@@ -83,4 +83,4 @@ Equipment quoted: $2,385.87. Payment and shipping status: https://livinginacat.w
 
 ## Reconciliation
 
-Amazon: five orders totaling $1,524.35, including tax and Taxes and others; two shipped and three need payment review. Bank charges unconfirmed. Taxes and others: $420.68 ($320.94 added items + $99.74 Amazon tax), already included in Amazon orders. FramingTech: $300.66 paid ($179.15 parts + $121.51 provisional shipping). Domain: $4.19 paid. Verified receipt payments: $304.85, partial, not all spending.
+Amazon: five orders totaling $1,524.35, including the Taxes and others category; two shipped and three need payment review. Bank charges unconfirmed. Taxes and others: $420.68 ($320.94 added items + $99.74 Amazon tax), already included in Amazon orders. FramingTech: $300.66 paid ($179.15 parts + $121.51 provisional shipping). Domain: $4.19 paid. Verified receipt payments: $304.85, partial, not all spending.
