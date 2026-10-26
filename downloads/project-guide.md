@@ -4,6 +4,8 @@ Updated: October 26, 2026. DIY prototype without physical assembly or testing. P
 
 ## Goal
 
+Build an AI that can perceive and act in the real world. The first project connects that goal to a concrete task: physically using an iPhone.
+
 Use camera vision, XY motion and a vertically actuated capacitive stylus to operate an iPhone physically. First milestones: tap, double-tap, long press, swipe and drag with one contact point. One stylus cannot perform two-finger gestures. Extended autonomy and universal compatibility with every app are not demonstrated.
 
 ## Planned architecture

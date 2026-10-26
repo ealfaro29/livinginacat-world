@@ -2,17 +2,19 @@
 number: 1
 slug: project-begins
 date: "2026-10-26"
-title: "We’re starting: an AI, an iPhone and a physical robot"
-excerpt: "The full living in a cat world plan: build, print, test and share a robot that can use a phone with a real stylus."
+title: "Building an AI for the real world"
+excerpt: "The first project in living in a cat world: give an AI a way to see and physically use an iPhone, and document the build in the open."
 ---
 
-We want to build a machine that can **look at an iPhone screen, decide what to do, and physically do it**. A camera will be its eyes. A two-axis mechanism will position a stylus over the screen. An actuator will lower that stylus to tap, hold or swipe.
+We’re building an AI that can **perceive the real world and act within it**: the world we share with people, cats and everyday objects.
+
+The first project gives that goal a concrete starting point: **an AI that can see an iPhone screen, decide what to do, and physically use it**. A camera will be its eyes. A two-axis robot will position a stylus over the screen, and an actuator will lower it to tap, hold or swipe.
 
 This journal begins before the first assembly. People are supporting the project financially, and we want them to see what we buy, why we choose it, what it costs and what actually works. We will also share files that others can study, reuse and improve.
 
 > Starting point: CAD design prepared and purchases started, now paused while we organize this documentation. We have not yet printed, assembled or physically tested the robot.
 
-## What we want it to do
+## What we’re building toward
 
 The first goal is to reach every useful area of the screen and perform one-finger gestures: a single tap, double tap, long press, swipe and drag. We will then connect those actions to an AI observation-and-decision loop.
 
