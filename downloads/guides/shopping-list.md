@@ -2,7 +2,7 @@
 
 Updated: 2026-10-26. USD. Item quotes; tax and shipping excluded unless noted. Purchases in progress, one store at a time.
 
-Equipment quoted, including allowance: $2,885.87. Listed item quotes: $2,385.87; unallocated equipment allowance: $500.00. The allowance is a planning amount, not a vendor quote, order or payment. Payment and shipping status: https://livinginacat.world/purchases/.
+Equipment quoted, including allowance: $2,893.69. Listed item quotes: $2,393.69; unallocated equipment allowance: $500.00. The allowance is a planning amount, not a vendor quote, order or payment. Payment and shipping status: https://livinginacat.world/purchases/.
 
 | Store | Item | Quantity | Unit price | Subtotal | Status | Offer |
 |---|---|---:|---:|---:|---|---|
@@ -61,19 +61,19 @@ Equipment quoted, including allowance: $2,885.87. Listed item quotes: $2,385.87;
 | DigiKey | Adafruit 3893 · JST PH 3 cable | 1 | $1.25 | $1.25 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/3893/9603619) |
 | DigiKey | Adafruit 4873 · JST XH 3 cable pair | 1 | $0.95 | $0.95 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/4873/13922054) |
 | DigiKey | Qualtek 3021001-03 · USB-A to USB-B · 3 ft | 1 | $2.26 | $2.26 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/qualtek/3021001-03/1531288) |
-| BoltDepot | 7218 · BHCS M3×6 | 9 | $0.06 | $0.54 | Not ordered | [Product](https://boltdepot.com/Product-Details?product=7218) |
-| BoltDepot | 7219 · BHCS M3×8 | 42 | $0.06 | $2.52 | Not ordered | [Product](https://boltdepot.com/Product-Details?product=7219) |
-| BoltDepot | 7220 · BHCS M3×10 | 4 | $0.06 | $0.24 | Not ordered | [Product](https://boltdepot.com/Product-Details?product=7220) |
-| BoltDepot | 7222 · BHCS M3×16 | 2 | $0.07 | $0.14 | Not ordered | [Product](https://boltdepot.com/Product-Details?product=7222) |
-| BoltDepot | 15291 · BHCS M3×25 | 4 | $0.09 | $0.36 | Not ordered | [Product](https://boltdepot.com/Product-Details?product=15291) |
-| BoltDepot | 6632 · BHCS M5×10 | 6 | $0.12 | $0.72 | Not ordered | [Product](https://boltdepot.com/Product-Details?product=6632) |
-| BoltDepot | 6633 · BHCS M5×12 | 2 | $0.13 | $0.26 | Not ordered | [Product](https://boltdepot.com/Product-Details?product=6633) |
-| BoltDepot | 6634 · BHCS M5×16 | 6 | $0.14 | $0.84 | Not ordered | [Product](https://boltdepot.com/Product-Details?product=6634) |
-| BoltDepot | 6635 · BHCS M5×20 | 2 | $0.18 | $0.36 | Not ordered | [Product](https://boltdepot.com/Product-Details?product=6635) |
-| BoltDepot | 7213 · FHCS M3×8 | 4 | $0.06 | $0.24 | Not ordered | [Product](https://boltdepot.com/Product-Details?product=7213) |
-| BoltDepot | 7214 · FHCS M3×10 | 10 | $0.07 | $0.70 | Not ordered | [Product](https://boltdepot.com/Product-Details?product=7214) |
-| BoltDepot | 6674 · FHCS M5×12 | 6 | $0.20 | $1.20 | Not ordered | [Product](https://boltdepot.com/Product-Details?product=6674) |
-| BoltDepot | 4515 · M5 flat washer DIN125 | 2 | $0.05 | $0.10 | Not ordered | [Product](https://boltdepot.com/Product-Details?product=4515) |
+| BoltDepot | 7218 · BHCS M3×6 | 15 | $0.06 | $0.90 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=7218) |
+| BoltDepot | 7219 · BHCS M3×8 | 50 | $0.06 | $3.00 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=7219) |
+| BoltDepot | 7220 · BHCS M3×10 | 15 | $0.06 | $0.90 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=7220) |
+| BoltDepot | 7222 · BHCS M3×16 | 10 | $0.07 | $0.70 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=7222) |
+| BoltDepot | 15291 · BHCS M3×25 | 10 | $0.09 | $0.90 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=15291) |
+| BoltDepot | 6632 · BHCS M5×10 | 10 | $0.12 | $1.20 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=6632) |
+| BoltDepot | 6633 · BHCS M5×12 | 10 | $0.13 | $1.30 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=6633) |
+| BoltDepot | 6634 · BHCS M5×16 | 10 | $0.14 | $1.40 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=6634) |
+| BoltDepot | 6635 · BHCS M5×20 | 10 | $0.18 | $1.80 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=6635) |
+| BoltDepot | 7213 · FHCS M3×8 | 10 | $0.06 | $0.60 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=7213) |
+| BoltDepot | 7214 · FHCS M3×10 | 12 | $0.07 | $0.84 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=7214) |
+| BoltDepot | 6674 · FHCS M5×12 | 10 | $0.20 | $2.00 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=6674) |
+| BoltDepot | 4515 · M5 flat washer DIN125 | 10 | $0.05 | $0.50 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=4515) |
 | MakerStore | PLATE-STRIP-2 · flat plate 40×18×4 mm | 2 | $2.40 | $4.80 | Not ordered | [Product](https://makerstore.cc/product/2-hole-joining-plate/) |
 | Walmart | uxcell · spacers · 5 ID / 10 OD / 9 mm high | 1 | $8.99 | $8.99 | Not ordered | [Product](https://www.walmart.com/ip/5223528994) |
 | Walmart | uxcell · spiral wrap · 4 mm ID · 20 m | 1 | $9.99 | $9.99 | Not ordered | [Product](https://www.walmart.com/ip/3364975377) |
@@ -85,7 +85,7 @@ Equipment quoted, including allowance: $2,885.87. Listed item quotes: $2,385.87;
 
 - Additional equipment allowance: $500.00. Unallocated planning allowance requested by the project owner. Not a vendor quote, purchase order or verified payment.
 
-Item quotes $2,385.87 + allowance $500.00 = total estimate $2,885.87.
+Item quotes $2,393.69 + allowance $500.00 = total estimate $2,893.69.
 
 ## Reconciliation
 
