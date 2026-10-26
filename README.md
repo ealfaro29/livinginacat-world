@@ -1,4 +1,4 @@
-# Living in a Cat
+# Living in the Real World
 
 An open build journal for a physical robot that sees and touches an iPhone. Plans, decisions, purchases, shipments and hardware files.
 
@@ -53,3 +53,7 @@ CAD publication does not certify physical compatibility, safety or performance. 
 ## License
 
 MIT. Mechanics derived from PhysiClaw hardware v0.51 by Qiao Qian, under MIT. Original notice retained. See [attribution and scope](docs/ATTRIBUTION.md) and [contributing](CONTRIBUTING.md).
+
+## Visual identity
+
+The palette, typography and rough hardware-illustration style are defined in [docs/BRAND.md](docs/BRAND.md). Raw concept sketches and exact manufacturing CAD are separate artifacts.
