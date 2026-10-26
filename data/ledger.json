@@ -126,8 +126,8 @@
     {
       "id": "makerstore",
       "vendor": "MakerStore",
-      "status": "pending",
-      "orderedAt": null,
+      "status": "awaiting_invoice",
+      "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 480,
       "actualPaidCents": null,
       "shippingPaidCents": null,
@@ -135,8 +135,12 @@
       "tariffPaidCents": null,
       "receivedAt": null,
       "publicReceiptUrl": null,
-      "evidenceLevel": "cart-quote",
-      "notes": "Shipping needs confirmation from the store. No confirmed order."
+      "evidenceLevel": "vendor-order-confirmation-email",
+      "notes": "Custom Invoice request received by the vendor on October 26, 2026 for two PLATE-STRIP-2 plates, $4.80 in items. The automatic confirmation lists provisional USPS Ground Advantage shipping of $5.38 and a $10.18 total. The vendor states it will calculate exact shipping and send a final invoice; the order is on hold pending payment. Final shipping, final total, payment and dispatch remain unconfirmed.",
+      "invoiceTotalCents": 1018,
+      "invoiceTotalFinal": false,
+      "shippingInvoicedCents": 538,
+      "shippingChargeFinal": false
     },
     {
       "id": "walmart",
@@ -1226,6 +1230,11 @@
     }
   ],
   "changes": [
+    {
+      "date": "2026-10-26",
+      "title": "MakerStore custom invoice requested",
+      "detail": "MakerStore acknowledged the two-plate Custom Invoice request. Its automatic email lists $4.80 in parts and provisional $5.38 shipping ($10.18 total), while stating exact shipping and a final invoice will follow. The order is on hold; no payment or dispatch is confirmed. The equipment estimate is unchanged."
+    },
     {
       "date": "2026-10-26",
       "title": "BoltDepot order confirmed with owner-selected spares",

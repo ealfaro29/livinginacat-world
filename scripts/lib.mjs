@@ -32,6 +32,7 @@ export const date = (value) =>
 export const labels = {
   pending: "Not ordered",
   deferred: "Deferred",
+  awaiting_invoice: "Awaiting final invoice",
   ordered: "Order confirmed",
   shipped: "Shipped",
   preparing: "Preparing",
