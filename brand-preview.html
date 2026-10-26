@@ -4,118 +4,154 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="robots" content="noindex" />
-    <title>Living in the Real World — share artwork</title>
+    <title>living in a cat world — share artwork</title>
     <style>
+      @font-face {
+        font-family: Space;
+        src: url("/assets/fonts/SpaceGrotesk-Variable.ttf");
+        font-weight: 300 700;
+      }
       * {
         box-sizing: border-box;
       }
       html,
       body {
-        margin: 0;
         width: 1200px;
         height: 630px;
+        margin: 0;
         overflow: hidden;
-        background: #ce1019;
-        color: #fffaf2;
-        font-family: Arial, Helvetica, sans-serif;
+        background: #101011;
+        color: #f0e9df;
+        font-family: Space, Arial, sans-serif;
       }
       .share {
+        width: 1200px;
         height: 630px;
         display: grid;
-        grid-template-columns: 600px 600px;
+        grid-template-columns: 440px minmax(0, 1fr);
+        padding: 40px 35px;
+        gap: 20px;
       }
       .copy {
-        padding: 45px 40px;
+        padding: 0 0 0 12px;
         position: relative;
       }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+        line-height: 1.05;
+        letter-spacing: -0.4px;
+      }
+      .brand img {
+        width: 42px;
+        height: 42px;
+        object-fit: contain;
+      }
       .kicker {
-        font: 10px/1.5 monospace;
-        letter-spacing: 1.5px;
-        margin: 0 0 50px;
+        font: 8px/1.5 monospace;
+        color: #aca6a0;
+        letter-spacing: 1.2px;
+        margin: 58px 0 25px;
       }
       .copy h1 {
         font:
-          100px/0.9 Impact,
-          Haettenschweiler,
-          "Arial Narrow Bold",
+          600 75px/0.95 Space,
+          Arial,
           sans-serif;
-        text-transform: uppercase;
-        letter-spacing: -2px;
-        margin: 0 0 33px;
+        letter-spacing: -4px;
+        margin: 0 0 25px;
       }
-      .copy h1 span {
-        border-bottom: 5px solid #fffaf2;
+      .copy h1 em {
+        font:
+          italic 86px/0.95 Georgia,
+          serif;
+        letter-spacing: -4px;
+      }
+      .dot {
+        color: #f04b41;
       }
       .copy p:not(.kicker) {
-        font-size: 19px;
-        line-height: 1.6;
+        font-size: 13px;
+        line-height: 1.9;
+        color: #aca6a0;
       }
       .address {
         position: absolute;
-        left: 40px;
-        bottom: 30px;
-        font: 12px/1.5 monospace;
-        letter-spacing: 1px;
+        left: 12px;
+        bottom: 7px;
+        font: 9px/1.5 monospace;
+        color: #f0e9df;
       }
       .machine {
         margin: 0;
+        align-self: center;
+        transform: rotate(-3deg);
+        background: #f0e9df;
+        color: #191817;
+        box-shadow: 0 16px 35px #0008;
         position: relative;
-        overflow: hidden;
-        background: #f3eee5;
-        color: #141414;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        border-left: 1px solid #141414;
+        padding-top: 25px;
+      }
+      .machine:before {
+        content: "";
+        position: absolute;
+        top: -13px;
+        left: 35px;
+        width: 70px;
+        height: 25px;
+        background: #d7c6aa90;
+        transform: rotate(-15deg);
       }
       .machine > div {
         position: absolute;
-        top: 20px;
-        left: 22px;
-        right: 22px;
+        top: 10px;
+        left: 18px;
+        right: 18px;
         display: flex;
         justify-content: space-between;
-        font: 9px/1.5 monospace;
-        letter-spacing: 1px;
+        font: 7px/1.5 monospace;
+        letter-spacing: 0.5px;
       }
       .machine img {
+        display: block;
         width: 100%;
         height: auto;
         mix-blend-mode: multiply;
       }
       .machine figcaption {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #141414;
-        color: #fffaf2;
-        padding: 17px 20px;
-        font: 9px/1.5 monospace;
-        letter-spacing: 1px;
+        padding: 10px 17px;
+        border-top: 1px solid #19181740;
+        font: 7px/1.5 monospace;
+        letter-spacing: 0.4px;
       }
     </style>
   </head>
   <body>
     <main class="share">
       <div class="copy">
-        <p class="kicker">LIVING IN THE REAL WORLD / AN OPEN BUILD JOURNAL</p>
-        <h1>An AI in the<br /><span>real world.</span></h1>
+        <div class="brand">
+          <img src="/assets/brand/robot-cat-180.png" alt="" /><span
+            >living in a<br />cat world</span
+          >
+        </div>
+        <p class="kicker">A PERSONAL BUILD JOURNAL</p>
+        <h1>
+          living in a<br /><em>cat world<span class="dot">.</span></em>
+        </h1>
         <p>
-          A real iPhone. A physical robot.<br />Every part. Every dollar. Every
-          test.
+          Building a robot that sees an iPhone.<br />And actually touches it.
         </p>
-        <div class="address">EXPLORE THE OPEN NOTEBOOK ↗</div>
+        <div class="address">PLANS. RECEIPTS. UNFINISHED BITS. ↗</div>
       </div>
       <figure class="machine">
-        <div><span>PROJECT 001</span><span>CONCEPT / REV. 0.1</span></div>
+        <div><span>ON THE WORKBENCH / 001</span><span>REV. 0.1</span></div>
         <img
           src="/assets/prototype-rough-v1.png"
-          alt="Raw hand-drawn prototype of the robot and iPhone"
+          alt="Raw sketch of the iPhone robot"
         />
-        <figcaption>
-          REAL HARDWARE / OPEN FILES / PHYSICAL TESTS AHEAD
-        </figcaption>
+        <figcaption>CONCEPT SKETCH / PHYSICAL TESTS AHEAD</figcaption>
       </figure>
     </main>
   </body>

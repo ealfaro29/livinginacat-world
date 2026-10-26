@@ -3,7 +3,7 @@ number: 1
 slug: project-begins
 date: "2026-10-26"
 title: "We’re starting: an AI, an iPhone and a physical robot"
-excerpt: "The full Living in the Real World plan: build, print, test and share a robot that can use a phone with a real stylus."
+excerpt: "The full living in a cat world plan: build, print, test and share a robot that can use a phone with a real stylus."
 ---
 
 We want to build a machine that can **look at an iPhone screen, decide what to do, and physically do it**. A camera will be its eyes. A two-axis mechanism will position a stylus over the screen. An actuator will lower that stylus to tap, hold or swipe.
