@@ -2,7 +2,7 @@
 
 An open build journal about creating an AI that can perceive and act in the real world. The first project is a robot that physically uses an iPhone. Plans, decisions, purchases, shipments and hardware files are documented openly.
 
-**Website:** https://livinginacat.world · **Initial stage:** CAD prepared; no physical assembly or testing. Purchases paused.
+**Website:** https://livinginacat.world · **Initial stage:** CAD prepared; no physical assembly or testing. Purchases in progress, one store at a time.
 
 ## Contents
 

@@ -36,7 +36,7 @@ export function renderHome({ posts, ledger, finances, hardware }) {
     <span class="hand-note">a real phone. a real touch.</span>
   </div>
 </section>
-<div class="build-status wrap"><span class="status-heading"><span class="status-dot"></span> THE CURRENT STATE</span><span>CAD prepared</span><span>Purchases paused</span><span>Physical tests ahead</span><a href="/documentation/">Open the project ↗</a></div>
+<div class="build-status wrap"><span class="status-heading"><span class="status-dot"></span> THE CURRENT STATE</span><span>CAD prepared</span><span>${ledger.purchasesPaused ? "Purchases paused" : "Purchases in progress"}</span><span>Physical tests ahead</span><a href="/documentation/">Open the project ↗</a></div>
 
 <section class="wrap journal-section">
   <div class="section-heading"><div><p class="eyebrow">01 / FIELD NOTES</p><h2>The notebook<span class="red-period">.</span></h2></div><a class="text-link" href="/journal/">All entries ↗</a></div>

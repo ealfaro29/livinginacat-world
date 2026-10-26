@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "updatedAt": "2026-10-26",
   "currency": "USD",
-  "purchasesPaused": true,
+  "purchasesPaused": false,
   "equipmentQuotedTotalCents": 288587,
   "equipmentAllowances": [
     {
@@ -1218,6 +1218,11 @@
     }
   ],
   "changes": [
+    {
+      "date": "2026-10-26",
+      "title": "Purchases resumed",
+      "detail": "The project owner resumed purchases one store at a time. The DigiKey cart was rechecked: 11 references, $77.36 in items and $91.18 estimated including shipping and tariff. The Remington wire lists approximately 8 days to dispatch and may incur a separate shipping fee. No new order or payment is confirmed by this update."
+    },
     {
       "date": "2026-10-26",
       "title": "Equipment estimate increased by $500",
