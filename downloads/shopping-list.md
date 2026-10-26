@@ -74,7 +74,7 @@ Equipment quoted, including allowance: $2,893.69. Listed item quotes: $2,393.69;
 | BoltDepot | 7214 · FHCS M3×10 | 12 | $0.07 | $0.84 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=7214) |
 | BoltDepot | 6674 · FHCS M5×12 | 10 | $0.20 | $2.00 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=6674) |
 | BoltDepot | 4515 · M5 flat washer DIN125 | 10 | $0.05 | $0.50 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=4515) |
-| MakerStore | PLATE-STRIP-2 · flat plate 40×18×4 mm | 2 | $2.40 | $4.80 | Not ordered | [Product](https://makerstore.cc/product/2-hole-joining-plate/) |
+| MakerStore | PLATE-STRIP-2 · flat plate 40×18×4 mm | 2 | $2.40 | $4.80 | Awaiting final invoice | [Product](https://makerstore.cc/product/2-hole-joining-plate/) |
 | Walmart | uxcell · spacers · 5 ID / 10 OD / 9 mm high | 1 | $8.99 | $8.99 | Not ordered | [Product](https://www.walmart.com/ip/5223528994) |
 | Walmart | uxcell · spiral wrap · 4 mm ID · 20 m | 1 | $9.99 | $9.99 | Not ordered | [Product](https://www.walmart.com/ip/3364975377) |
 | Walmart | SUPERDANT · 1 mm adhesive EVA foam | 1 | $10.85 | $10.85 | Not ordered | [Product](https://www.walmart.com/ip/9540216155) |

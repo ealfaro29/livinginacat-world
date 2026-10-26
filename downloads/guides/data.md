@@ -7,6 +7,7 @@ Public source: `data/ledger.json`. USD amounts are integer cents. `null` means u
 - `items`: original equipment list and quotes. Quantity means purchase units, not always individual parts. Quoted total = quantity × quoted unit price.
 - `equipmentAllowances`: owner-requested planning amounts, kept separate from item quotes, orders and verified payments. The equipment estimate is item quotes plus these allowances.
 - `orders`: vendor-level quote, documentary order total and verified payment where evidence exists. `invoiceTotalCents` is the order amount; `shippingInvoicedCents`, `taxInvoicedCents` and `tariffInvoicedCents` describe its charges. An order confirmation alone does not establish settled payment: `actualPaidCents` and the `*PaidCents` fields remain unknown until payment evidence exists. Paid tax and shipping are breakdowns of the paid total, not additional amounts to add again.
+- An `awaiting_invoice` order acknowledges a request awaiting the vendor's final invoice. `invoiceTotalFinal: false` and `shippingChargeFinal: false` distinguish provisional amounts from final charges; neither establishes payment or dispatch.
 - `amazonOrders`: anonymized extracts of five real orders. They include equipment and extras. Documentary order totals are distinct from reconciled bank payments.
 - `otherExpenses`: domain and grouped additions. `includedInVendorOrderTotals: true` prevents duplicate counting. The “Taxes and others” category includes added items plus the documented Amazon tax, with a separate breakdown. Discounts are not allocated to that category without evidence.
 - `shipments`: real shipped package or preparation record. Planned dispatch is distinct from estimated arrival. Complete `deliveredAt` only with delivery evidence.
@@ -14,7 +15,7 @@ Public source: `data/ledger.json`. USD amounts are integer cents. `null` means u
 
 ## Initial evidence
 
-FramingTech: payment email and PDF confirmation. GoDaddy: email receipt. Amazon: authenticated order details, order invoices and tracking pages. DigiKey: order confirmation email; processing, without shipment or settled-payment evidence. Private originals stay outside the repository. AMZ codes are public references independent of actual order numbers.
+FramingTech: payment email and PDF confirmation. GoDaddy: email receipt. Amazon: authenticated order details, order invoices and tracking pages. DigiKey and BoltDepot: vendor order confirmation emails, without shipment or settled-payment evidence. MakerStore: Custom Invoice acknowledgement with provisional shipping, awaiting final invoice and payment. Private originals stay outside the repository. AMZ codes are public references independent of actual order numbers.
 
 ## Updating
 
