@@ -15,7 +15,7 @@ export function renderHome({ posts, ledger, finances, hardware }) {
 <section class="workshop-hero wrap" aria-label="living in a cat world">
   <div class="hero-intro">
     <p class="eyebrow"><span class="red-dash"></span> AI IN THE PHYSICAL WORLD</p>
-    <h1>living in a<br><em>cat world<span class="red-period">.</span></em></h1>
+    <h1>living in the<br><em>real world<span class="red-period">.</span></em></h1>
     <p class="hero-deck">Building an AI that can live in the real world.<br>See, decide and act beyond the screen.</p>
     <a class="round-link" href="/journal/project-begins/"><span class="round-arrow">↗</span><span>Start with<br><b>the first project</b></span></a>
     <div class="hero-side-note"><span>01—</span><p>First step: a camera, a robot, an iPhone.<br>From seeing the screen to touching it.</p></div>

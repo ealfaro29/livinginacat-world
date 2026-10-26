@@ -1,6 +1,6 @@
 # living in a cat world
 
-The exact public name is **living in a cat world**. Keep it in English and lowercase. This is a personal project journal, with the physical iPhone robot as the first build.
+The exact public name is **living in a cat world**. Keep it in English and lowercase. The hero headline is **living in the real world**; it describes the project’s direction and does not rename the blog. This is a personal project journal, with the physical iPhone robot as the first build.
 
 ## Identity
 
@@ -39,6 +39,6 @@ A concept sketch is not evidence of a finished build. CAD does not prove physica
 - `public/assets/brand/robot-cat-48.png`: favicon.
 - `public/assets/prototype-rough-v1.png`: conceptual hardware sketch.
 - `public/assets/printed-parts.png`: actual CAD contact sheet.
-- `public/assets/social-cat-world-dark-v2.png`: native social layout captured from `public/brand-preview.html`.
+- `public/assets/social-cat-world-dark-v3.png`: native social layout captured from `public/brand-preview.html`.
 
 Logo generation prompt and mode: [ROBOT-CAT-PROMPT.md](ROBOT-CAT-PROMPT.md). Hardware illustration brief: [ART-PROMPTS.md](ART-PROMPTS.md).
