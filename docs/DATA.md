@@ -5,6 +5,7 @@ Public source: `data/ledger.json`. USD amounts are integer cents. `null` means u
 ## Overlapping records: do not add together
 
 - `items`: original equipment list and quotes. Quantity means purchase units, not always individual parts. Quoted total = quantity × quoted unit price.
+- `equipmentAllowances`: owner-requested planning amounts, kept separate from item quotes, orders and verified payments. The equipment estimate is item quotes plus these allowances.
 - `orders`: vendor-level quote and verified payment where evidence exists. Paid tax and shipping are breakdowns of the paid total, not additional amounts to add again.
 - `amazonOrders`: anonymized extracts of five real orders. They include equipment and extras. Documentary order totals are distinct from reconciled bank payments.
 - `otherExpenses`: domain and grouped additions. `includedInVendorOrderTotals: true` prevents duplicate counting. The “Taxes and others” category includes added items plus the documented Amazon tax, with a separate breakdown. Discounts are not allocated to that category without evidence.

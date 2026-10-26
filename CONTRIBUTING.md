@@ -8,4 +8,4 @@ For purchase data, share only an anonymized extract: item, quantity, amount, cur
 
 Before a pull request: `npm ci`, `npm test`, `npm run build`, `npm run check`. Inspect affected pages on desktop and mobile. Keep the public site and new documentation in English. Explain the need for any new dependency, analytics or automation.
 
-Contributions are under MIT with third-party notices retained. Read docs/ATTRIBUTION.md before adding external files.
+Contributions are under MIT with third-party notices retained. Read the [attribution guide](docs/ATTRIBUTION.md) before adding external files.

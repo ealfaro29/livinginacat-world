@@ -9,10 +9,14 @@ An open build journal about creating an AI that can perceive and act in the real
 - `content/posts/`: English journal entries in Markdown with front matter.
 - `data/ledger.json`: public quotes, orders, payments and shipments; integer USD cents.
 - `data/hardware-release.json`: public CAD version and archive hash.
-- `hardware/ft412/`: STL, STEP, coupons and CAD records; read `PUBLIC-RELEASE.md` first.
+- `hardware/ft412/`: STL, STEP, coupons and CAD records; read the [release scope](hardware/ft412/PUBLIC-RELEASE.md) first.
 - `docs/PROJECT.md`: architecture, planned assembly and acceptance tests.
 - `public/`: original visuals, styles and CAD download.
 - `scripts/`: static generator, checks and publication.
+
+## Read the guides
+
+Project documentation is available as native site pages at [Documentation](https://livinginacat.world/documentation/), including the [project guide](https://livinginacat.world/documentation/project-guide/), [parts list](https://livinginacat.world/documentation/shopping-list/) and [hardware guide](https://livinginacat.world/documentation/hardware/). Each guide keeps its downloadable Markdown source. `scripts/guides.mjs` defines the catalogue, internal links and section navigation; the build reads the original Markdown files and generates the pages.
 
 ## Development
 

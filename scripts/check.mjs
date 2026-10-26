@@ -40,6 +40,30 @@ for (const file of all) {
         );
       }
     }
+    for (const m of text.matchAll(/href="((?:\/[^"#]*)?)#([^"]+)"/g)) {
+      const pathname = m[1].split("?")[0];
+      const destination = pathname
+        ? path.join(
+            base,
+            pathname.endsWith("/") ? pathname + "index.html" : pathname,
+          )
+        : file;
+      try {
+        const target =
+          destination === file ? text : await fs.readFile(destination, "utf8");
+        const ids = new Set(
+          [...target.matchAll(/\sid="([^"]+)"/g)].map((x) => x[1]),
+        );
+        if (!ids.has(decodeURIComponent(m[2])))
+          errors.push(
+            `Broken section link: ${path.relative(base, file)} -> ${m[1]}#${m[2]}`,
+          );
+      } catch {
+        errors.push(
+          `Invalid section target: ${path.relative(base, file)} -> ${m[1]}#${m[2]}`,
+        );
+      }
+    }
   }
 }
 if (errors.length) {
@@ -47,5 +71,5 @@ if (errors.length) {
   process.exit(1);
 }
 console.log(
-  `Checked ${all.length} generated files: internal routes and privacy markers OK.`,
+  `Checked ${all.length} generated files: internal routes, section anchors and privacy markers OK.`,
 );
