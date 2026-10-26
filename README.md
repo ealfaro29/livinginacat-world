@@ -1,6 +1,6 @@
 # living in a cat world
 
-An open build journal for a physical robot that sees and touches an iPhone. Plans, decisions, purchases, shipments and hardware files.
+An open build journal about creating an AI that can perceive and act in the real world. The first project is a robot that physically uses an iPhone. Plans, decisions, purchases, shipments and hardware files are documented openly.
 
 **Website:** https://livinginacat.world · **Initial stage:** CAD prepared; no physical assembly or testing. Purchases paused.
 

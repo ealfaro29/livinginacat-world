@@ -14,11 +14,11 @@ export function renderHome({ posts, ledger, finances, hardware }) {
   return `
 <section class="workshop-hero wrap" aria-label="living in a cat world">
   <div class="hero-intro">
-    <p class="eyebrow"><span class="red-dash"></span> A PERSONAL BUILD JOURNAL</p>
+    <p class="eyebrow"><span class="red-dash"></span> AI IN THE PHYSICAL WORLD</p>
     <h1>living in a<br><em>cat world<span class="red-period">.</span></em></h1>
-    <p class="hero-deck">Building things I don’t know how to build.<br>Documenting the whole way through.</p>
-    <a class="round-link" href="/journal/project-begins/"><span class="round-arrow">↗</span><span>Start with<br><b>the first experiment</b></span></a>
-    <div class="hero-side-note"><span>01—</span><p>A robot that sees an iPhone.<br>And actually touches it.</p></div>
+    <p class="hero-deck">Building an AI that can live in the real world.<br>See, decide and act beyond the screen.</p>
+    <a class="round-link" href="/journal/project-begins/"><span class="round-arrow">↗</span><span>Start with<br><b>the first project</b></span></a>
+    <div class="hero-side-note"><span>01—</span><p>First step: a camera, a robot, an iPhone.<br>From seeing the screen to touching it.</p></div>
   </div>
   <div class="hero-workbench" id="prototype">
     <div class="workbench-top"><span>ON THE WORKBENCH</span><span>PROJECT / 001</span></div>
@@ -48,10 +48,10 @@ export function renderHome({ posts, ledger, finances, hardware }) {
 
 <section class="fabrication-section wrap">
   <div class="parts-contact-sheet"><div class="contact-top"><span>THE PRINT QUEUE</span><span>STL / STEP</span></div><img src="/assets/printed-parts.png" width="2400" height="2850" alt="Actual CAD preview showing the individual printable robot parts, not fabricated parts" loading="lazy"><span class="cad-stamp">CAD FILES<br><small>NOT PRINTED YET</small></span><p>${hardware.stlDesigns} designs + ${hardware.coupons} fit coupons / REV. ${hardware.version}</p></div>
-  <div class="fabrication-copy"><p class="eyebrow">02 / FROM FILE TO WORKBENCH</p><h2>${hardware.installedPrintedParts} parts.<br><em>One first build.</em></h2><p>Print the mounts. Assemble the frame. Calibrate the camera. Then find out whether a stylus can tap and swipe reliably.</p><div class="build-sequence"><span><b>01</b> Print</span><i>↗</i><span><b>02</b> Assemble</span><i>↗</i><span><b>03</b> Test</span></div><a class="button" href="/downloads/${hardware.filename}" download>Get the open CAD files <span>↓</span></a><a class="under-link" href="/documentation/">Read the design, checks and limits ↗</a><p class="small-note">Geometry reviewed. Physical fit, touch and motion still need testing.</p></div>
+  <div class="fabrication-copy"><p class="eyebrow">02 / FROM FILE TO WORKBENCH</p><h2>${hardware.installedPrintedParts} parts.<br><em>One first build.</em></h2><p>Print the mounts. Assemble the frame. Calibrate the camera. Then test tap accuracy and swipe reliability.</p><div class="build-sequence"><span><b>01</b> Print</span><i>↗</i><span><b>02</b> Assemble</span><i>↗</i><span><b>03</b> Test</span></div><a class="button" href="/downloads/${hardware.filename}" download>Get the open CAD files <span>↓</span></a><a class="under-link" href="/documentation/">Read the design, checks and limits ↗</a><p class="small-note">Geometry reviewed. Physical fit, touch and motion still need testing.</p></div>
 </section>
 
 <section class="ledger-section"><div class="wrap"><div class="section-heading"><div><p class="eyebrow">03 / THE OPEN BOOKS</p><h2>Here’s where<br><em>the money goes.</em></h2></div><div class="ledger-aside"><p>Parts, orders, receipts.<br>Nothing swept under the workbench.</p><a class="text-link" href="/purchases/">Explore the full ledger ↗</a></div></div>${finances}<div class="ledger-bottom"><p>Quotes ≠ orders ≠ verified payments.<br>The records keep those distinctions.</p><a class="text-link" href="/shipments/">Track the packages ↗</a></div></div></section>
 
-<section class="wrap closing-note"><span class="hand-star" aria-hidden="true">✳</span><div><p class="eyebrow">A SMALL PROMISE</p><h2>The failed attempts<br>go here, too.</h2><p>This is a build in progress. The people supporting it deserve the receipts, the unfinished bits and the results that don’t work.</p><a class="text-link" href="/documentation/#transparency">How this journal stays transparent ↗</a></div><span class="closing-number" aria-hidden="true">001</span></section>`;
+<section class="wrap closing-note"><span class="hand-star" aria-hidden="true">✳</span><div><p class="eyebrow">THE OPEN BUILD JOURNAL</p><h2>The whole process,<br>in the open.</h2><p>Design decisions, purchases and test results, shared openly with everyone supporting the build. Progress and lessons learned, documented as the project develops.</p><a class="text-link" href="/documentation/#transparency">How this journal stays transparent ↗</a></div><span class="closing-number" aria-hidden="true">001</span></section>`;
 }

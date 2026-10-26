@@ -16,6 +16,10 @@ Use the simple robot cat head as the logo and favicon. It is a graphic mark, not
 
 Dark backgrounds dominate. Warm paper is reserved for sketches, receipts and CAD contact sheets. Use red sparingly for annotations, links and markers. No glowing gradients.
 
+## Voice
+
+The central idea is “building an AI that can live in the real world.” Describe perception and physical action through concrete milestones, starting with the iPhone robot. Keep cat references subtle: the name, the robot cat logo, and an occasional natural nod. Write with purpose and confidence. Describe goals and verified progress precisely, and keep development milestones explicit.
+
 ## Typography and composition
 
 Self-hosted Space Grotesk for the main text and headings; Georgia italic as an editorial counterpoint; system monospace for dates, records and small annotations. Space Grotesk is distributed under the SIL Open Font License; its notice is in `public/assets/fonts/OFL-SpaceGrotesk.txt`.
@@ -35,6 +39,6 @@ A concept sketch is not evidence of a finished build. CAD does not prove physica
 - `public/assets/brand/robot-cat-48.png`: favicon.
 - `public/assets/prototype-rough-v1.png`: conceptual hardware sketch.
 - `public/assets/printed-parts.png`: actual CAD contact sheet.
-- `public/assets/social-cat-world-dark-v1.png`: native social layout captured from `public/brand-preview.html`.
+- `public/assets/social-cat-world-dark-v2.png`: native social layout captured from `public/brand-preview.html`.
 
 Logo generation prompt and mode: [ROBOT-CAT-PROMPT.md](ROBOT-CAT-PROMPT.md). Hardware illustration brief: [ART-PROMPTS.md](ART-PROMPTS.md).
