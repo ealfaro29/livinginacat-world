@@ -28,6 +28,10 @@ npm run dev
 
 Preview: `http://127.0.0.1:4173`. Production files are generated in `dist/`. No runtime server, cookies, analytics or API keys. No automatic email or store access: the ledger displays its review date.
 
+## Regenerate the CAD preview image
+
+Optional: create a Python virtual environment, install `scripts/preview-requirements.txt`, then run `python scripts/render-hardware-preview.py`. This renders the published STL geometry only; it does not regenerate or validate the CAD models.
+
 ## Update and publish
 
 1. Edit Markdown or JSON, keeping quoted, ordered, paid, shipped and delivered distinct.
