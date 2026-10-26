@@ -14,7 +14,7 @@ This post preserves the state on **October 26, 2026**. The [purchase record](/pu
 
 | Category | USD | What it represents |
 |---|---:|---|
-| Equipment quoted | $2,385.87 | 74 equipment lines, excluding tax and shipping |
+| Equipment quoted, including allowance | $2,885.87 | $2,385.87 across 74 equipment lines + $500.00 equipment allowance; tax and shipping excluded |
 | Five Amazon orders | $1,524.35 | Order totals including tax and extras; payment is unresolved on three orders |
 | FramingTech, verified payment | $300.66 | $179.15 in parts and $121.51 in provisional shipping |
 | Domain, verified payment | $4.19 | First year of livinginacat.world |
@@ -25,6 +25,10 @@ These rows overlap: **do not add them together**. We have not reconciled bank st
 ### Taxes and others
 
 Two items were added outside the original robot list. At the project owner’s request, the category is called **“Taxes and others”**. Its breakdown is **$320.94 in added items + $99.74 in Amazon tax = $420.68**. Both components are already included in the Amazon orders and are not added again to the $1,524.35 total. This is a classification subtotal; we do not invent a discount allocation between categories.
+
+### Equipment allowance
+
+**Estimate adjustment · October 26, 2026:** the project owner added a $500.00 unallocated equipment allowance. Listed item prices and vendor subtotals remain $2,385.87; the total equipment estimate is $2,885.87. The allowance is not a vendor quote, order, expense or payment.
 
 ## Amazon: five orders, different states
 

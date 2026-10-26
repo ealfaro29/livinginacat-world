@@ -2,7 +2,7 @@
 
 Updated: 2026-10-26. USD. Item quotes; tax and shipping excluded unless noted. Purchases paused.
 
-Equipment quoted: $2,385.87. Payment and shipping status: https://livinginacat.world/purchases/.
+Equipment quoted, including allowance: $2,885.87. Listed item quotes: $2,385.87; unallocated equipment allowance: $500.00. The allowance is a planning amount, not a vendor quote, order or payment. Payment and shipping status: https://livinginacat.world/purchases/.
 
 | Store | Item | Quantity | Unit price | Subtotal | Status | Offer |
 |---|---|---:|---:|---:|---|---|
@@ -80,6 +80,12 @@ Equipment quoted: $2,385.87. Payment and shipping status: https://livinginacat.w
 | Walmart | SUPERDANT · 1 mm adhesive EVA foam | 1 | $10.85 | $10.85 | Not ordered | [Product](https://www.walmart.com/ip/9540216155) |
 | PhotonLight | Creality PTFE · 2 mm ID / 4 mm OD · 2 m | 1 | $9.99 | $9.99 | Not ordered | [Product](https://www.photonlight.com/products/creality-ptfe-tubing-4mm-od-x-2mm-id-x-1m-length-white) |
 | West3D | Mobil Mobilux EP2 · 10 mL syringe | 1 | $9.99 | $9.99 | Not ordered | [Product](https://west3d.com/products/mobil-mobilux-ep2-10ml-filled-syringe-with-blunt-tip) |
+
+## Equipment allowance
+
+- Additional equipment allowance: $500.00. Unallocated planning allowance requested by the project owner. Not a vendor quote, purchase order or verified payment.
+
+Item quotes $2,385.87 + allowance $500.00 = total estimate $2,885.87.
 
 ## Reconciliation
 
