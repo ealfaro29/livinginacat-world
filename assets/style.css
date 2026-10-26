@@ -1434,7 +1434,7 @@ footer .red-period {
     gap: 25px;
   }
   .hero-intro h1 {
-    font-size: 65px;
+    font-size: clamp(50px, 8vw, 65px);
   }
   .hero-deck {
     font-size: 11px;
@@ -2042,7 +2042,7 @@ footer .red-period {
 }
 @media (max-width: 370px) {
   .hero-intro h1 {
-    font-size: 64px;
+    font-size: clamp(54px, 17vw, 64px);
   }
   .workshop-hero,
   .wrap,
