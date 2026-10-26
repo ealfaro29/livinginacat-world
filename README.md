@@ -32,6 +32,8 @@ Preview: `http://127.0.0.1:4173`. Production files are generated in `dist/`. No 
 
 Optional: create a Python virtual environment, install `scripts/preview-requirements.txt`, then run `python scripts/render-hardware-preview.py`. This renders the published STL geometry only; it does not regenerate or validate the CAD models.
 
+The shopping-list graphic is generated from the ledger with `node scripts/render-shopping-svg.mjs`. Export the SVG to PNG at exactly 1080×1440 and visually inspect it before publishing.
+
 ## Update and publish
 
 1. Edit Markdown or JSON, keeping quoted, ordered, paid, shipped and delivered distinct.
