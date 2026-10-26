@@ -6,14 +6,14 @@
 <ul>
 <li><code>items</code>: original equipment list and quotes. Quantity means purchase units, not always individual parts. Quoted total = quantity × quoted unit price.</li>
 <li><code>equipmentAllowances</code>: owner-requested planning amounts, kept separate from item quotes, orders and verified payments. The equipment estimate is item quotes plus these allowances.</li>
-<li><code>orders</code>: vendor-level quote and verified payment where evidence exists. Paid tax and shipping are breakdowns of the paid total, not additional amounts to add again.</li>
+<li><code>orders</code>: vendor-level quote, documentary order total and verified payment where evidence exists. <code>invoiceTotalCents</code> is the order amount; <code>shippingInvoicedCents</code>, <code>taxInvoicedCents</code> and <code>tariffInvoicedCents</code> describe its charges. An order confirmation alone does not establish settled payment: <code>actualPaidCents</code> and the <code>*PaidCents</code> fields remain unknown until payment evidence exists. Paid tax and shipping are breakdowns of the paid total, not additional amounts to add again.</li>
 <li><code>amazonOrders</code>: anonymized extracts of five real orders. They include equipment and extras. Documentary order totals are distinct from reconciled bank payments.</li>
 <li><code>otherExpenses</code>: domain and grouped additions. <code>includedInVendorOrderTotals: true</code> prevents duplicate counting. The “Taxes and others” category includes added items plus the documented Amazon tax, with a separate breakdown. Discounts are not allocated to that category without evidence.</li>
 <li><code>shipments</code>: real shipped package or preparation record. Planned dispatch is distinct from estimated arrival. Complete <code>deliveredAt</code> only with delivery evidence.</li>
 <li><code>funding</code>: preserve unknown amounts until reconciled. Do not publish individual supporters or contributions without authorization.</li>
 </ul>
 <h2 id="initial-evidence">Initial evidence<a class="heading-anchor" href="#initial-evidence" aria-label="Link to Initial evidence">#</a></h2>
-<p>FramingTech: payment email and PDF confirmation. GoDaddy: email receipt. Amazon: authenticated order details, order invoices and tracking pages. Private originals stay outside the repository. AMZ codes are public references independent of actual order numbers.</p>
+<p>FramingTech: payment email and PDF confirmation. GoDaddy: email receipt. Amazon: authenticated order details, order invoices and tracking pages. DigiKey: order confirmation email; processing, without shipment or settled-payment evidence. Private originals stay outside the repository. AMZ codes are public references independent of actual order numbers.</p>
 <h2 id="updating">Updating<a class="heading-anchor" href="#updating" aria-label="Link to Updating">#</a></h2>
 <ol>
 <li>Read current evidence and retain its original reference privately.</li>

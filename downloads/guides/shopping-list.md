@@ -50,17 +50,17 @@ Equipment quoted, including allowance: $2,885.87. Listed item quotes: $2,385.87;
 | FramingTech | RN05BM3 · M3, slot 5 | 38 | $2.02 | $76.76 | Order confirmed | [Product](https://www.framingtech.com/shop/rn05bm3-m3-roll-in-t-nut-with-ball-plunger-5-slot-484695) |
 | FramingTech | RN05BM5 · M5, slot 5 | 20 | $1.42 | $28.40 | Order confirmed | [Product](https://www.framingtech.com/shop/rn05bm5-m5-roll-in-t-nut-with-ball-plunger-5-slot-484697) |
 | VXB | DLC32 V2.1 · 1169-0401 | 1 | $60.95 | $60.95 | Deferred | [Product](https://vxb.com/products/dlc32-v2-1-32-bit-offline-controller-board-for-cnc) |
-| DigiKey | NKK S301 · SPST switch | 1 | $10.87 | $10.87 | Not ordered | [Product](https://www.digikey.com/en/products/detail/nkk-switches/S301/1006974) |
-| DigiKey | Littelfuse FHAS101 · fuse holder | 1 | $14.86 | $14.86 | Not ordered | [Product](https://www.digikey.com/en/products/detail/littelfuse-commercial-vehicle-products/FHAS101/27496166) |
-| DigiKey | Littelfuse 0287003.U · ATO 3 A fuse | 1 | $0.50 | $0.50 | Not ordered | [Product](https://www.digikey.com/en/products/detail/littelfuse-inc/0287003-U/3996895) |
-| DigiKey | Remington 18UL1007STRRED25 | 1 | $17.15 | $17.15 | Not ordered | [Product](https://www.digikey.com/en/products/detail/remington-industries/18UL1007STRRED25/11613023) |
-| DigiKey | Desco 09838 · ground adapter | 1 | $8.09 | $8.09 | Not ordered | [Product](https://www.digikey.com/en/products/detail/desco/09838/3043259) |
-| DigiKey | Pomona 1166-36-0 · banana-to-clip lead | 1 | $9.98 | $9.98 | Not ordered | [Product](https://www.digikey.com/en/products/detail/pomona-electronics/1166-36-0/736125) |
-| DigiKey | Adafruit 412 · 12 V solenoid | 1 | $7.50 | $7.50 | Not ordered | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/412/5819056) |
-| DigiKey | Adafruit 5648 · protected MOSFET driver | 1 | $3.95 | $3.95 | Not ordered | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/5648/17282414) |
-| DigiKey | Adafruit 3893 · JST PH 3 cable | 1 | $1.25 | $1.25 | Not ordered | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/3893/9603619) |
-| DigiKey | Adafruit 4873 · JST XH 3 cable pair | 1 | $0.95 | $0.95 | Not ordered | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/4873/13922054) |
-| DigiKey | Qualtek 3021001-03 · USB-A to USB-B · 3 ft | 1 | $2.26 | $2.26 | Not ordered | [Product](https://www.digikey.com/en/products/detail/qualtek/3021001-03/1531288) |
+| DigiKey | NKK S301 · SPST switch | 1 | $10.87 | $10.87 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/nkk-switches/S301/1006974) |
+| DigiKey | Littelfuse FHAS101 · fuse holder | 1 | $14.86 | $14.86 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/littelfuse-commercial-vehicle-products/FHAS101/27496166) |
+| DigiKey | Littelfuse 0287003.U · ATO 3 A fuse | 1 | $0.50 | $0.50 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/littelfuse-inc/0287003-U/3996895) |
+| DigiKey | Remington 18UL1007STRRED25 | 1 | $17.15 | $17.15 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/remington-industries/18UL1007STRRED25/11613023) |
+| DigiKey | Desco 09838 · ground adapter | 1 | $8.09 | $8.09 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/desco/09838/3043259) |
+| DigiKey | Pomona 1166-36-0 · banana-to-clip lead | 1 | $9.98 | $9.98 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/pomona-electronics/1166-36-0/736125) |
+| DigiKey | Adafruit 412 · 12 V solenoid | 1 | $7.50 | $7.50 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/412/5819056) |
+| DigiKey | Adafruit 5648 · protected MOSFET driver | 1 | $3.95 | $3.95 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/5648/17282414) |
+| DigiKey | Adafruit 3893 · JST PH 3 cable | 1 | $1.25 | $1.25 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/3893/9603619) |
+| DigiKey | Adafruit 4873 · JST XH 3 cable pair | 1 | $0.95 | $0.95 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/4873/13922054) |
+| DigiKey | Qualtek 3021001-03 · USB-A to USB-B · 3 ft | 1 | $2.26 | $2.26 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/qualtek/3021001-03/1531288) |
 | BoltDepot | 7218 · BHCS M3×6 | 9 | $0.06 | $0.54 | Not ordered | [Product](https://boltdepot.com/Product-Details?product=7218) |
 | BoltDepot | 7219 · BHCS M3×8 | 42 | $0.06 | $2.52 | Not ordered | [Product](https://boltdepot.com/Product-Details?product=7219) |
 | BoltDepot | 7220 · BHCS M3×10 | 4 | $0.06 | $0.24 | Not ordered | [Product](https://boltdepot.com/Product-Details?product=7220) |
