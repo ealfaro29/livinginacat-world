@@ -75,7 +75,7 @@ A prepared cart remains a quote until there is an order and confirmation. Prices
 
 GoDaddy confirms **$4.19 for the domain’s first year**. The receipt announces automatic renewal on **October 26, 2027 at $71.99**, before possible charges. We record this as an announced future cost, not money spent now. Pricing may change.
 
-The blog will be published as a static GitHub Pages site, with its source in [the public repository](https://github.com/ealfaro29/livinginacat-world). No paid hosting subscription is confirmed in these accounts.
+The blog is published as a static GitHub Pages site, with its source in [the public repository](https://github.com/ealfaro29/livinginacat-world). No paid hosting subscription is confirmed in these accounts.
 
 ## How the record will continue
 
