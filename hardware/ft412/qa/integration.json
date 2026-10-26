@@ -1,0 +1,147 @@
+{
+  "status": "SELECTED_GEOMETRY_CHECKS_PASS_NOT_PHYSICAL_TEST",
+  "motor_mounts_against_frame_and_gussets": "PASS_zero_intersection",
+  "electronics_holder_against_frame_gussets_motors": "PASS_zero_intersection",
+  "electronics_holder_world_placement_mm": {
+    "origin": [
+      0,
+      -20,
+      358.6
+    ],
+    "rotation_Z_degrees": 90
+  },
+  "head_sample_positions": [
+    {
+      "x_mm": -46,
+      "y_carriage_world_z_mm": 63.5,
+      "state": "released",
+      "max_intersection_mm3": 0.0
+    },
+    {
+      "x_mm": -46,
+      "y_carriage_world_z_mm": 63.5,
+      "state": "extended",
+      "max_intersection_mm3": 0.0
+    },
+    {
+      "x_mm": 0,
+      "y_carriage_world_z_mm": 63.5,
+      "state": "released",
+      "max_intersection_mm3": 0.0
+    },
+    {
+      "x_mm": 0,
+      "y_carriage_world_z_mm": 63.5,
+      "state": "extended",
+      "max_intersection_mm3": 0.0
+    },
+    {
+      "x_mm": 46,
+      "y_carriage_world_z_mm": 63.5,
+      "state": "released",
+      "max_intersection_mm3": 0.0
+    },
+    {
+      "x_mm": 46,
+      "y_carriage_world_z_mm": 63.5,
+      "state": "extended",
+      "max_intersection_mm3": 0.0
+    },
+    {
+      "x_mm": -46,
+      "y_carriage_world_z_mm": 166.5,
+      "state": "released",
+      "max_intersection_mm3": 0.0
+    },
+    {
+      "x_mm": -46,
+      "y_carriage_world_z_mm": 166.5,
+      "state": "extended",
+      "max_intersection_mm3": 0.0
+    },
+    {
+      "x_mm": 0,
+      "y_carriage_world_z_mm": 166.5,
+      "state": "released",
+      "max_intersection_mm3": 0.0
+    },
+    {
+      "x_mm": 0,
+      "y_carriage_world_z_mm": 166.5,
+      "state": "extended",
+      "max_intersection_mm3": 0.0
+    },
+    {
+      "x_mm": 46,
+      "y_carriage_world_z_mm": 166.5,
+      "state": "released",
+      "max_intersection_mm3": 0.0
+    },
+    {
+      "x_mm": 46,
+      "y_carriage_world_z_mm": 166.5,
+      "state": "extended",
+      "max_intersection_mm3": 0.0
+    },
+    {
+      "x_mm": -46,
+      "y_carriage_world_z_mm": 269.5,
+      "state": "released",
+      "max_intersection_mm3": 0.0
+    },
+    {
+      "x_mm": -46,
+      "y_carriage_world_z_mm": 269.5,
+      "state": "extended",
+      "max_intersection_mm3": 0.0
+    },
+    {
+      "x_mm": 0,
+      "y_carriage_world_z_mm": 269.5,
+      "state": "released",
+      "max_intersection_mm3": 0.0
+    },
+    {
+      "x_mm": 0,
+      "y_carriage_world_z_mm": 269.5,
+      "state": "extended",
+      "max_intersection_mm3": 0.0
+    },
+    {
+      "x_mm": 46,
+      "y_carriage_world_z_mm": 269.5,
+      "state": "released",
+      "max_intersection_mm3": 0.0
+    },
+    {
+      "x_mm": 46,
+      "y_carriage_world_z_mm": 269.5,
+      "state": "extended",
+      "max_intersection_mm3": 0.0
+    }
+  ],
+  "initial_center_limits_mm": {
+    "x": [
+      -46,
+      46
+    ],
+    "y_carriage_world_z": [
+      63.5,
+      269.5
+    ]
+  },
+  "initial_usable_x_mm": 92,
+  "initial_usable_y_mm": 206,
+  "x_limit_reason": "56mm-wide cradle approaches XY joints at full110.1mm geometric travel; preserve1.5mm nominal lateral clearance.",
+  "y_limit_reason": "39.9mm carriage kept>=2.05mm from250mm rail ends41.5/291.5.",
+  "tip_y_range_world_z_mm": [
+    42,
+    248
+  ],
+  "coordinate_warning": "These are CAD frame coordinates, not machine G-code coordinates. Calibrate before setting soft limits. No firmware/homing changes are included.",
+  "limitations": [
+    "Only sampled positions and selected solids tested, no full continuous sweep.",
+    "Belt flex, belt clamps at moving extremes, cables, tolerances, wires around the PCB add-on and actual commercial mounting ears require assembly checks.",
+    "No physical stiffness, thermal, backlash, touchscreen contact or electrical test."
+  ]
+}

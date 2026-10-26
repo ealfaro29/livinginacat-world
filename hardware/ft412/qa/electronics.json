@@ -1,0 +1,93 @@
+{
+  "status": "CAD only; unprinted, untested",
+  "units": "mm",
+  "bridas_required": 4,
+  "bridas_in_Fermerry_kit": 18,
+  "bridas_length_in": 4,
+  "bridas_width_not_published": true,
+  "slot_acceptance_mm": {
+    "width": 6,
+    "thickness": 3
+  },
+  "new_purchased_fasteners": 0,
+  "Adafruit_outline_mm": [
+    25.4,
+    17.78
+  ],
+  "Adafruit_holes_mm": [
+    [
+      22.86,
+      2.54
+    ],
+    [
+      22.86,
+      15.24
+    ]
+  ],
+  "Adafruit_pegs_mm": {
+    "diameter": 2.1,
+    "height_above_seat": 1
+  },
+  "board_seat_z_mm": 5,
+  "board_bottom_clearance_mm": 2,
+  "S301_panel_mm": {
+    "thickness": 3,
+    "main_hole": 12.7,
+    "nominal_manufacturer_hole": 12.5,
+    "locking_hole": 3.2,
+    "locking_offset": 9
+  },
+  "original_holder_source": "source_intermediates/fdm_pcb_holder_x1.step",
+  "main_rib_bottom_z_mm": -3.6,
+  "S301_guard": "integrated open-top side/rear guard; individually insulate both solder lugs with supplied electrical tape",
+  "intersection_volumes_mm3": {
+    "DLC32_vs_holder": 0.0,
+    "5648_pcb_vs_holder": 0.0,
+    "5648_pcb_vs_clamp": 0.0,
+    "5648_components_vs_clamp": 0.0,
+    "holder_vs_clamp": 0.0,
+    "S301_rear_vs_holder": 0.0,
+    "S301_bushing_vs_panel": 0.0,
+    "S301_rear_vs_5648": 0.0
+  },
+  "parts": [
+    {
+      "name": "fdm_pcb_holder_electronics_x1",
+      "bounds_mm": [
+        [
+          -110.0,
+          -38.0,
+          0.0
+        ],
+        [
+          48.0,
+          38.0,
+          48.599998474121094
+        ]
+      ],
+      "volume_mm3": 42547.24385200747,
+      "one_valid_solid": true,
+      "one_closed_consistent_mesh": true,
+      "relative_STL_volume_error": 2.606063869745576e-06
+    },
+    {
+      "name": "fdm_5648_retainer_x1",
+      "bounds_mm": [
+        [
+          21.299999237060547,
+          1.2899999618530273,
+          0.0
+        ],
+        [
+          32.5,
+          16.489999771118164,
+          8.0
+        ]
+      ],
+      "volume_mm3": 263.2000000000001,
+      "one_valid_solid": true,
+      "one_closed_consistent_mesh": true,
+      "relative_STL_volume_error": 2.4639001706855407e-08
+    }
+  ]
+}

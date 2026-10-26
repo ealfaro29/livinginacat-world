@@ -1,0 +1,120 @@
+{
+  "status": "NOMINAL_CAD_GEOMETRY_ONLY_NOT_PHYSICALLY_TESTED",
+  "stock": {
+    "2040_mm": [
+      355,
+      355,
+      190,
+      190
+    ],
+    "1020_mm": [
+      185,
+      190,
+      190
+    ]
+  },
+  "frame_outer_mm": [
+    230,
+    40,
+    355
+  ],
+  "bed_cross_top_world_y_mm": 20,
+  "bed_cross_centers_world_z_mm": [
+    107.5,
+    207.5
+  ],
+  "bed_gusset_holes": {
+    "horizontal_x_mm": [
+      -85,
+      85
+    ],
+    "horizontal_y_mm": 20,
+    "vertical_x_mm": [
+      -95,
+      95
+    ],
+    "vertical_y_mm": 10
+  },
+  "frame_corner_gusset_layer_y_mm": [
+    1,
+    19
+  ],
+  "bed_gusset_envelope_x_absolute_mm": [
+    77,
+    95
+  ],
+  "bed_ear_outer_abs_x_mm": 57,
+  "bed_lateral_clearance_mm": 20,
+  "gs20_05w_kits": 8,
+  "gs20_each_hardware": "2 M4x8 LHCS +2 SQN05M4, supplied in kit",
+  "minimum_slot_mouth_mm": 5.15,
+  "slot_lip_depth_mm": 1.8,
+  "slot_center_floor_depth_mm": 6.35,
+  "xy_pad_width_mm": 4.8,
+  "xy_pad_per_side_mouth_clearance_mm": 0.175,
+  "xy_pad_vendor_section_intersection_mm3": 0,
+  "sqn05m4_vendor_section_intersection_mm3": 0,
+  "m4_gusset_bolt_mm": {
+    "protrusion": 5,
+    "nut_engagement": 2.84,
+    "floor_margin": 1.35
+  },
+  "m3_rail_and_bed_bolt_mm": {
+    "protrusion": 5,
+    "rn05bm3_engagement": 3.2,
+    "floor_margin": 1.35
+  },
+  "m3_tnut_purchase_qty": 38,
+  "foot_m5x16_roof10p5_mm": {
+    "protrusion": 5.5,
+    "floor_margin": 0.85
+  },
+  "checks": [
+    {
+      "gusset": "bed_gusset_-1_107.5",
+      "profile_collision_mm3": 0,
+      "phone_envelope_collision_mm3": 0
+    },
+    {
+      "gusset": "bed_gusset_-1_207.5",
+      "profile_collision_mm3": 0,
+      "phone_envelope_collision_mm3": 0
+    },
+    {
+      "gusset": "corner_gusset_-1_29",
+      "profile_collision_mm3": 0,
+      "phone_envelope_collision_mm3": 0
+    },
+    {
+      "gusset": "corner_gusset_-1_326",
+      "profile_collision_mm3": 0,
+      "phone_envelope_collision_mm3": 0
+    },
+    {
+      "gusset": "bed_gusset_1_107.5",
+      "profile_collision_mm3": 0,
+      "phone_envelope_collision_mm3": 0
+    },
+    {
+      "gusset": "bed_gusset_1_207.5",
+      "profile_collision_mm3": 0,
+      "phone_envelope_collision_mm3": 0
+    },
+    {
+      "gusset": "corner_gusset_1_29",
+      "profile_collision_mm3": 0,
+      "phone_envelope_collision_mm3": 0
+    },
+    {
+      "gusset": "corner_gusset_1_326",
+      "profile_collision_mm3": 0,
+      "phone_envelope_collision_mm3": 0
+    }
+  ],
+  "limitations": [
+    "Gussets use conservative envelope from manufacturer drawing, not exact vendor STEP.",
+    "Cut length and squareness are vendor tolerances; square frame before tightening.",
+    "M3 count covers13+13+8 rail holes plus4bed holes; follow actual received rail pattern.",
+    "X rail position, belt path, motors and actuator require their separate checks."
+  ]
+}

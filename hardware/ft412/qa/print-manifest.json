@@ -1,0 +1,272 @@
+{
+  "status": "SOFTWARE_QA_PASS_UNPRINTED_UNASSEMBLED_NO_PHYSICAL_TEST",
+  "configuration": "FramingTech355/250+Adafruit412+MicroTraders collar capture",
+  "part_designs": 16,
+  "physical_pieces": 22,
+  "parts": [
+    {
+      "part": "fdm_belt_clamp_x1",
+      "quantity": 1,
+      "stl": "stl/fdm_belt_clamp_x1.stl",
+      "step": "step/fdm_belt_clamp_x1.step",
+      "print_bbox_mm": [
+        40.0,
+        25.0,
+        16.0
+      ],
+      "volume_mm3": 9803.239867010165,
+      "solid_and_mesh_valid": true,
+      "mesh_cad_relative_volume_error": 5.74251082286701e-05,
+      "stl_sha256": "58e2d31f52e7a22d5255196dcf11240685e12702a82029f6b89f15bc2d138e1a",
+      "step_sha256": "9727c90c3aa4853e2f2e81de950e394ebf624aa2f8b1b91fe08677f5940d890e"
+    },
+    {
+      "part": "fdm_idler_mount_front_x2",
+      "quantity": 2,
+      "stl": "stl/fdm_idler_mount_front_x2.stl",
+      "step": "step/fdm_idler_mount_front_x2.step",
+      "print_bbox_mm": [
+        20.0,
+        20.0,
+        18.0
+      ],
+      "volume_mm3": 5487.84380482505,
+      "solid_and_mesh_valid": true,
+      "mesh_cad_relative_volume_error": 4.9279955176394455e-05,
+      "stl_sha256": "823e10b437f85b9db5642f5be8aaad0c9454345a0377251af4dfc03e8516c19f",
+      "step_sha256": "d9c0c6f606d69a0ae559bdbb1eafc124d87571dff4e2576d171d20ae8a60dd28"
+    },
+    {
+      "part": "fdm_idler_mount_motor_x2",
+      "quantity": 2,
+      "stl": "stl/fdm_idler_mount_motor_x2.stl",
+      "step": "step/fdm_idler_mount_motor_x2.step",
+      "print_bbox_mm": [
+        42.0,
+        20.0,
+        18.0
+      ],
+      "volume_mm3": 11403.644911980326,
+      "solid_and_mesh_valid": true,
+      "mesh_cad_relative_volume_error": 7.867061503383827e-05,
+      "stl_sha256": "971e9d5ca0df13a13b5718bcf9db1ae5142cda5c5d28f9139186ddf2a7a634b7",
+      "step_sha256": "9147764b5aa8dc68a13195ba1cf12f0072ae763d991846bd27be5f670b05ebc9"
+    },
+    {
+      "part": "fdm_phone_bed_x1",
+      "quantity": 1,
+      "stl": "stl/fdm_phone_bed_x1.stl",
+      "step": "step/fdm_phone_bed_x1.step",
+      "print_bbox_mm": [
+        114.0,
+        175.0,
+        13.0
+      ],
+      "volume_mm3": 32209.57096340617,
+      "solid_and_mesh_valid": true,
+      "mesh_cad_relative_volume_error": 3.0022571350153585e-06,
+      "stl_sha256": "b7fb1ab3cd779064d5ddaae7ed858c128a97be88a7a95ab0bfc70fca8ce01fb4",
+      "step_sha256": "97b90ade6c1e41521ee865a4c69c7c8a318ce5c309200f372813eaee62cb3328"
+    },
+    {
+      "part": "fdm_tube_holder_x1",
+      "quantity": 1,
+      "stl": "stl/fdm_tube_holder_x1.stl",
+      "step": "step/fdm_tube_holder_x1.step",
+      "print_bbox_mm": [
+        16.0,
+        9.100000381469727,
+        64.5
+      ],
+      "volume_mm3": 4802.221970983227,
+      "solid_and_mesh_valid": true,
+      "mesh_cad_relative_volume_error": 8.955884513568097e-05,
+      "stl_sha256": "e8c7e0c08df7c38c3e6b6859875cf164d0d7426d6de82cd9c4323e8168041a2d",
+      "step_sha256": "2ebe9d64612400726b3d67f21d62f49387554cd497a959f4f27eaa2eccd9f211"
+    },
+    {
+      "part": "fdm_xy_joint_left_x1",
+      "quantity": 1,
+      "stl": "stl/fdm_xy_joint_left_x1.stl",
+      "step": "step/fdm_xy_joint_left_x1.step",
+      "print_bbox_mm": [
+        41.0,
+        26.0,
+        10.0
+      ],
+      "volume_mm3": 6127.0158752964035,
+      "solid_and_mesh_valid": true,
+      "mesh_cad_relative_volume_error": 9.49074900630481e-05,
+      "stl_sha256": "e83ddd193714abaec0d1843b94b2e9b6b7dc65a3a73d96f1ace2f73e7dff8b11",
+      "step_sha256": "9be09770dd16aba3ce4b7b578b55dc1c1028d793188b0f2de5d4f1340a3d3350"
+    },
+    {
+      "part": "fdm_xy_joint_right_x1",
+      "quantity": 1,
+      "stl": "stl/fdm_xy_joint_right_x1.stl",
+      "step": "step/fdm_xy_joint_right_x1.step",
+      "print_bbox_mm": [
+        41.0,
+        26.0,
+        10.0
+      ],
+      "volume_mm3": 6127.015875296398,
+      "solid_and_mesh_valid": true,
+      "mesh_cad_relative_volume_error": 9.491514215297042e-05,
+      "stl_sha256": "bd7214a383736f4f367dbc5e1b044e040e08b9262b39db6cb78fbca57521e280",
+      "step_sha256": "72fc1acfa54a4fc4935f9afce0948ea0f246d1168d48a952c04bee3a7fd6067c"
+    },
+    {
+      "part": "ft412_solenoid_cradle",
+      "quantity": 1,
+      "stl": "stl/ft412_solenoid_cradle.stl",
+      "step": "step/ft412_solenoid_cradle.step",
+      "print_bbox_mm": [
+        56.0,
+        48.0,
+        29.0
+      ],
+      "volume_mm3": 11594.81926100751,
+      "solid_and_mesh_valid": true,
+      "mesh_cad_relative_volume_error": 1.597729060348178e-05,
+      "stl_sha256": "cb1406bcf7ca3b6ed2de4c615c78496d12367aeecf2ff0eb4a245d3bf3b69d27",
+      "step_sha256": "933eee2122e952f56066c3defbfcfb585672908edb27394b268fe07688345689"
+    },
+    {
+      "part": "ft412_clamp_bar_x2",
+      "quantity": 2,
+      "stl": "stl/ft412_clamp_bar_x2.stl",
+      "step": "step/ft412_clamp_bar_x2.step",
+      "print_bbox_mm": [
+        52.0,
+        5.0,
+        6.0
+      ],
+      "volume_mm3": 968.5699184189494,
+      "solid_and_mesh_valid": true,
+      "mesh_cad_relative_volume_error": 3.4835156204211744e-05,
+      "stl_sha256": "5abb701ad39e14f7222eb4d5e5eab7a4165837a67121ab794de42ef45615f414",
+      "step_sha256": "f85a4c6d21e71aa90c3453edfab040adde05c3e90d567902c3b6c7555fa5ecb1"
+    },
+    {
+      "part": "ft412_coupler_rear",
+      "quantity": 1,
+      "stl": "stl/ft412_coupler_rear.stl",
+      "step": "step/ft412_coupler_rear.step",
+      "print_bbox_mm": [
+        22.0,
+        18.799999237060543,
+        7.75
+      ],
+      "volume_mm3": 2644.004308605395,
+      "solid_and_mesh_valid": true,
+      "mesh_cad_relative_volume_error": 6.339822763913178e-05,
+      "stl_sha256": "38ee031699d895cb0501c463b71816af23cdd86da9db1a63c82cd9efe0832dba",
+      "step_sha256": "61753b3dd9c4f6bcd70a953b12a98c8e0bb65babb76cd8be61b99217110af9e6"
+    },
+    {
+      "part": "ft412_coupler_front",
+      "quantity": 1,
+      "stl": "stl/ft412_coupler_front.stl",
+      "step": "step/ft412_coupler_front.step",
+      "print_bbox_mm": [
+        22.0,
+        18.799999237060547,
+        7.749999899999999
+      ],
+      "volume_mm3": 2642.1190099717637,
+      "solid_and_mesh_valid": true,
+      "mesh_cad_relative_volume_error": 6.91232266182332e-05,
+      "stl_sha256": "4f4bd52cea7c6c05889e6c9d06b7fda02d8f07fa0fd47ae5bad3a7e38edaef40",
+      "step_sha256": "1efc069be4dc42c06d6acf3b88e5bf30dba06b5a1b47206d68280ad29a7b4496"
+    },
+    {
+      "part": "fdm_motor_mount_A_x1",
+      "quantity": 1,
+      "stl": "stl/fdm_motor_mount_A_x1.stl",
+      "step": "step/fdm_motor_mount_A_x1.step",
+      "print_bbox_mm": [
+        60.0,
+        42.0,
+        14.000000000000004
+      ],
+      "volume_mm3": 14313.333416074891,
+      "solid_and_mesh_valid": true,
+      "mesh_cad_relative_volume_error": 9.004914389300345e-06,
+      "stl_sha256": "304706e41a99532f0634dc7d555c823cf80ff91c5ec878cabbc14a7527a5e14e",
+      "step_sha256": "66fd84614d80fad9d805aec3c632f28dc4c17a4dbc39dbea247283113b3be59c"
+    },
+    {
+      "part": "fdm_motor_mount_B_x1",
+      "quantity": 1,
+      "stl": "stl/fdm_motor_mount_B_x1.stl",
+      "step": "step/fdm_motor_mount_B_x1.step",
+      "print_bbox_mm": [
+        60.0,
+        42.0,
+        18.000000000000004
+      ],
+      "volume_mm3": 16085.815102304216,
+      "solid_and_mesh_valid": true,
+      "mesh_cad_relative_volume_error": 3.5631340502715553e-06,
+      "stl_sha256": "34c7219f5bc9e45f948dd3534a4ae9da18b26242690e14401e9c5da6f7c3a869",
+      "step_sha256": "847127ad01af29e42b91e43da37f0fbeee6360adc7d16ef7fd2068dcffa7f6c9"
+    },
+    {
+      "part": "ft_foot_x4",
+      "quantity": 4,
+      "stl": "stl/ft_foot_x4.stl",
+      "step": "step/ft_foot_x4.step",
+      "print_bbox_mm": [
+        24.0,
+        23.99254131736234,
+        22.0
+      ],
+      "volume_mm3": 8698.162922911635,
+      "solid_and_mesh_valid": true,
+      "mesh_cad_relative_volume_error": 0.000414395494797858,
+      "stl_sha256": "39471e25c6171146cb688bec03670b95b6c5add2f71811998ca01593d3804c22",
+      "step_sha256": "bf410ad744aacfb47abb2902f6d370a0d4107b0b4332d0028bbbb8b43089671c"
+    },
+    {
+      "part": "fdm_pcb_holder_electronics_x1",
+      "quantity": 1,
+      "stl": "stl/fdm_pcb_holder_electronics_x1.stl",
+      "step": "step/fdm_pcb_holder_electronics_x1.step",
+      "print_bbox_mm": [
+        158.0,
+        76.0,
+        48.599998474121094
+      ],
+      "volume_mm3": 42547.24385200768,
+      "solid_and_mesh_valid": true,
+      "mesh_cad_relative_volume_error": 2.6060638647863046e-06,
+      "stl_sha256": "517fc05e9d9847a7a570029c5ef3769dabbf1f2e36814efb5babc4f07ec83287",
+      "step_sha256": "add326055092fb06e512fa8e0974d75c0400c0cd7e894b73049731449d016c34"
+    },
+    {
+      "part": "fdm_5648_retainer_x1",
+      "quantity": 1,
+      "stl": "stl/fdm_5648_retainer_x1.stl",
+      "step": "step/fdm_5648_retainer_x1.step",
+      "print_bbox_mm": [
+        11.200000762939453,
+        15.199999809265137,
+        8.0
+      ],
+      "volume_mm3": 263.19999999999993,
+      "solid_and_mesh_valid": true,
+      "mesh_cad_relative_volume_error": 2.4639002354766734e-08,
+      "stl_sha256": "4e19130aedd5df39eb171912f9a1169ded2cda088cc5b22dfa62752c0e253ac4",
+      "step_sha256": "b5245c2291ba9ece2e793559436923d4f5f55bf6bea94339e7e51ef029d693b3"
+    }
+  ],
+  "solid_volume_cm3_total": 219.67236846405902,
+  "coupon_files": [
+    "coupons/fdm_clearance_coupon.stl",
+    "coupons/fdm_square_nut_coupon.stl",
+    "coupons/fdm_countersink_coupon.stl"
+  ],
+  "physical_validation": false,
+  "firmware_changed": false
+}

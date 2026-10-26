@@ -1,0 +1,156 @@
+{
+  "status": "CAD geometry only; unprinted, untested",
+  "units": "mm",
+  "mounts": [
+    {
+      "name": "fdm_motor_mount_A_x1",
+      "standoff_mm": 8,
+      "plate_thickness_mm": 6,
+      "head_seat_z_mm": 3,
+      "M3_centres_mm": [
+        [
+          -15.5,
+          -15.5
+        ],
+        [
+          -15.5,
+          15.5
+        ],
+        [
+          15.5,
+          -15.5
+        ],
+        [
+          15.5,
+          15.5
+        ]
+      ],
+      "M5_centres_mm": [
+        [
+          32.0,
+          -12.5
+        ],
+        [
+          32.0,
+          12.5
+        ]
+      ],
+      "M3_screw_mm": 6,
+      "M5_screw_mm": 16,
+      "M5_reach_past_frame_face_mm": 5,
+      "motor_face_z_mm": 0,
+      "pulley_hub_base_z_mm": 3,
+      "belt_band_z_interval_mm": [
+        11.75,
+        17.75
+      ],
+      "tool_diameter_mm": 3,
+      "tool_centre_z_mm": 6.75,
+      "intersections_mm3": {
+        "motor": 0.0,
+        "pulley": 0.0,
+        "M3_0": 0.0,
+        "M3_1": 0.0,
+        "M3_2": 0.0,
+        "M3_3": 0.0,
+        "M5_0": 0.0,
+        "M5_1": 0.0,
+        "Allen_tool_0": 0.0,
+        "Allen_tool_1": 0.0
+      },
+      "single_valid_CAD_solid": true,
+      "single_closed_consistent_mesh": true,
+      "print_bounds_mm": [
+        [
+          -20.0,
+          -21.0,
+          -2.6645352591003757e-15
+        ],
+        [
+          40.0,
+          21.0,
+          14.0
+        ]
+      ],
+      "volume_mm3": 14313.333416075098,
+      "STL_relative_volume_error": 9.004914374812688e-06,
+      "minimum_nominal_M3_outer_counterbore_ligament_mm": 1.25,
+      "limits": "No complete frame/belt/cable sweep; no physical force, heat, fatigue or clamp-creep validation"
+    },
+    {
+      "name": "fdm_motor_mount_B_x1",
+      "standoff_mm": 12,
+      "plate_thickness_mm": 6,
+      "head_seat_z_mm": 3,
+      "M3_centres_mm": [
+        [
+          -15.5,
+          -15.5
+        ],
+        [
+          -15.5,
+          15.5
+        ],
+        [
+          15.5,
+          -15.5
+        ],
+        [
+          15.5,
+          15.5
+        ]
+      ],
+      "M5_centres_mm": [
+        [
+          32.0,
+          -12.5
+        ],
+        [
+          32.0,
+          12.5
+        ]
+      ],
+      "M3_screw_mm": 6,
+      "M5_screw_mm": 20,
+      "M5_reach_past_frame_face_mm": 5,
+      "motor_face_z_mm": 0,
+      "pulley_hub_base_z_mm": 8,
+      "belt_band_z_interval_mm": [
+        16.75,
+        22.75
+      ],
+      "tool_diameter_mm": 3,
+      "tool_centre_z_mm": 11.75,
+      "intersections_mm3": {
+        "motor": 0.0,
+        "pulley": 0.0,
+        "M3_0": 0.0,
+        "M3_1": 0.0,
+        "M3_2": 0.0,
+        "M3_3": 0.0,
+        "M5_0": 0.0,
+        "M5_1": 0.0,
+        "Allen_tool_0": 0.0,
+        "Allen_tool_1": 0.0
+      },
+      "single_valid_CAD_solid": true,
+      "single_closed_consistent_mesh": true,
+      "print_bounds_mm": [
+        [
+          -20.0,
+          -21.0,
+          -2.6645352591003757e-15
+        ],
+        [
+          40.0,
+          21.0,
+          18.0
+        ]
+      ],
+      "volume_mm3": 16085.815102304305,
+      "STL_relative_volume_error": 3.5631340447305986e-06,
+      "minimum_nominal_M3_outer_counterbore_ligament_mm": 1.25,
+      "limits": "No complete frame/belt/cable sweep; no physical force, heat, fatigue or clamp-creep validation"
+    }
+  ]
+}

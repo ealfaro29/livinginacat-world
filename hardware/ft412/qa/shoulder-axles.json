@@ -1,0 +1,359 @@
+{
+  "status": "Nominal CAD envelopes pass with the documented four tip preparations; no physical validation",
+  "configuration": "PhysiClaw DIY FDM 355/250",
+  "upstream_commit": "8f610d48642aef7d974d3ce09d28e14a4a99bbae",
+  "shim_inventory_including_12_original_lower_shims": {
+    "required_nominal_qty_by_thickness_mm": {
+      "0.1": 0,
+      "0.2": 2,
+      "0.3": 12,
+      "0.5": 32
+    },
+    "purchased_qty_by_thickness_mm": {
+      "0.1": 12,
+      "0.2": 12,
+      "0.3": 12,
+      "0.5": 32
+    },
+    "target_actual_axial_play_mm": [
+      0.1,
+      0.3
+    ]
+  },
+  "selected_sources_observed_in_parent_Chrome_session": {
+    "shoulder_10": {
+      "url": "https://www.amazon.com/dp/B0DP7173LB",
+      "brand": "uxcell",
+      "pack": 6,
+      "observed_price_usd": 6.89,
+      "head_diameter_mm": 9,
+      "head_height_mm": 3.5
+    },
+    "shoulder_20": {
+      "url": "https://www.amazon.com/dp/B0FDQHC8SW",
+      "brand": "MECCANIXITY",
+      "pack": 26,
+      "observed_price_usd": 9.99,
+      "head_diameter_mm": 9,
+      "head_height_mm": 3.0
+    },
+    "square_nut_m4": {
+      "url": "https://www.amazon.com/dp/B07RR3H2FT",
+      "brand": "uxcell",
+      "pack": 50,
+      "observed_price_usd": 9.49,
+      "dimensions_mm": [
+        7,
+        7,
+        3
+      ]
+    },
+    "shim_assortment": {
+      "url": "https://www.amazon.com/dp/B0FF1NZVNX",
+      "pack": 48,
+      "observed_price_usd": 11.99,
+      "inside_outside_diameters_mm": [
+        5,
+        8
+      ],
+      "qty_each_thickness": 12,
+      "thicknesses_mm": [
+        0.1,
+        0.2,
+        0.3,
+        0.5
+      ]
+    },
+    "shim_half_mm": {
+      "url": "https://www.amazon.com/dp/B0C3TWCXL4",
+      "pack": 20,
+      "observed_price_usd": 6.29,
+      "inside_outside_diameters_mm": [
+        5,
+        8
+      ],
+      "thickness_mm": 0.5
+    }
+  },
+  "limitations": [
+    "Product dimensions were read from the selected product listings, not physically measured.",
+    "Part intersections use plain cylinders for thread major diameter, not helical threads or chamfers.",
+    "Mirrored XY joints are equivalent for this local axial check.",
+    "No full moving assembly, strength, wear, bearing preload or thermal analysis.",
+    "The upstream XY bundle screw placement is not used: its shoulder penetrates the M4 clearance hole by 1-2 mm. Seat the shoulder at the host surface instead."
+  ],
+  "positions": [
+    {
+      "position": "LU / motor, columna -X nativa",
+      "part_kind": "motor",
+      "shoulder_diameter_mm": 5.0,
+      "shoulder_length_mm": 20,
+      "thread": "M4 x 0.7",
+      "selected_stock_thread_length_mm": 8.0,
+      "installed_thread_length_max_mm": 8.0,
+      "installed_thread_length_min_mm": 8.0,
+      "nut_width_mm": 7.0,
+      "nut_thickness_mm": 3.0,
+      "nut_pocket_width_mm": 7.5,
+      "nut_pocket_thickness_mm": 3.5,
+      "nut_roof_mm": 4.0,
+      "nut_engagement_at_max_length_mm": 3.0,
+      "axial_free_space_above_nominal_stack_mm": 2,
+      "nominal_additional_top_shims_mm": [
+        0.5,
+        0.5,
+        0.5,
+        0.3
+      ],
+      "nominal_final_axial_play_mm": 0.2,
+      "major_diameter_envelope_intersection_with_printed_part_mm3": 0.0,
+      "tip_recess_from_back_face_min_mm": 10.0,
+      "prepare_thread_tip": false
+    },
+    {
+      "position": "LU / motor, columna +X nativa",
+      "part_kind": "motor",
+      "shoulder_diameter_mm": 5.0,
+      "shoulder_length_mm": 10,
+      "thread": "M4 x 0.7",
+      "selected_stock_thread_length_mm": 8.0,
+      "installed_thread_length_max_mm": 8.0,
+      "installed_thread_length_min_mm": 8.0,
+      "nut_width_mm": 7.0,
+      "nut_thickness_mm": 3.0,
+      "nut_pocket_width_mm": 7.5,
+      "nut_pocket_thickness_mm": 3.5,
+      "nut_roof_mm": 4.0,
+      "nut_engagement_at_max_length_mm": 3.0,
+      "axial_free_space_above_nominal_stack_mm": 1,
+      "nominal_additional_top_shims_mm": [
+        0.5,
+        0.3
+      ],
+      "nominal_final_axial_play_mm": 0.2,
+      "major_diameter_envelope_intersection_with_printed_part_mm3": 0.0,
+      "tip_recess_from_back_face_min_mm": 10.0,
+      "prepare_thread_tip": false
+    },
+    {
+      "position": "RU / motor, columna -X nativa",
+      "part_kind": "motor",
+      "shoulder_diameter_mm": 5.0,
+      "shoulder_length_mm": 20,
+      "thread": "M4 x 0.7",
+      "selected_stock_thread_length_mm": 8.0,
+      "installed_thread_length_max_mm": 8.0,
+      "installed_thread_length_min_mm": 8.0,
+      "nut_width_mm": 7.0,
+      "nut_thickness_mm": 3.0,
+      "nut_pocket_width_mm": 7.5,
+      "nut_pocket_thickness_mm": 3.5,
+      "nut_roof_mm": 4.0,
+      "nut_engagement_at_max_length_mm": 3.0,
+      "axial_free_space_above_nominal_stack_mm": 2,
+      "nominal_additional_top_shims_mm": [
+        0.5,
+        0.5,
+        0.5,
+        0.3
+      ],
+      "nominal_final_axial_play_mm": 0.2,
+      "major_diameter_envelope_intersection_with_printed_part_mm3": 0.0,
+      "tip_recess_from_back_face_min_mm": 10.0,
+      "prepare_thread_tip": false
+    },
+    {
+      "position": "RU / motor, columna +X nativa",
+      "part_kind": "motor",
+      "shoulder_diameter_mm": 5.0,
+      "shoulder_length_mm": 20,
+      "thread": "M4 x 0.7",
+      "selected_stock_thread_length_mm": 8.0,
+      "installed_thread_length_max_mm": 8.0,
+      "installed_thread_length_min_mm": 8.0,
+      "nut_width_mm": 7.0,
+      "nut_thickness_mm": 3.0,
+      "nut_pocket_width_mm": 7.5,
+      "nut_pocket_thickness_mm": 3.5,
+      "nut_roof_mm": 4.0,
+      "nut_engagement_at_max_length_mm": 3.0,
+      "axial_free_space_above_nominal_stack_mm": 2,
+      "nominal_additional_top_shims_mm": [
+        0.5,
+        0.5,
+        0.5,
+        0.3
+      ],
+      "nominal_final_axial_play_mm": 0.2,
+      "major_diameter_envelope_intersection_with_printed_part_mm3": 0.0,
+      "tip_recess_from_back_face_min_mm": 10.0,
+      "prepare_thread_tip": false
+    },
+    {
+      "position": "LD / frontal",
+      "part_kind": "front",
+      "shoulder_diameter_mm": 5.0,
+      "shoulder_length_mm": 10,
+      "thread": "M4 x 0.7",
+      "selected_stock_thread_length_mm": 8.0,
+      "installed_thread_length_max_mm": 8.0,
+      "installed_thread_length_min_mm": 8.0,
+      "nut_width_mm": 7.0,
+      "nut_thickness_mm": 3.0,
+      "nut_pocket_width_mm": 7.5,
+      "nut_pocket_thickness_mm": 3.5,
+      "nut_roof_mm": 4.0,
+      "nut_engagement_at_max_length_mm": 3.0,
+      "axial_free_space_above_nominal_stack_mm": 1,
+      "nominal_additional_top_shims_mm": [
+        0.5,
+        0.3
+      ],
+      "nominal_final_axial_play_mm": 0.2,
+      "major_diameter_envelope_intersection_with_printed_part_mm3": 0.0,
+      "tip_recess_from_back_face_min_mm": 10.0,
+      "prepare_thread_tip": false
+    },
+    {
+      "position": "RD / frontal",
+      "part_kind": "front",
+      "shoulder_diameter_mm": 5.0,
+      "shoulder_length_mm": 20,
+      "thread": "M4 x 0.7",
+      "selected_stock_thread_length_mm": 8.0,
+      "installed_thread_length_max_mm": 8.0,
+      "installed_thread_length_min_mm": 8.0,
+      "nut_width_mm": 7.0,
+      "nut_thickness_mm": 3.0,
+      "nut_pocket_width_mm": 7.5,
+      "nut_pocket_thickness_mm": 3.5,
+      "nut_roof_mm": 4.0,
+      "nut_engagement_at_max_length_mm": 3.0,
+      "axial_free_space_above_nominal_stack_mm": 2,
+      "nominal_additional_top_shims_mm": [
+        0.5,
+        0.5,
+        0.5,
+        0.3
+      ],
+      "nominal_final_axial_play_mm": 0.2,
+      "major_diameter_envelope_intersection_with_printed_part_mm3": 0.0,
+      "tip_recess_from_back_face_min_mm": 10.0,
+      "prepare_thread_tip": false
+    },
+    {
+      "position": "LJ1 / junta izquierda, bolsillo frontal",
+      "part_kind": "xy",
+      "shoulder_diameter_mm": 5.0,
+      "shoulder_length_mm": 20,
+      "thread": "M4 x 0.7",
+      "selected_stock_thread_length_mm": 8.0,
+      "installed_thread_length_max_mm": 7.5,
+      "installed_thread_length_min_mm": 7.2,
+      "nut_width_mm": 7.0,
+      "nut_thickness_mm": 3.0,
+      "nut_pocket_width_mm": 7.5,
+      "nut_pocket_thickness_mm": 3.5,
+      "nut_roof_mm": 3.2,
+      "nut_engagement_at_max_length_mm": 3.0,
+      "axial_free_space_above_nominal_stack_mm": 2,
+      "nominal_additional_top_shims_mm": [
+        0.5,
+        0.5,
+        0.5,
+        0.3
+      ],
+      "nominal_final_axial_play_mm": 0.2,
+      "major_diameter_envelope_intersection_with_printed_part_mm3": 0.0,
+      "tip_recess_from_back_face_min_mm": 0.5,
+      "prepare_thread_tip": true,
+      "stock_b8_back_face_clearance_mm": 0.0,
+      "minimum_tip_recess_acceptance_mm": 0.5
+    },
+    {
+      "position": "LJ2 / junta izquierda, bolsillo inclinado",
+      "part_kind": "xy",
+      "shoulder_diameter_mm": 5.0,
+      "shoulder_length_mm": 10,
+      "thread": "M4 x 0.7",
+      "selected_stock_thread_length_mm": 8.0,
+      "installed_thread_length_max_mm": 7.5,
+      "installed_thread_length_min_mm": 7.2,
+      "nut_width_mm": 7.0,
+      "nut_thickness_mm": 3.0,
+      "nut_pocket_width_mm": 7.5,
+      "nut_pocket_thickness_mm": 3.5,
+      "nut_roof_mm": 3.2,
+      "nut_engagement_at_max_length_mm": 3.0,
+      "axial_free_space_above_nominal_stack_mm": 1,
+      "nominal_additional_top_shims_mm": [
+        0.3,
+        0.3,
+        0.2
+      ],
+      "nominal_final_axial_play_mm": 0.2,
+      "major_diameter_envelope_intersection_with_printed_part_mm3": 0.0,
+      "tip_recess_from_back_face_min_mm": 0.5,
+      "prepare_thread_tip": true,
+      "stock_b8_back_face_clearance_mm": 0.0,
+      "minimum_tip_recess_acceptance_mm": 0.5
+    },
+    {
+      "position": "RJ1 / junta derecha, bolsillo frontal",
+      "part_kind": "xy",
+      "shoulder_diameter_mm": 5.0,
+      "shoulder_length_mm": 10,
+      "thread": "M4 x 0.7",
+      "selected_stock_thread_length_mm": 8.0,
+      "installed_thread_length_max_mm": 7.5,
+      "installed_thread_length_min_mm": 7.2,
+      "nut_width_mm": 7.0,
+      "nut_thickness_mm": 3.0,
+      "nut_pocket_width_mm": 7.5,
+      "nut_pocket_thickness_mm": 3.5,
+      "nut_roof_mm": 3.2,
+      "nut_engagement_at_max_length_mm": 3.0,
+      "axial_free_space_above_nominal_stack_mm": 1,
+      "nominal_additional_top_shims_mm": [
+        0.3,
+        0.3,
+        0.2
+      ],
+      "nominal_final_axial_play_mm": 0.2,
+      "major_diameter_envelope_intersection_with_printed_part_mm3": 0.0,
+      "tip_recess_from_back_face_min_mm": 0.5,
+      "prepare_thread_tip": true,
+      "stock_b8_back_face_clearance_mm": 0.0,
+      "minimum_tip_recess_acceptance_mm": 0.5
+    },
+    {
+      "position": "RJ2 / junta derecha, bolsillo inclinado",
+      "part_kind": "xy",
+      "shoulder_diameter_mm": 5.0,
+      "shoulder_length_mm": 20,
+      "thread": "M4 x 0.7",
+      "selected_stock_thread_length_mm": 8.0,
+      "installed_thread_length_max_mm": 7.5,
+      "installed_thread_length_min_mm": 7.2,
+      "nut_width_mm": 7.0,
+      "nut_thickness_mm": 3.0,
+      "nut_pocket_width_mm": 7.5,
+      "nut_pocket_thickness_mm": 3.5,
+      "nut_roof_mm": 3.2,
+      "nut_engagement_at_max_length_mm": 3.0,
+      "axial_free_space_above_nominal_stack_mm": 2,
+      "nominal_additional_top_shims_mm": [
+        0.5,
+        0.5,
+        0.5,
+        0.3
+      ],
+      "nominal_final_axial_play_mm": 0.2,
+      "major_diameter_envelope_intersection_with_printed_part_mm3": 0.0,
+      "tip_recess_from_back_face_min_mm": 0.5,
+      "prepare_thread_tip": true,
+      "stock_b8_back_face_clearance_mm": 0.0,
+      "minimum_tip_recess_acceptance_mm": 0.5
+    }
+  ]
+}

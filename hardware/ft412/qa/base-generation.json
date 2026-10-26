@@ -1,0 +1,517 @@
+{
+  "status": "CAD_AND_MESH_CHECKED__NOT_PHYSICALLY_PRINTED_OR_TESTED",
+  "upstream": "PhysiClaw hardware v0.51",
+  "source_commit": "8f610d48642aef7d974d3ce09d28e14a4a99bbae",
+  "hole_extra_mm": 0.2,
+  "nut_extra_mm": 0.2,
+  "fits_before_mm": {
+    "M3_NORMAL": 3.4,
+    "M4_CLOSE": 4.3,
+    "M5_CLOSE": 5.3,
+    "M5_NORMAL": 5.5,
+    "M3_NUT_W": 5.7,
+    "M3_NUT_T": 2.7,
+    "M4_NUT_W": 7.3,
+    "M4_NUT_T": 3.3,
+    "M5_NUT_W": 8.3,
+    "M5_NUT_T": 4.0,
+    "M3_CSK_HEAD": 6.0,
+    "M5_CSK_HEAD": 10.0
+  },
+  "fits_after_mm": {
+    "M3_NORMAL": 3.6,
+    "M4_CLOSE": 4.5,
+    "M5_CLOSE": 5.5,
+    "M5_NORMAL": 5.7,
+    "M3_NUT_W": 5.9,
+    "M3_NUT_T": 2.9000000000000004,
+    "M4_NUT_W": 7.5,
+    "M4_NUT_T": 3.5,
+    "M5_NUT_W": 8.5,
+    "M5_NUT_T": 4.2,
+    "M3_CSK_HEAD": 7.0,
+    "M5_CSK_HEAD": 11.5
+  },
+  "chosen_mechanical_configuration": {
+    "y_profiles_mm": [
+      355,
+      355
+    ],
+    "y_rails_mm": [
+      250,
+      250
+    ],
+    "x_rail_mm": 150,
+    "x_beam_mm": 185,
+    "short_frame_mm": [
+      190,
+      190
+    ],
+    "bed_crossbeams_mm": [
+      190,
+      190
+    ],
+    "profile_supplier": "FramingTech slot5; frame gussets and bed gussets",
+    "layout_qa": "qa/framingtech-frame.json",
+    "firmware_changed": false
+  },
+  "quantity_total": 10,
+  "parts": [
+    {
+      "watertight": true,
+      "winding_consistent": true,
+      "mesh_components": 1,
+      "triangles": 11452,
+      "volume_relative_error": 5.742510823609252e-05,
+      "print_bbox_mm": [
+        40.0,
+        25.0,
+        16.0
+      ],
+      "stl_sha256": "58e2d31f52e7a22d5255196dcf11240685e12702a82029f6b89f15bc2d138e1a",
+      "step": "step/fdm_belt_clamp_x1.step",
+      "stl": "stl/fdm_belt_clamp_x1.stl",
+      "step_sha256": "9727c90c3aa4853e2f2e81de950e394ebf624aa2f8b1b91fe08677f5940d890e",
+      "volume_mm3": 9803.239867010088,
+      "cad_valid": true,
+      "cad_solids": 1,
+      "part": "belt_clamp",
+      "quantity": 1,
+      "changes": [
+        "Clearance diameters +0.2 mm by default; mounting centres unchanged",
+        "Captive-nut cavities +0.2 mm width/thickness by default",
+        "Countersink mouths M3=7.0mm/M5=11.5mm for specified ISO10642 heads"
+      ],
+      "original_volume_mm3": 9947.373578157712,
+      "native_bbox_mm": [
+        40.0,
+        25.0,
+        16.0
+      ],
+      "native_bounds_unchanged": true,
+      "rotation": "nativeZup",
+      "original_step_sha256": "711063ceb0d50226a85ead304f6b542b22ca162da1c298f4c148322994f66805",
+      "original_stl": "original_stl/original_belt_clamp_x1.stl",
+      "original_mesh_check": {
+        "watertight": true,
+        "winding_consistent": true,
+        "mesh_components": 1,
+        "triangles": 11452,
+        "volume_relative_error": 5.380975412335797e-05,
+        "print_bbox_mm": [
+          40.0,
+          25.0,
+          16.0
+        ],
+        "stl_sha256": "90082fde591de27b55e092937d83b09c3c18c152c7778292275258981c1a6e81"
+      }
+    },
+    {
+      "watertight": true,
+      "winding_consistent": true,
+      "mesh_components": 1,
+      "triangles": 2584,
+      "volume_relative_error": 4.927995517772035e-05,
+      "print_bbox_mm": [
+        20.0,
+        20.0,
+        18.0
+      ],
+      "stl_sha256": "823e10b437f85b9db5642f5be8aaad0c9454345a0377251af4dfc03e8516c19f",
+      "step": "step/fdm_idler_mount_front_x2.step",
+      "stl": "stl/fdm_idler_mount_front_x2.stl",
+      "step_sha256": "d9c0c6f606d69a0ae559bdbb1eafc124d87571dff4e2576d171d20ae8a60dd28",
+      "volume_mm3": 5487.843804825043,
+      "cad_valid": true,
+      "cad_solids": 1,
+      "part": "idler_mount_front",
+      "quantity": 2,
+      "changes": [
+        "Clearance diameters +0.2 mm by default; mounting centres unchanged",
+        "Captive-nut cavities +0.2 mm width/thickness by default",
+        "Countersink mouths M3=7.0mm/M5=11.5mm for specified ISO10642 heads"
+      ],
+      "original_volume_mm3": 5535.379222976762,
+      "native_bbox_mm": [
+        20.0,
+        20.0,
+        18.0
+      ],
+      "native_bounds_unchanged": true,
+      "rotation": "nativeZup",
+      "original_step_sha256": "2b29e44847570aa159225df36ba03fdf81e1ddba5fcad88128c9c828839a40ef",
+      "original_stl": "original_stl/original_idler_mount_front_x2.stl",
+      "original_mesh_check": {
+        "watertight": true,
+        "winding_consistent": true,
+        "mesh_components": 1,
+        "triangles": 2584,
+        "volume_relative_error": 4.691552480418616e-05,
+        "print_bbox_mm": [
+          20.0,
+          20.0,
+          18.0
+        ],
+        "stl_sha256": "ddd86a06309dd26e8c9adad8bf67f2eaa36236ac1b3d7672340a4ccbeeae63af"
+      }
+    },
+    {
+      "watertight": true,
+      "winding_consistent": true,
+      "mesh_components": 1,
+      "triangles": 5130,
+      "volume_relative_error": 7.86706150419739e-05,
+      "print_bbox_mm": [
+        42.0,
+        20.0,
+        18.0
+      ],
+      "stl_sha256": "971e9d5ca0df13a13b5718bcf9db1ae5142cda5c5d28f9139186ddf2a7a634b7",
+      "step": "step/fdm_idler_mount_motor_x2.step",
+      "stl": "stl/fdm_idler_mount_motor_x2.stl",
+      "step_sha256": "9147764b5aa8dc68a13195ba1cf12f0072ae763d991846bd27be5f670b05ebc9",
+      "volume_mm3": 11403.644911980231,
+      "cad_valid": true,
+      "cad_solids": 1,
+      "part": "idler_mount_motor",
+      "quantity": 2,
+      "changes": [
+        "Clearance diameters +0.2 mm by default; mounting centres unchanged",
+        "Captive-nut cavities +0.2 mm width/thickness by default",
+        "Countersink mouths M3=7.0mm/M5=11.5mm for specified ISO10642 heads"
+      ],
+      "original_volume_mm3": 11494.031010902043,
+      "native_bbox_mm": [
+        42.0,
+        20.0,
+        18.0
+      ],
+      "native_bounds_unchanged": true,
+      "rotation": "nativeZup",
+      "original_step_sha256": "2911ec9303fa1f0d138c512ff6214eb92af586ca92f9bb27c127dab352d87b35",
+      "original_stl": "original_stl/original_idler_mount_motor_x2.stl",
+      "original_mesh_check": {
+        "watertight": true,
+        "winding_consistent": true,
+        "mesh_components": 1,
+        "triangles": 5130,
+        "volume_relative_error": 7.757386074961869e-05,
+        "print_bbox_mm": [
+          42.0,
+          20.0,
+          18.0
+        ],
+        "stl_sha256": "98f7f13ec6eed5a08447186109b6338c30faa6de5567f12cfa02c0597c270484"
+      }
+    },
+    {
+      "watertight": true,
+      "winding_consistent": true,
+      "mesh_components": 1,
+      "triangles": 8996,
+      "volume_relative_error": 2.1385385239804957e-05,
+      "print_bbox_mm": [
+        96.0,
+        76.0,
+        10.6
+      ],
+      "stl_sha256": "08f3ca9168ecb79cc48acb6d4c33affcc25b39bf1facbf9e6c06945dc943e32b",
+      "step": "step/fdm_pcb_holder_x1.step",
+      "stl": "stl/fdm_pcb_holder_x1.stl",
+      "step_sha256": "441ca859fa3336159f40b7a77a9e1b09be388ff90256202db806f6f1f7b66239",
+      "volume_mm3": 14413.661587756062,
+      "cad_valid": true,
+      "cad_solids": 1,
+      "part": "pcb_holder",
+      "quantity": 1,
+      "changes": [
+        "Clearance diameters +0.2 mm by default; mounting centres unchanged",
+        "Captive-nut cavities +0.2 mm width/thickness by default",
+        "Countersink mouths M3=7.0mm/M5=11.5mm for specified ISO10642 heads",
+        "Honeycomb webs1->2mm; relief slots moved1mm from mounting rib",
+        "Mounting rib3->3.6mm; FHCSM5x12 protrusion5.4mm gives0.95mm nominal FT slot-floor clearance"
+      ],
+      "original_volume_mm3": 14363.41211179873,
+      "native_bbox_mm": [
+        96.0,
+        76.0,
+        10.6
+      ],
+      "native_bounds_unchanged": false,
+      "rotation": "nativeZup",
+      "original_step_sha256": "5b4f47cad366d0836c938077f0e1d9e7599726bffe1c374cc10995852c9529ec",
+      "original_stl": "original_stl/original_pcb_holder_x1.stl",
+      "original_mesh_check": {
+        "watertight": true,
+        "winding_consistent": true,
+        "mesh_components": 1,
+        "triangles": 8996,
+        "volume_relative_error": 9.248140421385904e-06,
+        "print_bbox_mm": [
+          96.0,
+          76.0,
+          10.0
+        ],
+        "stl_sha256": "6fc872548cebc20f3ac9346686b84ebe2ef2fd4723f2b4ec03915527e10cd640"
+      }
+    },
+    {
+      "watertight": true,
+      "winding_consistent": true,
+      "mesh_components": 1,
+      "triangles": 8748,
+      "volume_relative_error": 3.002257126205455e-06,
+      "print_bbox_mm": [
+        114.0,
+        175.0,
+        13.0
+      ],
+      "stl_sha256": "b7fb1ab3cd779064d5ddaae7ed858c128a97be88a7a95ab0bfc70fca8ce01fb4",
+      "step": "step/fdm_phone_bed_x1.step",
+      "stl": "stl/fdm_phone_bed_x1.stl",
+      "step_sha256": "97b90ade6c1e41521ee865a4c69c7c8a318ce5c309200f372813eaee62cb3328",
+      "volume_mm3": 32209.570963406462,
+      "cad_valid": true,
+      "cad_solids": 1,
+      "part": "phone_bed",
+      "quantity": 1,
+      "changes": [
+        "Clearance diameters +0.2 mm by default; mounting centres unchanged",
+        "Captive-nut cavities +0.2 mm width/thickness by default",
+        "Countersink mouths M3=7.0mm/M5=11.5mm for specified ISO10642 heads",
+        "Eight alignment-wall windows filled; phone reference faces unchanged"
+      ],
+      "original_volume_mm3": 29992.170585869775,
+      "native_bbox_mm": [
+        114.0,
+        175.0,
+        13.0
+      ],
+      "native_bounds_unchanged": true,
+      "rotation": "nativeZup",
+      "original_step_sha256": "a03e53c6698164a03d8205d7db15c63c996cdad3e1a9e86c72a395f99ee514a3",
+      "original_stl": "original_stl/original_phone_bed_x1.stl",
+      "original_mesh_check": {
+        "watertight": true,
+        "winding_consistent": true,
+        "mesh_components": 1,
+        "triangles": 12876,
+        "volume_relative_error": 7.3098687845059314e-06,
+        "print_bbox_mm": [
+          114.0,
+          175.0,
+          13.0
+        ],
+        "stl_sha256": "e60947761c60d113c55a3ea937a9109e7a11bfb67a858a2de20427bb8fb736e5"
+      }
+    },
+    {
+      "watertight": true,
+      "winding_consistent": true,
+      "mesh_components": 1,
+      "triangles": 3526,
+      "volume_relative_error": 8.955884510518639e-05,
+      "print_bbox_mm": [
+        16.0,
+        9.1,
+        64.5
+      ],
+      "stl_sha256": "e8c7e0c08df7c38c3e6b6859875cf164d0d7426d6de82cd9c4323e8168041a2d",
+      "step": "step/fdm_tube_holder_x1.step",
+      "stl": "stl/fdm_tube_holder_x1.stl",
+      "step_sha256": "2ebe9d64612400726b3d67f21d62f49387554cd497a959f4f27eaa2eccd9f211",
+      "volume_mm3": 4802.2219709833735,
+      "cad_valid": true,
+      "cad_solids": 1,
+      "part": "tube_holder",
+      "quantity": 1,
+      "changes": [
+        "Clearance diameters +0.2 mm by default; mounting centres unchanged",
+        "Captive-nut cavities +0.2 mm width/thickness by default",
+        "Countersink mouths M3=7.0mm/M5=11.5mm for specified ISO10642 heads",
+        "Mounting rib3->3.6mm; FHCSM5x12 protrusion5.4mm gives0.95mm nominal FT slot-floor clearance"
+      ],
+      "original_volume_mm3": 4557.303116735795,
+      "native_bbox_mm": [
+        16.0,
+        64.5,
+        9.1
+      ],
+      "native_bounds_unchanged": false,
+      "rotation": "((0.0, 0.0, 0.0), (1.0, 0.0, 0.0)):90",
+      "original_step_sha256": "2b0f86ee252e9b6b67ca6e23516d89a8293772e08292c128baaa8b9dadca2c22",
+      "original_stl": "original_stl/original_tube_holder_x1.stl",
+      "original_mesh_check": {
+        "watertight": true,
+        "winding_consistent": true,
+        "mesh_components": 1,
+        "triangles": 3526,
+        "volume_relative_error": 5.8285125123604615e-05,
+        "print_bbox_mm": [
+          16.0,
+          8.5,
+          64.5
+        ],
+        "stl_sha256": "47ca477abf8690123c3f32be5968f9076e4d761fe53d2783abf85e0fdb7b5522"
+      }
+    },
+    {
+      "watertight": true,
+      "winding_consistent": true,
+      "mesh_components": 1,
+      "triangles": 9470,
+      "volume_relative_error": 9.490749001598813e-05,
+      "print_bbox_mm": [
+        41.0,
+        26.0,
+        10.0
+      ],
+      "stl_sha256": "e83ddd193714abaec0d1843b94b2e9b6b7dc65a3a73d96f1ace2f73e7dff8b11",
+      "step": "step/fdm_xy_joint_left_x1.step",
+      "stl": "stl/fdm_xy_joint_left_x1.stl",
+      "step_sha256": "9be09770dd16aba3ce4b7b578b55dc1c1028d793188b0f2de5d4f1340a3d3350",
+      "volume_mm3": 6127.015875296692,
+      "cad_valid": true,
+      "cad_solids": 1,
+      "part": "xy_joint_left",
+      "quantity": 1,
+      "changes": [
+        "Clearance diameters +0.2 mm by default; mounting centres unchanged",
+        "Captive-nut cavities +0.2 mm width/thickness by default",
+        "Countersink mouths M3=7.0mm/M5=11.5mm for specified ISO10642 heads",
+        "XY locating pads reduced6.3->4.8mm for FT5slot; centres unchanged"
+      ],
+      "original_volume_mm3": 6269.180624406485,
+      "native_bbox_mm": [
+        41.0,
+        26.0,
+        10.0
+      ],
+      "native_bounds_unchanged": true,
+      "rotation": "((0.0, 0.0, 0.0), (1.0, 0.0, 0.0)):180",
+      "original_step_sha256": "158e6f763a92fafd10d4cc75cf3492a5c2b56600956292824cfc81597db5c7ec",
+      "original_stl": "original_stl/original_xy_joint_left_x1.stl",
+      "original_mesh_check": {
+        "watertight": true,
+        "winding_consistent": true,
+        "mesh_components": 1,
+        "triangles": 9470,
+        "volume_relative_error": 7.989954423417117e-05,
+        "print_bbox_mm": [
+          41.0,
+          26.0,
+          10.0
+        ],
+        "stl_sha256": "851e34c92f0f45c62041bad33004f59a6f6c43c10c9186a126cd794d3d47d5e1"
+      }
+    },
+    {
+      "watertight": true,
+      "winding_consistent": true,
+      "mesh_components": 1,
+      "triangles": 9470,
+      "volume_relative_error": 9.491514210516818e-05,
+      "print_bbox_mm": [
+        41.0,
+        26.0,
+        10.0
+      ],
+      "stl_sha256": "bd7214a383736f4f367dbc5e1b044e040e08b9262b39db6cb78fbca57521e280",
+      "step": "step/fdm_xy_joint_right_x1.step",
+      "stl": "stl/fdm_xy_joint_right_x1.stl",
+      "step_sha256": "72fc1acfa54a4fc4935f9afce0948ea0f246d1168d48a952c04bee3a7fd6067c",
+      "volume_mm3": 6127.015875296692,
+      "cad_valid": true,
+      "cad_solids": 1,
+      "part": "xy_joint_right",
+      "quantity": 1,
+      "changes": [
+        "Clearance diameters +0.2 mm by default; mounting centres unchanged",
+        "Captive-nut cavities +0.2 mm width/thickness by default",
+        "Countersink mouths M3=7.0mm/M5=11.5mm for specified ISO10642 heads"
+      ],
+      "original_volume_mm3": 6269.180624406475,
+      "native_bbox_mm": [
+        41.0,
+        26.0,
+        10.0
+      ],
+      "native_bounds_unchanged": true,
+      "rotation": "((0.0, 0.0, 0.0), (1.0, 0.0, 0.0)):180",
+      "original_step_sha256": "29cbceecc18d1857eafecbffe369ffd9a12a3e36a0770b46914b2a20e82aedec",
+      "original_stl": "original_stl/original_xy_joint_right_x1.stl",
+      "original_mesh_check": {
+        "watertight": true,
+        "winding_consistent": true,
+        "mesh_components": 1,
+        "triangles": 9470,
+        "volume_relative_error": 7.989563485808252e-05,
+        "print_bbox_mm": [
+          41.0,
+          26.0,
+          10.0
+        ],
+        "stl_sha256": "0c943e83275d77adc763c1d08c04068902ec0ec67f61e39bf724fe50efe78a4a"
+      }
+    }
+  ],
+  "coupons": [
+    {
+      "watertight": true,
+      "winding_consistent": true,
+      "mesh_components": 1,
+      "triangles": 6108,
+      "volume_relative_error": 4.520946010258698e-05,
+      "print_bbox_mm": [
+        56.0,
+        36.0,
+        6.0
+      ],
+      "stl_sha256": "73aff22fae2cfb74f3bb092dcf59797b8db64bf1be16fad63af79c48d0d884b1",
+      "step": "step/fdm_clearance_coupon.step",
+      "stl": "coupons/fdm_clearance_coupon.stl",
+      "step_sha256": "62aa614f7d762ba20cc18f9d509b8aa724b7aa7be047761d0934eecc2e67da15",
+      "volume_mm3": 10906.216030232476,
+      "cad_valid": true,
+      "cad_solids": 1
+    },
+    {
+      "watertight": true,
+      "winding_consistent": true,
+      "mesh_components": 1,
+      "triangles": 3108,
+      "volume_relative_error": 9.80380247963801e-06,
+      "print_bbox_mm": [
+        60.0,
+        24.0,
+        9.0
+      ],
+      "stl_sha256": "1a2bb02bc38a608722ff230a9a4a736af9f348e334759889cdea88d08272fe46",
+      "step": "step/fdm_square_nut_coupon.step",
+      "stl": "coupons/fdm_square_nut_coupon.stl",
+      "step_sha256": "90a7266679855acbda5a09bddda5f4aff9e2c9bb9fb12978351292b0ba5ee94f",
+      "volume_mm3": 11502.051427967901,
+      "cad_valid": true,
+      "cad_solids": 1
+    },
+    {
+      "watertight": true,
+      "winding_consistent": true,
+      "mesh_components": 1,
+      "triangles": 2288,
+      "volume_relative_error": 0.00013287364632149482,
+      "print_bbox_mm": [
+        28.0,
+        16.0,
+        6.0
+      ],
+      "stl_sha256": "173ac1c452dafad87f5d18e1bc06a9c38d11d8209309941c180e2107d940ef9f",
+      "step": "step/fdm_countersink_coupon.step",
+      "stl": "coupons/fdm_countersink_coupon.stl",
+      "step_sha256": "c2f6a895322c34f3412dcdd2e1354e327a2b06123bdc937381b73ddbb7e2372d",
+      "volume_mm3": 2351.4951096948116,
+      "cad_valid": true,
+      "cad_solids": 1
+    }
+  ]
+}

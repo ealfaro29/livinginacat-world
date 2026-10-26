@@ -1,0 +1,73 @@
+{
+  "status": "Nominal software geometry only; unprinted, unassembled, not load tested",
+  "qty_to_print": 4,
+  "dimensions_mm": {
+    "outer_diameter": 24.0,
+    "height_without_EVA": 22.0,
+    "through_diameter": 5.6,
+    "counterbore_diameter": 10.5,
+    "counterbore_depth": 11.5,
+    "roof_between_profile_and_head": 10.5
+  },
+  "fastener": {
+    "size": "BHCS M5x16",
+    "qty": 4,
+    "head_max_diameter_mm": 9.5,
+    "head_max_height_mm": 2.75,
+    "protrusion_into_slot_mm": 5.5,
+    "nut": "FramingTech RN05BM5",
+    "nut_qty": 4
+  },
+  "nominal_slot_check_mm": {
+    "profile_floor_depth": 6.35,
+    "profile_lip_depth": 1.8,
+    "nut_E": 4.0,
+    "nut_T": 4.6,
+    "nut_thread_start_from_face": 1.2,
+    "nut_thread_end_from_face": 5.8,
+    "thread_engagement": 4.3,
+    "clearance_to_slot_floor": 0.85
+  },
+  "placement_upstream_coordinates_mm": {
+    "x_centres": [
+      -105,
+      105
+    ],
+    "long_axis_centres": [
+      10,
+      345
+    ],
+    "profile_contact_face_y": 20,
+    "feet_extend_toward_y": 42,
+    "gussets_y_envelope": [
+      1,
+      19
+    ],
+    "radius_overhang_beyond_long_end": 2
+  },
+  "mesh": {
+    "cad_valid": true,
+    "cad_solids": 1,
+    "watertight": true,
+    "winding_consistent": true,
+    "components": 1,
+    "bounding_box_mm": [
+      24.0,
+      23.99254131736234,
+      22.0
+    ],
+    "volume_one_mm3": 8698.162922911411,
+    "all_four_solid_petg_mass_g_at_1_27": 44.18666764838997
+  },
+  "sources": [
+    "https://github.com/physiclaw/PhysiClaw/blob/8f610d48642aef7d974d3ce09d28e14a4a99bbae/hardware/parts/standard/extrusion_spec.py",
+    "https://github.com/physiclaw/PhysiClaw/blob/8f610d48642aef7d974d3ce09d28e14a4a99bbae/hardware/assembly/procedures/frame_41_bumper.py",
+    "https://www.framingtech.com/shop/rn05bm5-m5-roll-in-t-nut-with-ball-plunger-5-slot-484697"
+  ],
+  "limitations": [
+    "Slot clearance is based on the FramingTech vendor STEP profile, not a measured delivered extrusion.",
+    "Nut4.0/4.6 body/neck values must not be reused for another nut.",
+    "Nominal mounting-envelope check only: feet occupy the exterior +Y side, gussets terminate atY19 and feet beginY20. No full assembly collision simulation.",
+    "No physical print, friction, creep, thread-preload or load-capacity test."
+  ]
+}

@@ -1,0 +1,168 @@
+{
+  "status": "CAD_AND_MESH_CHECKED_NOT_PHYSICALLY_TESTED",
+  "parts": [
+    {
+      "part": "ft412_solenoid_cradle",
+      "cad_valid": true,
+      "solids": 1,
+      "watertight": true,
+      "volume_mm3": 11594.81926100758,
+      "print_bbox_mm": [
+        56.0,
+        48.0,
+        29.0
+      ],
+      "step": "step/ft412_solenoid_cradle.step",
+      "stl": "stl/ft412_solenoid_cradle.stl",
+      "sha256": "cb1406bcf7ca3b6ed2de4c615c78496d12367aeecf2ff0eb4a245d3bf3b69d27",
+      "quantity": 1
+    },
+    {
+      "part": "ft412_clamp_bar_x2",
+      "cad_valid": true,
+      "solids": 1,
+      "watertight": true,
+      "volume_mm3": 968.5699184189524,
+      "print_bbox_mm": [
+        52.0,
+        5.0,
+        6.0
+      ],
+      "step": "step/ft412_clamp_bar_x2.step",
+      "stl": "stl/ft412_clamp_bar_x2.stl",
+      "sha256": "5abb701ad39e14f7222eb4d5e5eab7a4165837a67121ab794de42ef45615f414",
+      "quantity": 2
+    },
+    {
+      "part": "ft412_coupler_rear",
+      "cad_valid": true,
+      "solids": 1,
+      "watertight": true,
+      "volume_mm3": 2644.0043086053875,
+      "print_bbox_mm": [
+        22.0,
+        18.799999237060543,
+        7.75
+      ],
+      "step": "step/ft412_coupler_rear.step",
+      "stl": "stl/ft412_coupler_rear.stl",
+      "sha256": "38ee031699d895cb0501c463b71816af23cdd86da9db1a63c82cd9efe0832dba",
+      "quantity": 1
+    },
+    {
+      "part": "ft412_coupler_front",
+      "cad_valid": true,
+      "solids": 1,
+      "watertight": true,
+      "volume_mm3": 2642.119009966823,
+      "print_bbox_mm": [
+        22.0,
+        18.799999237060547,
+        7.749999899999999
+      ],
+      "step": "step/ft412_coupler_front.step",
+      "stl": "stl/ft412_coupler_front.stl",
+      "sha256": "4f4bd52cea7c6c05889e6c9d06b7fda02d8f07fa0fd47ae5bad3a7e38edaef40",
+      "quantity": 1
+    }
+  ],
+  "source_dimensions": {
+    "body_mm": [
+      14,
+      17,
+      29.7
+    ],
+    "push_cap_diameter_mm": 5,
+    "push_cap_length_mm": 10,
+    "documented_stroke_mm": 4.9,
+    "microtraders_collar_mm": [
+      8.9,
+      4.5
+    ],
+    "microtraders_mesh_diameter_mm": 7,
+    "microtraders_total_height_mm": 14.5,
+    "microtraders_thread_length_mm": 4.9,
+    "microtraders_thread_major_diameter_nominal_mm": 5,
+    "thread_pitch": "not specified and not used",
+    "stem_axial_cavity_mm": 5.3,
+    "nominal_axial_clearance_mm": 0.4
+  },
+  "hardware_added": {
+    "M3_BHCS_25": 4,
+    "M3_BHCS_16": 2,
+    "M3_BHCS_6_ground_terminal": 1,
+    "M3_square_5p4x5p4x2p4": 7
+  },
+  "retained_mount_hardware": {
+    "M3_BHCS_8": 4,
+    "M3_FHCS_10": 2
+  },
+  "original_solenoid_M3_BHCS_6_removed": 2,
+  "height_adjustment_mm": [
+    -3,
+    3
+  ],
+  "axis_native_xy_mm": [
+    0,
+    23
+  ],
+  "tip_fore_aft_offset_vs_reference_mm": 1,
+  "coupler_to_wall_nominal_gap_mm": 0.5,
+  "default_screen_case": {
+    "phone_thickness_mm": 8,
+    "bed_top_world_y_mm": 17,
+    "screen_world_y_mm": 9,
+    "released_tip_world_y_mm": 4.6,
+    "extended_tip_world_y_mm": 9.5,
+    "nominal_compression_mm": 0.5
+  },
+  "height_setting": "Body adjustment =8 minus actual phone thickness (mm); use paper/contact/force test, not formula alone.",
+  "thermal_design": "Initial duty<=10%, maxON1s; rest>=10xON. Electrical50%datasheet is NOT thermal qualification of PETG.",
+  "ground": "M3x6 screw/captive nut mechanically presses stripped flexible reference wire against metal tip stem. Verify continuity to mesh; isolate from coil leads.",
+  "checks": [
+    {
+      "adjustment_mm": -3,
+      "stroke_mm": 0,
+      "contact_native_z_mm": 58.6,
+      "coupler_mount_and_clamp_collision_mm3": 0
+    },
+    {
+      "adjustment_mm": -3,
+      "stroke_mm": 4.9,
+      "contact_native_z_mm": 63.5,
+      "coupler_mount_and_clamp_collision_mm3": 0
+    },
+    {
+      "adjustment_mm": 0,
+      "stroke_mm": 0,
+      "contact_native_z_mm": 61.6,
+      "coupler_mount_and_clamp_collision_mm3": 0
+    },
+    {
+      "adjustment_mm": 0,
+      "stroke_mm": 4.9,
+      "contact_native_z_mm": 66.5,
+      "coupler_mount_and_clamp_collision_mm3": 0
+    },
+    {
+      "adjustment_mm": 3,
+      "stroke_mm": 0,
+      "contact_native_z_mm": 64.6,
+      "coupler_mount_and_clamp_collision_mm3": 0
+    },
+    {
+      "adjustment_mm": 3,
+      "stroke_mm": 4.9,
+      "contact_native_z_mm": 69.5,
+      "coupler_mount_and_clamp_collision_mm3": 0
+    }
+  ],
+  "physical_acceptance": [
+    "Print coupler first and check\u00d85cap and8.9collar without forcing or closing gap fully.",
+    "Clamp bars must bear on metal frame edges, never exposed coil, wire, spring or moving rod.",
+    "Check full spring return with cable slack and zero side load before phone installation.",
+    "Start with sacrificial flat surface and force measurement; adjust for reliable light contact, no hard bottoming on glass.",
+    "Measure cradle and motor mount temperature during intended duty; keepPETG mount below50C and stop if creep/softening.",
+    "Calibrate camera-to-tip transform and physical travel limits after assembly. Firmware is not changed by this package."
+  ]
+}
