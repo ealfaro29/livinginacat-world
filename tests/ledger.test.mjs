@@ -80,6 +80,19 @@ test("unverified payments stay unknown, shipping is not delivery", () => {
   );
   assert.equal(ft.shippingChargeFinal, false);
 });
+test("DigiKey order charges reconcile without establishing settled payment", () => {
+  const order = ledger.orders.find((x) => x.id === "digikey");
+  assert.equal(order.status, "ordered");
+  assert.equal(order.invoiceTotalCents, 9697);
+  assert.equal(
+    order.invoiceTotalCents,
+    7736 + order.shippingInvoicedCents + order.taxInvoicedCents + order.tariffInvoicedCents,
+  );
+  assert.equal(order.actualPaidCents, null);
+  assert.equal(order.shippingPaidCents, null);
+  assert.equal(order.taxPaidCents, null);
+  assert.equal(order.tariffPaidCents, null);
+});
 test("published CAD archive matches its manifest hash", async () => {
   const release = await readJSON("data/hardware-release.json");
   const b = await fs.readFile(

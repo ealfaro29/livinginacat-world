@@ -88,8 +88,8 @@
     {
       "id": "digikey",
       "vendor": "DigiKey",
-      "status": "pending",
-      "orderedAt": null,
+      "status": "ordered",
+      "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 7736,
       "actualPaidCents": null,
       "shippingPaidCents": null,
@@ -97,8 +97,12 @@
       "tariffPaidCents": null,
       "receivedAt": null,
       "publicReceiptUrl": null,
-      "evidenceLevel": "cart-quote",
-      "notes": "Consolidated cart prepared, not paid. Delivery address and final charges still require checkout review; Remington wire lists about 8 days to dispatch."
+      "evidenceLevel": "vendor-order-confirmation-email",
+      "notes": "Order confirmation received October 26, 2026: 11 purchase units, $77.36 items + $8.49 shipping + $5.79 sales tax + $5.33 tariff = $96.97 order total. The vendor assigned two sales orders and states the order is being processed. No shipping notice, tracking, delivery or settled bank charge is confirmed. The cart had estimated approximately 8 days to dispatch the Remington wire; a dispatch date is not yet confirmed.",
+      "invoiceTotalCents": 9697,
+      "shippingInvoicedCents": 849,
+      "taxInvoicedCents": 579,
+      "tariffInvoicedCents": 533
     },
     {
       "id": "boltdepot",
@@ -1218,6 +1222,11 @@
     }
   ],
   "changes": [
+    {
+      "date": "2026-10-26",
+      "title": "DigiKey order confirmed",
+      "detail": "DigiKey confirmed 11 purchase units totaling $96.97: $77.36 items, $8.49 shipping, $5.79 sales tax and $5.33 tariff. Two vendor sales orders are processing. No shipment or settled bank charge is confirmed, so verified payments remain unchanged."
+    },
     {
       "date": "2026-10-26",
       "title": "Purchases resumed",
