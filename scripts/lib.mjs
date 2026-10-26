@@ -40,8 +40,15 @@ export const labels = {
   partially_shipped_payment_attention: "Mixed status",
 };
 export function totals(ledger) {
+  const quotedItems = ledger.items.reduce((n, x) => n + x.quotedTotalCents, 0);
+  const equipmentAllowance = (ledger.equipmentAllowances ?? []).reduce(
+    (n, x) => n + x.amountCents,
+    0,
+  );
   return {
-    quoted: ledger.items.reduce((n, x) => n + x.quotedTotalCents, 0),
+    quotedItems,
+    equipmentAllowance,
+    quoted: quotedItems + equipmentAllowance,
     verifiedPaid: [...ledger.orders, ...ledger.otherExpenses].reduce(
       (n, x) => n + (x.actualPaidCents ?? 0),
       0,

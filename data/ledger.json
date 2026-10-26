@@ -3,7 +3,18 @@
   "updatedAt": "2026-10-26",
   "currency": "USD",
   "purchasesPaused": true,
-  "equipmentQuotedTotalCents": 238587,
+  "equipmentQuotedTotalCents": 288587,
+  "equipmentAllowances": [
+    {
+      "id": "equipment-allowance-2026-10-26",
+      "name": "Additional equipment allowance",
+      "amountCents": 50000,
+      "status": "planning_allowance",
+      "source": "Project owner adjustment, October 26, 2026",
+      "actualPaidCents": null,
+      "notes": "Unallocated planning allowance requested by the project owner. Not a vendor quote, purchase order or verified payment."
+    }
+  ],
   "funding": {
     "receivedCents": null,
     "publicSupporters": [],
@@ -1207,6 +1218,11 @@
     }
   ],
   "changes": [
+    {
+      "date": "2026-10-26",
+      "title": "Equipment estimate increased by $500",
+      "detail": "At the project owner’s request, a $500.00 unallocated equipment allowance increases the equipment estimate from $2,385.87 to $2,885.87. The 74 item quotes and vendor subtotals are unchanged. This is a planning adjustment, not an order, expense or payment."
+    },
     {
       "date": "2026-10-26",
       "title": "Category renamed to Taxes and others",

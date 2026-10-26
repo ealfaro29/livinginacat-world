@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { readJSON, root, totals } from "../scripts/lib.mjs";
 const ledger = await readJSON("data/ledger.json");
-test("quote reconciles all items and vendor subtotals", () => {
+test("equipment estimate reconciles item quotes, vendors and planning allowances", () => {
   assert.equal(
     new Set(ledger.items.map((x) => x.id)).size,
     ledger.items.length,
@@ -20,7 +20,13 @@ test("quote reconciles all items and vendor subtotals", () => {
       o.quotedSubtotalCents,
       o.vendor,
     );
+  assert.equal(totals(ledger).quotedItems, 238587);
+  assert.equal(totals(ledger).equipmentAllowance, 50000);
+  assert.equal(totals(ledger).quoted, 288587);
   assert.equal(totals(ledger).quoted, ledger.equipmentQuotedTotalCents);
+  assert.ok(
+    ledger.equipmentAllowances.every((x) => x.actualPaidCents === null),
+  );
 });
 test("Amazon invoices reconcile without counting grouped extras twice", () => {
   for (const o of ledger.amazonOrders)
