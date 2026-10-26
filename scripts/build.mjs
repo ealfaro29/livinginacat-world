@@ -1,43 +1,218 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import {fileURLToPath} from 'node:url';
-import matter from 'gray-matter';
-import {marked} from 'marked';
-import {root,readJSON,money,esc,date,labels,totals,csv} from './lib.mjs';
-const site=await readJSON('data/site.json'), ledger=await readJSON('data/ledger.json'), hardware=await readJSON('data/hardware-release.json');
-const sum=totals(ledger), repo=`https://github.com/${site.repoOwner}/${site.repoName}`;
-const out=new URL('dist/',root);
-await fs.rm(out,{recursive:true,force:true}); await fs.mkdir(out,{recursive:true});
-await fs.cp(new URL('public/',root),out,{recursive:true});
-const write=async(file,text)=>{const p=new URL(file,out);await fs.mkdir(path.dirname(fileURLToPath(p)),{recursive:true});await fs.writeFile(p,text);};
-const posts=[];
-for(const file of (await fs.readdir(new URL('content/posts/',root))).filter(x=>x.endsWith('.md'))){const raw=await fs.readFile(new URL('content/posts/'+file,root),'utf8');const p=matter(raw);posts.push({...p.data,date:String(p.data.date),content:p.content,raw});}
-posts.sort((a,b)=>b.number-a.number);
-const badge=(status)=>`<span class="badge ${status.includes('attention')?'attention':''}">${esc(labels[status]??status)}</span>`;
-const nav=[['/journal/','Journal'],['/purchases/','Purchases'],['/shipments/','Shipments'],['/documentation/','Documentation']];
-function shell(title,body,url='/',description=site.description){return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)} · Living in a Cat</title><meta name="description" content="${esc(description)}"><meta name="theme-color" content="#193e35"><link rel="canonical" href="${site.url}${url}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:type" content="${url.includes('/journal/')&&url!='/journal/'?'article':'website'}"><meta property="og:url" content="${site.url}${url}"><meta property="og:image" content="${site.url}/assets/social.svg"><link rel="icon" href="/assets/cat.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/style.css"><link rel="alternate" type="application/rss+xml" title="Living in a Cat" href="/feed.xml"></head><body><a class="skip" href="#contenido">Skip to content</a><header class="site-header"><a class="brand" href="/"><img src="/assets/cat.svg" width="38" height="38" alt=""><span>living in a cat<span class="brand-sub">A PROJECT IN THE OPEN</span></span></a><nav aria-label="Main">${nav.map(([href,label])=>`<a href="${href}"${url.startsWith(href)?' aria-current="page"':''}>${label}</a>`).join('')}<a class="github" href="${repo}">GitHub ↗</a></nav></header><main id="contenido">${body}</main><footer><div><a class="footer-brand" href="/">Living in a Cat</a><p>A physical robot. An open process.<br>Decisions, costs and results, with their limits.</p></div><div><a href="${repo}">Code and files ↗</a><a href="/feed.xml">RSS</a><a href="/documentation/#transparency">How we document</a><span>Updated: ${date(ledger.updatedAt)} · USD</span></div><p class="footnote">Prototype in development. No physical build or test yet. Published under <a href="${repo}/blob/main/LICENSE">MIT</a>, with <a href="${repo}/blob/main/docs/ATTRIBUTION.md">PhysiClaw attribution</a>.</p></footer><script src="/assets/site.js" defer></script></body></html>`;}
-const intro=(eyebrow,title,text)=>`<section class="page-intro wrap"><p class="eyebrow">${eyebrow}</p><h1>${title}</h1><p class="lead">${text}</p></section>`;
-const card=p=>`<a class="post-card" href="/journal/${p.slug}/"><div class="card-meta"><span>ENTRY ${String(p.number).padStart(2,'0')}</span><time datetime="${p.date}">${date(p.date)}</time></div><h3>${esc(p.title)}</h3><p>${esc(p.excerpt)}</p><span class="text-link">Read the entry <span aria-hidden="true">↗</span></span></a>`;
-const finances=`<div class="stats"><div><strong>${money(sum.quoted)}</strong><span>Equipment quoted</span><small>Items only; shipping and tax excluded.</small></div><div><strong>${money(sum.verifiedPaid)}</strong><span>Verified payments · partial</span><small>FramingTech + domain. Amazon not reconciled.</small></div><div><strong>${sum.shipped}</strong><span>Packages shipped</span><small>Amazon. No confirmed delivery yet.</small></div><div><strong>${hardware.installedPrintedParts}</strong><span>Parts to print</span><small>${hardware.stlDesigns} designs + ${hardware.coupons} fit coupons.</small></div></div>`;
-await write('index.html',shell('An AI that touches the real world',`<section class="hero wrap"><div class="hero-copy"><p class="eyebrow"><span class="dot"></span> OPEN BUILD JOURNAL · FROM THE FIRST SCREW</p><h1>An AI that touches<br>the <em>real world.</em></h1><p class="lead">We’re building a robot that sees an iPhone and uses it with a physical stylus. Every part, every expense and every attempt is documented here.</p><div class="actions"><a class="button" href="/journal/project-begins/">How the project begins ↗</a><a class="text-link" href="/purchases/">Explore the purchases →</a></div><div class="project-status"><span class="dot"></span> CAD prepared · purchases paused · physical tests ahead</div></div><figure class="hero-art"><img src="/assets/robot.svg" alt="Conceptual robot diagram: a camera above an iPhone and a stylus moving on two axes"><figcaption>01 / THE GOAL &nbsp;·&nbsp; Concept sketch, not an already-built machine</figcaption></figure></section><section class="wrap metrics">${finances}</section><section class="wrap section"><div class="section-heading"><div><p class="eyebrow">THE JOURNAL</p><h2>Sharing the process<br>as it happens.</h2></div><a class="text-link" href="/journal/">All entries ↗</a></div><div class="post-grid">${posts.map(card).join('')}</div></section><section class="dark-section"><div class="wrap roadmap"><div><p class="eyebrow">FROM THE DESIGN TO THE FIRST TOUCH</p><h2>One verifiable step<br>at a time.</h2><p>CAD is a beginning. Motion, touch and autonomy will have to be demonstrated through physical tests.</p><a class="button light" href="/documentation/">Explore the files ↗</a></div><ol><li class="current"><span>01</span><div><h3>Design and document</h3><p>Geometry reviewed and parts list published.</p></div></li><li><span>02</span><div><h3>Print and build</h3><p>Fit coupons, printed parts, mechanics and wiring.</p></div></li><li><span>03</span><div><h3>Calibrate and touch</h3><p>Align the camera, coordinates and capacitive contact.</p></div></li><li><span>04</span><div><h3>Connect the AI and measure</h3><p>Observe, act and check the result.</p></div></li></ol></div></section><section class="wrap section transparency"><p class="eyebrow">TRANSPARENCY, FROM THE START</p><h2>What’s missing<br><em>belongs here, too.</em></h2><p>An order is not a payment. An estimate is not a delivery. A CAD model is not a physical test. Our records keep those distinctions so you can follow the project with context.</p><a class="text-link" href="/shipments/">See shipment status ↗</a></section>`));
-await write('journal/index.html',shell('The journal',intro('BUILDING IN THE OPEN','The journal.','Decisions, progress and mistakes documented from the start.')+`<section class="wrap post-grid section compact">${posts.map(card).join('')}</section>`,'/journal/'));
-for(const p of posts){await write(`journal/${p.slug}/index.html`,shell(p.title,`<article class="article wrap"><header><a class="back" href="/journal/">← Back to the journal</a><p class="eyebrow">ENTRY ${String(p.number).padStart(2,'0')} · <time datetime="${p.date}">${date(p.date)}</time></p><h1>${esc(p.title)}</h1><p class="lead">${esc(p.excerpt)}</p><p class="article-byline">Living in a Cat · Initial project record</p></header><div class="prose">${marked.parse(p.content)}</div><aside class="article-end"><p>This entry preserves a snapshot of its publication date. The latest status is in the purchase and shipment records.</p><a class="text-link" href="/purchases/">Open the current record →</a> · <a href="${repo}/tree/main/content/posts">Read or propose changes in Markdown ↗</a></aside></article>`,`/journal/${p.slug}/`,p.excerpt));await write(`downloads/post-${p.number}.md`,p.raw);}
-const vendorRows=ledger.orders.map(o=>`<tr><th scope="row">${esc(o.vendor)}</th><td>${money(o.quotedSubtotalCents)}</td><td>${badge(o.status)}</td><td>${money(o.actualPaidCents)}</td><td class="notes">${esc(o.notes)}</td></tr>`).join('');
-const amazonRows=ledger.amazonOrders.map(o=>`<tr><th>${o.id}</th><td>${money(o.invoiceItemsCents)}</td><td>${money(o.discountCents)}</td><td>${money(o.taxCents)}</td><td>${money(o.orderTotalCents)}</td><td>${badge(o.status)}</td></tr>`).join('');
-const itemRows=ledger.items.map(x=>{const order=ledger.orders.find(o=>o.id===x.orderId),status=x.procurementStatus??order.status;return `<tr data-item data-vendor="${esc(x.vendor)}" data-status="${status}"><td><a href="${esc(x.url)}" rel="noreferrer">${esc(x.name)} ↗</a><small>${esc(x.notes)}</small></td><td>${esc(x.vendor)}</td><td>${x.quantity}</td><td>${money(x.quotedUnitCents)}</td><td>${money(x.quotedTotalCents)}</td><td>${badge(status)}${x.shipmentOrderRef?`<small>${x.shipmentOrderRef}</small>`:''}</td><td>${money(x.actualPaidCents)}</td></tr>`;}).join('');
-await write('purchases/index.html',shell('Purchases and accounts',intro('PUBLIC RECORD · USD','Every purchase, in context.','Quoted prices, order totals and verified payments are shown separately. Unknown amounts remain unconfirmed.')+`<section class="wrap">${finances}<div class="notice"><strong>Purchases paused.</strong> Three Amazon orders require payment review. Two packages are marked shipped. Bank charges for the five orders have not been reconciled.</div><div class="section-heading"><h2>By store</h2><span class="caption">As of: ${date(ledger.updatedAt)}</span></div><div class="table-scroll"><table><caption class="sr-only">Quotes and verified payments by store</caption><thead><tr><th>Store</th><th>Items quoted</th><th>Status</th><th>Verified payment</th><th>Details</th></tr></thead><tbody>${vendorRows}</tbody></table></div><p class="caption">“Unconfirmed” does not mean $0. FramingTech’s $300.66 includes $121.51 in provisional shipping; its parts subtotal remains $179.15. Do not add both columns together.</p><h2 class="mt">The five Amazon orders</h2><p>Order totals: <strong>${money(sum.amazon)}</strong>, including tax and Taxes and others. This is an order amount, not confirmation of bank charges.</p><div class="table-scroll"><table><thead><tr><th>Public reference</th><th>Items</th><th>Discount</th><th>Tax</th><th>Order total</th><th>Status</th></tr></thead><tbody>${amazonRows}</tbody></table></div><p class="caption">Standard shipping on AMZ-02 and AMZ-03 is offset by equal shipping credits. AMZ references are public aliases, not the store’s order numbers.</p><div class="two-col mt"><div class="note-card"><p class="eyebrow">ADDITIONAL CATEGORY</p><h3>Taxes and others · ${money(42068)}</h3><p>Added items: $320.94 before tax. Amazon tax: $99.74. Classification subtotal: $420.68, without allocating discounts. <strong>Already included in the Amazon order totals</strong>; not added a second time.</p></div><div class="note-card"><p class="eyebrow">BLOG INFRASTRUCTURE</p><h3>Domain · ${money(419)} paid</h3><p>First year of livinginacat.world. Announced renewal: $71.99 on October 26, 2027, before possible charges. A future cost; pricing may change.</p></div></div><div class="notice neutral"><strong>Contributions and balance: not reconciled.</strong> There is no verified total of contributions received yet. We do not calculate a balance from incomplete data. This record documents orders and expenses, not a bank audit.</div></section><section class="wrap section" id="parts"><div class="section-heading"><div><p class="eyebrow">BILL OF MATERIALS</p><h2>All ${ledger.items.length} equipment lines.</h2></div><div class="downloads"><a href="/downloads/purchases.csv" download>CSV ↓</a><a href="/downloads/ledger.json" download>JSON ↓</a><a href="/downloads/shopping-list.md" download>Markdown ↓</a></div></div><div class="filters"><label>Search parts<input id="item-search" type="search" placeholder="Raspberry, screw, camera…"></label><label>Store<select id="vendor-filter"><option value="">All stores</option>${ledger.orders.map(o=>`<option>${esc(o.vendor)}</option>`).join('')}</select></label><label>Status<select id="status-filter"><option value="">All statuses</option>${[...new Set(ledger.items.map(x=>x.procurementStatus??ledger.orders.find(o=>o.id===x.orderId).status))].map(s=>`<option value="${s}">${labels[s]}</option>`).join('')}</select></label></div><p id="filter-count" class="caption" aria-live="polite">${ledger.items.length} lines</p><div class="table-scroll"><table class="items-table"><caption class="sr-only">Complete equipment list</caption><thead><tr><th>Part / quoted offer</th><th>Store</th><th>Qty.</th><th>Unit price</th><th>Quoted subtotal</th><th>Status</th><th>Items paid</th></tr></thead><tbody>${itemRows}</tbody></table></div><p class="caption">Quantity means purchase units; one pack may contain several parts. Prices are a snapshot from October 26, 2026 and may change. Links are not affiliate links. Listings and lead times do not guarantee physical compatibility.</p><h2 class="mt">Recorded changes</h2><ul class="change-list">${ledger.changes.map(c=>`<li><time>${date(c.date??ledger.updatedAt)}</time><p>${esc(c.detail??c.summary??c.description??c.note??JSON.stringify(c))}</p></li>`).join('')}</ul><a class="text-link" href="${repo}/commits/main/data/ledger.json">View the full history on GitHub ↗</a></section>`,'/purchases/'));
-const shipCard=s=>`<article class="shipment-card"><div class="card-meta"><span>${s.id}</span>${badge(s.status)}</div><h2>${esc(s.id==='AMZ-PKG-01'?'Assembly file':s.id==='AMZ-PKG-02'?'Phone package':'Frame profiles and nuts')}</h2><p class="carrier">${esc(s.carrier)}</p><dl><div><dt>${s.status==='preparing'?'Planned dispatch':'Estimated arrival'}</dt><dd>${date(s.expectedDeliveryDate??s.expectedShipDate)}</dd></div><div><dt>Delivery</dt><dd>${s.deliveredAt?date(s.deliveredAt):'Unconfirmed'}</dd></div><div><dt>Last checked</dt><dd>${date(s.lastChecked??ledger.updatedAt)}</dd></div></dl><p>${esc(s.notes)}</p><small>Source: ${s.status==='preparing'?'vendor email and confirmation':'Amazon tracking page'} · ${esc(s.orderRef)}</small></article>`;
-await write('shipments/index.html',shell('Shipment tracking',intro('FROM THE STORE TO THE WORKBENCH','On the way. And getting ready.','Status checked against available orders and emails. Estimated dates are kept separate from confirmed deliveries.')+`<section class="wrap"><div class="shipment-grid">${ledger.shipments.map(shipCard).join('')}</div><div class="notice"><strong>AMZ-02, AMZ-03 and AMZ-04: payment review needed.</strong> These orders have no confirmed shipment. No items have been reordered and no payment method has been changed.</div><div class="note-card mt"><h2>How this record is updated</h2><p>Last reviewed on ${date(ledger.updatedAt)}. Updates are manual, based on emails and order pages. This static site does not check email or stores in real time.</p><p>Full tracking numbers, addresses and private tracking links stay outside the site and repository. “Shipped” does not mean “delivered.” FramingTech’s planned October 28 dispatch is not an arrival date.</p><a class="text-link" href="/purchases/">Match shipments to purchases →</a></div></section>`,'/shipments/'));
-await write('documentation/index.html',shell('Open documentation',intro('FILES TO READ, PRINT AND IMPROVE','Building in the open.','We share the available design, its checks, and everything that still needs a test on the workbench.')+`<section class="wrap"><div class="docs-feature"><div><p class="eyebrow">HARDWARE · V${hardware.version}</p><h2>The prototype parts.</h2><p>16 STL designs, their editable STEP files, 3 fit coupons and CAD review records. The manifest specifies 22 installed parts. The archive excludes commercial reference CAD and complete regeneration scripts.</p><a class="button" href="/downloads/${hardware.filename}" download>Download public CAD · 3 MB ↓</a><p class="caption hash">SHA-256: ${hardware.sha256}</p><a class="text-link" href="${repo}/tree/main/hardware/ft412">Browse the files and release scope ↗</a></div><img src="/assets/piezas-ft412.png" alt="CAD preview of the prototype’s printed parts" loading="lazy"></div><div class="notice"><strong>Not physically validated.</strong> Geometry and export checks do not validate assembly, tolerances, contact force or thermal behavior. Print the fit coupons and check the actual parts first.</div><div class="doc-grid"><a class="note-card" href="/downloads/project-guide.md" download><span class="eyebrow">01 · MARKDOWN</span><h3>Project guide ↓</h3><p>Architecture, planned assembly, limits and acceptance tests.</p></a><a class="note-card" href="/downloads/shopping-list.md" download><span class="eyebrow">02 · MARKDOWN / DATA</span><h3>Complete parts list ↓</h3><p>Model, quantity, quoted price and product link for each line.</p></a><a class="note-card" href="${repo}/blob/main/hardware/ft412/qa/print-manifest.json"><span class="eyebrow">03 · PRINTING</span><h3>Print manifest ↗</h3><p>Quantities and files. Fit coupons before final parts.</p></a><a class="note-card" href="${repo}/blob/main/CONTRIBUTING.md"><span class="eyebrow">04 · COMMUNITY</span><h3>How to contribute ↗</h3><p>Suggest improvements, report issues and share results.</p></a></div><div class="prose policy" id="transparency"><h2>Our transparency rules</h2><ol><li><strong>Keep the evidence.</strong> Original documents stay private. We publish the relevant amounts and statuses, without addresses or private identifiers.</li><li><strong>Keep estimates distinct from facts.</strong> Quoted, ordered, paid, shipped and delivered are distinct states. Unknown does not mean zero.</li><li><strong>Avoid double counting.</strong> Grouped expenses included in an order are not added again. Tax and shipping are explained separately when evidence is available.</li><li><strong>Record corrections.</strong> Data updates are tracked in Git; journal entries keep their dated context.</li><li><strong>Publish technical limits.</strong> Each test will document its setup, conditions, results and failures. CAD is not presented as evidence of unproven reliability.</li></ol><h2>Origin and license</h2><p>The mechanical foundation derives from <a href="https://github.com/physiclaw/PhysiClaw">PhysiClaw</a>, hardware v0.51, under MIT. We retain its notice and document our modifications. The blog and our contributions are published under MIT. Read the <a href="${repo}/blob/main/docs/ATTRIBUTION.md">attribution and release scope</a>.</p><h2>What is not published yet</h2><p>The complete robot software, regeneration scripts and physical test results will be added as they are developed and validated. This initial site documents the start; it does not present those stages as complete.</p></div></section>`,'/documentation/'));
-await write('404.html',shell('Page not found',intro('404','Nothing here yet.','Return to the journal to follow the project.')+`<div class="wrap"><a class="button" href="/">Back to the home page →</a></div>`,'/404.html'));
-await write('CNAME',site.domain+'\n'); await write('.nojekyll','');
-await write('downloads/ledger.json',JSON.stringify(ledger,null,2)+'\n');
-const rows=[['id','store','item','quantity','quoted_unit_usd','quoted_subtotal_usd','status','paid_items_usd','url'],...ledger.items.map(x=>[x.id,x.vendor,x.name,x.quantity,(x.quotedUnitCents/100).toFixed(2),(x.quotedTotalCents/100).toFixed(2),x.procurementStatus??ledger.orders.find(o=>o.id===x.orderId).status,x.actualPaidCents==null?'':(x.actualPaidCents/100).toFixed(2),x.url])];
-await write('downloads/purchases.csv',csv(rows));
-await write('downloads/shopping-list.md',`# Shopping list · Living in a Cat\n\nUpdated: ${ledger.updatedAt}. USD. Item quotes; tax and shipping excluded unless noted. Purchases paused.\n\nEquipment quoted: ${money(sum.quoted)}. Payment and shipping status: ${site.url}/purchases/.\n\n| Store | Item | Quantity | Unit price | Subtotal | Status | Offer |\n|---|---|---:|---:|---:|---|---|\n${ledger.items.map(x=>`| ${x.vendor} | ${x.name.replaceAll('|','/')} | ${x.quantity} | ${money(x.quotedUnitCents)} | ${money(x.quotedTotalCents)} | ${labels[x.procurementStatus??ledger.orders.find(o=>o.id===x.orderId).status]} | [Product](${x.url}) |`).join('\n')}\n\n## Reconciliation\n\nAmazon: five orders totaling $1,524.35, including tax and Taxes and others; two shipped and three need payment review. Bank charges unconfirmed. Taxes and others: $420.68 ($320.94 added items + $99.74 Amazon tax), already included in Amazon orders. FramingTech: $300.66 paid ($179.15 parts + $121.51 provisional shipping). Domain: $4.19 paid. Verified receipt payments: $304.85, partial, not all spending.\n`);
-await fs.copyFile(new URL('docs/PROJECT.md',root),new URL('downloads/project-guide.md',out));
-const routes=['/','/journal/','/purchases/','/shipments/','/documentation/',...posts.map(p=>`/journal/${p.slug}/`)];
-await write('sitemap.xml',`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${routes.map(r=>`<url><loc>${site.url}${r}</loc><lastmod>${ledger.updatedAt}</lastmod></url>`).join('')}</urlset>`);
-await write('robots.txt',`User-agent: *\nAllow: /\nSitemap: ${site.url}/sitemap.xml\n`);
-await write('feed.xml',`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Living in a Cat</title><link>${site.url}</link><description>${esc(site.description)}</description><language>en</language>${posts.map(p=>`<item><title>${esc(p.title)}</title><link>${site.url}/journal/${p.slug}/</link><guid>${site.url}/journal/${p.slug}/</guid><description>${esc(p.excerpt)}</description><pubDate>${new Date(p.date+'T12:00:00Z').toUTCString()}</pubDate></item>`).join('')}</channel></rss>`);
-console.log(`Built ${routes.length} pages, ${ledger.items.length} equipment lines; quote ${money(sum.quoted)}, verified paid (partial) ${money(sum.verifiedPaid)}.`);
+import fs from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import matter from "gray-matter";
+import { marked } from "marked";
+import {
+  root,
+  readJSON,
+  money,
+  esc,
+  date,
+  labels,
+  totals,
+  csv,
+} from "./lib.mjs";
+const site = await readJSON("data/site.json"),
+  ledger = await readJSON("data/ledger.json"),
+  hardware = await readJSON("data/hardware-release.json");
+const sum = totals(ledger),
+  repo = `https://github.com/${site.repoOwner}/${site.repoName}`;
+const out = new URL("dist/", root);
+await fs.rm(out, { recursive: true, force: true });
+await fs.mkdir(out, { recursive: true });
+await fs.cp(new URL("public/", root), out, { recursive: true });
+const write = async (file, text) => {
+  const p = new URL(file, out);
+  await fs.mkdir(path.dirname(fileURLToPath(p)), { recursive: true });
+  await fs.writeFile(p, text);
+};
+const posts = [];
+for (const file of (await fs.readdir(new URL("content/posts/", root))).filter(
+  (x) => x.endsWith(".md"),
+)) {
+  const raw = await fs.readFile(new URL("content/posts/" + file, root), "utf8");
+  const p = matter(raw);
+  posts.push({ ...p.data, date: String(p.data.date), content: p.content, raw });
+}
+posts.sort((a, b) => b.number - a.number);
+const badge = (status) =>
+  `<span class="badge ${status.includes("attention") ? "attention" : ""}">${esc(labels[status] ?? status)}</span>`;
+const nav = [
+  ["/journal/", "Journal"],
+  ["/purchases/", "Purchases"],
+  ["/shipments/", "Shipments"],
+  ["/documentation/", "Documentation"],
+];
+function shell(title, body, url = "/", description = site.description) {
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)} · Living in a Cat</title><meta name="description" content="${esc(description)}"><meta name="theme-color" content="#193e35"><link rel="canonical" href="${site.url}${url}"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:type" content="${url.includes("/journal/") && url != "/journal/" ? "article" : "website"}"><meta property="og:url" content="${site.url}${url}"><meta property="og:image" content="${site.url}/assets/social.png"><meta name="twitter:card" content="summary_large_image"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><link rel="icon" href="/assets/cat.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/style.css"><link rel="alternate" type="application/rss+xml" title="Living in a Cat" href="/feed.xml"></head><body><a class="skip" href="#contenido">Skip to content</a><header class="site-header"><a class="brand" href="/"><img src="/assets/cat.svg" width="38" height="38" alt=""><span>living in a cat<span class="brand-sub">A PROJECT IN THE OPEN</span></span></a><nav aria-label="Main">${nav.map(([href, label]) => `<a href="${href}"${url.startsWith(href) ? ' aria-current="page"' : ""}>${label}</a>`).join("")}<a class="github" href="${repo}">GitHub ↗</a></nav></header><main id="contenido">${body}</main><footer><div><a class="footer-brand" href="/">Living in a Cat</a><p>A physical robot. An open process.<br>Decisions, costs and results, with their limits.</p></div><div><a href="${repo}">Code and files ↗</a><a href="/feed.xml">RSS</a><a href="/documentation/#transparency">How we document</a><span>Updated: ${date(ledger.updatedAt)} · USD</span></div><p class="footnote">Prototype in development. No physical build or test yet. Published under <a href="${repo}/blob/main/LICENSE">MIT</a>, with <a href="${repo}/blob/main/docs/ATTRIBUTION.md">PhysiClaw attribution</a>.</p></footer><script src="/assets/site.js" defer></script></body></html>`;
+}
+const intro = (eyebrow, title, text) =>
+  `<section class="page-intro wrap"><p class="eyebrow">${eyebrow}</p><h1>${title}</h1><p class="lead">${text}</p></section>`;
+const card = (p) =>
+  `<a class="post-card" href="/journal/${p.slug}/"><div class="card-meta"><span>ENTRY ${String(p.number).padStart(2, "0")}</span><time datetime="${p.date}">${date(p.date)}</time></div><h3>${esc(p.title)}</h3><p>${esc(p.excerpt)}</p><span class="text-link">Read the entry <span aria-hidden="true">↗</span></span></a>`;
+const finances = `<div class="stats"><div><strong>${money(sum.quoted)}</strong><span>Equipment quoted</span><small>Items only; shipping and tax excluded.</small></div><div><strong>${money(sum.verifiedPaid)}</strong><span>Verified payments · partial</span><small>FramingTech + domain. Amazon not reconciled.</small></div><div><strong>${sum.shipped}</strong><span>Packages shipped</span><small>Amazon. No confirmed delivery yet.</small></div><div><strong>${hardware.installedPrintedParts}</strong><span>Parts to print</span><small>${hardware.stlDesigns} designs + ${hardware.coupons} fit coupons.</small></div></div>`;
+await write(
+  "index.html",
+  shell(
+    "An AI that touches the real world",
+    `<section class="hero wrap"><div class="hero-copy"><p class="eyebrow"><span class="dot"></span> OPEN BUILD JOURNAL · FROM THE FIRST SCREW</p><h1>An AI that touches<br>the <em>real world.</em></h1><p class="lead">We’re building a robot that sees an iPhone and uses it with a physical stylus. Every part, every expense and every attempt is documented here.</p><div class="actions"><a class="button" href="/journal/project-begins/">How the project begins ↗</a><a class="text-link" href="/purchases/">Explore the purchases →</a></div><div class="project-status"><span class="dot"></span> CAD prepared · purchases paused · physical tests ahead</div></div><figure class="hero-art"><img src="/assets/robot.svg" alt="Conceptual robot diagram: a camera above an iPhone and a stylus moving on two axes"><figcaption>01 / THE GOAL &nbsp;·&nbsp; Concept sketch, not an already-built machine</figcaption></figure></section><section class="wrap metrics">${finances}</section><section class="wrap section"><div class="section-heading"><div><p class="eyebrow">THE JOURNAL</p><h2>Sharing the process<br>as it happens.</h2></div><a class="text-link" href="/journal/">All entries ↗</a></div><div class="post-grid">${posts.map(card).join("")}</div></section><section class="dark-section"><div class="wrap roadmap"><div><p class="eyebrow">FROM THE DESIGN TO THE FIRST TOUCH</p><h2>One verifiable step<br>at a time.</h2><p>CAD is a beginning. Motion, touch and autonomy will have to be demonstrated through physical tests.</p><a class="button light" href="/documentation/">Explore the files ↗</a></div><ol><li class="current"><span>01</span><div><h3>Design and document</h3><p>Geometry reviewed and parts list published.</p></div></li><li><span>02</span><div><h3>Print and build</h3><p>Fit coupons, printed parts, mechanics and wiring.</p></div></li><li><span>03</span><div><h3>Calibrate and touch</h3><p>Align the camera, coordinates and capacitive contact.</p></div></li><li><span>04</span><div><h3>Connect the AI and measure</h3><p>Observe, act and check the result.</p></div></li></ol></div></section><section class="wrap section transparency"><p class="eyebrow">TRANSPARENCY, FROM THE START</p><h2>What’s missing<br><em>belongs here, too.</em></h2><p>An order is not a payment. An estimate is not a delivery. A CAD model is not a physical test. Our records keep those distinctions so you can follow the project with context.</p><a class="text-link" href="/shipments/">See shipment status ↗</a></section>`,
+  ),
+);
+await write(
+  "journal/index.html",
+  shell(
+    "The journal",
+    intro(
+      "BUILDING IN THE OPEN",
+      "The journal.",
+      "Decisions, progress and mistakes documented from the start.",
+    ) +
+      `<section class="wrap post-grid section compact">${posts.map(card).join("")}</section>`,
+    "/journal/",
+  ),
+);
+for (const p of posts) {
+  await write(
+    `journal/${p.slug}/index.html`,
+    shell(
+      p.title,
+      `<article class="article wrap"><header><a class="back" href="/journal/">← Back to the journal</a><p class="eyebrow">ENTRY ${String(p.number).padStart(2, "0")} · <time datetime="${p.date}">${date(p.date)}</time></p><h1>${esc(p.title)}</h1><p class="lead">${esc(p.excerpt)}</p><p class="article-byline">Living in a Cat · Initial project record</p></header><div class="prose">${marked.parse(p.content)}</div><aside class="article-end"><p>This entry preserves a snapshot of its publication date. The latest status is in the purchase and shipment records.</p><a class="text-link" href="/purchases/">Open the current record →</a> · <a href="${repo}/tree/main/content/posts">Read or propose changes in Markdown ↗</a></aside></article>`,
+      `/journal/${p.slug}/`,
+      p.excerpt,
+    ),
+  );
+  await write(`downloads/post-${p.number}.md`, p.raw);
+}
+const vendorRows = ledger.orders
+  .map(
+    (o) =>
+      `<tr><th scope="row">${esc(o.vendor)}</th><td>${money(o.quotedSubtotalCents)}</td><td>${badge(o.status)}</td><td>${money(o.actualPaidCents)}</td><td class="notes">${esc(o.notes)}</td></tr>`,
+  )
+  .join("");
+const amazonRows = ledger.amazonOrders
+  .map(
+    (o) =>
+      `<tr><th>${o.id}</th><td>${money(o.invoiceItemsCents)}</td><td>${money(o.discountCents)}</td><td>${money(o.taxCents)}</td><td>${money(o.orderTotalCents)}</td><td>${badge(o.status)}</td></tr>`,
+  )
+  .join("");
+const itemRows = ledger.items
+  .map((x) => {
+    const order = ledger.orders.find((o) => o.id === x.orderId),
+      status = x.procurementStatus ?? order.status;
+    return `<tr data-item data-vendor="${esc(x.vendor)}" data-status="${status}"><td><a href="${esc(x.url)}" rel="noreferrer">${esc(x.name)} ↗</a><small>${esc(x.notes)}</small></td><td>${esc(x.vendor)}</td><td>${x.quantity}</td><td>${money(x.quotedUnitCents)}</td><td>${money(x.quotedTotalCents)}</td><td>${badge(status)}${x.shipmentOrderRef ? `<small>${x.shipmentOrderRef}</small>` : ""}</td><td>${money(x.actualPaidCents)}</td></tr>`;
+  })
+  .join("");
+await write(
+  "purchases/index.html",
+  shell(
+    "Purchases and accounts",
+    intro(
+      "PUBLIC RECORD · USD",
+      "Every purchase, in context.",
+      "Quoted prices, order totals and verified payments are shown separately. Unknown amounts remain unconfirmed.",
+    ) +
+      `<section class="wrap">${finances}<div class="notice"><strong>Purchases paused.</strong> Three Amazon orders require payment review. Two packages are marked shipped. Bank charges for the five orders have not been reconciled.</div><div class="section-heading"><h2>By store</h2><span class="caption">As of: ${date(ledger.updatedAt)}</span></div><div class="table-scroll"><table><caption class="sr-only">Quotes and verified payments by store</caption><thead><tr><th>Store</th><th>Items quoted</th><th>Status</th><th>Verified payment</th><th>Details</th></tr></thead><tbody>${vendorRows}</tbody></table></div><p class="caption">“Unconfirmed” does not mean $0. FramingTech’s $300.66 includes $121.51 in provisional shipping; its parts subtotal remains $179.15. Do not add both columns together.</p><h2 class="mt">The five Amazon orders</h2><p>Order totals: <strong>${money(sum.amazon)}</strong>, including tax and Taxes and others. This is an order amount, not confirmation of bank charges.</p><div class="table-scroll"><table><thead><tr><th>Public reference</th><th>Items</th><th>Discount</th><th>Tax</th><th>Order total</th><th>Status</th></tr></thead><tbody>${amazonRows}</tbody></table></div><p class="caption">Standard shipping on AMZ-02 and AMZ-03 is offset by equal shipping credits. AMZ references are public aliases, not the store’s order numbers.</p><div class="two-col mt"><div class="note-card"><p class="eyebrow">ADDITIONAL CATEGORY</p><h3>Taxes and others · ${money(42068)}</h3><p>Added items: $320.94 before tax. Amazon tax: $99.74. Classification subtotal: $420.68, without allocating discounts. <strong>Already included in the Amazon order totals</strong>; not added a second time.</p></div><div class="note-card"><p class="eyebrow">BLOG INFRASTRUCTURE</p><h3>Domain · ${money(419)} paid</h3><p>First year of livinginacat.world. Announced renewal: $71.99 on October 26, 2027, before possible charges. A future cost; pricing may change.</p></div></div><div class="notice neutral"><strong>Contributions and balance: not reconciled.</strong> There is no verified total of contributions received yet. We do not calculate a balance from incomplete data. This record documents orders and expenses, not a bank audit.</div></section><section class="wrap section" id="parts"><div class="section-heading"><div><p class="eyebrow">BILL OF MATERIALS</p><h2>All ${ledger.items.length} equipment lines.</h2></div><div class="downloads"><a href="/downloads/purchases.csv" download>CSV ↓</a><a href="/downloads/ledger.json" download>JSON ↓</a><a href="/downloads/shopping-list.md" download>Markdown ↓</a></div></div><div class="filters"><label>Search parts<input id="item-search" type="search" placeholder="Raspberry, screw, camera…"></label><label>Store<select id="vendor-filter"><option value="">All stores</option>${ledger.orders.map((o) => `<option>${esc(o.vendor)}</option>`).join("")}</select></label><label>Status<select id="status-filter"><option value="">All statuses</option>${[...new Set(ledger.items.map((x) => x.procurementStatus ?? ledger.orders.find((o) => o.id === x.orderId).status))].map((s) => `<option value="${s}">${labels[s]}</option>`).join("")}</select></label></div><p id="filter-count" class="caption" aria-live="polite">${ledger.items.length} lines</p><div class="table-scroll"><table class="items-table"><caption class="sr-only">Complete equipment list</caption><thead><tr><th>Part / quoted offer</th><th>Store</th><th>Qty.</th><th>Unit price</th><th>Quoted subtotal</th><th>Status</th><th>Items paid</th></tr></thead><tbody>${itemRows}</tbody></table></div><p class="caption">Quantity means purchase units; one pack may contain several parts. Prices are a snapshot from October 26, 2026 and may change. Links are not affiliate links. Listings and lead times do not guarantee physical compatibility.</p><h2 class="mt">Recorded changes</h2><ul class="change-list">${ledger.changes.map((c) => `<li><time>${date(c.date ?? ledger.updatedAt)}</time><p>${esc(c.detail ?? c.summary ?? c.description ?? c.note ?? JSON.stringify(c))}</p></li>`).join("")}</ul><a class="text-link" href="${repo}/commits/main/data/ledger.json">View the full history on GitHub ↗</a></section>`,
+    "/purchases/",
+  ),
+);
+const shipCard = (s) =>
+  `<article class="shipment-card"><div class="card-meta"><span>${s.id}</span>${badge(s.status)}</div><h2>${esc(s.id === "AMZ-PKG-01" ? "Assembly file" : s.id === "AMZ-PKG-02" ? "Phone package" : "Frame profiles and nuts")}</h2><p class="carrier">${esc(s.carrier)}</p><dl><div><dt>${s.status === "preparing" ? "Planned dispatch" : "Estimated arrival"}</dt><dd>${date(s.expectedDeliveryDate ?? s.expectedShipDate)}</dd></div><div><dt>Delivery</dt><dd>${s.deliveredAt ? date(s.deliveredAt) : "Unconfirmed"}</dd></div><div><dt>Last checked</dt><dd>${date(s.lastChecked ?? ledger.updatedAt)}</dd></div></dl><p>${esc(s.notes)}</p><small>Source: ${s.status === "preparing" ? "vendor email and confirmation" : "Amazon tracking page"} · ${esc(s.orderRef)}</small></article>`;
+await write(
+  "shipments/index.html",
+  shell(
+    "Shipment tracking",
+    intro(
+      "FROM THE STORE TO THE WORKBENCH",
+      "On the way. And getting ready.",
+      "Status checked against available orders and emails. Estimated dates are kept separate from confirmed deliveries.",
+    ) +
+      `<section class="wrap"><div class="shipment-grid">${ledger.shipments.map(shipCard).join("")}</div><div class="notice"><strong>AMZ-02, AMZ-03 and AMZ-04: payment review needed.</strong> These orders have no confirmed shipment. No items have been reordered and no payment method has been changed.</div><div class="note-card mt"><h2>How this record is updated</h2><p>Last reviewed on ${date(ledger.updatedAt)}. Updates are manual, based on emails and order pages. This static site does not check email or stores in real time.</p><p>Full tracking numbers, addresses and private tracking links stay outside the site and repository. “Shipped” does not mean “delivered.” FramingTech’s planned October 28 dispatch is not an arrival date.</p><a class="text-link" href="/purchases/">Match shipments to purchases →</a></div></section>`,
+    "/shipments/",
+  ),
+);
+await write(
+  "documentation/index.html",
+  shell(
+    "Open documentation",
+    intro(
+      "FILES TO READ, PRINT AND IMPROVE",
+      "Building in the open.",
+      "We share the available design, its checks, and everything that still needs a test on the workbench.",
+    ) +
+      `<section class="wrap"><div class="docs-feature"><div><p class="eyebrow">HARDWARE · V${hardware.version}</p><h2>The prototype parts.</h2><p>16 STL designs, their editable STEP files, 3 fit coupons and CAD review records. The manifest specifies 22 installed parts. The archive excludes commercial reference CAD and complete regeneration scripts.</p><a class="button" href="/downloads/${hardware.filename}" download>Download public CAD · 3 MB ↓</a><p class="caption hash">SHA-256: ${hardware.sha256}</p><a class="text-link" href="${repo}/tree/main/hardware/ft412">Browse the files and release scope ↗</a></div><img src="/assets/piezas-ft412.png" alt="CAD preview of the prototype’s printed parts" loading="lazy"></div><div class="notice"><strong>Not physically validated.</strong> Geometry and export checks do not validate assembly, tolerances, contact force or thermal behavior. Print the fit coupons and check the actual parts first.</div><div class="doc-grid"><a class="note-card" href="/downloads/project-guide.md" download><span class="eyebrow">01 · MARKDOWN</span><h3>Project guide ↓</h3><p>Architecture, planned assembly, limits and acceptance tests.</p></a><a class="note-card" href="/downloads/shopping-list.md" download><span class="eyebrow">02 · MARKDOWN / DATA</span><h3>Complete parts list ↓</h3><p>Model, quantity, quoted price and product link for each line.</p></a><a class="note-card" href="${repo}/blob/main/hardware/ft412/qa/print-manifest.json"><span class="eyebrow">03 · PRINTING</span><h3>Print manifest ↗</h3><p>Quantities and files. Fit coupons before final parts.</p></a><a class="note-card" href="${repo}/blob/main/CONTRIBUTING.md"><span class="eyebrow">04 · COMMUNITY</span><h3>How to contribute ↗</h3><p>Suggest improvements, report issues and share results.</p></a></div><div class="prose policy" id="transparency"><h2>Our transparency rules</h2><ol><li><strong>Keep the evidence.</strong> Original documents stay private. We publish the relevant amounts and statuses, without addresses or private identifiers.</li><li><strong>Keep estimates distinct from facts.</strong> Quoted, ordered, paid, shipped and delivered are distinct states. Unknown does not mean zero.</li><li><strong>Avoid double counting.</strong> Grouped expenses included in an order are not added again. Tax and shipping are explained separately when evidence is available.</li><li><strong>Record corrections.</strong> Data updates are tracked in Git; journal entries keep their dated context.</li><li><strong>Publish technical limits.</strong> Each test will document its setup, conditions, results and failures. CAD is not presented as evidence of unproven reliability.</li></ol><h2>Origin and license</h2><p>The mechanical foundation derives from <a href="https://github.com/physiclaw/PhysiClaw">PhysiClaw</a>, hardware v0.51, under MIT. We retain its notice and document our modifications. The blog and our contributions are published under MIT. Read the <a href="${repo}/blob/main/docs/ATTRIBUTION.md">attribution and release scope</a>.</p><h2>What is not published yet</h2><p>The complete robot software, regeneration scripts and physical test results will be added as they are developed and validated. This initial site documents the start; it does not present those stages as complete.</p></div></section>`,
+    "/documentation/",
+  ),
+);
+await write(
+  "404.html",
+  shell(
+    "Page not found",
+    intro(
+      "404",
+      "Nothing here yet.",
+      "Return to the journal to follow the project.",
+    ) +
+      `<div class="wrap"><a class="button" href="/">Back to the home page →</a></div>`,
+    "/404.html",
+  ),
+);
+await write("CNAME", site.domain + "\n");
+await write(".nojekyll", "");
+await write("downloads/ledger.json", JSON.stringify(ledger, null, 2) + "\n");
+const rows = [
+  [
+    "id",
+    "store",
+    "item",
+    "quantity",
+    "quoted_unit_usd",
+    "quoted_subtotal_usd",
+    "status",
+    "paid_items_usd",
+    "url",
+  ],
+  ...ledger.items.map((x) => [
+    x.id,
+    x.vendor,
+    x.name,
+    x.quantity,
+    (x.quotedUnitCents / 100).toFixed(2),
+    (x.quotedTotalCents / 100).toFixed(2),
+    x.procurementStatus ?? ledger.orders.find((o) => o.id === x.orderId).status,
+    x.actualPaidCents == null ? "" : (x.actualPaidCents / 100).toFixed(2),
+    x.url,
+  ]),
+];
+await write("downloads/purchases.csv", csv(rows));
+await write(
+  "downloads/shopping-list.md",
+  `# Shopping list · Living in a Cat\n\nUpdated: ${ledger.updatedAt}. USD. Item quotes; tax and shipping excluded unless noted. Purchases paused.\n\nEquipment quoted: ${money(sum.quoted)}. Payment and shipping status: ${site.url}/purchases/.\n\n| Store | Item | Quantity | Unit price | Subtotal | Status | Offer |\n|---|---|---:|---:|---:|---|---|\n${ledger.items.map((x) => `| ${x.vendor} | ${x.name.replaceAll("|", "/")} | ${x.quantity} | ${money(x.quotedUnitCents)} | ${money(x.quotedTotalCents)} | ${labels[x.procurementStatus ?? ledger.orders.find((o) => o.id === x.orderId).status]} | [Product](${x.url}) |`).join("\n")}\n\n## Reconciliation\n\nAmazon: five orders totaling $1,524.35, including tax and Taxes and others; two shipped and three need payment review. Bank charges unconfirmed. Taxes and others: $420.68 ($320.94 added items + $99.74 Amazon tax), already included in Amazon orders. FramingTech: $300.66 paid ($179.15 parts + $121.51 provisional shipping). Domain: $4.19 paid. Verified receipt payments: $304.85, partial, not all spending.\n`,
+);
+await fs.copyFile(
+  new URL("docs/PROJECT.md", root),
+  new URL("downloads/project-guide.md", out),
+);
+const routes = [
+  "/",
+  "/journal/",
+  "/purchases/",
+  "/shipments/",
+  "/documentation/",
+  ...posts.map((p) => `/journal/${p.slug}/`),
+];
+await write(
+  "sitemap.xml",
+  `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${routes.map((r) => `<url><loc>${site.url}${r}</loc><lastmod>${ledger.updatedAt}</lastmod></url>`).join("")}</urlset>`,
+);
+await write(
+  "robots.txt",
+  `User-agent: *\nAllow: /\nSitemap: ${site.url}/sitemap.xml\n`,
+);
+await write(
+  "feed.xml",
+  `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Living in a Cat</title><link>${site.url}</link><description>${esc(site.description)}</description><language>en</language>${posts.map((p) => `<item><title>${esc(p.title)}</title><link>${site.url}/journal/${p.slug}/</link><guid>${site.url}/journal/${p.slug}/</guid><description>${esc(p.excerpt)}</description><pubDate>${new Date(p.date + "T12:00:00Z").toUTCString()}</pubDate></item>`).join("")}</channel></rss>`,
+);
+console.log(
+  `Built ${routes.length} pages, ${ledger.items.length} equipment lines; quote ${money(sum.quoted)}, verified paid (partial) ${money(sum.verifiedPaid)}.`,
+);
