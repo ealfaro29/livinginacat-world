@@ -1,4 +1,4 @@
-# Living in the Real World · Project guide
+# living in a cat world · Project guide
 
 Updated: October 26, 2026. DIY prototype without physical assembly or testing. Purchases paused.
 

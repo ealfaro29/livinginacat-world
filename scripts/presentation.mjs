@@ -2,27 +2,56 @@ import { esc, money, date } from "./lib.mjs";
 
 export function articleCover(post, ledger) {
   if (post.number === 1)
-    return `<figure class="entry-cover sketch-cover"><img src="/assets/prototype-rough-v1.png" alt="Rough ink and red-pencil concept sketch of the phone robot, with an iPhone and a physical stylus" width="1536" height="1024" loading="lazy"><figcaption>PROJECT 001 / CONCEPT SKETCH — NOT A COMPLETED BUILD</figcaption></figure>`;
-  return `<div class="receipt-cover" aria-label="Illustrated order ledger"><span class="cover-kicker">THE PAPER TRAIL / OPEN RECORDS</span><div class="receipt-slip"><span class="receipt-title">ORDER RECORD</span>${ledger.amazonOrders.map((o) => `<div><span>${o.id}</span><b>${money(o.orderTotalCents)}</b></div>`).join("")}<div class="receipt-total"><span>AMAZON ORDERS</span><b>${money(ledger.amazonOrders.reduce((n, x) => n + x.orderTotalCents, 0))}</b></div><small>Order amounts. Bank payments not reconciled.</small></div><span class="rubber-stamp">IN THE OPEN</span></div>`;
+    return `<figure class="entry-cover sketch-cover"><img src="/assets/prototype-rough-v1.png" alt="Rough ink and red-pencil concept of the iPhone robot" width="1536" height="1024" loading="lazy"><figcaption>CONCEPT SKETCH / NOT A COMPLETED BUILD</figcaption></figure>`;
+  return `<div class="receipt-cover" aria-label="Illustrated order ledger"><span class="cover-kicker">FOLLOW THE PAPER TRAIL</span><div class="receipt-slip"><span class="receipt-title">ORDER RECORD</span>${ledger.amazonOrders.map((o) => `<div><span>${o.id}</span><b>${money(o.orderTotalCents)}</b></div>`).join("")}<div class="receipt-total"><span>AMAZON ORDERS</span><b>${money(ledger.amazonOrders.reduce((n, x) => n + x.orderTotalCents, 0))}</b></div><small>Order amounts. Bank payments not reconciled.</small></div><span class="rubber-stamp">OPEN BOOKS</span></div>`;
 }
 
 export function postCard(p, ledger) {
-  return `<a class="post-card" href="/journal/${p.slug}/"><div class="post-visual">${articleCover(p, ledger)}</div><div class="post-card-body"><div class="card-meta"><span>FIELD NOTE / ${String(p.number).padStart(2, "0")}</span><time datetime="${p.date}">${date(p.date)}</time></div><h3>${esc(p.title)}</h3><p>${esc(p.excerpt)}</p><span class="text-link">Open the notebook <span aria-hidden="true">↗</span></span></div></a>`;
+  return `<a class="post-card" href="/journal/${p.slug}/"><div class="post-visual">${articleCover(p, ledger)}<span class="post-index" aria-hidden="true">0${p.number}</span></div><div class="post-card-body"><div class="card-meta"><span>FIELD NOTE / ${String(p.number).padStart(2, "0")}</span><time datetime="${p.date}">${date(p.date)}</time></div><h3>${esc(p.title)}</h3><p>${esc(p.excerpt)}</p><span class="text-link">Read the field note <span aria-hidden="true">↗</span></span></div></a>`;
 }
 
 export function renderHome({ posts, ledger, finances, hardware }) {
   return `
-<section class="world-hero" aria-label="Living in the Real World">
-  <div class="hero-copy"><p class="eyebrow">AN OPEN HARDWARE JOURNAL / VOL. 001</p><h1>An AI in the<br><span>real world.</span></h1><p class="hero-deck">A real iPhone. A physical robot.<br>Every part, every dollar, every test, out in the open.</p><div class="actions"><a class="button paper" href="#prototype">Meet the machine <span>↘</span></a><a class="hero-journal-link" href="/journal/project-begins/">Start at the beginning ↗</a></div><div class="hero-status"><span class="status-light"></span> CAD PREPARED / PHYSICAL TESTS AHEAD</div></div>
-  <figure class="hero-machine"><div class="hero-machine-label"><span>PROJECT 001</span><span>PHYSICAL IPHONE CONTROL</span></div><img src="/assets/prototype-rough-v1.png" alt="Rough ink and red-pencil sketch of a CoreXY robot with a visible iPhone, camera and physical touch stylus" width="1536" height="1024" fetchpriority="high"><div class="hero-machine-spec"><span>2 MOTION AXES</span><span>1 TOUCH POINT</span><span>IPHONE 14</span></div><figcaption>CONCEPT SKETCH / NOT A COMPLETED MACHINE</figcaption></figure>
+<section class="workshop-hero wrap" aria-label="living in a cat world">
+  <div class="hero-intro">
+    <p class="eyebrow"><span class="red-dash"></span> A PERSONAL BUILD JOURNAL</p>
+    <h1>living in a<br><em>cat world<span class="red-period">.</span></em></h1>
+    <p class="hero-deck">Building things I don’t know how to build.<br>Documenting the whole way through.</p>
+    <a class="round-link" href="/journal/project-begins/"><span class="round-arrow">↗</span><span>Start with<br><b>the first experiment</b></span></a>
+    <div class="hero-side-note"><span>01—</span><p>A robot that sees an iPhone.<br>And actually touches it.</p></div>
+  </div>
+  <div class="hero-workbench" id="prototype">
+    <div class="workbench-top"><span>ON THE WORKBENCH</span><span>PROJECT / 001</span></div>
+    <div class="paper-stack"><figure class="drawing-sheet">
+      <div class="sheet-topline"><span>AI × IPHONE / CONCEPT STUDY</span><span>REV. ${hardware.version}</span></div>
+      <div class="sketch-canvas">
+        <img src="/assets/prototype-rough-v1.png" alt="Raw graphite and red-pencil sketch of a robot, with an iPhone in its frame and a stylus touching the screen" width="1536" height="1024" fetchpriority="high">
+        <button class="sketch-pin active" style="--x:53%;--y:21%" data-sketch="eyes" aria-label="Camera: explore feature 1" aria-pressed="true" aria-controls="sketch-note"><span>01</span><b>See</b></button>
+        <button class="sketch-pin" style="--x:81%;--y:48%" data-sketch="motion" aria-label="Motion: explore feature 2" aria-pressed="false" aria-controls="sketch-note"><span>02</span><b>Move</b></button>
+        <button class="sketch-pin" style="--x:47%;--y:58%" data-sketch="touch" aria-label="iPhone and touch: explore feature 3" aria-pressed="false" aria-controls="sketch-note"><span>03</span><b>Touch</b></button>
+      </div>
+      <figcaption>CONCEPT ILLUSTRATION / NOT A COMPLETED MACHINE</figcaption>
+    </figure></div>
+    <div class="sketch-note" id="sketch-note" aria-live="polite"><b>01 / THE EYES</b><p>A camera observes the screen before and after each action. Its view must be calibrated to the real machine.</p></div>
+    <span class="hand-note">a real phone. a real touch.</span>
+  </div>
 </section>
-<div class="manifesto-strip"><div><span>BUILD IN PUBLIC <i>✳</i> EVERY SCREW <i>✳</i> EVERY DOLLAR <i>✳</i> EVERY FAILED ATTEMPT <i>✳</i> OPEN FILES <i>✳</i> </span><span aria-hidden="true">BUILD IN PUBLIC <i>✳</i> EVERY SCREW <i>✳</i> EVERY DOLLAR <i>✳</i> EVERY FAILED ATTEMPT <i>✳</i> OPEN FILES <i>✳</i> </span></div></div>
-<section class="prototype-section wrap" id="prototype"><div class="section-heading"><div><p class="eyebrow red-label">PROJECT 001 / THE IPHONE ROBOT</p><h2>The idea gets<br><span class="rough-underline">physical.</span></h2></div><p class="section-deck">A camera for eyes. A moving stylus for touch.<br>And a real iPhone at the center of it all.</p></div>
-<div class="prototype-layout"><div class="sketch-sheet"><div class="sheet-topline"><span>EXPERIMENT 001 — ON THE DRAWING BOARD</span><span>REV. ${hardware.version}</span></div><div class="sketch-canvas"><img src="/assets/prototype-rough-v1.png" alt="Hand-drawn CoreXY machine with a camera, motors, rails and a stylus touching an iPhone with app icons on its screen" width="1536" height="1024" loading="eager"><button class="sketch-pin active" style="--x:53%;--y:21%" data-sketch="eyes" aria-label="Camera: explore feature 1" aria-pressed="true" aria-controls="sketch-note"><span>01</span><b>Camera</b></button><button class="sketch-pin" style="--x:81%;--y:48%" data-sketch="motion" aria-label="Motion: explore feature 2" aria-pressed="false" aria-controls="sketch-note"><span>02</span><b>Motion</b></button><button class="sketch-pin" style="--x:47%;--y:58%" data-sketch="touch" aria-label="iPhone and touch: explore feature 3" aria-pressed="false" aria-controls="sketch-note"><span>03</span><b>iPhone + touch</b></button></div><div class="sketch-note" id="sketch-note" aria-live="polite"><b>01 / THE EYES</b><p>A camera observes the screen before and after each action. Its view must be calibrated to the real machine.</p></div><p class="sheet-caption">CONCEPT ILLUSTRATION / AI-GENERATED SKETCH / NOT MANUFACTURING CAD OR PROOF OF ASSEMBLY</p></div>
-<aside class="build-notes"><p class="eyebrow">THE BUILD, IN BRIEF</p><h3>Screen. <br>Stylus. <br>Real contact.</h3><p>We’re building a physical robot that can tap, swipe and drag on an iPhone. The first job is to prove the mechanics. AI comes after that.</p><dl><div><dt>Motion</dt><dd>2 axes / CoreXY</dd></div><div><dt>Touch</dt><dd>1 capacitive tip</dd></div><div><dt>Phone</dt><dd>iPhone 14</dd></div><div><dt>Fabrication</dt><dd>${hardware.stlDesigns} printable designs</dd></div></dl><div class="build-stamp">NOT BUILT YET<br><span>We’ll publish the tests, too.</span></div><a class="text-link" href="/documentation/">Open the working files ↗</a></aside></div>
-<div class="planned-loop"><p class="eyebrow">THE PLANNED LOOP</p><ol><li><span>01</span><b>See.</b><p>Capture the screen.</p></li><li><span>02</span><b>Decide.</b><p>Choose a bounded action.</p></li><li><span>03</span><b>Touch.</b><p>Move the physical stylus.</p></li><li><span>04</span><b>Check.</b><p>Observe what changed.</p></li></ol></div></section>
-<section class="ledger-band"><div class="wrap"><div class="section-heading"><div><p class="eyebrow">THE NUMBERS / NO MYSTERY SPENDING</p><h2>Every dollar.<br>On the record.</h2></div><a class="text-link" href="/purchases/">Follow the money ↗</a></div>${finances}<p class="ledger-footnote">Purchases are paused. Quotes, orders and verified payments are different records. <a href="/shipments/">See which packages are on their way ↗</a></p></div></section>
-<section class="wrap journal-section"><div class="section-heading"><div><p class="eyebrow red-label">THE OPEN NOTEBOOK</p><h2>Fresh from<br>the workbench.</h2></div><a class="text-link" href="/journal/">All field notes ↗</a></div><div class="post-grid">${posts.map((p) => postCard(p, ledger)).join("")}</div></section>
-<section class="open-files-banner wrap"><div class="file-symbol" aria-hidden="true">↗</div><div><p class="eyebrow">TAKE A LOOK INSIDE</p><h2>Open files.<br>Rough edges included.</h2><p>Printable parts, editable CAD, the parts list and the checks we’ve made so far. Clear about what’s tested. Clear about what isn’t.</p></div><a class="button" href="/documentation/">Explore the documentation ↗</a></section>
-<section class="honesty-note wrap"><span class="note-star" aria-hidden="true">✳</span><p class="eyebrow">A NOTE FROM THIS LITTLE CORNER OF THE INTERNET</p><h2>The messy bits<br>belong here, too.</h2><p>An order is not a payment. A sketch is not a finished machine. This journal exists so the people supporting the project can see how it actually unfolds.</p><a class="text-link" href="/documentation/#transparency">Our transparency rules ↗</a></section>`;
+<div class="build-status wrap"><span class="status-heading"><span class="status-dot"></span> THE CURRENT STATE</span><span>CAD prepared</span><span>Purchases paused</span><span>Physical tests ahead</span><a href="/documentation/">Open the project ↗</a></div>
+
+<section class="wrap journal-section">
+  <div class="section-heading"><div><p class="eyebrow">01 / FIELD NOTES</p><h2>The notebook<span class="red-period">.</span></h2></div><a class="text-link" href="/journal/">All entries ↗</a></div>
+  <div class="post-grid">${[...posts]
+    .sort((a, b) => a.number - b.number)
+    .map((p) => postCard(p, ledger))
+    .join("")}</div>
+</section>
+
+<section class="fabrication-section wrap">
+  <div class="parts-contact-sheet"><div class="contact-top"><span>THE PRINT QUEUE</span><span>STL / STEP</span></div><img src="/assets/printed-parts.png" width="2400" height="2850" alt="Actual CAD preview showing the individual printable robot parts, not fabricated parts" loading="lazy"><span class="cad-stamp">CAD FILES<br><small>NOT PRINTED YET</small></span><p>${hardware.stlDesigns} designs + ${hardware.coupons} fit coupons / REV. ${hardware.version}</p></div>
+  <div class="fabrication-copy"><p class="eyebrow">02 / FROM FILE TO WORKBENCH</p><h2>${hardware.installedPrintedParts} parts.<br><em>One first build.</em></h2><p>Print the mounts. Assemble the frame. Calibrate the camera. Then find out whether a stylus can tap and swipe reliably.</p><div class="build-sequence"><span><b>01</b> Print</span><i>↗</i><span><b>02</b> Assemble</span><i>↗</i><span><b>03</b> Test</span></div><a class="button" href="/downloads/${hardware.filename}" download>Get the open CAD files <span>↓</span></a><a class="under-link" href="/documentation/">Read the design, checks and limits ↗</a><p class="small-note">Geometry reviewed. Physical fit, touch and motion still need testing.</p></div>
+</section>
+
+<section class="ledger-section"><div class="wrap"><div class="section-heading"><div><p class="eyebrow">03 / THE OPEN BOOKS</p><h2>Here’s where<br><em>the money goes.</em></h2></div><div class="ledger-aside"><p>Parts, orders, receipts.<br>Nothing swept under the workbench.</p><a class="text-link" href="/purchases/">Explore the full ledger ↗</a></div></div>${finances}<div class="ledger-bottom"><p>Quotes ≠ orders ≠ verified payments.<br>The records keep those distinctions.</p><a class="text-link" href="/shipments/">Track the packages ↗</a></div></div></section>
+
+<section class="wrap closing-note"><span class="hand-star" aria-hidden="true">✳</span><div><p class="eyebrow">A SMALL PROMISE</p><h2>The failed attempts<br>go here, too.</h2><p>This is a build in progress. The people supporting it deserve the receipts, the unfinished bits and the results that don’t work.</p><a class="text-link" href="/documentation/#transparency">How this journal stays transparent ↗</a></div><span class="closing-number" aria-hidden="true">001</span></section>`;
 }

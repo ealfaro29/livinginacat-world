@@ -1,27 +1,40 @@
-# Living in the Real World
+# living in a cat world
 
-An open hardware journal centered on the physical iPhone robot. The public identity uses the following palette and style. The existing domain and repository URL remain technical identifiers.
+The exact public name is **living in a cat world**. Keep it in English and lowercase. This is a personal project journal, with the physical iPhone robot as the first build.
+
+## Identity
+
+Use the simple robot cat head as the logo and favicon. It is a graphic mark, not a full mascot character. The original portrait is not used.
 
 ## Palette
 
-- Studio red: `#ce1019`; deep red: `#92070f`.
-- Near black: `#141414`.
-- Warm paper: `#f3eee5`; off-white: `#fffaf2`.
-- Chrome: `#bfc3c6`, `#73777b`.
-- Optional, restrained reflective accents: amber `#dfb041`, olive `#798d41`.
+- Charcoal background: `#101011`.
+- Dark surfaces: `#19191b`, `#222224`.
+- Warm paper and primary text: `#f0e9df`.
+- Vermilion accent: `#f04b41`.
+- Secondary text: `#aca6a0`.
 
-Red, black and warm paper dominate. Use bold editorial typography, sharp rules, oversized project numbers and notebook details. Keep financial and technical records readable.
+Dark backgrounds dominate. Warm paper is reserved for sketches, receipts and CAD contact sheets. Use red sparingly for annotations, links and markers. No glowing gradients.
 
-## Illustration style
+## Typography and composition
 
-The main subject is the robot and its clearly visible iPhone. Use raw graphite, black ink, charcoal crosshatching, red construction lines, imperfect edges and warm paper. Avoid unrelated characters, polished product renders and clean vector substitutes for the hardware sketch.
+Self-hosted Space Grotesk for the main text and headings; Georgia italic as an editorial counterpoint; system monospace for dates, records and small annotations. Space Grotesk is distributed under the SIL Open Font License; its notice is in `public/assets/fonts/OFL-SpaceGrotesk.txt`.
 
-Concept illustrations are not evidence of completed hardware or substitutes for manufacturing CAD. Preserve exact CAD files, measurements, financial amounts and source dates.
+Use large documentary imagery, asymmetrical field notes, loose paper edges and visible workshop details. Avoid generic feature-card grids, stock marketing headlines, scrolling text strips, marquees and decorative motion. All text stays still. User-triggered interactions explain the actual design.
+
+## Illustration and evidence
+
+Use raw graphite, ink, rough charcoal hatching, red construction lines and imperfect outlines for conceptual hardware sketches. Keep the iPhone recognizable. Exact manufacturing CAD and financial records are separate from decorative artwork.
+
+A concept sketch is not evidence of a finished build. CAD does not prove physical fit or performance. Keep amounts, source dates and validation status intact.
 
 ## Assets
 
-- `public/assets/prototype-rough-v1.png`: AI-generated conceptual hardware illustration.
-- `public/assets/device-mark.svg`: native vector device mark.
-- `public/assets/social-real-world-v3.png`: share preview, rendered from `public/brand-preview.html`.
+- `public/assets/brand/robot-cat-v1.png`: original AI-generated logo, transparent.
+- `public/assets/brand/robot-cat-180.png`: web logo.
+- `public/assets/brand/robot-cat-48.png`: favicon.
+- `public/assets/prototype-rough-v1.png`: conceptual hardware sketch.
+- `public/assets/printed-parts.png`: actual CAD contact sheet.
+- `public/assets/social-cat-world-dark-v1.png`: native social layout captured from `public/brand-preview.html`.
 
-The current reusable illustration brief is in `ART-PROMPTS.md`.
+Logo generation prompt and mode: [ROBOT-CAT-PROMPT.md](ROBOT-CAT-PROMPT.md). Hardware illustration brief: [ART-PROMPTS.md](ART-PROMPTS.md).

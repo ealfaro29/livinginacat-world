@@ -1,4 +1,4 @@
-# Living in the Real World
+# living in a cat world
 
 An open build journal for a physical robot that sees and touches an iPhone. Plans, decisions, purchases, shipments and hardware files.
 
