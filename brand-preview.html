@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Living in the Real World — share artwork</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        background: #ce1019;
+        color: #fffaf2;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      .share {
+        height: 630px;
+        display: grid;
+        grid-template-columns: 600px 600px;
+      }
+      .copy {
+        padding: 45px 40px;
+        position: relative;
+      }
+      .kicker {
+        font: 10px/1.5 monospace;
+        letter-spacing: 1.5px;
+        margin: 0 0 50px;
+      }
+      .copy h1 {
+        font:
+          100px/0.9 Impact,
+          Haettenschweiler,
+          "Arial Narrow Bold",
+          sans-serif;
+        text-transform: uppercase;
+        letter-spacing: -2px;
+        margin: 0 0 33px;
+      }
+      .copy h1 span {
+        border-bottom: 5px solid #fffaf2;
+      }
+      .copy p:not(.kicker) {
+        font-size: 19px;
+        line-height: 1.6;
+      }
+      .address {
+        position: absolute;
+        left: 40px;
+        bottom: 30px;
+        font: 12px/1.5 monospace;
+        letter-spacing: 1px;
+      }
+      .machine {
+        margin: 0;
+        position: relative;
+        overflow: hidden;
+        background: #f3eee5;
+        color: #141414;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border-left: 1px solid #141414;
+      }
+      .machine > div {
+        position: absolute;
+        top: 20px;
+        left: 22px;
+        right: 22px;
+        display: flex;
+        justify-content: space-between;
+        font: 9px/1.5 monospace;
+        letter-spacing: 1px;
+      }
+      .machine img {
+        width: 100%;
+        height: auto;
+        mix-blend-mode: multiply;
+      }
+      .machine figcaption {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #141414;
+        color: #fffaf2;
+        padding: 17px 20px;
+        font: 9px/1.5 monospace;
+        letter-spacing: 1px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="share">
+      <div class="copy">
+        <p class="kicker">LIVING IN THE REAL WORLD / AN OPEN BUILD JOURNAL</p>
+        <h1>An AI in the<br /><span>real world.</span></h1>
+        <p>
+          A real iPhone. A physical robot.<br />Every part. Every dollar. Every
+          test.
+        </p>
+        <div class="address">EXPLORE THE OPEN NOTEBOOK ↗</div>
+      </div>
+      <figure class="machine">
+        <div><span>PROJECT 001</span><span>CONCEPT / REV. 0.1</span></div>
+        <img
+          src="/assets/prototype-rough-v1.png"
+          alt="Raw hand-drawn prototype of the robot and iPhone"
+        />
+        <figcaption>
+          REAL HARDWARE / OPEN FILES / PHYSICAL TESTS AHEAD
+        </figcaption>
+      </figure>
+    </main>
+  </body>
+</html>

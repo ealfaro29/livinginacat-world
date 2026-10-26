@@ -1,4 +1,4 @@
-# Shopping list · Living in a Cat
+# Shopping list · Living in the Real World
 
 Updated: 2026-10-26. USD. Item quotes; tax and shipping excluded unless noted. Purchases paused.
 
