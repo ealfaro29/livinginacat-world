@@ -18,7 +18,7 @@ The camera sits on an external arm. The Pi, 12 V machine and phone charger use s
 
 FramingTech slot-5 profiles: two 20×40 at 355 mm, two 20×40 at 190 mm, one 10×20 at 185 mm and two 10×20 at 190 mm. MGN9H rails: X 150 mm, two Y 250 mm. GT2 belt, 6 mm wide; drive pulleys for a 5 mm shaft. Consult the complete purchase record for exact fasteners and components.
 
-The public archive includes 16 final STL and 16 STEP files, three fit coupons and CAD review records. The manifest specifies 22 installed printed parts. Print fit coupons in PETG first, then follow the final print manifest. Commercial reference CAD, full reference assemblies and self-contained regeneration scripts are excluded. Read hardware/ft412/PUBLIC-RELEASE.md, README.md, MOTOR-MOUNTS.md and ELECTRONICS.md together.
+The public archive includes 16 final STL and 16 STEP files, three fit coupons and CAD review records. The manifest specifies 22 installed printed parts. Print fit coupons in PETG first, then follow the final print manifest. Commercial reference CAD, full reference assemblies and self-contained regeneration scripts are excluded. Read the [release scope](../hardware/ft412/PUBLIC-RELEASE.md), [hardware guide](../hardware/ft412/README.md), [motor mounts](../hardware/ft412/MOTOR-MOUNTS.md) and [electronics mount](../hardware/ft412/ELECTRONICS.md) together.
 
 ## Build and verification order
 
@@ -48,4 +48,4 @@ The solenoid is intermittent-duty. Initial development limits: no more than 1 se
 
 Current parts and purchase status: https://livinginacat.world/purchases/. Shipments: https://livinginacat.world/shipments/. USD; quotes exclude tax and shipping unless noted. Ordered, paid, shipped and delivered are distinct states. API usage, substitutions and unknown charges will be added as verified.
 
-Mechanical foundation: PhysiClaw hardware v0.51 under MIT; attribution in docs/ATTRIBUTION.md. This variant and its limits are documented independently. Source: https://github.com/ealfaro29/livinginacat-world.
+Mechanical foundation: PhysiClaw hardware v0.51 under MIT; [attribution](ATTRIBUTION.md). This variant and its limits are documented independently. Source: https://github.com/ealfaro29/livinginacat-world.
