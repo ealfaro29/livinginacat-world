@@ -20,9 +20,9 @@ test("equipment estimate reconciles item quotes, vendors and planning allowances
       o.quotedSubtotalCents,
       o.vendor,
     );
-  assert.equal(totals(ledger).quotedItems, 238587);
+  assert.equal(totals(ledger).quotedItems, 239369);
   assert.equal(totals(ledger).equipmentAllowance, 50000);
-  assert.equal(totals(ledger).quoted, 288587);
+  assert.equal(totals(ledger).quoted, 289369);
   assert.equal(totals(ledger).quoted, ledger.equipmentQuotedTotalCents);
   assert.ok(
     ledger.equipmentAllowances.every((x) => x.actualPaidCents === null),
@@ -92,6 +92,20 @@ test("DigiKey order charges reconcile without establishing settled payment", () 
   assert.equal(order.shippingPaidCents, null);
   assert.equal(order.taxPaidCents, null);
   assert.equal(order.tariffPaidCents, null);
+});
+test("BoltDepot receipt reconciles owner-selected spares and charges", () => {
+  const order = ledger.orders.find((x) => x.id === "boltdepot");
+  const items = ledger.items.filter((x) => x.orderId === order.id);
+  assert.equal(items.length, 13);
+  assert.equal(items.reduce((sum, x) => sum + x.quantity, 0), 182);
+  assert.equal(items.reduce((sum, x) => sum + x.quotedTotalCents, 0), 1604);
+  assert.equal(order.status, "ordered");
+  assert.equal(order.invoiceTotalCents, 2616);
+  assert.equal(
+    order.invoiceTotalCents,
+    1604 + order.shippingInvoicedCents + order.taxInvoicedCents + order.tariffInvoicedCents,
+  );
+  assert.equal(order.actualPaidCents, null);
 });
 test("published CAD archive matches its manifest hash", async () => {
   const release = await readJSON("data/hardware-release.json");

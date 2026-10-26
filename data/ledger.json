@@ -3,7 +3,7 @@
   "updatedAt": "2026-10-26",
   "currency": "USD",
   "purchasesPaused": false,
-  "equipmentQuotedTotalCents": 288587,
+  "equipmentQuotedTotalCents": 289369,
   "equipmentAllowances": [
     {
       "id": "equipment-allowance-2026-10-26",
@@ -107,17 +107,21 @@
     {
       "id": "boltdepot",
       "vendor": "BoltDepot",
-      "status": "pending",
-      "orderedAt": null,
-      "quotedSubtotalCents": 822,
+      "status": "ordered",
+      "orderedAt": "2026-10-26",
+      "quotedSubtotalCents": 1604,
       "actualPaidCents": null,
       "shippingPaidCents": null,
       "taxPaidCents": null,
       "tariffPaidCents": null,
       "receivedAt": null,
       "publicReceiptUrl": null,
-      "evidenceLevel": "cart-quote",
-      "notes": "Cart prepared. Purchase and receipt not confirmed."
+      "evidenceLevel": "vendor-order-confirmation-email",
+      "notes": "Order confirmed by vendor email on October 26, 2026. Owner-selected spares increased 13 references from 99 to 182 individual pieces: $16.04 items + $8.41 Economy shipping + $1.71 sales tax = $26.16 order total. No dispatch notice, tracking, delivery or settled bank charge is confirmed.",
+      "invoiceTotalCents": 2616,
+      "shippingInvoicedCents": 841,
+      "taxInvoicedCents": 171,
+      "tariffInvoicedCents": 0
     },
     {
       "id": "makerstore",
@@ -965,156 +969,156 @@
       "vendor": "BoltDepot",
       "orderId": "boltdepot",
       "name": "7218 · BHCS M3×6",
-      "quantity": 9,
+      "quantity": 15,
       "quotedUnitCents": 6,
-      "quotedTotalCents": 54,
+      "quotedTotalCents": 90,
       "actualPaidCents": null,
       "url": "https://boltdepot.com/Product-Details?product=7218",
-      "notes": "8 motor fasteners + 1 tip-collar ground terminal."
+      "notes": "8 motor fasteners + 1 tip-collar ground terminal. Owner selected 15 pieces, including 6 additional spares beyond the initial 9-piece purchase quantity."
     },
     {
       "id": "boltdepot-057",
       "vendor": "BoltDepot",
       "orderId": "boltdepot",
       "name": "7219 · BHCS M3×8",
-      "quantity": 42,
+      "quantity": 50,
       "quotedUnitCents": 6,
-      "quotedTotalCents": 252,
+      "quotedTotalCents": 300,
       "actualPaidCents": null,
       "url": "https://boltdepot.com/Product-Details?product=7219",
-      "notes": "Up to 34 rail fasteners + 4 X-carriage belt-clamp + 4 actuator-base screws."
+      "notes": "Up to 34 rail fasteners + 4 X-carriage belt-clamp + 4 actuator-base screws. Owner selected 50 pieces, including 8 additional spares beyond the initial 42-piece purchase quantity."
     },
     {
       "id": "boltdepot-058",
       "vendor": "BoltDepot",
       "orderId": "boltdepot",
       "name": "7220 · BHCS M3×10",
-      "quantity": 4,
+      "quantity": 15,
       "quotedUnitCents": 6,
-      "quotedTotalCents": 24,
+      "quotedTotalCents": 90,
       "actualPaidCents": null,
       "url": "https://boltdepot.com/Product-Details?product=7220",
-      "notes": "DLC32 to PCB bracket."
+      "notes": "DLC32 to PCB bracket. Owner selected 15 pieces, including 11 additional spares beyond the initial 4-piece purchase quantity."
     },
     {
       "id": "boltdepot-059",
       "vendor": "BoltDepot",
       "orderId": "boltdepot",
       "name": "7222 · BHCS M3×16",
-      "quantity": 2,
+      "quantity": 10,
       "quotedUnitCents": 7,
-      "quotedTotalCents": 14,
+      "quotedTotalCents": 70,
       "actualPaidCents": null,
       "url": "https://boltdepot.com/Product-Details?product=7222",
-      "notes": "Tip collar."
+      "notes": "Tip collar. Owner selected 10 pieces, including 8 additional spares beyond the initial 2-piece purchase quantity."
     },
     {
       "id": "boltdepot-060",
       "vendor": "BoltDepot",
       "orderId": "boltdepot",
       "name": "15291 · BHCS M3×25",
-      "quantity": 4,
+      "quantity": 10,
       "quotedUnitCents": 9,
-      "quotedTotalCents": 36,
+      "quotedTotalCents": 90,
       "actualPaidCents": null,
       "url": "https://boltdepot.com/Product-Details?product=15291",
-      "notes": "Adafruit 412 cradle."
+      "notes": "Adafruit 412 cradle. Owner selected 10 pieces, including 6 additional spares beyond the initial 4-piece purchase quantity."
     },
     {
       "id": "boltdepot-061",
       "vendor": "BoltDepot",
       "orderId": "boltdepot",
       "name": "6632 · BHCS M5×10",
-      "quantity": 6,
+      "quantity": 10,
       "quotedUnitCents": 12,
-      "quotedTotalCents": 72,
+      "quotedTotalCents": 120,
       "actualPaidCents": null,
       "url": "https://boltdepot.com/Product-Details?product=6632",
-      "notes": "4 idler blocks + 2 braces to extrusion."
+      "notes": "4 idler blocks + 2 braces to extrusion. Owner selected 10 pieces, including 4 additional spares beyond the initial 6-piece purchase quantity."
     },
     {
       "id": "boltdepot-062",
       "vendor": "BoltDepot",
       "orderId": "boltdepot",
       "name": "6633 · BHCS M5×12",
-      "quantity": 2,
+      "quantity": 10,
       "quotedUnitCents": 13,
-      "quotedTotalCents": 26,
+      "quotedTotalCents": 130,
       "actualPaidCents": null,
       "url": "https://boltdepot.com/Product-Details?product=6633",
-      "notes": "Braces to FDM block, using captive Amazon nuts."
+      "notes": "Braces to FDM block, using captive Amazon nuts. Owner selected 10 pieces, including 8 additional spares beyond the initial 2-piece purchase quantity."
     },
     {
       "id": "boltdepot-063",
       "vendor": "BoltDepot",
       "orderId": "boltdepot",
       "name": "6634 · BHCS M5×16",
-      "quantity": 6,
+      "quantity": 10,
       "quotedUnitCents": 14,
-      "quotedTotalCents": 84,
+      "quotedTotalCents": 140,
       "actualPaidCents": null,
       "url": "https://boltdepot.com/Product-Details?product=6634",
-      "notes": "4 feet + 2 motor A fasteners."
+      "notes": "4 feet + 2 motor A fasteners. Owner selected 10 pieces, including 4 additional spares beyond the initial 6-piece purchase quantity."
     },
     {
       "id": "boltdepot-064",
       "vendor": "BoltDepot",
       "orderId": "boltdepot",
       "name": "6635 · BHCS M5×20",
-      "quantity": 2,
+      "quantity": 10,
       "quotedUnitCents": 18,
-      "quotedTotalCents": 36,
+      "quotedTotalCents": 180,
       "actualPaidCents": null,
       "url": "https://boltdepot.com/Product-Details?product=6635",
-      "notes": "Motor B."
+      "notes": "Motor B. Owner selected 10 pieces, including 8 additional spares beyond the initial 2-piece purchase quantity."
     },
     {
       "id": "boltdepot-065",
       "vendor": "BoltDepot",
       "orderId": "boltdepot",
       "name": "7213 · FHCS M3×8",
-      "quantity": 4,
+      "quantity": 10,
       "quotedUnitCents": 6,
-      "quotedTotalCents": 24,
+      "quotedTotalCents": 60,
       "actualPaidCents": null,
       "url": "https://boltdepot.com/Product-Details?product=7213",
-      "notes": "Bed to 4 RN05BM3 nuts."
+      "notes": "Bed to 4 RN05BM3 nuts. Owner selected 10 pieces, including 6 additional spares beyond the initial 4-piece purchase quantity."
     },
     {
       "id": "boltdepot-066",
       "vendor": "BoltDepot",
       "orderId": "boltdepot",
       "name": "7214 · FHCS M3×10",
-      "quantity": 10,
+      "quantity": 12,
       "quotedUnitCents": 7,
-      "quotedTotalCents": 70,
+      "quotedTotalCents": 84,
       "actualPaidCents": null,
       "url": "https://boltdepot.com/Product-Details?product=7214",
-      "notes": "8 XY-joint to Y-carriage + 2 actuator front-base screws."
+      "notes": "8 XY-joint to Y-carriage + 2 actuator front-base screws. Owner selected 12 pieces, including 2 additional spares beyond the initial 10-piece purchase quantity."
     },
     {
       "id": "boltdepot-067",
       "vendor": "BoltDepot",
       "orderId": "boltdepot",
       "name": "6674 · FHCS M5×12",
-      "quantity": 6,
+      "quantity": 10,
       "quotedUnitCents": 20,
-      "quotedTotalCents": 120,
+      "quotedTotalCents": 200,
       "actualPaidCents": null,
       "url": "https://boltdepot.com/Product-Details?product=6674",
-      "notes": "2 XY + 2 PCB bracket + 2 tube bracket fasteners."
+      "notes": "2 XY + 2 PCB bracket + 2 tube bracket fasteners. Owner selected 10 pieces, including 4 additional spares beyond the initial 6-piece purchase quantity."
     },
     {
       "id": "boltdepot-068",
       "vendor": "BoltDepot",
       "orderId": "boltdepot",
       "name": "4515 · M5 flat washer DIN125",
-      "quantity": 2,
+      "quantity": 10,
       "quotedUnitCents": 5,
-      "quotedTotalCents": 10,
+      "quotedTotalCents": 50,
       "actualPaidCents": null,
       "url": "https://boltdepot.com/Product-Details?product=4515",
-      "notes": "Under 2 brace-to-extrusion M5×10 button-head screws."
+      "notes": "Under 2 brace-to-extrusion M5×10 button-head screws. Owner selected 10 pieces, including 8 additional spares beyond the initial 2-piece purchase quantity."
     },
     {
       "id": "makerstore-069",
@@ -1222,6 +1226,11 @@
     }
   ],
   "changes": [
+    {
+      "date": "2026-10-26",
+      "title": "BoltDepot order confirmed with owner-selected spares",
+      "detail": "The vendor confirmed 13 references and 182 pieces, including the extra spares requested by the owner. Items total $16.04, shipping $8.41 and sales tax $1.71; order total $26.16. The original 99-piece quote was $8.22. The additional $7.82 in parts increases the equipment estimate from $2,885.87 to $2,893.69; the $500 allowance is unchanged. No shipment or settled bank charge is confirmed."
+    },
     {
       "date": "2026-10-26",
       "title": "DigiKey order confirmed",
