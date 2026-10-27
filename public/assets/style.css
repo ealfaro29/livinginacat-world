@@ -749,7 +749,7 @@ footer {
 }
 .stats {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   padding: 35px 0 27px;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
