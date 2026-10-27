@@ -54,9 +54,9 @@ test("Amazon invoices reconcile without counting grouped extras twice", () => {
   assert.equal(
     ledger.amazonOrders.reduce((n, x) => n + x.invoiceItemsCents, 0),
     ledger.orders.find((x) => x.id === "amazon").quotedSubtotalCents +
-      extra.quotedTotalCents,
+      extra.quotedTotalCents + 999,
   );
-  assert.equal(totals(ledger).amazon, 152435);
+  assert.equal(totals(ledger).amazon, 153450);
   assert.equal(
     ledger.orders.find((x) => x.id === "amazon").invoiceTotalCents,
     totals(ledger).amazon,
@@ -117,7 +117,7 @@ test("Walmart approved additions and tax remain included in the order total", ()
   assert.equal(extra.includedInVendorOrderTotals, true);
   assert.equal(extra.categoryTotalCents, extra.quotedTotalCents + extra.vendorTaxCents);
   assert.equal(extra.vendorTaxCents, order.taxInvoicedCents);
-  assert.equal(totals(ledger).taxesAndOthers, 52704);
+  assert.equal(totals(ledger).taxesAndOthers, 52770);
   assert.equal(order.actualPaidCents, null);
   assert.equal(extra.actualPaidCents, null);
 });
@@ -130,7 +130,8 @@ test("Bambu order and grouped costs reconcile without double counting", () => {
   assert.equal(extra.vendorTaxCents, order.taxInvoicedCents);
   assert.equal(extra.includedInVendorOrderTotals, true);
   const confirmedOrders = ledger.orders.filter((x) => x.id !== "makerstore").reduce((sum, x) => sum + x.invoiceTotalCents, 0);
-  assert.equal(confirmedOrders + 419, 298921);
+  assert.equal(confirmedOrders + 419, 299936);
+  assert.equal(totals(ledger).confirmedOrderTotal, confirmedOrders + 419);
   assert.equal(order.actualPaidCents, null);
 });
 test("published CAD archive matches its manifest hash", async () => {

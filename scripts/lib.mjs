@@ -50,6 +50,13 @@ export function totals(ledger) {
   );
   return {
     quotedItems,
+    confirmedOrderTotal:
+      ledger.orders
+        .filter((x) => x.invoiceTotalCents != null && x.invoiceTotalFinal !== false && !["pending", "deferred", "awaiting_invoice", "cancelled", "canceled"].includes(x.status))
+        .reduce((n, x) => n + x.invoiceTotalCents, 0) +
+      ledger.otherExpenses
+        .filter((x) => !x.includedInVendorOrderTotals && x.actualPaidCents != null)
+        .reduce((n, x) => n + x.actualPaidCents, 0),
     equipmentAllowance,
     quoted: quotedItems + equipmentAllowance,
     taxesAndOthers: ledger.otherExpenses
