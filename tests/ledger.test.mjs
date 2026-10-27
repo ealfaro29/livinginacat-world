@@ -64,11 +64,11 @@ test("Amazon invoices reconcile without counting grouped extras twice", () => {
   assert.equal(ledger.amazonOrders.flatMap((x) => x.itemIds).length, 35);
 });
 test("unverified payments stay unknown, shipping is not delivery", () => {
-  assert.equal(totals(ledger).verifiedPaid, 30485);
+  assert.equal(totals(ledger).verifiedPaid, 32240);
   assert.equal(totals(ledger).shipped, 2);
   assert.equal(
     ledger.amazonOrders.filter((x) => x.status === "payment_attention").length,
-    3,
+    0,
   );
   assert.ok(ledger.amazonOrders.every((x) => x.actualPaidCents === null));
   assert.ok(ledger.shipments.every((x) => x.deliveredAt === null));

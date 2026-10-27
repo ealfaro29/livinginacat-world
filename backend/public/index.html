@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="theme-color" content="#101011" />
+    <title>Dispatch room · living in a cat world</title>
+    <link rel="icon" href="/robot-cat-48.png" />
+    <link rel="stylesheet" href="/admin.css" />
+    <script src="/admin.js" type="module"></script>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="https://livinginacat.world/"
+        ><img src="/robot-cat-48.png" width="42" height="42" alt="" /><span
+          >living in a<br /><strong>cat world.</strong></span
+        ></a
+      >
+      <div class="header-right">
+        <span class="private-label">PRIVATE / PROJECT OPERATIONS</span
+        ><button id="logout" class="text-button" hidden>Sign out ↗</button>
+      </div>
+    </header>
+    <main>
+      <section id="auth" class="auth" hidden>
+        <div class="auth-intro">
+          <p class="eyebrow">THE BUILD, BEHIND THE SCENES</p>
+          <h1>
+            The dispatch<br /><em>room.</em><span class="red-dot">●</span>
+          </h1>
+          <p>Every order. Every package.<br />All the way to the workbench.</p>
+          <div class="route-art" aria-hidden="true">
+            <span>STORE</span><i></i><span>MIAMI</span><i></i
+            ><span>WORKBENCH</span>
+          </div>
+        </div>
+        <div class="auth-card">
+          <p class="eyebrow" id="auth-mode">OWNER ACCESS</p>
+          <h2 id="auth-title">Welcome back.</h2>
+          <p id="auth-description">
+            Sign in to manage orders, private invoices and locker arrivals.
+          </p>
+          <form id="auth-form">
+            <label
+              >Username<input
+                name="username"
+                value="ealfaro29"
+                autocomplete="username"
+                required /></label
+            ><label
+              >Password<input
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                required
+                maxlength="128" /></label
+            ><label id="confirm-label" hidden
+              >Confirm password<input
+                name="confirm"
+                type="password"
+                autocomplete="new-password"
+                maxlength="128" /></label
+            ><button class="primary" type="submit" id="auth-submit">
+              Enter the dispatch room →
+            </button>
+          </form>
+          <p id="auth-error" class="error" role="alert"></p>
+          <small
+            >Your invoices and tracking numbers stay private. Changes sync
+            across your devices.</small
+          >
+        </div>
+      </section>
+      <section id="app" hidden>
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">THE BUILD / DISPATCH ROOM</p>
+            <h1>From store<br />to <em>workbench.</em></h1>
+            <p class="muted">
+              Orders, prealerts and arrivals. One shared record.
+            </p>
+          </div>
+          <div class="sync-block">
+            <span id="sync" role="status">Connecting…</span>
+            <div>
+              <button id="refresh" class="secondary">Refresh ↻</button
+              ><a
+                href="https://app.speedylogisticscr.com/customer/prealerts"
+                target="_blank"
+                rel="noreferrer"
+                class="secondary"
+                >Open Speedy ↗</a
+              >
+            </div>
+          </div>
+        </div>
+        <div id="stats" class="stats"></div>
+        <div class="toolbar">
+          <div class="tabs" role="tablist" aria-label="Records">
+            <button data-tab="packages" role="tab" aria-selected="true">
+              Packages <span id="package-count"></span></button
+            ><button data-tab="orders" role="tab" aria-selected="false">
+              Orders</button
+            ><button data-tab="history" role="tab" aria-selected="false">
+              Activity
+            </button>
+          </div>
+          <div class="tools">
+            <button id="new-package" class="secondary">+ Add package</button
+            ><a class="text-button" href="/api/export" download
+              >Export JSON ↓</a
+            >
+          </div>
+        </div>
+        <div id="packages-panel">
+          <div class="filters">
+            <label class="search-label"
+              ><span class="sr-only">Search packages</span
+              ><input
+                id="search"
+                type="search"
+                placeholder="Search store, part or tracking…" /></label
+            ><label
+              ><span class="sr-only">Filter status</span
+              ><select id="filter">
+                <option value="all">All packages</option>
+                <option value="needs">Needs tracking / PDF</option>
+                <option value="ready">Ready to prealert</option>
+                <option value="prealerted">Prealerted</option>
+                <option value="arrived">At the locker</option>
+              </select></label
+            >
+          </div>
+          <div id="packages" class="package-grid"></div>
+        </div>
+        <div id="orders-panel" hidden>
+          <div id="orders" class="orders-list"></div>
+          <p class="footnote">
+            Confirmed order totals are distinct from settled bank payments.
+            Split packages never add another order total.
+          </p>
+        </div>
+        <div id="history-panel" hidden>
+          <ol id="history" class="history"></ol>
+        </div>
+        <p class="footnote">
+          Arrival dates are estimates until confirmed. “At the locker” records
+          your confirmation in Speedy; it does not mean delivery in Costa Rica.
+          Mail checks run separately from this page.
+        </p>
+      </section>
+      <p id="loading" class="loading" role="status">
+        Opening the dispatch room…
+      </p>
+    </main>
+    <footer>
+      <a href="https://livinginacat.world/">← Back to the public journal</a
+      ><span>Private evidence. Public progress.</span>
+    </footer>
+    <dialog id="editor">
+      <form id="package-form">
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow">PACKAGE RECORD</p>
+            <h2 id="editor-title">Package details.</h2>
+          </div>
+          <button
+            type="button"
+            id="close-editor"
+            class="text-button"
+            aria-label="Close editor"
+          >
+            ✕
+          </button>
+        </div>
+        <label id="order-label">Order<select name="orderId"></select></label
+        ><label
+          >Package title<input name="title" required maxlength="160" /></label
+        ><label
+          >Contents<textarea
+            name="contents"
+            rows="3"
+            maxlength="3000"
+          ></textarea>
+        </label>
+        <div class="form-grid">
+          <label
+            >Carrier<input
+              name="carrier"
+              list="carriers"
+              maxlength="80"
+              placeholder="FedEx, UPS, USPS…" /></label
+          ><label
+            >Tracking number<input
+              name="tracking"
+              maxlength="100"
+              autocomplete="off" /></label
+          ><label
+            >Shipping status<select name="shippingStatus">
+              <option value="awaiting_tracking">Awaiting tracking</option>
+              <option value="preparing">Preparing</option>
+              <option value="shipped">Shipped</option>
+              <option value="carrier_delivered">Carrier says delivered</option>
+              <option value="on_hold">On hold</option>
+            </select></label
+          ><label
+            >Estimated locker arrival<input
+              name="expectedArrival"
+              type="date" /></label
+          ><label
+            >Package goods value (USD)<input
+              name="value"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="Unknown" /></label
+          ><label
+            >Speedy prealert reference<input
+              name="prealertReference"
+              maxlength="160"
+          /></label>
+        </div>
+        <label
+          >Private notes<textarea
+            name="notes"
+            rows="3"
+            maxlength="5000"
+          ></textarea>
+        </label>
+        <div class="checks">
+          <label
+            ><input type="checkbox" name="prealerted" /> Prealert already
+            submitted in Speedy</label
+          ><label
+            ><input type="checkbox" name="arrived" /> Confirmed received at the
+            locker</label
+          >
+        </div>
+        <p class="muted">
+          These checkboxes record a confirmed action. Saving here does not
+          submit a prealert to Speedy.
+        </p>
+        <p id="editor-error" class="error" role="alert"></p>
+        <button type="submit" class="primary">Save and sync →</button>
+      </form>
+    </dialog>
+    <dialog id="pdf-editor">
+      <form id="pdf-form">
+        <div class="dialog-heading">
+          <h2>Attach a PDF.</h2>
+          <button
+            type="button"
+            id="close-pdf"
+            class="text-button"
+            aria-label="Close PDF upload"
+          >
+            ✕
+          </button>
+        </div>
+        <p id="pdf-package" class="muted"></p>
+        <label
+          >Document type<select name="kind">
+            <option value="invoice">Invoice / purchase receipt</option>
+            <option value="order_confirmation">Order confirmation only</option>
+            <option value="provisional_invoice">Provisional invoice</option>
+          </select></label
+        ><label
+          >PDF file · maximum 8 MB<input
+            name="file"
+            type="file"
+            accept="application/pdf,.pdf"
+            required
+        /></label>
+        <p class="muted">
+          Keep the original vendor document. Only an invoice or purchase receipt
+          counts toward prealert readiness. Speedy makes the final acceptance
+          decision.
+        </p>
+        <p id="pdf-error" class="error" role="alert"></p>
+        <button type="submit" class="primary">Upload privately →</button>
+      </form>
+    </dialog>
+    <datalist id="carriers">
+      <option value="FedEx"></option>
+      <option value="UPS"></option>
+      <option value="USPS"></option>
+      <option value="Amazon Logistics"></option>
+      <option value="DHL"></option>
+    </datalist>
+    <div id="toast" role="status" hidden></div>
+  </body>
+</html>

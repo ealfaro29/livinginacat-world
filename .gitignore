@@ -5,3 +5,6 @@ dist/
 private/
 receipts/
 *.log
+
+.wrangler/
+.dev.vars*

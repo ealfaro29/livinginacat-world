@@ -39,6 +39,7 @@ export const labels = {
   payment_attention: "Payment review",
   partial_payment_attention: "3 orders: payment review",
   partially_shipped_payment_attention: "Mixed status",
+  partially_shipped: "Partially shipped",
 };
 export function totals(ledger) {
   const quotedItems = ledger.items.reduce((n, x) => n + x.quotedTotalCents, 0);

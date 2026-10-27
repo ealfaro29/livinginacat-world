@@ -1,0 +1,13 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "livinginacat-admin",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-26",
+  "account_id": "740fd37c6a7741c5b502263b1f31f508",
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true },
+  "d1_databases": [{ "binding": "DB", "database_name": "livinginacat-admin", "database_id": "9fe265a7-9030-4b41-bf19-03daea973c93", "migrations_dir": "migrations" }],
+  "kv_namespaces": [{ "binding": "DOCUMENTS", "id": "766392bb73a845fdb19a0d4b0032068d" }],
+  "ratelimits": [{ "name": "LOGIN_RATE", "namespace_id": "63840", "simple": { "limit": 5, "period": 60 } }]
+}
