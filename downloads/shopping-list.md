@@ -75,9 +75,9 @@ Equipment quoted, including allowance: $2,893.69. Listed item quotes: $2,393.69;
 | BoltDepot | 6674 · FHCS M5×12 | 10 | $0.20 | $2.00 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=6674) |
 | BoltDepot | 4515 · M5 flat washer DIN125 | 10 | $0.05 | $0.50 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=4515) |
 | MakerStore | PLATE-STRIP-2 · flat plate 40×18×4 mm | 2 | $2.40 | $4.80 | Awaiting final invoice | [Product](https://makerstore.cc/product/2-hole-joining-plate/) |
-| Walmart | uxcell · spacers · 5 ID / 10 OD / 9 mm high | 1 | $8.99 | $8.99 | Not ordered | [Product](https://www.walmart.com/ip/5223528994) |
-| Walmart | uxcell · spiral wrap · 4 mm ID · 20 m | 1 | $9.99 | $9.99 | Not ordered | [Product](https://www.walmart.com/ip/3364975377) |
-| Walmart | SUPERDANT · 1 mm adhesive EVA foam | 1 | $10.85 | $10.85 | Not ordered | [Product](https://www.walmart.com/ip/9540216155) |
+| Walmart | uxcell · spacers · 5 ID / 10 OD / 9 mm high | 1 | $8.99 | $8.99 | Order confirmed | [Product](https://www.walmart.com/ip/5223528994) |
+| Walmart | uxcell · spiral wrap · 4 mm ID · 20 m | 1 | $9.99 | $9.99 | Order confirmed | [Product](https://www.walmart.com/ip/3364975377) |
+| Walmart | SUPERDANT · 1 mm adhesive EVA foam | 1 | $10.85 | $10.85 | Order confirmed | [Product](https://www.walmart.com/ip/9540216155) |
 | PhotonLight | Creality PTFE · 2 mm ID / 4 mm OD · 2 m | 1 | $9.99 | $9.99 | Not ordered | [Product](https://www.photonlight.com/products/creality-ptfe-tubing-4mm-od-x-2mm-id-x-1m-length-white) |
 | West3D | Mobil Mobilux EP2 · 10 mL syringe | 1 | $9.99 | $9.99 | Not ordered | [Product](https://west3d.com/products/mobil-mobilux-ep2-10ml-filled-syringe-with-blunt-tip) |
 
@@ -89,4 +89,10 @@ Item quotes $2,393.69 + allowance $500.00 = total estimate $2,893.69.
 
 ## Reconciliation
 
-Amazon: five orders totaling $1,524.35, including the Taxes and others category; two shipped and three need payment review. Bank charges unconfirmed. Taxes and others: $420.68 ($320.94 added items + $99.74 Amazon tax), already included in Amazon orders. FramingTech: $300.66 paid ($179.15 parts + $121.51 provisional shipping). Domain: $4.19 paid. Verified receipt payments: $304.85, partial, not all spending.
+Amazon: five orders totaling $1,524.35, including the Taxes and others category; two shipped and three need payment review. Bank charges unconfirmed. Taxes and others: $444.16 (Amazon: $320.94 additions + $99.74 tax = $420.68; Walmart: $19.99 additions + $3.49 tax = $23.48). Already included in the corresponding vendor order totals, not added again. FramingTech: $300.66 paid ($179.15 parts + $121.51 provisional shipping). Domain: $4.19 paid. Verified receipt payments: $304.85, partial, not all spending.
+
+Other vendor order totals (not settled-bank-payment evidence):
+- DigiKey: $96.97; Order confirmed.
+- BoltDepot: $26.16; Order confirmed.
+- MakerStore: $10.18 provisional; Awaiting final invoice.
+- Walmart: $53.31; Order confirmed.
