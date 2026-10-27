@@ -13,6 +13,7 @@ An open build journal about creating an AI that can perceive and act in the real
 - `docs/PROJECT.md`: architecture, planned assembly and acceptance tests.
 - `public/`: original visuals, styles and CAD download.
 - `scripts/`: static generator, checks and publication.
+- `backend/`: authenticated, synchronized dispatch room; private PDFs and records stay outside Git.
 
 ## Read the guides
 
@@ -30,7 +31,7 @@ npm run check
 npm run dev
 ```
 
-Preview: `http://127.0.0.1:4173`. Production files are generated in `dist/`. No runtime server, cookies, analytics or API keys. No automatic email or store access: the ledger displays its review date.
+Preview: `http://127.0.0.1:4173`. Public production files are generated in `dist/` and remain static, without cookies, analytics or API keys. The separate [private dispatch room](backend/README.md) uses authenticated cloud storage for orders, PDFs, prealerts and locker arrivals. The public ledger displays its review date; email reconciliation runs separately.
 
 ## Regenerate the CAD preview image
 

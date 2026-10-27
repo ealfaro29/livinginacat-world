@@ -7,40 +7,40 @@ Equipment quoted, including allowance: $2,893.69. Listed item quotes: $2,393.69;
 | Store | Item | Quantity | Unit price | Subtotal | Status | Offer |
 |---|---|---:|---:|---:|---|---|
 | Amazon | iPhone 14 · 128 GB · unlocked · Renewed Excellent | 1 | $304.95 | $304.95 | Shipped | [Product](https://www.amazon.com/dp/B0BN72FYFG) |
-| Amazon | CanaKit Raspberry Pi 5 PRO · 4 GB / 128 GB | 1 | $209.99 | $209.99 | Payment review | [Product](https://www.amazon.com/dp/B0CRSPKPNG) |
-| Amazon | EMEET C960 4K · autofocus · USB-A | 1 | $45.59 | $45.59 | Payment review | [Product](https://www.amazon.com/dp/B0CJHZ92P6) |
-| Amazon | STEPPERONLINE 17HE15-1504S · NEMA 17 | 2 | $10.99 | $21.98 | Payment review | [Product](https://www.amazon.com/dp/B0B38GX54H) |
-| Amazon | Zeelo GT2 · 5 m × 6 mm belt and pulleys | 1 | $16.99 | $16.99 | Payment review | [Product](https://www.amazon.com/dp/B08SMFM3Z6) |
-| Amazon | 3Dman · 10 smooth idlers · 5 mm bore | 1 | $11.99 | $11.99 | Payment review | [Product](https://www.amazon.com/dp/B07RV2T54M) |
-| Amazon | WINSINN · 5 toothed idlers · 5 mm bore | 1 | $8.99 | $8.99 | Payment review | [Product](https://www.amazon.com/dp/B07BPGYX3G) |
-| Amazon | SUNLU black PETG · 2 kg | 1 | $22.49 | $22.49 | Payment review | [Product](https://www.amazon.com/dp/B0FRRX8YDF) |
-| Amazon | Plusivo S578 · soldering kit and multimeter | 1 | $44.99 | $44.99 | Payment review | [Product](https://www.amazon.com/dp/B0B3JW8BVW) |
-| Amazon | Kynup · 150 mm digital caliper | 1 | $19.78 | $19.78 | Payment review | [Product](https://www.amazon.com/dp/B07X8JQ8L5) |
-| Amazon | AMTOVL · 9 metric hex keys | 1 | $9.99 | $9.99 | Payment review | [Product](https://www.amazon.com/dp/B0CJBRYQF3) |
-| Amazon | Anker Nano Pro · 20 W USB-C charger | 1 | $11.99 | $11.99 | Payment review | [Product](https://www.amazon.com/dp/B099F558S1) |
-| Amazon | Anker · USB-C to Lightning cable · 3 ft | 1 | $20.99 | $20.99 | Payment review | [Product](https://www.amazon.com/dp/B0DB5RZBV3) |
-| Amazon | Airlonv · 17-inch LED desk lamp | 1 | $19.92 | $19.92 | Payment review | [Product](https://www.amazon.com/dp/B0C4JTPPYY) |
-| Amazon | NEEWER UA057 · 22-inch camera arm | 1 | $33.99 | $33.99 | Payment review | [Product](https://www.amazon.com/dp/B0DN1C9RH2) |
-| Amazon | Fermerry · 22 AWG silicone wire | 1 | $12.79 | $12.79 | Payment review | [Product](https://www.amazon.com/dp/B089CQHRDT) |
-| Amazon | ALITOVE · 12 V / 5 A / 60 W supply | 1 | $12.99 | $12.99 | Payment review | [Product](https://www.amazon.com/dp/B01GEA8PQA) |
-| Amazon | uxcell · 150 mm X rail with MGN9H carriage | 1 | $14.99 | $14.99 | Payment review | [Product](https://www.amazon.com/dp/B0GYSQYSKH) |
-| Amazon | BIGTREETECH TMC2209 V1.3 · pack of 2 | 1 | $13.99 | $13.99 | Payment review | [Product](https://www.amazon.com/dp/B08SMDY3SQ) |
-| Amazon | uxcell · two 250 mm Y rails with MGN9H carriages | 1 | $27.99 | $27.99 | Payment review | [Product](https://www.amazon.com/dp/B0GYSVQ9H3) |
-| Amazon | uxcell · 20 shims · 5×8×0.5 mm | 1 | $6.29 | $6.29 | Payment review | [Product](https://www.amazon.com/dp/B0C3TWCXL4) |
-| Amazon | USDRWAM · 50 M3 square nuts | 1 | $6.29 | $6.29 | Payment review | [Product](https://www.amazon.com/dp/B0H1BN727R) |
-| Amazon | USDRWAM · 30 M5 square nuts | 1 | $6.29 | $6.29 | Payment review | [Product](https://www.amazon.com/dp/B0H1BVBNKH) |
-| Amazon | uxcell · 50 M4 square nuts | 1 | $9.49 | $9.49 | Payment review | [Product](https://www.amazon.com/dp/B07RR3H2FT) |
-| Amazon | 48 shims · 5×8 mm · four thicknesses | 1 | $11.99 | $11.99 | Payment review | [Product](https://www.amazon.com/dp/B0FF1NZVNX) |
-| Amazon | uxcell · 6 shoulder screws · Ø5×10 mm · M4 | 1 | $6.89 | $6.89 | Payment review | [Product](https://www.amazon.com/dp/B0DP7173LB) |
-| Amazon | MECCANIXITY · 26 shoulder screws · Ø5×20 mm · M4 | 1 | $9.99 | $9.99 | Payment review | [Product](https://www.amazon.com/dp/B0FDQHC8SW) |
-| Amazon | IRWIN 226303 · 3-inch clamp-on vise | 1 | $37.65 | $37.65 | Payment review | [Product](https://www.amazon.com/dp/B0001LQY44) |
+| Amazon | CanaKit Raspberry Pi 5 PRO · 4 GB / 128 GB | 1 | $209.99 | $209.99 | Order confirmed | [Product](https://www.amazon.com/dp/B0CRSPKPNG) |
+| Amazon | EMEET C960 4K · autofocus · USB-A | 1 | $45.59 | $45.59 | Order confirmed | [Product](https://www.amazon.com/dp/B0CJHZ92P6) |
+| Amazon | STEPPERONLINE 17HE15-1504S · NEMA 17 | 2 | $10.99 | $21.98 | Order confirmed | [Product](https://www.amazon.com/dp/B0B38GX54H) |
+| Amazon | Zeelo GT2 · 5 m × 6 mm belt and pulleys | 1 | $16.99 | $16.99 | Order confirmed | [Product](https://www.amazon.com/dp/B08SMFM3Z6) |
+| Amazon | 3Dman · 10 smooth idlers · 5 mm bore | 1 | $11.99 | $11.99 | Order confirmed | [Product](https://www.amazon.com/dp/B07RV2T54M) |
+| Amazon | WINSINN · 5 toothed idlers · 5 mm bore | 1 | $8.99 | $8.99 | Order confirmed | [Product](https://www.amazon.com/dp/B07BPGYX3G) |
+| Amazon | SUNLU black PETG · 2 kg | 1 | $22.49 | $22.49 | Order confirmed | [Product](https://www.amazon.com/dp/B0FRRX8YDF) |
+| Amazon | Plusivo S578 · soldering kit and multimeter | 1 | $44.99 | $44.99 | Order confirmed | [Product](https://www.amazon.com/dp/B0B3JW8BVW) |
+| Amazon | Kynup · 150 mm digital caliper | 1 | $19.78 | $19.78 | Order confirmed | [Product](https://www.amazon.com/dp/B07X8JQ8L5) |
+| Amazon | AMTOVL · 9 metric hex keys | 1 | $9.99 | $9.99 | Order confirmed | [Product](https://www.amazon.com/dp/B0CJBRYQF3) |
+| Amazon | Anker Nano Pro · 20 W USB-C charger | 1 | $11.99 | $11.99 | Order confirmed | [Product](https://www.amazon.com/dp/B099F558S1) |
+| Amazon | Anker · USB-C to Lightning cable · 3 ft | 1 | $20.99 | $20.99 | Order confirmed | [Product](https://www.amazon.com/dp/B0DB5RZBV3) |
+| Amazon | Airlonv · 17-inch LED desk lamp | 1 | $19.92 | $19.92 | Order confirmed | [Product](https://www.amazon.com/dp/B0C4JTPPYY) |
+| Amazon | NEEWER UA057 · 22-inch camera arm | 1 | $33.99 | $33.99 | Order confirmed | [Product](https://www.amazon.com/dp/B0DN1C9RH2) |
+| Amazon | Fermerry · 22 AWG silicone wire | 1 | $12.79 | $12.79 | Order confirmed | [Product](https://www.amazon.com/dp/B089CQHRDT) |
+| Amazon | ALITOVE · 12 V / 5 A / 60 W supply | 1 | $12.99 | $12.99 | Order confirmed | [Product](https://www.amazon.com/dp/B01GEA8PQA) |
+| Amazon | uxcell · 150 mm X rail with MGN9H carriage | 1 | $14.99 | $14.99 | Order confirmed | [Product](https://www.amazon.com/dp/B0GYSQYSKH) |
+| Amazon | BIGTREETECH TMC2209 V1.3 · pack of 2 | 1 | $13.99 | $13.99 | Order confirmed | [Product](https://www.amazon.com/dp/B08SMDY3SQ) |
+| Amazon | uxcell · two 250 mm Y rails with MGN9H carriages | 1 | $27.99 | $27.99 | Order confirmed | [Product](https://www.amazon.com/dp/B0GYSVQ9H3) |
+| Amazon | uxcell · 20 shims · 5×8×0.5 mm | 1 | $6.29 | $6.29 | Order confirmed | [Product](https://www.amazon.com/dp/B0C3TWCXL4) |
+| Amazon | USDRWAM · 50 M3 square nuts | 1 | $6.29 | $6.29 | Order confirmed | [Product](https://www.amazon.com/dp/B0H1BN727R) |
+| Amazon | USDRWAM · 30 M5 square nuts | 1 | $6.29 | $6.29 | Order confirmed | [Product](https://www.amazon.com/dp/B0H1BVBNKH) |
+| Amazon | uxcell · 50 M4 square nuts | 1 | $9.49 | $9.49 | Order confirmed | [Product](https://www.amazon.com/dp/B07RR3H2FT) |
+| Amazon | 48 shims · 5×8 mm · four thicknesses | 1 | $11.99 | $11.99 | Order confirmed | [Product](https://www.amazon.com/dp/B0FF1NZVNX) |
+| Amazon | uxcell · 6 shoulder screws · Ø5×10 mm · M4 | 1 | $6.89 | $6.89 | Order confirmed | [Product](https://www.amazon.com/dp/B0DP7173LB) |
+| Amazon | MECCANIXITY · 26 shoulder screws · Ø5×20 mm · M4 | 1 | $9.99 | $9.99 | Order confirmed | [Product](https://www.amazon.com/dp/B0FDQHC8SW) |
+| Amazon | IRWIN 226303 · 3-inch clamp-on vise | 1 | $37.65 | $37.65 | Order confirmed | [Product](https://www.amazon.com/dp/B0001LQY44) |
 | Amazon | Crescent Nicholson 21908N · 8-inch file | 1 | $20.65 | $20.65 | Shipped | [Product](https://www.amazon.com/dp/B07Y2P7F1G) |
-| Amazon | Century 4082 · file handle and 7 inserts | 1 | $11.67 | $11.67 | Payment review | [Product](https://www.amazon.com/dp/B004UU7Y64) |
-| Amazon | BESSEY BV-NVJ · soft vise jaws | 1 | $17.09 | $17.09 | Payment review | [Product](https://www.amazon.com/dp/B06Y48XXBF) |
-| Amazon | Loctite 243 · 10 ml · 1329837 | 1 | $21.16 | $21.16 | Payment review | [Product](https://www.amazon.com/dp/B004VODM24) |
-| Amazon | Micro Traders · 8 capacitive mesh tips · 7 mm | 1 | $12.49 | $12.49 | Payment review | [Product](https://www.amazon.com/dp/B0DSVSVSZN) |
-| Amazon | Crescent AC26VS · 6-inch adjustable wrench | 1 | $13.28 | $13.28 | Payment review | [Product](https://www.amazon.com/dp/B00002N5KZ) |
-| Amazon | Landtek MILA34300N · dual-channel contact thermometer | 1 | $27.99 | $27.99 | Payment review | [Product](https://www.amazon.com/dp/B0C4YL76WY) |
+| Amazon | Century 4082 · file handle and 7 inserts | 1 | $11.67 | $11.67 | Order confirmed | [Product](https://www.amazon.com/dp/B004UU7Y64) |
+| Amazon | BESSEY BV-NVJ · soft vise jaws | 1 | $17.09 | $17.09 | Order confirmed | [Product](https://www.amazon.com/dp/B06Y48XXBF) |
+| Amazon | Loctite 243 · 10 ml · 1329837 | 1 | $21.16 | $21.16 | Order confirmed | [Product](https://www.amazon.com/dp/B004VODM24) |
+| Amazon | Micro Traders · 8 capacitive mesh tips · 7 mm | 1 | $12.49 | $12.49 | Order confirmed | [Product](https://www.amazon.com/dp/B0DSVSVSZN) |
+| Amazon | Crescent AC26VS · 6-inch adjustable wrench | 1 | $13.28 | $13.28 | Order confirmed | [Product](https://www.amazon.com/dp/B00002N5KZ) |
+| Amazon | Landtek MILA34300N · dual-channel contact thermometer | 1 | $27.99 | $27.99 | Order confirmed | [Product](https://www.amazon.com/dp/B0C4YL76WY) |
 | Bambu Lab | Bambu Lab X2D AMS Combo · AMS2Pro | 1 | $899.00 | $899.00 | Deferred | [Product](https://us.store.bambulab.com/products/x2d) |
 | FramingTech | 20×40-05 · 355 mm | 2 | $10.12 | $20.24 | Order confirmed | [Product](https://www.framingtech.com/shop/20x40-05-3m-20mm-x-40mm-t-slot-profile-6-5mm-tslots-403227) |
 | FramingTech | 20×40-05 · 190 mm | 2 | $6.58 | $13.16 | Order confirmed | [Product](https://www.framingtech.com/shop/20x40-05-3m-20mm-x-40mm-t-slot-profile-6-5mm-tslots-403227) |
@@ -49,7 +49,7 @@ Equipment quoted, including allowance: $2,893.69. Listed item quotes: $2,393.69;
 | FramingTech | GS20-05W · complete bracket kit | 8 | $3.46 | $27.68 | Order confirmed | [Product](https://www.framingtech.com/shop/gs20-05w-gusset-20x20-with-5-slot-hardware-432568) |
 | FramingTech | RN05BM3 · M3, slot 5 | 38 | $2.02 | $76.76 | Order confirmed | [Product](https://www.framingtech.com/shop/rn05bm3-m3-roll-in-t-nut-with-ball-plunger-5-slot-484695) |
 | FramingTech | RN05BM5 · M5, slot 5 | 20 | $1.42 | $28.40 | Order confirmed | [Product](https://www.framingtech.com/shop/rn05bm5-m5-roll-in-t-nut-with-ball-plunger-5-slot-484697) |
-| VXB | DLC32 V2.1 · 1169-0401 | 1 | $60.95 | $60.95 | Deferred | [Product](https://vxb.com/products/dlc32-v2-1-32-bit-offline-controller-board-for-cnc) |
+| VXB | DLC32 V2.1 · 1169-0401 | 1 | $60.95 | $60.95 | Order confirmed | [Product](https://vxb.com/products/dlc32-v2-1-32-bit-offline-controller-board-for-cnc) |
 | DigiKey | NKK S301 · SPST switch | 1 | $10.87 | $10.87 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/nkk-switches/S301/1006974) |
 | DigiKey | Littelfuse FHAS101 · fuse holder | 1 | $14.86 | $14.86 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/littelfuse-commercial-vehicle-products/FHAS101/27496166) |
 | DigiKey | Littelfuse 0287003.U · ATO 3 A fuse | 1 | $0.50 | $0.50 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/littelfuse-inc/0287003-U/3996895) |
@@ -78,8 +78,8 @@ Equipment quoted, including allowance: $2,893.69. Listed item quotes: $2,393.69;
 | Walmart | uxcell · spacers · 5 ID / 10 OD / 9 mm high | 1 | $8.99 | $8.99 | Order confirmed | [Product](https://www.walmart.com/ip/5223528994) |
 | Walmart | uxcell · spiral wrap · 4 mm ID · 20 m | 1 | $9.99 | $9.99 | Order confirmed | [Product](https://www.walmart.com/ip/3364975377) |
 | Walmart | SUPERDANT · 1 mm adhesive EVA foam | 1 | $10.85 | $10.85 | Order confirmed | [Product](https://www.walmart.com/ip/9540216155) |
-| PhotonLight | Creality PTFE · 2 mm ID / 4 mm OD · 2 m | 1 | $9.99 | $9.99 | Not ordered | [Product](https://www.photonlight.com/products/creality-ptfe-tubing-4mm-od-x-2mm-id-x-1m-length-white) |
-| West3D | Mobil Mobilux EP2 · 10 mL syringe | 1 | $9.99 | $9.99 | Not ordered | [Product](https://west3d.com/products/mobil-mobilux-ep2-10ml-filled-syringe-with-blunt-tip) |
+| PhotonLight | Creality PTFE · 2 mm ID / 4 mm OD · 2 m | 1 | $9.99 | $9.99 | Order confirmed | [Product](https://www.photonlight.com/products/creality-ptfe-tubing-4mm-od-x-2mm-id-x-1m-length-white) |
+| West3D | Mobil Mobilux EP2 · 10 mL syringe | 1 | $9.99 | $9.99 | Order confirmed | [Product](https://west3d.com/products/mobil-mobilux-ep2-10ml-filled-syringe-with-blunt-tip) |
 
 ## Equipment allowance
 
@@ -89,10 +89,13 @@ Item quotes $2,393.69 + allowance $500.00 = total estimate $2,893.69.
 
 ## Reconciliation
 
-Amazon: five orders totaling $1,524.35, including the Taxes and others category; two shipped and three need payment review. Bank charges unconfirmed. Taxes and others: $444.16 (Amazon: $320.94 additions + $99.74 tax = $420.68; Walmart: $19.99 additions + $3.49 tax = $23.48). Already included in the corresponding vendor order totals, not added again. FramingTech: $300.66 paid ($179.15 parts + $121.51 provisional shipping). Domain: $4.19 paid. Verified receipt payments: $304.85, partial, not all spending.
+Amazon: five orders totaling $1,524.35, including the Taxes and others category; two confirmed shipped; earlier payment-review warnings are no longer present. Bank charges unconfirmed. Taxes and others: $444.16 (Amazon: $320.94 additions + $99.74 tax = $420.68; Walmart: $19.99 additions + $3.49 tax = $23.48). Already included in the corresponding vendor order totals, not added again. FramingTech: $300.66 paid ($179.15 parts + $121.51 provisional shipping). West3D: $17.55 paid per vendor invoice. Domain: $4.19 paid. Verified vendor/receipt payments: $322.40, partial, not all spending.
 
 Other vendor order totals (not settled-bank-payment evidence):
+- VXB: $65.22; Order confirmed.
 - DigiKey: $96.97; Order confirmed.
 - BoltDepot: $26.16; Order confirmed.
 - MakerStore: $10.18 provisional; Awaiting final invoice.
 - Walmart: $53.31; Order confirmed.
+- PhotonLight: $18.94; Order confirmed.
+- West3D: $17.55; Order confirmed.

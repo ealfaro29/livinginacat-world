@@ -24,7 +24,7 @@
     {
       "id": "amazon",
       "vendor": "Amazon",
-      "status": "partial_payment_attention",
+      "status": "partially_shipped",
       "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 110658,
       "actualPaidCents": null,
@@ -34,7 +34,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "authenticated-order-page",
-      "notes": "Five orders created. Two are marked shipped and three require payment review. Totals include tax and the additions grouped as Taxes and others. Individual bank charges have not been reconciled.",
+      "notes": "Five confirmed orders totaling $1,524.35. Two packages were confirmed shipped. The latest authenticated order history no longer shows the three earlier payment-review warnings; delivery estimates are October 27 for AMZ-02 and AMZ-03, and November 2 for AMZ-04. Dispatch and tracking for those three orders still need evidence. Bank charges have not been reconciled.",
       "invoiceTotalCents": 152435
     },
     {
@@ -73,8 +73,8 @@
     {
       "id": "vxb",
       "vendor": "VXB",
-      "status": "deferred",
-      "orderedAt": null,
+      "status": "ordered",
+      "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 6095,
       "actualPaidCents": null,
       "shippingPaidCents": null,
@@ -82,8 +82,12 @@
       "tariffPaidCents": null,
       "receivedAt": null,
       "publicReceiptUrl": null,
-      "evidenceLevel": "cart-quote",
-      "notes": "Deferred after a checkout problem. No confirmed purchase."
+      "evidenceLevel": "vendor-order-confirmation-email",
+      "notes": "Vendor confirmation: $60.95 items + $0.00 shipping + $4.27 tax = $65.22. Processing; no shipment, tracking or settled bank charge confirmed.",
+      "invoiceTotalCents": 6522,
+      "shippingInvoicedCents": 0,
+      "taxInvoicedCents": 427,
+      "tariffInvoicedCents": 0
     },
     {
       "id": "digikey",
@@ -165,8 +169,8 @@
     {
       "id": "photonlight",
       "vendor": "PhotonLight",
-      "status": "pending",
-      "orderedAt": null,
+      "status": "ordered",
+      "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 999,
       "actualPaidCents": null,
       "shippingPaidCents": null,
@@ -174,23 +178,31 @@
       "tariffPaidCents": null,
       "receivedAt": null,
       "publicReceiptUrl": null,
-      "evidenceLevel": "cart-quote",
-      "notes": "Cart prepared. Purchase and receipt not confirmed."
+      "evidenceLevel": "vendor-order-confirmation-email",
+      "notes": "Vendor confirmation: $9.99 item + $8.95 shipping + $0.00 tax = $18.94. Estimated arrival November 2, 2026; not shipped or delivered according to the available evidence. No tracking or settled bank charge confirmed.",
+      "invoiceTotalCents": 1894,
+      "shippingInvoicedCents": 895,
+      "taxInvoicedCents": 0,
+      "tariffInvoicedCents": 0
     },
     {
       "id": "west3d",
       "vendor": "West3D",
-      "status": "pending",
-      "orderedAt": null,
+      "status": "ordered",
+      "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 999,
-      "actualPaidCents": null,
-      "shippingPaidCents": null,
-      "taxPaidCents": null,
+      "actualPaidCents": 1755,
+      "shippingPaidCents": 756,
+      "taxPaidCents": 0,
       "tariffPaidCents": null,
       "receivedAt": null,
       "publicReceiptUrl": null,
-      "evidenceLevel": "cart-quote",
-      "notes": "Cart prepared. Purchase and receipt not confirmed."
+      "evidenceLevel": "vendor-confirmation-email-and-paid-invoice-pdf",
+      "notes": "Vendor invoice confirms $17.55 paid, amount due $0.00: $9.99 item + $7.56 shipping + $0.00 tax. Processing; usual dispatch 1–2 business days is not a confirmed ship date. No tracking or arrival confirmed; bank settlement is not independently reconciled.",
+      "invoiceTotalCents": 1755,
+      "shippingInvoicedCents": 756,
+      "taxInvoicedCents": 0,
+      "tariffInvoicedCents": 0
     }
   ],
   "items": [
@@ -221,7 +233,7 @@
       "url": "https://www.amazon.com/dp/B0CRSPKPNG",
       "notes": "Includes 45 W supply with 5 V/5 A profile, cooling, case, card and reader. Do not buy those accessories again.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 20999
     },
     {
@@ -234,9 +246,9 @@
       "quotedTotalCents": 4559,
       "actualPaidCents": null,
       "url": "https://www.amazon.com/dp/B0CJHZ92P6",
-      "notes": "UVC; built-in 1.5 m cable and 1/4-inch mount. Initial mounting distance 25–35 cm. Quoted at $45.59; this order currently requires payment review.",
+      "notes": "UVC; built-in 1.5 m cable and 1/4-inch mount. Initial mounting distance 25–35 cm. Quoted at $45.59; the earlier payment-review warning is no longer present.",
       "shipmentOrderRef": "AMZ-02",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 4559
     },
     {
@@ -251,7 +263,7 @@
       "url": "https://www.amazon.com/dp/B0B38GX54H",
       "notes": "Two 1.5 A motors, 42×42×38 mm; 1 m cables included.",
       "shipmentOrderRef": "AMZ-03",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 1099
     },
     {
@@ -266,7 +278,7 @@
       "url": "https://www.amazon.com/dp/B08SMFM3Z6",
       "notes": "Use two 20-tooth drive pulleys, 5 mm bore. Pack includes four. Cut the belt after checking the actual routing.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 1699
     },
     {
@@ -281,7 +293,7 @@
       "url": "https://www.amazon.com/dp/B07RV2T54M",
       "notes": "For 6 mm belt. Measure actual height and adjust axial clearance with shims.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 1199
     },
     {
@@ -296,7 +308,7 @@
       "url": "https://www.amazon.com/dp/B07BPGYX3G",
       "notes": "Two installed. Listing variant and drawing specify 5 mm bore; measure the received parts.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 899
     },
     {
@@ -311,7 +323,7 @@
       "url": "https://www.amazon.com/dp/B0FRRX8YDF",
       "notes": "Initial FDM structural material; print fit coupons before the full set.",
       "shipmentOrderRef": "AMZ-03",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 2249
     },
     {
@@ -326,7 +338,7 @@
       "url": "https://www.amazon.com/dp/B0B3JW8BVW",
       "notes": "Includes wiring tools, solder, flux, cutters, strippers and heat-shrink. 120 V input.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 4499
     },
     {
@@ -341,7 +353,7 @@
       "url": "https://www.amazon.com/dp/B07X8JQ8L5",
       "notes": "For fit checks, screw measurements and spacer dimensions.",
       "shipmentOrderRef": "AMZ-02",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 1978
     },
     {
@@ -356,7 +368,7 @@
       "url": "https://www.amazon.com/dp/B0CJBRYQF3",
       "notes": "Includes 2.5, 3 and 4 mm sizes. The original camera mount imperial key set is not needed.",
       "shipmentOrderRef": "AMZ-02",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 999
     },
     {
@@ -371,7 +383,7 @@
       "url": "https://www.amazon.com/dp/B099F558S1",
       "notes": "Separate charging for the phone.",
       "shipmentOrderRef": "AMZ-02",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 1199
     },
     {
@@ -386,7 +398,7 @@
       "url": "https://www.amazon.com/dp/B0DB5RZBV3",
       "notes": "For iPhone 14; avoids relying on the refurbished phone's generic cable.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 2099
     },
     {
@@ -401,7 +413,7 @@
       "url": "https://www.amazon.com/dp/B0C4JTPPYY",
       "notes": "Adjust uniform lighting to limit screen reflections.",
       "shipmentOrderRef": "AMZ-03",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 1992
     },
     {
@@ -416,7 +428,7 @@
       "url": "https://www.amazon.com/dp/B0DN1C9RH2",
       "notes": "1/4-inch thread, stated 500 g capacity. Replaces the original mast, bracket and imperial fasteners.",
       "shipmentOrderRef": "AMZ-02",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 3399
     },
     {
@@ -431,7 +443,7 @@
       "url": "https://www.amazon.com/dp/B089CQHRDT",
       "notes": "Six colors × 10 ft. For coil and signals; includes heat-shrink and cable ties.",
       "shipmentOrderRef": "AMZ-03",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 1279
     },
     {
@@ -446,7 +458,7 @@
       "url": "https://www.amazon.com/dp/B01GEA8PQA",
       "notes": "Machine supply; Raspberry Pi has its own supply. Center positive: verify polarity before connection.",
       "shipmentOrderRef": "AMZ-02",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 1299
     },
     {
@@ -461,7 +473,7 @@
       "url": "https://www.amazon.com/dp/B0GYSQYSKH",
       "notes": "Long H carriage; nominal assembled height 10 mm. Do not substitute MGN9C or MGN12.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 1499
     },
     {
@@ -476,7 +488,7 @@
       "url": "https://www.amazon.com/dp/B08SMDY3SQ",
       "notes": "Two drivers and heatsinks. Do not duplicate the order at BIQU.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 1399
     },
     {
@@ -491,7 +503,7 @@
       "url": "https://www.amazon.com/dp/B0GYSVQ9H3",
       "notes": "Pack includes two rails and carriages. Requires the specified 355 mm long frame profiles.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 2799
     },
     {
@@ -506,7 +518,7 @@
       "url": "https://www.amazon.com/dp/B0C3TWCXL4",
       "notes": "20 pieces at 0.5 mm; combine with 12 from the assortment for 32 nominal pieces. ID 5 / OD 8 mm.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 629
     },
     {
@@ -521,7 +533,7 @@
       "url": "https://www.amazon.com/dp/B0H1BN727R",
       "notes": "17 of 50 installed; 33 spare. M3, 5.4×5.4×2.4 mm. Captive in PETG, not T-slot nuts.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 629
     },
     {
@@ -536,7 +548,7 @@
       "url": "https://www.amazon.com/dp/B0H1BVBNKH",
       "notes": "2 of 30 installed; 28 spare. M5, 8×8×4 mm. Captive in PETG, not RN05BM5.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 629
     },
     {
@@ -551,7 +563,7 @@
       "url": "https://www.amazon.com/dp/B07RR3H2FT",
       "notes": "10 of 50 installed; 40 spare. M4, 7×7×3 mm. Captive axle nuts, not GS20 frame nuts.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 949
     },
     {
@@ -566,7 +578,7 @@
       "url": "https://www.amazon.com/dp/B0FF1NZVNX",
       "notes": "48-piece set: 12 each at 0.1/0.2/0.3/0.5 mm. Use 12×0.5 + 12×0.3 + 2×0.2 with the other pack; remaining shims allow adjustment.",
       "shipmentOrderRef": "AMZ-03",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 1199
     },
     {
@@ -581,7 +593,7 @@
       "url": "https://www.amazon.com/dp/B0DP7173LB",
       "notes": "4 of 6 installed; 2 spare. Ø5×10 mm shoulder, M4×0.7 thread 8 mm long. Shorten only the two XY-joint threaded tips to 7.2–7.5 mm.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 689
     },
     {
@@ -596,7 +608,7 @@
       "url": "https://www.amazon.com/dp/B0FDQHC8SW",
       "notes": "6 of 26 installed. Ø5×20 mm shoulder, M4×0.7 thread 8 mm long. Shorten only the two XY-joint threaded tips to 7.2–7.5 mm.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 999
     },
     {
@@ -611,7 +623,7 @@
       "url": "https://www.amazon.com/dp/B0001LQY44",
       "notes": "Holds the four threaded tips during preparation. Requires a compatible clamping surface.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 3765
     },
     {
@@ -641,7 +653,7 @@
       "url": "https://www.amazon.com/dp/B004UU7Y64",
       "notes": "Handle for the selected file.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 1167
     },
     {
@@ -656,7 +668,7 @@
       "url": "https://www.amazon.com/dp/B06Y48XXBF",
       "notes": "Protects parts held in the vise.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 1709
     },
     {
@@ -671,7 +683,7 @@
       "url": "https://www.amazon.com/dp/B004VODM24",
       "notes": "Medium-strength blue threadlocker for metal-to-metal pulley set screws. Do not apply to PETG. One-time purchase, no subscription.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 2116
     },
     {
@@ -686,7 +698,7 @@
       "url": "https://www.amazon.com/dp/B0DSVSVSZN",
       "notes": "One installed and seven spare. Collar Ø8.9×4.5 mm; M5 stem about 4.9 mm long. Printed clamp holds the collar; thread pitch is not assumed.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 1249
     },
     {
@@ -701,7 +713,7 @@
       "url": "https://www.amazon.com/dp/B00002N5KZ",
       "notes": "For NKK S301 panel mounting nuts; hex keys cannot perform this task.",
       "shipmentOrderRef": "AMZ-04",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 1328
     },
     {
@@ -716,7 +728,7 @@
       "url": "https://www.amazon.com/dp/B0C4YL76WY",
       "notes": "Listing includes two K-type bead probes, two rigid probes and three AAA batteries. For commissioning checks on solenoid, motors and mounts.",
       "shipmentOrderRef": "AMZ-03",
-      "procurementStatus": "payment_attention",
+      "procurementStatus": "ordered",
       "orderUnitCents": 2799
     },
     {
@@ -1224,7 +1236,7 @@
       "id": "amazon-additions-grouped",
       "vendor": "Amazon",
       "name": "Taxes and others",
-      "status": "partially_shipped_payment_attention",
+      "status": "partially_shipped",
       "quotedTotalCents": 32094,
       "actualPaidCents": null,
       "includedInVendorOrderTotals": true,
@@ -1249,6 +1261,16 @@
     }
   ],
   "changes": [
+    {
+      "date": "2026-10-26",
+      "title": "Two forwarder prealerts consolidated; West3D payment documented",
+      "detail": "Two confirmed Amazon/FedEx packages are prealerted and grouped in the project consolidation. No package has a confirmed locker arrival. The original West3D invoice explicitly records $17.55 paid and $0.00 due, increasing documented vendor payments from $304.85 to $322.40; this remains a partial record, not complete bank reconciliation. Original PDFs and identifiers stay private."
+    },
+    {
+      "date": "2026-10-26",
+      "title": "Private dispatch room and new order confirmations",
+      "detail": "VXB ($65.22), West3D ($17.55) and PhotonLight ($18.94) are confirmed by vendor emails, with fees recorded separately. Amazon no longer displays the earlier payment-review warnings. The private dispatch room tracks original invoices, full tracking numbers and locker arrivals; those records are excluded from the public ledger. No settled bank payments or arrivals are inferred."
+    },
     {
       "date": "2026-10-26",
       "title": "Walmart order confirmed with approved additional category",
@@ -1337,7 +1359,7 @@
     },
     {
       "id": "AMZ-02",
-      "status": "payment_attention",
+      "status": "ordered",
       "orderedAt": "2026-10-26",
       "currency": "USD",
       "itemIds": [
@@ -1357,11 +1379,11 @@
       "actualPaidCents": null,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-26",
-      "notes": "Requires payment review; no payment changes were made during the purchase pause."
+      "notes": "The latest authenticated order history no longer shows a payment-review warning. Estimated arrival October 27, 2026; no dispatch or tracking yet verified for this order. Bank charge remains unconfirmed."
     },
     {
       "id": "AMZ-03",
-      "status": "payment_attention",
+      "status": "ordered",
       "orderedAt": "2026-10-26",
       "currency": "USD",
       "itemIds": [
@@ -1381,11 +1403,11 @@
       "actualPaidCents": null,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-26",
-      "notes": "Requires payment review; no payment changes were made during the purchase pause."
+      "notes": "The latest authenticated order history no longer shows a payment-review warning. Estimated arrival October 27, 2026; no dispatch or tracking yet verified for this order. Bank charge remains unconfirmed."
     },
     {
       "id": "AMZ-04",
-      "status": "payment_attention",
+      "status": "ordered",
       "orderedAt": "2026-10-26",
       "currency": "USD",
       "itemIds": [
@@ -1420,7 +1442,7 @@
       "actualPaidCents": null,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-26",
-      "notes": "Requires payment review; no payment changes were made during the purchase pause."
+      "notes": "The latest authenticated order history no longer shows a payment-review warning. Estimated arrival November 2, 2026; no dispatch or tracking yet verified for this order. Bank charge remains unconfirmed."
     },
     {
       "id": "AMZ-05",
@@ -1456,7 +1478,7 @@
       "deliveredAt": null,
       "lastChecked": "2026-10-26",
       "source": "Amazon tracking page",
-      "notes": "Amazon reports the package left the shipper facility. Estimated delivery date, not guaranteed."
+      "notes": "Amazon reports the package left the shipper facility. Estimated delivery date, not guaranteed. Forwarder prealert verified and grouped with the other tracked project package. No locker arrival is confirmed."
     },
     {
       "id": "AMZ-PKG-02",
@@ -1471,7 +1493,7 @@
       "deliveredAt": null,
       "lastChecked": "2026-10-26",
       "source": "Amazon tracking page",
-      "notes": "Amazon reports the carrier received the package. Includes the project phone and part of the grouped additions; no confirmed delivery."
+      "notes": "Amazon reports the carrier received the package. Includes the project phone and part of the grouped additions; no confirmed delivery. Forwarder prealert verified and grouped with the other tracked project package. No locker arrival is confirmed."
     },
     {
       "id": "FT-PREP-01",
