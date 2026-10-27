@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-26",
+  "updatedAt": "2026-10-27",
   "currency": "USD",
   "purchasesPaused": false,
   "equipmentQuotedTotalCents": 289369,
@@ -34,14 +34,14 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "authenticated-order-page",
-      "notes": "Five confirmed orders totaling $1,524.35. Two packages were confirmed shipped. The latest authenticated order history no longer shows the three earlier payment-review warnings; delivery estimates are October 27 for AMZ-02 and AMZ-03, and November 2 for AMZ-04. Dispatch and tracking for those three orders still need evidence. Bank charges have not been reconciled.",
+      "notes": "Five confirmed orders total $1,524.35. Four have carrier tracking; one carrier reports delivery to reception, pending confirmation by the forwarder. The remaining order is preparing. Order totals do not prove settled bank charges.",
       "invoiceTotalCents": 152435
     },
     {
       "id": "bambu-lab",
       "vendor": "Bambu Lab",
-      "status": "deferred",
-      "orderedAt": null,
+      "status": "partially_shipped",
+      "orderedAt": "2026-10-27",
       "quotedSubtotalCents": 89900,
       "actualPaidCents": null,
       "shippingPaidCents": null,
@@ -49,8 +49,13 @@
       "tariffPaidCents": null,
       "receivedAt": null,
       "publicReceiptUrl": null,
-      "evidenceLevel": "cart-quote",
-      "notes": "Deferred while reviewing the announced promotion. No confirmed purchase."
+      "evidenceLevel": "vendor-order-confirmation-and-authenticated-order-summary",
+      "notes": "Order total $881.86: $847.18 in items, less $30.00 printer coupon, plus $6.99 shipping and $57.69 tax. Equipment items include the X2D AMS Combo ($789.00 before coupon) and a switching adapter ($32.99). The remaining $25.19 is grouped under Taxes and others. Accessories have tracking; the printer is preparing separately. Vendor net payment is stated; bank settlement is not independently reconciled. The $899.00 equipment quote is the original planning quote.",
+      "invoiceTotalCents": 88186,
+      "invoiceItemsCents": 84718,
+      "shippingInvoicedCents": 699,
+      "taxInvoicedCents": 5769,
+      "discountCents": 3000
     },
     {
       "id": "framingtech",
@@ -83,7 +88,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-email",
-      "notes": "Vendor confirmation: $60.95 items + $0.00 shipping + $4.27 tax = $65.22. Processing; no shipment, tracking or settled bank charge confirmed.",
+      "notes": "Vendor order total $65.22: $60.95 items + $0.00 shipping + $4.27 tax. USPS tracking is assigned; the carrier reports a label was created and is awaiting the package. Prealerted and consolidated. No locker arrival or settled bank charge confirmed.",
       "invoiceTotalCents": 6522,
       "shippingInvoicedCents": 0,
       "taxInvoicedCents": 427,
@@ -149,7 +154,7 @@
     {
       "id": "walmart",
       "vendor": "Walmart",
-      "status": "ordered",
+      "status": "partially_shipped",
       "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 2983,
       "actualPaidCents": null,
@@ -159,7 +164,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-email-and-authenticated-order-page",
-      "notes": "Order confirmed October 26, 2026: $29.83 equipment + $23.48 Taxes and others = $53.31 total, with free shipping. The grouped category includes $3.49 documented sales tax and $19.99 other expenses, already included in the order total. Fulfillment estimates range from October 28 to November 9. No dispatch, tracking, delivery or settled bank charge is confirmed.",
+      "notes": "Order confirmed: $29.83 equipment plus $23.48 Taxes and others = $53.31, with free shipping. The grouped category includes $3.49 documented sales tax and $19.99 other expenses, already in the order total. Three fulfillment groups have tracking and are prealerted; the remaining equipment group is preparing. No locker arrival or settled bank charge confirmed.",
       "invoiceItemsCents": 4982,
       "invoiceTotalCents": 5331,
       "shippingInvoicedCents": 0,
@@ -198,7 +203,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-confirmation-email-and-paid-invoice-pdf",
-      "notes": "Vendor invoice confirms $17.55 paid, amount due $0.00: $9.99 item + $7.56 shipping + $0.00 tax. Processing; usual dispatch 1–2 business days is not a confirmed ship date. No tracking or arrival confirmed; bank settlement is not independently reconciled.",
+      "notes": "Vendor invoice records $17.55 paid: $9.99 item and $7.56 shipping, $0.00 tax. USPS tracking is assigned; the carrier reports a label was created and is awaiting the package. Prealerted and consolidated; no locker arrival confirmed.",
       "invoiceTotalCents": 1755,
       "shippingInvoicedCents": 756,
       "taxInvoicedCents": 0,
@@ -248,7 +253,7 @@
       "url": "https://www.amazon.com/dp/B0CJHZ92P6",
       "notes": "UVC; built-in 1.5 m cable and 1/4-inch mount. Initial mounting distance 25–35 cm. Quoted at $45.59; the earlier payment-review warning is no longer present.",
       "shipmentOrderRef": "AMZ-02",
-      "procurementStatus": "ordered",
+      "procurementStatus": "carrier_delivered",
       "orderUnitCents": 4559
     },
     {
@@ -263,7 +268,7 @@
       "url": "https://www.amazon.com/dp/B0B38GX54H",
       "notes": "Two 1.5 A motors, 42×42×38 mm; 1 m cables included.",
       "shipmentOrderRef": "AMZ-03",
-      "procurementStatus": "ordered",
+      "procurementStatus": "shipped",
       "orderUnitCents": 1099
     },
     {
@@ -323,7 +328,7 @@
       "url": "https://www.amazon.com/dp/B0FRRX8YDF",
       "notes": "Initial FDM structural material; print fit coupons before the full set.",
       "shipmentOrderRef": "AMZ-03",
-      "procurementStatus": "ordered",
+      "procurementStatus": "shipped",
       "orderUnitCents": 2249
     },
     {
@@ -353,7 +358,7 @@
       "url": "https://www.amazon.com/dp/B07X8JQ8L5",
       "notes": "For fit checks, screw measurements and spacer dimensions.",
       "shipmentOrderRef": "AMZ-02",
-      "procurementStatus": "ordered",
+      "procurementStatus": "carrier_delivered",
       "orderUnitCents": 1978
     },
     {
@@ -368,7 +373,7 @@
       "url": "https://www.amazon.com/dp/B0CJBRYQF3",
       "notes": "Includes 2.5, 3 and 4 mm sizes. The original camera mount imperial key set is not needed.",
       "shipmentOrderRef": "AMZ-02",
-      "procurementStatus": "ordered",
+      "procurementStatus": "carrier_delivered",
       "orderUnitCents": 999
     },
     {
@@ -383,7 +388,7 @@
       "url": "https://www.amazon.com/dp/B099F558S1",
       "notes": "Separate charging for the phone.",
       "shipmentOrderRef": "AMZ-02",
-      "procurementStatus": "ordered",
+      "procurementStatus": "carrier_delivered",
       "orderUnitCents": 1199
     },
     {
@@ -413,7 +418,7 @@
       "url": "https://www.amazon.com/dp/B0C4JTPPYY",
       "notes": "Adjust uniform lighting to limit screen reflections.",
       "shipmentOrderRef": "AMZ-03",
-      "procurementStatus": "ordered",
+      "procurementStatus": "shipped",
       "orderUnitCents": 1992
     },
     {
@@ -428,7 +433,7 @@
       "url": "https://www.amazon.com/dp/B0DN1C9RH2",
       "notes": "1/4-inch thread, stated 500 g capacity. Replaces the original mast, bracket and imperial fasteners.",
       "shipmentOrderRef": "AMZ-02",
-      "procurementStatus": "ordered",
+      "procurementStatus": "carrier_delivered",
       "orderUnitCents": 3399
     },
     {
@@ -443,7 +448,7 @@
       "url": "https://www.amazon.com/dp/B089CQHRDT",
       "notes": "Six colors × 10 ft. For coil and signals; includes heat-shrink and cable ties.",
       "shipmentOrderRef": "AMZ-03",
-      "procurementStatus": "ordered",
+      "procurementStatus": "shipped",
       "orderUnitCents": 1279
     },
     {
@@ -458,7 +463,7 @@
       "url": "https://www.amazon.com/dp/B01GEA8PQA",
       "notes": "Machine supply; Raspberry Pi has its own supply. Center positive: verify polarity before connection.",
       "shipmentOrderRef": "AMZ-02",
-      "procurementStatus": "ordered",
+      "procurementStatus": "carrier_delivered",
       "orderUnitCents": 1299
     },
     {
@@ -578,7 +583,7 @@
       "url": "https://www.amazon.com/dp/B0FF1NZVNX",
       "notes": "48-piece set: 12 each at 0.1/0.2/0.3/0.5 mm. Use 12×0.5 + 12×0.3 + 2×0.2 with the other pack; remaining shims allow adjustment.",
       "shipmentOrderRef": "AMZ-03",
-      "procurementStatus": "ordered",
+      "procurementStatus": "shipped",
       "orderUnitCents": 1199
     },
     {
@@ -728,7 +733,7 @@
       "url": "https://www.amazon.com/dp/B0C4YL76WY",
       "notes": "Listing includes two K-type bead probes, two rigid probes and three AAA batteries. For commissioning checks on solenoid, motors and mounts.",
       "shipmentOrderRef": "AMZ-03",
-      "procurementStatus": "ordered",
+      "procurementStatus": "shipped",
       "orderUnitCents": 2799
     },
     {
@@ -741,7 +746,8 @@
       "quotedTotalCents": 89900,
       "actualPaidCents": null,
       "url": "https://us.store.bambulab.com/products/x2d",
-      "notes": "Printer plus AMS2Pro combo, not two separate purchases."
+      "notes": "Printer plus AMS2Pro combo, not two separate purchases.",
+      "procurementStatus": "preparing"
     },
     {
       "id": "framingtech-037",
@@ -1163,7 +1169,8 @@
       "quotedTotalCents": 899,
       "actualPaidCents": null,
       "url": "https://www.walmart.com/ip/5223528994",
-      "notes": "Pack of 20; use 4, 16 spare. Not motor spacers."
+      "notes": "Pack of 20; use 4, 16 spare. Not motor spacers.",
+      "procurementStatus": "preparing"
     },
     {
       "id": "walmart-071",
@@ -1175,7 +1182,8 @@
       "quotedTotalCents": 999,
       "actualPaidCents": null,
       "url": "https://www.walmart.com/ip/3364975377",
-      "notes": "About 0.5 m used; remainder is roll surplus."
+      "notes": "About 0.5 m used; remainder is roll surplus.",
+      "procurementStatus": "shipped"
     },
     {
       "id": "walmart-072",
@@ -1187,7 +1195,8 @@
       "quotedTotalCents": 1085,
       "actualPaidCents": null,
       "url": "https://www.walmart.com/ip/9540216155",
-      "notes": "200 mm × 3 m roll; cut 70×140 mm bed pad and four foot rings."
+      "notes": "200 mm × 3 m roll; cut 70×140 mm bed pad and four foot rings.",
+      "procurementStatus": "shipped"
     },
     {
       "id": "photonlight-073",
@@ -1258,9 +1267,28 @@
       "includedInVendorOrderTotals": true,
       "evidenceLevel": "authenticated-order-page-and-owner-classification",
       "notes": "Grouped other expenses of $19.99 plus documented sales tax of $3.49: $23.48 total. Already included in the $53.31 vendor order and not counted again. Item-level details stay private; settled bank charge unconfirmed."
+    },
+    {
+      "id": "bambu-additions-grouped",
+      "vendor": "Bambu Lab",
+      "name": "Taxes and others",
+      "status": "partially_shipped",
+      "orderedAt": "2026-10-27",
+      "quotedTotalCents": 2519,
+      "vendorTaxCents": 5769,
+      "categoryTotalCents": 8288,
+      "actualPaidCents": null,
+      "includedInVendorOrderTotals": true,
+      "evidenceLevel": "vendor-order-confirmation-and-owner-classification",
+      "notes": "Other expenses of $25.19 and documented order tax of $57.69, totaling $82.88. Both are included in the Bambu order total and are not added again. The printer coupon is recorded separately."
     }
   ],
   "changes": [
+    {
+      "date": "2026-10-27",
+      "title": "Printer order and shipment tracking updated",
+      "detail": "Bambu Lab confirmed an $881.86 order, including $6.99 shipping, $57.69 tax and a $30.00 printer coupon. Other expenses are grouped and included in the order total. The first project consolidation now contains ten prealerted packages. Amazon reports one delivery to reception; forwarder receipt is not confirmed. Printed parts and physical tests remain ahead."
+    },
     {
       "date": "2026-10-26",
       "title": "Two forwarder prealerts consolidated; West3D payment documented",
@@ -1359,7 +1387,7 @@
     },
     {
       "id": "AMZ-02",
-      "status": "ordered",
+      "status": "carrier_delivered",
       "orderedAt": "2026-10-26",
       "currency": "USD",
       "itemIds": [
@@ -1378,12 +1406,12 @@
       "orderTotalCents": 15840,
       "actualPaidCents": null,
       "evidenceLevel": "authenticated-order-page",
-      "sourceDate": "2026-10-26",
-      "notes": "The latest authenticated order history no longer shows a payment-review warning. Estimated arrival October 27, 2026; no dispatch or tracking yet verified for this order. Bank charge remains unconfirmed."
+      "sourceDate": "2026-10-27",
+      "notes": "Amazon reports delivery to reception on October 27; the forwarder has not confirmed receipt. Bank charge remains unconfirmed."
     },
     {
       "id": "AMZ-03",
-      "status": "ordered",
+      "status": "shipped",
       "orderedAt": "2026-10-26",
       "currency": "USD",
       "itemIds": [
@@ -1402,8 +1430,8 @@
       "orderTotalCents": 12536,
       "actualPaidCents": null,
       "evidenceLevel": "authenticated-order-page",
-      "sourceDate": "2026-10-26",
-      "notes": "The latest authenticated order history no longer shows a payment-review warning. Estimated arrival October 27, 2026; no dispatch or tracking yet verified for this order. Bank charge remains unconfirmed."
+      "sourceDate": "2026-10-27",
+      "notes": "Amazon tracking shows this order shipped and prealerted with the forwarder. No locker arrival or settled bank charge is confirmed."
     },
     {
       "id": "AMZ-04",
@@ -1493,7 +1521,7 @@
       "deliveredAt": null,
       "lastChecked": "2026-10-26",
       "source": "Amazon tracking page",
-      "notes": "Amazon reports the carrier received the package. Includes the project phone and part of the grouped additions; no confirmed delivery. Forwarder prealert verified and grouped with the other tracked project package. No locker arrival is confirmed."
+      "notes": "Amazon reports the carrier received the package. Prealerted and consolidated; no locker arrival is confirmed."
     },
     {
       "id": "FT-PREP-01",
@@ -1516,6 +1544,146 @@
       "lastChecked": "2026-10-26",
       "source": "Vendor confirmation email and order PDF",
       "notes": "Stock allocated and order released to production. This is a planned dispatch date. No tracking number or dispatch confirmation yet."
+    },
+    {
+      "id": "AMZ-PKG-03",
+      "vendor": "Amazon",
+      "orderRef": "AMZ-02",
+      "status": "carrier_delivered",
+      "carrier": "Amazon Logistics",
+      "title": "Parts and supplies",
+      "itemIds": [],
+      "expectedDeliveryDate": null,
+      "deliveredAt": null,
+      "lastChecked": "2026-10-27",
+      "source": "Vendor order or carrier tracking",
+      "notes": "Amazon reports delivery to reception on October 27. Prealerted and consolidated; forwarder receipt remains unconfirmed."
+    },
+    {
+      "id": "AMZ-PKG-04",
+      "vendor": "Amazon",
+      "orderRef": "AMZ-03",
+      "status": "shipped",
+      "carrier": "Amazon Logistics",
+      "title": "Parts and supplies",
+      "itemIds": [],
+      "expectedDeliveryDate": "2026-10-27",
+      "deliveredAt": null,
+      "lastChecked": "2026-10-27",
+      "source": "Vendor order or carrier tracking",
+      "notes": "Shipped, prealerted and consolidated. No forwarder receipt is confirmed."
+    },
+    {
+      "id": "WMT-PKG-01",
+      "vendor": "Walmart",
+      "orderRef": "walmart",
+      "status": "shipped",
+      "carrier": "Walmart",
+      "title": "Other expenses shipment",
+      "itemIds": [],
+      "expectedDeliveryDate": null,
+      "deliveredAt": null,
+      "lastChecked": "2026-10-27",
+      "source": "Vendor order or carrier tracking",
+      "notes": "Carrier tracking is available; prealerted and consolidated. No forwarder receipt is confirmed."
+    },
+    {
+      "id": "WMT-PKG-02",
+      "vendor": "Walmart",
+      "orderRef": "walmart",
+      "status": "shipped",
+      "carrier": "SF Express",
+      "title": "Foam",
+      "itemIds": [],
+      "expectedDeliveryDate": "2026-11-06",
+      "deliveredAt": null,
+      "lastChecked": "2026-10-27",
+      "source": "Vendor order or carrier tracking",
+      "notes": "Shipped, prealerted and consolidated. No forwarder receipt is confirmed."
+    },
+    {
+      "id": "WMT-PKG-03",
+      "vendor": "Walmart",
+      "orderRef": "walmart",
+      "status": "shipped",
+      "carrier": "USPS",
+      "title": "Cable management",
+      "itemIds": [],
+      "expectedDeliveryDate": "2026-11-09",
+      "deliveredAt": null,
+      "lastChecked": "2026-10-27",
+      "source": "Vendor order or carrier tracking",
+      "notes": "Shipped, prealerted and consolidated. No forwarder receipt is confirmed."
+    },
+    {
+      "id": "WMT-PREP-04",
+      "vendor": "Walmart",
+      "orderRef": "walmart",
+      "status": "preparing",
+      "carrier": "Unconfirmed",
+      "title": "Spacers",
+      "itemIds": [],
+      "expectedDeliveryDate": "2026-11-09",
+      "deliveredAt": null,
+      "lastChecked": "2026-10-27",
+      "source": "Vendor order or carrier tracking",
+      "notes": "Preparing separately; carrier and tracking are not yet confirmed."
+    },
+    {
+      "id": "VXB-PKG-01",
+      "vendor": "VXB",
+      "orderRef": "vxb",
+      "status": "preparing",
+      "carrier": "USPS",
+      "title": "Controller board",
+      "itemIds": [],
+      "expectedDeliveryDate": null,
+      "deliveredAt": null,
+      "lastChecked": "2026-10-27",
+      "source": "Vendor order or carrier tracking",
+      "notes": "USPS label created; awaiting carrier acceptance. Prealerted and consolidated; the forwarder date is provisional."
+    },
+    {
+      "id": "WEST-PKG-01",
+      "vendor": "West3D",
+      "orderRef": "west3d",
+      "status": "preparing",
+      "carrier": "USPS",
+      "title": "Rail lubricant",
+      "itemIds": [],
+      "expectedDeliveryDate": null,
+      "deliveredAt": null,
+      "lastChecked": "2026-10-27",
+      "source": "Vendor order or carrier tracking",
+      "notes": "USPS label created; awaiting carrier acceptance. Prealerted and consolidated; the forwarder date is provisional."
+    },
+    {
+      "id": "BAMBU-PKG-01",
+      "vendor": "Bambu Lab",
+      "orderRef": "bambu-lab",
+      "status": "shipped",
+      "carrier": "OnTrac",
+      "title": "Accessories shipment",
+      "itemIds": [],
+      "expectedDeliveryDate": null,
+      "deliveredAt": null,
+      "lastChecked": "2026-10-27",
+      "source": "Vendor order or carrier tracking",
+      "notes": "A separate accessories shipment has tracking and is prealerted and consolidated. The forwarder date is provisional."
+    },
+    {
+      "id": "BAMBU-PREP-01",
+      "vendor": "Bambu Lab",
+      "orderRef": "bambu-lab",
+      "status": "preparing",
+      "carrier": "Unconfirmed",
+      "title": "3D printer",
+      "itemIds": [],
+      "expectedDeliveryDate": null,
+      "deliveredAt": null,
+      "lastChecked": "2026-10-27",
+      "source": "Vendor order or carrier tracking",
+      "notes": "The printer is a separate fulfillment group; carrier and tracking are not yet confirmed."
     }
   ]
 }

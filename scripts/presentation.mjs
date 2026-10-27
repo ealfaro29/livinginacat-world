@@ -3,6 +3,8 @@ import { esc, money, date } from "./lib.mjs";
 export function articleCover(post, ledger) {
   if (post.number === 1)
     return `<figure class="entry-cover sketch-cover"><img src="/assets/prototype-rough-v1.png" alt="Rough ink and red-pencil concept of the iPhone robot" width="1536" height="1024" loading="lazy"><figcaption>CONCEPT SKETCH / NOT A COMPLETED BUILD</figcaption></figure>`;
+  if (post.number === 3)
+    return `<figure class="entry-cover sketch-cover"><img src="/assets/printed-parts.png" alt="CAD preview of parts planned for the robot" width="2400" height="2850" loading="lazy"><figcaption>OPEN CAD / PHYSICAL TESTS AHEAD</figcaption></figure>`;
   return `<div class="receipt-cover" aria-label="Illustrated order ledger"><span class="cover-kicker">FOLLOW THE PAPER TRAIL</span><div class="receipt-slip"><span class="receipt-title">ORDER RECORD</span>${ledger.amazonOrders.map((o) => `<div><span>${o.id}</span><b>${money(o.orderTotalCents)}</b></div>`).join("")}<div class="receipt-total"><span>AMAZON ORDERS</span><b>${money(ledger.amazonOrders.reduce((n, x) => n + x.orderTotalCents, 0))}</b></div><small>Order amounts. Bank payments not reconciled.</small></div><span class="rubber-stamp">OPEN BOOKS</span></div>`;
 }
 

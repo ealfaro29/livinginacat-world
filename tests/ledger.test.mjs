@@ -65,7 +65,7 @@ test("Amazon invoices reconcile without counting grouped extras twice", () => {
 });
 test("unverified payments stay unknown, shipping is not delivery", () => {
   assert.equal(totals(ledger).verifiedPaid, 32240);
-  assert.equal(totals(ledger).shipped, 2);
+  assert.equal(totals(ledger).shipped, 8);
   assert.equal(
     ledger.amazonOrders.filter((x) => x.status === "payment_attention").length,
     0,
@@ -110,16 +110,28 @@ test("BoltDepot receipt reconciles owner-selected spares and charges", () => {
 test("Walmart approved additions and tax remain included in the order total", () => {
   const order = ledger.orders.find((x) => x.id === "walmart");
   const extra = ledger.otherExpenses.find((x) => x.id === "walmart-additions-grouped");
-  assert.equal(order.status, "ordered");
+  assert.equal(order.status, "partially_shipped");
   assert.equal(order.invoiceItemsCents, order.quotedSubtotalCents + extra.quotedTotalCents);
   assert.equal(order.invoiceTotalCents, order.invoiceItemsCents + order.taxInvoicedCents);
   assert.equal(order.invoiceTotalCents, 5331);
   assert.equal(extra.includedInVendorOrderTotals, true);
   assert.equal(extra.categoryTotalCents, extra.quotedTotalCents + extra.vendorTaxCents);
   assert.equal(extra.vendorTaxCents, order.taxInvoicedCents);
-  assert.equal(totals(ledger).taxesAndOthers, 44416);
+  assert.equal(totals(ledger).taxesAndOthers, 52704);
   assert.equal(order.actualPaidCents, null);
   assert.equal(extra.actualPaidCents, null);
+});
+test("Bambu order and grouped costs reconcile without double counting", () => {
+  const order = ledger.orders.find((x) => x.id === "bambu-lab");
+  const extra = ledger.otherExpenses.find((x) => x.id === "bambu-additions-grouped");
+  assert.equal(order.invoiceTotalCents, order.invoiceItemsCents - order.discountCents + order.shippingInvoicedCents + order.taxInvoicedCents);
+  assert.equal(order.invoiceTotalCents, 88186);
+  assert.equal(extra.categoryTotalCents, extra.quotedTotalCents + extra.vendorTaxCents);
+  assert.equal(extra.vendorTaxCents, order.taxInvoicedCents);
+  assert.equal(extra.includedInVendorOrderTotals, true);
+  const confirmedOrders = ledger.orders.filter((x) => x.id !== "makerstore").reduce((sum, x) => sum + x.invoiceTotalCents, 0);
+  assert.equal(confirmedOrders + 419, 298921);
+  assert.equal(order.actualPaidCents, null);
 });
 test("published CAD archive matches its manifest hash", async () => {
   const release = await readJSON("data/hardware-release.json");
