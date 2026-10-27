@@ -378,10 +378,10 @@ async function handle(request, env) {
       throw new ApiError(400, "Invalid Speedy evidence.");
     for (const event of input.events) {
       if (
-        !["prealert_confirmed", "consolidation_confirmed"].includes(
+        !["prealert_confirmed", "consolidation_confirmed", "status_confirmed"].includes(
           event.type,
         ) ||
-        !text(event.reference, 160) ||
+        (event.type !== "status_confirmed" && !text(event.reference, 160)) ||
         !text(event.source, 500)
       )
         throw new ApiError(
@@ -397,6 +397,19 @@ async function handle(request, env) {
         throw new ApiError(400, "A Speedy event requires a tracking number.");
       if (event.tracking !== next.tracking)
         throw new ApiError(409, "Speedy tracking does not match this package.");
+      if (event.type === "status_confirmed") {
+        const allowed = ["received", "in_transit", "delivered"];
+        if (!allowed.includes(event.status))
+          throw new ApiError(400, "Invalid Speedy status.");
+        if (next.speedyStatusVerifiedAt && Date.parse(next.speedyStatusVerifiedAt) >= verifiedAt.getTime()) continue;
+        if (next.speedyStatus && allowed.indexOf(event.status) < allowed.indexOf(next.speedyStatus)) continue;
+        next.speedyStatus = event.status;
+        next.speedyStatusVerifiedAt = verifiedAt.toISOString();
+        next.speedyStatusSource = text(event.source, 500);
+        if (event.status === "received") next.lockerArrivedAt ||= verifiedAt.toISOString();
+        await updatePackage(env, row, next, actor, "Speedy package status verified");
+        continue;
+      }
       if (event.type === "prealert_confirmed") {
         if (
           next.prealertedAt &&

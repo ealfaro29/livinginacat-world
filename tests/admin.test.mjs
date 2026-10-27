@@ -357,6 +357,23 @@ test("private admin protects evidence and persists versioned changes", async (t)
     eventVersion,
     "verified Speedy events are idempotent",
   );
+  const statusEvent = (status, verifiedAt, tracking = "123456789012") => ({
+    events: [{ type: "status_confirmed", packageId: "test-pkg", tracking, status, verifiedAt, source: "Speedy test UI" }],
+  });
+  assert.equal((await request("/api/ingest/speedy", { method: "POST", service: true, payload: statusEvent("received", "2026-10-26T21:00:00Z", "wrong") })).status, 409);
+  assert.equal((await request("/api/ingest/speedy", { method: "POST", service: true, payload: statusEvent("received", "2026-10-26T21:00:00Z") })).status, 200);
+  snap = await (await request("/api/snapshot", { cookie: device2 })).json();
+  assert.equal(snap.packages[0].speedyStatus, "received");
+  assert.ok(snap.packages[0].lockerArrivedAt);
+  assert.equal(snap.packages[0].shippingStatus, "shipped");
+  assert.equal(snap.packages[0].notes, "Shared note");
+  assert.equal((await request("/api/ingest/speedy", { method: "POST", service: true, payload: statusEvent("in_transit", "2026-10-26T22:00:00Z") })).status, 200);
+  assert.equal((await request("/api/ingest/speedy", { method: "POST", service: true, payload: statusEvent("received", "2026-10-26T23:00:00Z") })).status, 200);
+  snap = await (await request("/api/snapshot", { cookie: device2 })).json();
+  assert.equal(snap.packages[0].speedyStatus, "in_transit", "older statuses do not overwrite progress");
+  assert.equal((await request("/api/ingest/speedy", { method: "POST", service: true, payload: statusEvent("delivered", "2026-10-27T00:00:00Z") })).status, 200);
+  snap = await (await request("/api/snapshot", { cookie: device2 })).json();
+  assert.equal(snap.packages[0].speedyStatus, "delivered");
   assert.equal((await request(pdfPath)).status, 401);
   const file = await request(pdfPath, { cookie: device2 });
   assert.equal(file.status, 200);
