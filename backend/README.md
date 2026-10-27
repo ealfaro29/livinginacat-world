@@ -4,7 +4,7 @@ The public journal remains on GitHub Pages. `/admin/` links to a separate HTTPS 
 
 ## Owner workflow
 
-Open the one-time activation link locally and choose a password (14–128 characters). The owner username is `ealfaro29`. Subsequent visits use the sign-in form. Sessions last 12 hours. There is no public signup. Use **Add package** when a store splits an order, **Edit details** to record a submitted Speedy prealert or confirmed locker arrival, and **Attach PDF** to keep the original invoice. These actions synchronize across devices. A version conflict requires refreshing before saving; it does not silently overwrite another device.
+Open the one-time activation link locally and choose a password (14–128 characters). The owner username is `ealfaro29`. Subsequent visits use the sign-in form. Sessions last 12 hours. There is no public signup. Production is locked to owner `ealfaro29`; `OWNER_SETUP_ENABLED=false` also closes the original activation endpoint. A fresh deployment must explicitly enable one-time setup and close it after activation. Use **Add package** when a store splits an order, **Edit details** to record a submitted Speedy prealert or confirmed locker arrival, and **Attach PDF** to keep the original invoice. These actions synchronize across devices. A version conflict requires refreshing before saving; it does not silently overwrite another device.
 
 **Ready to prealert** requires a carrier, tracking number and PDF classified as an invoice/purchase receipt. A provisional invoice or plain order confirmation remains visibly incomplete. An ETA is never treated as an arrival. Marking a prealert in this panel does not submit it to Speedy. Consolidation and prealert actions must be verified in Speedy's own UI.
 

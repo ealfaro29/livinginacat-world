@@ -159,7 +159,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-email-and-authenticated-order-page",
-      "notes": "Order confirmed October 26, 2026: $29.83 for the three equipment lines + $19.99 for the owner-approved other expenses + $3.49 sales tax = $53.31 total, with free shipping. The other expenses and tax are classified as Taxes and others and already included in this order total. Three fulfillment groups are at Placed status: other expenses estimated October 28; foam November 3–6; spacers and spiral wrap November 5–9. No dispatch, tracking, delivery or settled bank charge is confirmed.",
+      "notes": "Order confirmed October 26, 2026: $29.83 equipment + $23.48 Taxes and others = $53.31 total, with free shipping. The grouped category includes $3.49 documented sales tax and $19.99 other expenses, already included in the order total. Fulfillment estimates range from October 28 to November 9. No dispatch, tracking, delivery or settled bank charge is confirmed.",
       "invoiceItemsCents": 4982,
       "invoiceTotalCents": 5331,
       "shippingInvoicedCents": 0,
@@ -1241,7 +1241,7 @@
       "actualPaidCents": null,
       "includedInVendorOrderTotals": true,
       "evidenceLevel": "authenticated-order-page-and-owner-classification",
-      "notes": "Two added items ($320.94 before tax) plus documented Amazon tax ($99.74), grouped at the owner’s request. Classification subtotal $420.68; no discount allocation assumed. Both components are already included in the five Amazon orders, not added again.",
+      "notes": "Aggregated other expenses of $320.94 plus documented Amazon tax of $99.74: $420.68 total. These amounts are already included in the five vendor orders and are not added again. Item-level details stay private.",
       "amazonTaxCents": 9974,
       "categoryTotalCents": 42068
     },
@@ -1257,7 +1257,7 @@
       "actualPaidCents": null,
       "includedInVendorOrderTotals": true,
       "evidenceLevel": "authenticated-order-page-and-owner-classification",
-      "notes": "At the owner’s explicit request, the other expenses ($19.99 before tax) and documented Walmart sales tax ($3.49) are grouped as Taxes and others: $23.48. Both are already included in the $53.31 vendor order; not a second expense. No settled bank charge is confirmed."
+      "notes": "Grouped other expenses of $19.99 plus documented sales tax of $3.49: $23.48 total. Already included in the $53.31 vendor order and not counted again. Item-level details stay private; settled bank charge unconfirmed."
     }
   ],
   "changes": [
@@ -1274,7 +1274,7 @@
     {
       "date": "2026-10-26",
       "title": "Walmart order confirmed with approved additional category",
-      "detail": "Walmart confirmed $53.31: three equipment lines $29.83, owner-approved other expenses $19.99 and tax $3.49, with free shipping. The $23.48 addition-plus-tax classification is included in the order total and raises Taxes and others from $420.68 to $444.16 without changing the equipment estimate. Fulfillment is at Placed status; no dispatch or settled bank charge is confirmed."
+      "detail": "Walmart confirmed $53.31: $29.83 equipment and $23.48 in Taxes and others, including $3.49 sales tax, with free shipping. The grouped amount is included in the vendor total and raises the category total to $444.16 without changing the equipment estimate. No dispatch or settled bank charge is confirmed."
     },
     {
       "date": "2026-10-26",

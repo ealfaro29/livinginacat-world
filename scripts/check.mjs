@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { rootPath } from "./lib.mjs";
+import { assertPublicText } from "./privacy.mjs";
 const base = path.join(rootPath, "dist/");
 await fs.access(path.join(base, "index.html"));
 async function files(dir) {
@@ -16,6 +17,11 @@ const all = await files(base),
 for (const file of all) {
   if (!/\.(html|js|css|json|md|csv|xml|txt|svg)$/.test(file)) continue;
   const text = await fs.readFile(file, "utf8");
+  try {
+    assertPublicText(text, path.relative(base, file));
+  } catch (error) {
+    errors.push(error.message);
+  }
   if (
     /\/Users\/|\/var\/folders\/|access_token|[\w.+-]+@(?:gmail|outlook|hotmail)\.com|\b\d{3}-\d{7}-\d{7}\b/i.test(
       text,

@@ -24,7 +24,7 @@ These rows overlap: **do not add them together**. We have not reconciled bank st
 
 ### Taxes and others
 
-Two items were added outside the original robot list. At the project owner’s request, the category is called **“Taxes and others”**. Its breakdown is **$320.94 in added items + $99.74 in Amazon tax = $420.68**. Both components are already included in the Amazon orders and are not added again to the $1,524.35 total. This is a classification subtotal; we do not invent a discount allocation between categories.
+The aggregated **“Taxes and others”** category includes **$320.94 in other expenses + $99.74 in Amazon tax = $420.68**. Item-level details are private. Both components are already included in the Amazon orders and are not added again to the $1,524.35 total. This is a classification subtotal; we do not invent a discount allocation between categories.
 
 ### Equipment allowance
 

@@ -27,3 +27,7 @@ FramingTech: payment email and PDF confirmation. GoDaddy: email receipt. Amazon:
 6. Commit, publish and verify live. Journal posts remain dated snapshots; tables show the latest record.
 
 Maintaining this ledger does not authorize purchases, payment-method changes, outgoing email or recurring monitoring.
+
+## Public and private boundary
+
+Personal or non-itemized purchases belong only in the private owner records. Public records retain their exact amounts under Taxes and others or Other expenses without product names, product identifiers, quantities, photos, invoices or descriptions that reveal those purchases. Preserve actual tax and tariff amounts; do not relabel other purchases as tax. Shipment updates for this category use a generic title. Never copy private admin data or original invoice contents into public source, posts, downloads, screenshots or commit messages. `npm run check` blocks restricted identities before publication.

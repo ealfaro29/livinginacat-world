@@ -73,7 +73,9 @@ async function body(request, limit = 1000000) {
   }
 }
 async function owner(env) {
-  return env.DB.prepare("SELECT * FROM owner WHERE id=1").first();
+  return env.DB.prepare("SELECT * FROM owner WHERE id=1 AND username=?")
+    .bind(env.OWNER_USERNAME || "ealfaro29")
+    .first();
 }
 async function rate(request, env) {
   if (!env.LOGIN_RATE) throw new ApiError(503, "Login protection unavailable.");
@@ -106,6 +108,7 @@ async function auth(request, env, serviceAllowed = false) {
     .bind(await digest(token), Date.now())
     .first();
   if (!session) throw new ApiError(401, "Your session expired. Sign in again.");
+  if (!(await owner(env))) throw new ApiError(403, "Owner access only.");
   return "owner";
 }
 async function startSession(env) {
@@ -235,11 +238,13 @@ async function handle(request, env) {
     } catch {}
     return json({
       signedIn,
-      setupAvailable: !(await owner(env)),
+      setupAvailable: env.OWNER_SETUP_ENABLED === "true" && !(await owner(env)),
       username: signedIn ? (await owner(env)).username : undefined,
     });
   }
   if (path === "/api/setup" && method === "POST") {
+    if (env.OWNER_SETUP_ENABLED !== "true")
+      throw new ApiError(403, "Owner registration is closed.");
     await rate(request, env);
     const input = await body(request, 2000);
     if (
@@ -277,6 +282,7 @@ async function handle(request, env) {
     );
     if (
       !user ||
+      user.username !== (env.OWNER_USERNAME || "ealfaro29") ||
       text(input.username, 80) !== user.username ||
       !equal(candidate, user.password_hash)
     )

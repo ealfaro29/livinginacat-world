@@ -5,6 +5,7 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import { Miniflare, convertV4MiniflareOptions } from "miniflare";
 import { ready, mergeImport, editPackage } from "../backend/model.mjs";
+import worker from "../backend/worker.mjs";
 const hash = (x) => createHash("sha256").update(x).digest("hex");
 test("private admin protects evidence and persists versioned changes", async (t) => {
   const mf = new Miniflare(
@@ -18,6 +19,7 @@ test("private admin protects evidence and persists versioned changes", async (t)
       kvNamespaces: ["DOCUMENTS"],
       bindings: {
         SETUP_TOKEN_HASH: hash("test-setup-only"),
+        OWNER_SETUP_ENABLED: "true",
         INGEST_TOKEN_HASH: hash("test-ingest-only"),
       },
       ratelimits: {
@@ -376,6 +378,24 @@ test("private admin protects evidence and persists versioned changes", async (t)
     (await request("/api/snapshot", { cookie: device2 })).status,
     200,
   );
+  await db
+    .prepare("UPDATE owner SET username='another-owner' WHERE id=1")
+    .run();
+  assert.equal(
+    (await request("/api/snapshot", { cookie: device2 })).status,
+    403,
+  );
+});
+test("closed registration rejects setup even when an activation key is supplied", async () => {
+  const response = await worker.fetch(
+    new Request("https://admin.test/api/setup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "unused" }),
+    }),
+    { OWNER_SETUP_ENABLED: "false" },
+  );
+  assert.equal(response.status, 403);
 });
 test("prealert readiness requires carrier, tracking and final purchase PDF", () => {
   assert.equal(
