@@ -210,12 +210,32 @@ function renderPackages() {
       (filter === "needs" && !p.readiness.ready && !p.lockerArrivedAt)
     );
   });
+  const priority = (p) =>
+    p.lockerArrivedAt
+      ? 5
+      : p.readiness.ready && !p.prealertedAt
+        ? 0
+        : p.prealertedAt
+          ? 1
+          : p.tracking
+            ? 2
+            : p.shippingStatus === "on_hold"
+              ? 4
+              : 3;
+  visible.sort(
+    (a, b) =>
+      priority(a) - priority(b) ||
+      (a.expectedArrival || "9999").localeCompare(
+        b.expectedArrival || "9999",
+      ) ||
+      a.id.localeCompare(b.id),
+  );
   $("#packages").innerHTML = visible.length
     ? visible
         .map((p) => {
           const order = data.orders.find((o) => o.id === p.orderId),
             [label, cls] = state(p);
-          return `<article class="package ${cls}"><div class="package-top"><span>${esc(order?.vendor)} / ${esc(p.id)}</span><span class="badge ${cls}">${label}</span></div><h3>${esc(p.title)}</h3><p class="contents">${esc(p.contents)}</p><div class="tracking-row"><div><strong>${esc(p.tracking || "Tracking not issued yet")}</strong><small>${esc(p.carrier || "Carrier not confirmed")}</small></div>${p.tracking ? `<button class="text-button" data-action="copy" data-id="${esc(p.id)}">Copy ↗</button>` : ""}</div><dl><div><dt>Estimated arrival</dt><dd>${date(p.expectedArrival)}</dd></div><div><dt>Locker arrival</dt><dd>${p.lockerArrivedAt ? date(p.lockerArrivedAt) : "Not received"}</dd></div><div><dt>Prealert</dt><dd>${p.prealertedAt ? date(p.prealertedAt) : "Not submitted"}</dd></div><div><dt>Goods value</dt><dd>${money(p.declaredValueCents)}</dd></div></dl><div class="requirements">${[
+          return `<article class="package ${cls}"><div class="package-top"><span>${esc(order?.vendor)} / ${esc(p.id)}</span><span class="badge ${cls}">${label}</span></div><h3>${esc(p.title)}</h3><p class="contents" title="${esc(p.contents)}">${esc(p.contents)}</p><div class="tracking-row"><div><strong>${esc(p.tracking || "Tracking not issued yet")}</strong><small>${esc(p.carrier || "Carrier not confirmed")}</small></div>${p.tracking ? `<button class="text-button" data-action="copy" data-id="${esc(p.id)}">Copy ↗</button>` : ""}</div><dl><div><dt>Estimated arrival</dt><dd>${date(p.expectedArrival)}</dd></div><div><dt>Locker arrival</dt><dd>${p.lockerArrivedAt ? date(p.lockerArrivedAt) : "Not received"}</dd></div><div><dt>Prealert</dt><dd>${p.prealertedAt ? date(p.prealertedAt) : "Not submitted"}</dd></div><div><dt>Goods value</dt><dd>${money(p.declaredValueCents)}</dd></div>${p.expectedShipDate ? `<div><dt>Planned dispatch</dt><dd>${date(p.expectedShipDate)}</dd></div>` : ""}</dl><div class="requirements">${[
             ["Tracking", !!p.tracking],
             ["Carrier", !!p.carrier],
             ["Invoice PDF", p.document?.kind === "invoice"],
