@@ -107,6 +107,20 @@ test("BoltDepot receipt reconciles owner-selected spares and charges", () => {
   );
   assert.equal(order.actualPaidCents, null);
 });
+test("Walmart approved additions and tax remain included in the order total", () => {
+  const order = ledger.orders.find((x) => x.id === "walmart");
+  const extra = ledger.otherExpenses.find((x) => x.id === "walmart-additions-grouped");
+  assert.equal(order.status, "ordered");
+  assert.equal(order.invoiceItemsCents, order.quotedSubtotalCents + extra.quotedTotalCents);
+  assert.equal(order.invoiceTotalCents, order.invoiceItemsCents + order.taxInvoicedCents);
+  assert.equal(order.invoiceTotalCents, 5331);
+  assert.equal(extra.includedInVendorOrderTotals, true);
+  assert.equal(extra.categoryTotalCents, extra.quotedTotalCents + extra.vendorTaxCents);
+  assert.equal(extra.vendorTaxCents, order.taxInvoicedCents);
+  assert.equal(totals(ledger).taxesAndOthers, 44416);
+  assert.equal(order.actualPaidCents, null);
+  assert.equal(extra.actualPaidCents, null);
+});
 test("published CAD archive matches its manifest hash", async () => {
   const release = await readJSON("data/hardware-release.json");
   const b = await fs.readFile(
