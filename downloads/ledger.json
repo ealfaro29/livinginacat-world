@@ -34,8 +34,8 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "authenticated-order-page",
-      "notes": "Five confirmed orders total $1,524.35. Four have carrier tracking; one carrier reports delivery to reception, pending confirmation by the forwarder. The remaining order is preparing. Order totals do not prove settled bank charges.",
-      "invoiceTotalCents": 152435
+      "notes": "Six confirmed orders total $1,534.50. Four have carrier tracking; one carrier reports delivery to reception, pending confirmation by the forwarder. The remaining orders are preparing. Order totals do not prove settled bank charges.",
+      "invoiceTotalCents": 153450
     },
     {
       "id": "bambu-lab",
@@ -1250,9 +1250,9 @@
       "actualPaidCents": null,
       "includedInVendorOrderTotals": true,
       "evidenceLevel": "authenticated-order-page-and-owner-classification",
-      "notes": "Aggregated other expenses of $320.94 plus documented Amazon tax of $99.74: $420.68 total. These amounts are already included in the five vendor orders and are not added again. Item-level details stay private.",
-      "amazonTaxCents": 9974,
-      "categoryTotalCents": 42068
+      "notes": "Aggregated other expenses of $320.94 plus documented Amazon tax of $100.40: $421.34 total. These amounts are already included in the six vendor orders and are not added again. Item-level details stay private.",
+      "amazonTaxCents": 10040,
+      "categoryTotalCents": 42134
     },
     {
       "id": "walmart-additions-grouped",
@@ -1284,6 +1284,11 @@
     }
   ],
   "changes": [
+    {
+      "date": "2026-10-27",
+      "title": "Frame plates ordered",
+      "detail": "AMZ-06 adds one pack of flat joining plates: $9.99 less $0.50 coupon plus $0.66 estimated tax, for an order total of $10.15. Estimated delivery October 28; payment and tracking are not yet independently confirmed."
+    },
     {
       "date": "2026-10-27",
       "title": "Printer order and shipment tracking updated",
@@ -1490,6 +1495,23 @@
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-26",
       "notes": "Amazon marks this order shipped. Its order total is documented but does not replace bank reconciliation."
+    },
+    {
+      "id": "AMZ-06",
+      "status": "ordered",
+      "orderedAt": "2026-10-27",
+      "currency": "USD",
+      "itemIds": [],
+      "invoiceItemsCents": 999,
+      "shippingCents": 0,
+      "shippingCreditCents": 0,
+      "discountCents": 50,
+      "taxCents": 66,
+      "orderTotalCents": 1015,
+      "actualPaidCents": null,
+      "evidenceLevel": "authenticated-order-page",
+      "sourceDate": "2026-10-27",
+      "notes": "One pack of flat joining plates for the frame. This purchase was added after the original equipment quote. Estimated delivery October 28; bank settlement and shipment tracking unconfirmed."
     }
   ],
   "shipments": [
