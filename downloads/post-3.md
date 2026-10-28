@@ -30,7 +30,7 @@ The printer is $789.00 before the $30.00 printer coupon, and the adapter is $32.
 
 The original equipment planning estimate remains **$2,893.69**, including the owner's $500 unallocated allowance. It is a historical quote, not the amount spent: for example, it used the original $899 printer quote. Confirmed order totals and shipping charges belong in the purchase ledger instead.
 
-As of this update, confirmed vendor order totals plus the first year of the domain add up to **$2,989.21**. This figure excludes MakerStore's **$10.18 provisional invoice request**, future forwarding costs, any further shipping adjustment and AI usage. It includes order totals that have not all been independently verified against bank charges; it is not a reconciled cash-spending total. FramingTech's shipping may change after weighing.
+As of this update, confirmed vendor order totals plus the first year of the domain add up to **$2,989.21**. This figure excludes future forwarding costs, any further shipping adjustment and AI usage. It includes order totals that have not all been independently verified against bank charges; it is not a reconciled cash-spending total. FramingTech's shipping may change after weighing.
 
 The [purchase record](/purchases/) keeps the quotes, vendor totals, actual tax, grouped other expenses and evidence level separate. We have not reconciled the contributions received, so there is no public balance yet.
 

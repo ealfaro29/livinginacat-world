@@ -15,7 +15,7 @@ Public source: `data/ledger.json`. USD amounts are integer cents. `null` means u
 
 ## Initial evidence
 
-FramingTech: payment email and PDF confirmation. GoDaddy: email receipt. Amazon: authenticated order details, order invoices and tracking pages. DigiKey and BoltDepot: vendor order confirmation emails, without shipment or settled-payment evidence. Walmart: confirmation email and authenticated order details; fulfillment groups at Placed status and estimated arrival windows are not dispatched packages. MakerStore: Custom Invoice acknowledgement with provisional shipping, awaiting final invoice and payment. Private originals stay outside the repository. AMZ codes are public references independent of actual order numbers.
+FramingTech: payment email and PDF confirmation. GoDaddy: email receipt. Amazon: authenticated order details, order invoices and tracking pages. DigiKey and BoltDepot: vendor order confirmation emails, without shipment or settled-payment evidence. Walmart: confirmation email and authenticated order details; fulfillment groups at Placed status and estimated arrival windows are not dispatched packages. Private originals stay outside the repository. AMZ codes are public references independent of actual order numbers.
 
 ## Updating
 

@@ -19,7 +19,7 @@ Read `PUBLIC-RELEASE.md` first. Print only final files in `stl/` with quantities
 | M5 T-nuts | 20 RN05BM5; allocation below |
 | Actuator | Adafruit 412, 12 V / 0.3 A, 14×17×29.7 mm body; 4.9 mm drawing stroke |
 | Tip | Micro Traders B0DSVSVSZN, Ø8.9×4.5 mm metal collar, Ø7 mm mesh |
-| Remaining metal plates | 2 MakerStore 40×18×4 mm rear-idler braces |
+| Remaining metal plates | 2 rear-idler braces from the purchased 40×18 mm joining plate pack; thickness and fit to be verified |
 
 Profiles are metric 10×20 and 20×40, not imperial 1010/1020. The FramingTech STEP slot opening is at least 5.15 mm. Earlier MISUMI slot-6 nuts are not used. Amazon square M3/M4/M5 nuts fit printed pockets and do not automatically replace FramingTech T-nuts.
 

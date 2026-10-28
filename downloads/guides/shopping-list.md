@@ -2,7 +2,7 @@
 
 Updated: 2026-10-27. USD. Item quotes; tax and shipping excluded unless noted. Purchases in progress, one store at a time.
 
-Equipment quoted, including allowance: $2,893.69. Listed item quotes: $2,393.69; unallocated equipment allowance: $500.00. The allowance is a planning amount, not a vendor quote, order or payment. Payment and shipping status: https://livinginacat.world/purchases/.
+Equipment quoted, including allowance: $2,898.88. Listed item quotes: $2,398.88; unallocated equipment allowance: $500.00. The allowance is a planning amount, not a vendor quote, order or payment. Payment and shipping status: https://livinginacat.world/purchases/.
 
 | Store | Item | Quantity | Unit price | Subtotal | Status | Offer |
 |---|---|---:|---:|---:|---|---|
@@ -74,7 +74,7 @@ Equipment quoted, including allowance: $2,893.69. Listed item quotes: $2,393.69;
 | BoltDepot | 7214 · FHCS M3×10 | 12 | $0.07 | $0.84 | Shipped | [Product](https://boltdepot.com/Product-Details?product=7214) |
 | BoltDepot | 6674 · FHCS M5×12 | 10 | $0.20 | $2.00 | Shipped | [Product](https://boltdepot.com/Product-Details?product=6674) |
 | BoltDepot | 4515 · M5 flat washer DIN125 | 10 | $0.05 | $0.50 | Shipped | [Product](https://boltdepot.com/Product-Details?product=4515) |
-| MakerStore | PLATE-STRIP-2 · flat plate 40×18×4 mm | 2 | $2.40 | $4.80 | Awaiting final invoice | [Product](https://makerstore.cc/product/2-hole-joining-plate/) |
+| Amazon | 2020 flat joining plates · 40×18 mm · pack of 12 | 1 | $9.99 | $9.99 | Order confirmed | [Product](https://www.amazon.com/dp/B0DX9MSB7N) |
 | Walmart | uxcell · spacers · 5 ID / 10 OD / 9 mm high | 1 | $8.99 | $8.99 | Preparing | [Product](https://www.walmart.com/ip/5223528994) |
 | Walmart | uxcell · spiral wrap · 4 mm ID · 20 m | 1 | $9.99 | $9.99 | Shipped | [Product](https://www.walmart.com/ip/3364975377) |
 | Walmart | SUPERDANT · 1 mm adhesive EVA foam | 1 | $10.85 | $10.85 | Shipped | [Product](https://www.walmart.com/ip/9540216155) |
@@ -85,7 +85,7 @@ Equipment quoted, including allowance: $2,893.69. Listed item quotes: $2,393.69;
 
 - Additional equipment allowance: $500.00. Unallocated planning allowance requested by the project owner. Not a vendor quote, purchase order or verified payment.
 
-Item quotes $2,393.69 + allowance $500.00 = total estimate $2,893.69.
+Item quotes $2,398.88 + allowance $500.00 = total estimate $2,898.88.
 
 ## Reconciliation
 
@@ -96,7 +96,6 @@ Other vendor order totals (not settled-bank-payment evidence):
 - VXB: $65.22; Order confirmed.
 - DigiKey: $96.97; Order confirmed.
 - BoltDepot: $26.16; Shipped.
-- MakerStore: $10.18 provisional; Awaiting final invoice.
 - Walmart: $53.31; Partially shipped.
 - PhotonLight: $18.94; Shipped.
 - West3D: $17.55; Order confirmed.
