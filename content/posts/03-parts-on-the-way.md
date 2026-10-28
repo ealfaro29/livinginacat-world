@@ -6,6 +6,10 @@ title: "The parts are on their way"
 excerpt: "The printer is ordered, shipments are being tracked, and the first consolidation is full. Here is what has changed and what still needs to be tested."
 ---
 
+**Update, October 27:** Two more packages have been prealerted in a second consolidation. Speedy’s package listing now shows one earlier shipment received, although the consolidation view has not yet reflected it. The [shipment record](/shipments/) has the latest details.
+
+The original report follows.
+
 The project is moving from a design and shopping list toward a workbench full of real parts. The **Bambu Lab X2D AMS Combo is ordered**, the first shipments have tracking, and we have started consolidating packages for their trip to Costa Rica.
 
 This is a progress report, not a claim that the robot works yet. The files are prepared, but we have not printed the components, assembled the machine, or tested a tap or swipe on the phone.
@@ -34,7 +38,7 @@ The [purchase record](/purchases/) keeps the quotes, vendor totals, actual tax, 
 
 Ten tracked packages have been prealerted and placed in the first project consolidation. That includes packages already in transit and packages whose labels have been created but which the carrier has not yet accepted. Once further packages are ready, we will use another consolidation when the forwarder allows it.
 
-Amazon reports that one package was delivered to reception. The forwarder has not yet confirmed receiving it, so we are keeping those two statuses separate. Bambu's accessories are in a separate shipment from the printer; the printer itself is still preparing. Tracking numbers, addresses and original invoices remain in the private dispatch room.
+Amazon reports that one package was delivered to reception. At the time of the original report, the forwarder had not yet confirmed receipt, so we kept those two statuses separate. Bambu's accessories are in a separate shipment from the printer; the printer itself is still preparing. Tracking numbers, addresses and original invoices remain in the private dispatch room.
 
 Some prealert dates are **temporary estimates** entered to prepare the paperwork. They are not carrier promises or proof of delivery. The [shipment record](/shipments/) reflects what we can verify, without making those temporary dates into confirmed arrivals.
 

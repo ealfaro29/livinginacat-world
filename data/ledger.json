@@ -116,7 +116,7 @@
     {
       "id": "boltdepot",
       "vendor": "BoltDepot",
-      "status": "ordered",
+      "status": "shipped",
       "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 1604,
       "actualPaidCents": null,
@@ -125,8 +125,8 @@
       "tariffPaidCents": null,
       "receivedAt": null,
       "publicReceiptUrl": null,
-      "evidenceLevel": "vendor-order-confirmation-email",
-      "notes": "Order confirmed by vendor email on October 26, 2026. Owner-selected spares increased 13 references from 99 to 182 individual pieces: $16.04 items + $8.41 Economy shipping + $1.71 sales tax = $26.16 order total. No dispatch notice, tracking, delivery or settled bank charge is confirmed.",
+      "evidenceLevel": "vendor-shipping-email-and-usps-tracking",
+      "notes": "Order total $26.16: $16.04 merchandise, $8.41 shipping and $1.71 tax. The vendor reports shipment; USPS shows a label created and is awaiting the parcel. Prealerted and assigned to the second project consolidation. Bank settlement and receipt by the forwarder are unconfirmed.",
       "invoiceTotalCents": 2616,
       "shippingInvoicedCents": 841,
       "taxInvoicedCents": 171,
@@ -174,7 +174,7 @@
     {
       "id": "photonlight",
       "vendor": "PhotonLight",
-      "status": "ordered",
+      "status": "shipped",
       "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 999,
       "actualPaidCents": null,
@@ -183,8 +183,8 @@
       "tariffPaidCents": null,
       "receivedAt": null,
       "publicReceiptUrl": null,
-      "evidenceLevel": "vendor-order-confirmation-email",
-      "notes": "Vendor confirmation: $9.99 item + $8.95 shipping + $0.00 tax = $18.94. Estimated arrival November 2, 2026; not shipped or delivered according to the available evidence. No tracking or settled bank charge confirmed.",
+      "evidenceLevel": "vendor-shipping-email",
+      "notes": "Order total $18.94: $9.99 merchandise, $8.95 shipping and $0.00 tax. The vendor reports shipment with USPS tracking; prealerted and assigned to the second project consolidation. Estimated delivery November 2, 2026; bank settlement and forwarder receipt remain unconfirmed.",
       "invoiceTotalCents": 1894,
       "shippingInvoicedCents": 895,
       "taxInvoicedCents": 0,
@@ -1286,18 +1286,23 @@
   "changes": [
     {
       "date": "2026-10-27",
+      "title": "More shipments and a second consolidation",
+      "detail": "BoltDepot and PhotonLight sent USPS tracking. Both packages were prealerted and placed in a second project consolidation after the first reached ten packages. USPS reports the BoltDepot label created and awaiting the parcel. Speedy’s package listing shows one earlier Amazon shipment received; the consolidation view has not yet reflected receipt."
+    },
+    {
+      "date": "2026-10-27",
       "title": "Frame plates ordered",
       "detail": "AMZ-06 adds one pack of flat joining plates: $9.99 less $0.50 coupon plus $0.66 estimated tax, for an order total of $10.15. Estimated delivery October 28; payment and tracking are not yet independently confirmed."
     },
     {
       "date": "2026-10-27",
       "title": "Printer order and shipment tracking updated",
-      "detail": "Bambu Lab confirmed an $881.86 order, including $6.99 shipping, $57.69 tax and a $30.00 printer coupon. Other expenses are grouped and included in the order total. The first project consolidation now contains ten prealerted packages. Amazon reports one delivery to reception; forwarder receipt is not confirmed. Printed parts and physical tests remain ahead."
+      "detail": "Bambu Lab confirmed an $881.86 order, including $6.99 shipping, $57.69 tax and a $30.00 printer coupon. Other expenses are grouped and included in the order total. The first project consolidation now contains ten prealerted packages. Amazon reports one delivery to reception; forwarder receipt had not yet been confirmed at that time. Printed parts and physical tests remain ahead."
     },
     {
       "date": "2026-10-26",
       "title": "Two forwarder prealerts consolidated; West3D payment documented",
-      "detail": "Two confirmed Amazon/FedEx packages are prealerted and grouped in the project consolidation. No package has a confirmed locker arrival. The original West3D invoice explicitly records $17.55 paid and $0.00 due, increasing documented vendor payments from $304.85 to $322.40; this remains a partial record, not complete bank reconciliation. Original PDFs and identifiers stay private."
+      "detail": "Two confirmed Amazon/FedEx packages are prealerted and grouped in the project consolidation. At the time, no package had a confirmed locker arrival. The original West3D invoice explicitly records $17.55 paid and $0.00 due, increasing documented vendor payments from $304.85 to $322.40; this remains a partial record, not complete bank reconciliation. Original PDFs and identifiers stay private."
     },
     {
       "date": "2026-10-26",
@@ -1412,7 +1417,7 @@
       "actualPaidCents": null,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-27",
-      "notes": "Amazon reports delivery to reception on October 27; the forwarder has not confirmed receipt. Bank charge remains unconfirmed."
+      "notes": "Amazon reports delivery to reception on October 27. Speedy’s package listing shows receipt; its consolidation view has not yet reflected it. Bank charge remains unconfirmed."
     },
     {
       "id": "AMZ-03",
@@ -1579,7 +1584,7 @@
       "deliveredAt": null,
       "lastChecked": "2026-10-27",
       "source": "Vendor order or carrier tracking",
-      "notes": "Amazon reports delivery to reception on October 27. Prealerted and consolidated; forwarder receipt remains unconfirmed."
+      "notes": "Amazon reports delivery to reception on October 27. Speedy’s package listing shows it received; the consolidation view has not yet reflected receipt."
     },
     {
       "id": "AMZ-PKG-04",
@@ -1589,11 +1594,11 @@
       "carrier": "Amazon Logistics",
       "title": "Parts and supplies",
       "itemIds": [],
-      "expectedDeliveryDate": "2026-10-27",
+      "expectedDeliveryDate": null,
       "deliveredAt": null,
       "lastChecked": "2026-10-27",
       "source": "Vendor order or carrier tracking",
-      "notes": "Shipped, prealerted and consolidated. No forwarder receipt is confirmed."
+      "notes": "Amazon reports the package is on its way but running late, with no updated delivery date. Prealerted and consolidated; no forwarder receipt confirmed."
     },
     {
       "id": "WMT-PKG-01",
@@ -1706,6 +1711,34 @@
       "lastChecked": "2026-10-27",
       "source": "Vendor order or carrier tracking",
       "notes": "The printer is a separate fulfillment group; carrier and tracking are not yet confirmed."
+    },
+    {
+      "id": "BOLT-PKG-01",
+      "vendor": "BoltDepot",
+      "orderRef": "boltdepot",
+      "status": "shipped",
+      "carrier": "USPS",
+      "title": "Fasteners",
+      "itemIds": [],
+      "expectedDeliveryDate": null,
+      "deliveredAt": null,
+      "lastChecked": "2026-10-27",
+      "source": "Vendor shipping email and USPS tracking",
+      "notes": "Vendor reports shipment; USPS shows label created and awaits the package. Prealerted and added to the second project consolidation. The date entered in Speedy is provisional, not a USPS delivery estimate."
+    },
+    {
+      "id": "PHOTON-PKG-01",
+      "vendor": "PhotonLight",
+      "orderRef": "photonlight",
+      "status": "shipped",
+      "carrier": "USPS",
+      "title": "PTFE tubing",
+      "itemIds": [],
+      "expectedDeliveryDate": "2026-11-02",
+      "deliveredAt": null,
+      "lastChecked": "2026-10-27",
+      "source": "Vendor shipping email",
+      "notes": "Vendor reports shipment via USPS. Prealerted and added to the second project consolidation. The November 2 date is the vendor estimate, not confirmation of receipt."
     }
   ]
 }

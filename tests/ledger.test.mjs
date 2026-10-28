@@ -65,7 +65,7 @@ test("Amazon invoices reconcile without counting grouped extras twice", () => {
 });
 test("unverified payments stay unknown, shipping is not delivery", () => {
   assert.equal(totals(ledger).verifiedPaid, 32240);
-  assert.equal(totals(ledger).shipped, 8);
+  assert.equal(totals(ledger).shipped, 10);
   assert.equal(
     ledger.amazonOrders.filter((x) => x.status === "payment_attention").length,
     0,
@@ -99,7 +99,7 @@ test("BoltDepot receipt reconciles owner-selected spares and charges", () => {
   assert.equal(items.length, 13);
   assert.equal(items.reduce((sum, x) => sum + x.quantity, 0), 182);
   assert.equal(items.reduce((sum, x) => sum + x.quotedTotalCents, 0), 1604);
-  assert.equal(order.status, "ordered");
+  assert.equal(order.status, "shipped");
   assert.equal(order.invoiceTotalCents, 2616);
   assert.equal(
     order.invoiceTotalCents,
