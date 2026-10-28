@@ -65,7 +65,7 @@ test("Amazon invoices reconcile without counting grouped extras twice", () => {
 });
 test("unverified payments stay unknown, shipping is not delivery", () => {
   assert.equal(totals(ledger).verifiedPaid, 32240);
-  assert.equal(totals(ledger).shipped, 11);
+  assert.equal(totals(ledger).shipped, 12);
   assert.equal(
     ledger.amazonOrders.filter((x) => x.status === "payment_attention").length,
     0,
