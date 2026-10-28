@@ -3,7 +3,7 @@
   "updatedAt": "2026-10-27",
   "currency": "USD",
   "purchasesPaused": false,
-  "equipmentQuotedTotalCents": 289369,
+  "equipmentQuotedTotalCents": 289888,
   "equipmentAllowances": [
     {
       "id": "equipment-allowance-2026-10-26",
@@ -26,7 +26,7 @@
       "vendor": "Amazon",
       "status": "partially_shipped",
       "orderedAt": "2026-10-26",
-      "quotedSubtotalCents": 110658,
+      "quotedSubtotalCents": 111657,
       "actualPaidCents": null,
       "shippingPaidCents": null,
       "taxPaidCents": null,
@@ -131,25 +131,6 @@
       "shippingInvoicedCents": 841,
       "taxInvoicedCents": 171,
       "tariffInvoicedCents": 0
-    },
-    {
-      "id": "makerstore",
-      "vendor": "MakerStore",
-      "status": "awaiting_invoice",
-      "orderedAt": "2026-10-26",
-      "quotedSubtotalCents": 480,
-      "actualPaidCents": null,
-      "shippingPaidCents": null,
-      "taxPaidCents": null,
-      "tariffPaidCents": null,
-      "receivedAt": null,
-      "publicReceiptUrl": null,
-      "evidenceLevel": "vendor-order-confirmation-email",
-      "notes": "Custom Invoice request received by the vendor on October 26, 2026 for two PLATE-STRIP-2 plates, $4.80 in items. The automatic confirmation lists provisional USPS Ground Advantage shipping of $5.38 and a $10.18 total. The vendor states it will calculate exact shipping and send a final invoice; the order is on hold pending payment. Final shipping, final total, payment and dispatch remain unconfirmed.",
-      "invoiceTotalCents": 1018,
-      "invoiceTotalFinal": false,
-      "shippingInvoicedCents": 538,
-      "shippingChargeFinal": false
     },
     {
       "id": "walmart",
@@ -1148,16 +1129,17 @@
       "notes": "Under 2 brace-to-extrusion M5×10 button-head screws. Owner selected 10 pieces, including 8 additional spares beyond the initial 2-piece purchase quantity."
     },
     {
-      "id": "makerstore-069",
-      "vendor": "MakerStore",
-      "orderId": "makerstore",
-      "name": "PLATE-STRIP-2 · flat plate 40×18×4 mm",
-      "quantity": 2,
-      "quotedUnitCents": 240,
-      "quotedTotalCents": 480,
+      "id": "amazon-frame-plates",
+      "vendor": "Amazon",
+      "orderId": "amazon",
+      "name": "2020 flat joining plates · 40×18 mm · pack of 12",
+      "quantity": 1,
+      "quotedUnitCents": 999,
+      "quotedTotalCents": 999,
       "actualPaidCents": null,
-      "url": "https://makerstore.cc/product/2-hole-joining-plate/",
-      "notes": "Only two rear LU/RU reinforcements. These are not motor plates."
+      "url": "https://www.amazon.com/dp/B0DX9MSB7N",
+      "procurementStatus": "ordered",
+      "notes": "Purchased in AMZ-06 for the rear idler braces; verify thickness and fit after delivery."
     },
     {
       "id": "walmart-070",
@@ -1326,11 +1308,6 @@
     },
     {
       "date": "2026-10-26",
-      "title": "MakerStore custom invoice requested",
-      "detail": "MakerStore acknowledged the two-plate Custom Invoice request. Its automatic email lists $4.80 in parts and provisional $5.38 shipping ($10.18 total), while stating exact shipping and a final invoice will follow. The order is on hold; no payment or dispatch is confirmed. The equipment estimate is unchanged."
-    },
-    {
-      "date": "2026-10-26",
       "title": "BoltDepot order confirmed with owner-selected spares",
       "detail": "The vendor confirmed 13 references and 182 pieces, including the extra spares requested by the owner. Items total $16.04, shipping $8.41 and sales tax $1.71; order total $26.16. The original 99-piece quote was $8.22. The additional $7.82 in parts increases the equipment estimate from $2,885.87 to $2,893.69; the $500 allowance is unchanged. No shipment or settled bank charge is confirmed."
     },
@@ -1383,6 +1360,11 @@
       "date": "2026-10-25",
       "title": "Architecture and parts selected",
       "detail": "CoreXY prototype derived from PhysiClaw hardware v0.51, with PETG adaptations. Motor brackets and feet will be printed; two metal reinforcements remain in the parts list."
+    },
+    {
+      "date": "2026-10-27",
+      "title": "Joining plates ordered",
+      "detail": "The joining plate quote was replaced by the confirmed Amazon order; thickness and fit remain to be checked when the parts arrive."
     }
   ],
   "amazonOrders": [
@@ -1516,7 +1498,9 @@
       "status": "ordered",
       "orderedAt": "2026-10-27",
       "currency": "USD",
-      "itemIds": [],
+      "itemIds": [
+        "amazon-frame-plates"
+      ],
       "invoiceItemsCents": 999,
       "shippingCents": 0,
       "shippingCreditCents": 0,

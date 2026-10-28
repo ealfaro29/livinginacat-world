@@ -66,7 +66,6 @@ The item quote is distributed as follows:
 | VXB | $60.95 | Deferred after a checkout problem |
 | DigiKey | $77.36 | Consolidated cart prepared; no confirmed payment |
 | BoltDepot | $8.22 | Cart prepared |
-| MakerStore | $4.80 | Shipping requires confirmation |
 | Walmart | $29.83 | Cart prepared |
 | PhotonLight | $9.99 | Cart prepared |
 | West3D | $9.99 | Cart prepared |

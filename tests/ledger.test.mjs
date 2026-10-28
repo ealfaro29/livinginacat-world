@@ -20,9 +20,9 @@ test("equipment estimate reconciles item quotes, vendors and planning allowances
       o.quotedSubtotalCents,
       o.vendor,
     );
-  assert.equal(totals(ledger).quotedItems, 239369);
+  assert.equal(totals(ledger).quotedItems, 239888);
   assert.equal(totals(ledger).equipmentAllowance, 50000);
-  assert.equal(totals(ledger).quoted, 289369);
+  assert.equal(totals(ledger).quoted, 289888);
   assert.equal(totals(ledger).quoted, ledger.equipmentQuotedTotalCents);
   assert.ok(
     ledger.equipmentAllowances.every((x) => x.actualPaidCents === null),
@@ -54,14 +54,14 @@ test("Amazon invoices reconcile without counting grouped extras twice", () => {
   assert.equal(
     ledger.amazonOrders.reduce((n, x) => n + x.invoiceItemsCents, 0),
     ledger.orders.find((x) => x.id === "amazon").quotedSubtotalCents +
-      extra.quotedTotalCents + 999,
+      extra.quotedTotalCents,
   );
   assert.equal(totals(ledger).amazon, 153450);
   assert.equal(
     ledger.orders.find((x) => x.id === "amazon").invoiceTotalCents,
     totals(ledger).amazon,
   );
-  assert.equal(ledger.amazonOrders.flatMap((x) => x.itemIds).length, 35);
+  assert.equal(ledger.amazonOrders.flatMap((x) => x.itemIds).length, 36);
 });
 test("unverified payments stay unknown, shipping is not delivery", () => {
   assert.equal(totals(ledger).verifiedPaid, 32240);
@@ -129,7 +129,7 @@ test("Bambu order and grouped costs reconcile without double counting", () => {
   assert.equal(extra.categoryTotalCents, extra.quotedTotalCents + extra.vendorTaxCents);
   assert.equal(extra.vendorTaxCents, order.taxInvoicedCents);
   assert.equal(extra.includedInVendorOrderTotals, true);
-  const confirmedOrders = ledger.orders.filter((x) => x.id !== "makerstore").reduce((sum, x) => sum + x.invoiceTotalCents, 0);
+  const confirmedOrders = ledger.orders.reduce((sum, x) => sum + x.invoiceTotalCents, 0);
   assert.equal(confirmedOrders + 419, 299936);
   assert.equal(totals(ledger).confirmedOrderTotal, confirmedOrders + 419);
   assert.equal(order.actualPaidCents, null);

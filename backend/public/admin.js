@@ -159,8 +159,13 @@ function state(p) {
   if (p.shippingStatus === "on_hold") return ["On hold", ""];
   return [p.tracking ? "Needs invoice PDF" : "Awaiting tracking", ""];
 }
+const activeOrders = () => data.orders.filter((o) => o.status !== "removed_from_project");
+const activePackages = () => {
+  const active = new Set(activeOrders().map((o) => o.id));
+  return data.packages.filter((p) => active.has(p.orderId));
+};
 function render() {
-  const ps = data.packages,
+  const ps = activePackages(),
     counts = [
       ps.length,
       ps.filter(
@@ -177,7 +182,7 @@ function render() {
     .join("");
   $("#package-count").textContent = ps.length;
   renderPackages();
-  $("#orders").innerHTML = data.orders
+  $("#orders").innerHTML = activeOrders()
     .map(
       (o) =>
         `<article class="order"><div><h3>${esc(o.vendor)}</h3><div class="order-reference">${esc(o.orderReference || "Not ordered")} · ${esc(o.id)}</div></div><div class="order-body"><strong>${esc(o.title)}</strong><p>${esc(o.notes)}</p><p>${esc(o.status.replaceAll("_", " "))} · ${o.orderedAt ? date(o.orderedAt) : "No purchase confirmed"}</p></div><div class="price">${money(o.totalCents)}<small>${o.status === "deferred" ? "QUOTED" : "ORDER TOTAL"}</small></div></article>`,
@@ -193,7 +198,7 @@ function render() {
 function renderPackages() {
   const query = $("#search").value.toLowerCase(),
     filter = $("#filter").value;
-  const visible = data.packages.filter((p) => {
+  const visible = activePackages().filter((p) => {
     const o = data.orders.find((o) => o.id === p.orderId);
     if (
       ![o?.vendor, p.title, p.contents, p.tracking, p.carrier]
@@ -273,7 +278,7 @@ function openEditor(p) {
   f.reset();
   $("#editor-error").textContent = "";
   $("#order-label").hidden = !!p;
-  f.elements.orderId.innerHTML = data.orders
+  f.elements.orderId.innerHTML = activeOrders()
     .map(
       (o) =>
         `<option value="${esc(o.id)}">${esc(o.vendor)} · ${esc(o.orderReference || o.id)}</option>`,
