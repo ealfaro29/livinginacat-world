@@ -1286,6 +1286,11 @@
   "changes": [
     {
       "date": "2026-10-27",
+      "title": "Two carrier deliveries reported",
+      "detail": "Two further project shipments show delivered in Amazon tracking. Speedy receipt remains unconfirmed for both; carrier delivery and forwarder receipt are recorded separately."
+    },
+    {
+      "date": "2026-10-27",
       "title": "Another shipment joins the second consolidation",
       "detail": "A separate project equipment shipment has UPS tracking. UPS reports acceptance and estimates October 30 delivery. The shipment was prealerted and added to the second project consolidation; the date is an estimate, not confirmed receipt."
     },
@@ -1426,7 +1431,7 @@
     },
     {
       "id": "AMZ-03",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "orderedAt": "2026-10-26",
       "currency": "USD",
       "itemIds": [
@@ -1446,7 +1451,7 @@
       "actualPaidCents": null,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-27",
-      "notes": "Amazon tracking shows this order shipped and prealerted with the forwarder. No locker arrival or settled bank charge is confirmed."
+      "notes": "Amazon reports carrier delivery on October 27. Speedy receipt and settled bank payment remain unconfirmed."
     },
     {
       "id": "AMZ-04",
@@ -1489,7 +1494,7 @@
     },
     {
       "id": "AMZ-05",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "orderedAt": "2026-10-26",
       "currency": "USD",
       "itemIds": [
@@ -1504,7 +1509,7 @@
       "actualPaidCents": null,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-26",
-      "notes": "Amazon marks this order shipped. Its order total is documented but does not replace bank reconciliation."
+      "notes": "Amazon reports carrier delivery on October 27. Speedy receipt and settled bank payment remain unconfirmed."
     },
     {
       "id": "AMZ-06",
@@ -1544,16 +1549,15 @@
       "id": "AMZ-PKG-02",
       "vendor": "Amazon",
       "orderRef": "AMZ-05",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "FedEx",
-      "itemIds": [
-        "B0BN72FYFG"
-      ],
-      "expectedDeliveryDate": "2026-10-27",
+      "itemIds": [],
+      "expectedDeliveryDate": null,
       "deliveredAt": null,
       "lastChecked": "2026-10-26",
       "source": "Amazon tracking page",
-      "notes": "Amazon reports the carrier received the package. Prealerted and consolidated; no locker arrival is confirmed."
+      "notes": "Amazon reports carrier delivery to the dock on October 27. Speedy receipt is not yet confirmed.",
+      "title": "Project shipment"
     },
     {
       "id": "FT-PREP-01",
@@ -1595,7 +1599,7 @@
       "id": "AMZ-PKG-04",
       "vendor": "Amazon",
       "orderRef": "AMZ-03",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "Amazon Logistics",
       "title": "Parts and supplies",
       "itemIds": [],
@@ -1603,7 +1607,7 @@
       "deliveredAt": null,
       "lastChecked": "2026-10-27",
       "source": "Vendor order or carrier tracking",
-      "notes": "Amazon reports the package is on its way but running late, with no updated delivery date. Prealerted and consolidated; no forwarder receipt confirmed."
+      "notes": "Amazon reports delivery to the mail room on October 27. Speedy receipt is not yet confirmed."
     },
     {
       "id": "WMT-PKG-01",
