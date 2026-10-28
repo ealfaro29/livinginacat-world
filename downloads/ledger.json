@@ -40,7 +40,7 @@
     {
       "id": "bambu-lab",
       "vendor": "Bambu Lab",
-      "status": "partially_shipped",
+      "status": "shipped",
       "orderedAt": "2026-10-27",
       "quotedSubtotalCents": 89900,
       "actualPaidCents": null,
@@ -50,7 +50,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-and-authenticated-order-summary",
-      "notes": "Order total $881.86: $847.18 in items, less $30.00 printer coupon, plus $6.99 shipping and $57.69 tax. Equipment items include the X2D AMS Combo ($789.00 before coupon) and a switching adapter ($32.99). The remaining $25.19 is grouped under Taxes and others. Accessories have tracking; the printer is preparing separately. Vendor net payment is stated; bank settlement is not independently reconciled. The $899.00 equipment quote is the original planning quote.",
+      "notes": "Order total $881.86: $847.18 in items, less $30.00 printer coupon, plus $6.99 shipping and $57.69 tax. Equipment items include the X2D AMS Combo ($789.00 before coupon) and a switching adapter ($32.99). The remaining $25.19 is grouped under Taxes and others. Both fulfillment groups now have tracking; UPS has accepted the printer shipment and estimates delivery October 30. Both packages are prealerted and consolidated. Vendor net payment is stated; bank settlement is not independently reconciled. The $899.00 equipment quote is the original planning quote.",
       "invoiceTotalCents": 88186,
       "invoiceItemsCents": 84718,
       "shippingInvoicedCents": 699,
@@ -1286,6 +1286,11 @@
   "changes": [
     {
       "date": "2026-10-27",
+      "title": "Another shipment joins the second consolidation",
+      "detail": "A separate project equipment shipment has UPS tracking. UPS reports acceptance and estimates October 30 delivery. The shipment was prealerted and added to the second project consolidation; the date is an estimate, not confirmed receipt."
+    },
+    {
+      "date": "2026-10-27",
       "title": "More shipments and a second consolidation",
       "detail": "BoltDepot and PhotonLight sent USPS tracking. Both packages were prealerted and placed in a second project consolidation after the first reached ten packages. USPS reports the BoltDepot label created and awaiting the parcel. Speedy’s package listing shows one earlier Amazon shipment received; the consolidation view has not yet reflected receipt."
     },
@@ -1702,15 +1707,15 @@
       "id": "BAMBU-PREP-01",
       "vendor": "Bambu Lab",
       "orderRef": "bambu-lab",
-      "status": "preparing",
-      "carrier": "Unconfirmed",
+      "status": "shipped",
+      "carrier": "UPS",
       "title": "3D printer",
       "itemIds": [],
-      "expectedDeliveryDate": null,
+      "expectedDeliveryDate": "2026-10-30",
       "deliveredAt": null,
       "lastChecked": "2026-10-27",
-      "source": "Vendor order or carrier tracking",
-      "notes": "The printer is a separate fulfillment group; carrier and tracking are not yet confirmed."
+      "source": "Vendor shipping email and UPS tracking",
+      "notes": "UPS reports it has the shipment and estimates arrival October 30. Prealerted and added to the second project consolidation; forwarder receipt is not yet confirmed."
     },
     {
       "id": "BOLT-PKG-01",
