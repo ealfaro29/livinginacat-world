@@ -34,7 +34,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "authenticated-order-page",
-      "notes": "Six confirmed orders total $1,534.50. Five have carrier tracking; three are reported delivered by carriers, including one received by Speedy. Order totals do not prove settled bank charges.",
+      "notes": "Six confirmed orders total $1,534.50. Five have carrier tracking; three are reported delivered by carriers, including two received by Speedy. Order totals do not prove settled bank charges.",
       "invoiceTotalCents": 153450
     },
     {
@@ -60,7 +60,7 @@
     {
       "id": "framingtech",
       "vendor": "FramingTech",
-      "status": "ordered",
+      "status": "shipped",
       "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 17915,
       "actualPaidCents": 30066,
@@ -69,8 +69,8 @@
       "tariffPaidCents": 0,
       "receivedAt": null,
       "publicReceiptUrl": null,
-      "evidenceLevel": "vendor-payment-email-and-order-pdf",
-      "notes": "$300.66 payment confirmed by email: $179.15 parts and $121.51 provisional shipping. Planned dispatch October 28, 2026 via UPS Ground; no dispatch notice or tracking yet. Shipping may be adjusted after packing and weighing.",
+      "evidenceLevel": "vendor-paid-invoice-and-carrier-tracking",
+      "notes": "Vendor invoice confirms $300.66 paid, including $179.15 in parts and $121.51 in shipping. UPS has the package and estimates October 30 delivery; no forwarder receipt confirmed. Any later adjustment remains unconfirmed.",
       "invoiceTotalCents": 30066,
       "expectedShipDate": "2026-10-28",
       "shippingChargeFinal": false
@@ -1268,6 +1268,11 @@
   "changes": [
     {
       "date": "2026-10-28",
+      "title": "Frame shipment and receipt updates",
+      "detail": "FramingTech issued its paid invoice and UPS tracking. UPS estimates October 30 arrival; the shipment is prealerted and consolidated. Speedy lists another Amazon shipment received. Walmart reports another shipment delivered; Speedy receipt remains unconfirmed."
+    },
+    {
+      "date": "2026-10-28",
       "title": "Walmart package shipped",
       "detail": "Walmart supplied USPS tracking for the spacer shipment. The package was prealerted and added to the second project consolidation. November 9 is the vendor delivery estimate."
     },
@@ -1557,8 +1562,8 @@
       "id": "FT-PREP-01",
       "vendor": "FramingTech",
       "orderRef": "framingtech",
-      "status": "preparing",
-      "carrier": "UPS Ground (planned)",
+      "status": "shipped",
+      "carrier": "UPS",
       "itemIds": [
         "framingtech-037",
         "framingtech-038",
@@ -1569,11 +1574,11 @@
         "framingtech-043"
       ],
       "expectedShipDate": "2026-10-28",
-      "expectedDeliveryDate": null,
+      "expectedDeliveryDate": "2026-10-30",
       "deliveredAt": null,
-      "lastChecked": "2026-10-26",
-      "source": "Vendor confirmation email and order PDF",
-      "notes": "Stock allocated and order released to production. This is a planned dispatch date. No tracking number or dispatch confirmation yet."
+      "lastChecked": "2026-10-28",
+      "source": "Paid vendor invoice and UPS tracking",
+      "notes": "UPS confirms possession and estimates October 30 delivery. Prealerted and added to the second project consolidation. Speedy receipt is not confirmed."
     },
     {
       "id": "AMZ-PKG-03",
@@ -1599,23 +1604,23 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-10-27",
+      "lastChecked": "2026-10-28",
       "source": "Vendor order or carrier tracking",
-      "notes": "Amazon reports delivery to the mail room on October 27. Speedy receipt is not yet confirmed."
+      "notes": "Amazon reports carrier delivery on October 27. Speedy’s package listing shows this shipment received; the consolidation view has not yet reflected receipt."
     },
     {
       "id": "WMT-PKG-01",
       "vendor": "Walmart",
       "orderRef": "walmart",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "Walmart",
       "title": "Other expenses shipment",
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-10-27",
-      "source": "Vendor order or carrier tracking",
-      "notes": "Carrier tracking is available; prealerted and consolidated. No forwarder receipt is confirmed."
+      "lastChecked": "2026-10-28",
+      "source": "Walmart delivery confirmation",
+      "notes": "Walmart reports delivery on October 28. Speedy receipt is not yet confirmed."
     },
     {
       "id": "WMT-PKG-02",
