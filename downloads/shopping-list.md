@@ -89,7 +89,7 @@ Item quotes $2,398.88 + allowance $500.00 = total estimate $2,898.88.
 
 ## Reconciliation
 
-Amazon: 6 orders totaling $1,534.50, including the Taxes and others category; five have carrier tracking, including three carrier-reported deliveries. AMZ-06 adds a pack of frame joining plates after the original estimate. Bank charges unconfirmed. Taxes and others: $527.70 (Amazon: $320.94 additions + $100.40 tax = $421.34; Walmart: $19.99 additions + $3.49 tax = $23.48; Bambu Lab: $25.19 additions + $57.69 tax = $82.88). Already included in the corresponding vendor order totals, not added again. FramingTech: $300.66 paid ($179.15 parts + $121.51 provisional shipping). West3D: $17.55 paid per vendor invoice. Domain: $4.19 paid. Verified vendor/receipt payments: $322.40, partial, not all spending.
+Amazon: 6 orders totaling $1,534.50, including the Taxes and others category; five have carrier tracking, including four carrier-reported deliveries. AMZ-06 adds a pack of frame joining plates after the original estimate. Bank charges unconfirmed. Taxes and others: $527.70 (Amazon: $320.94 additions + $100.40 tax = $421.34; Walmart: $19.99 additions + $3.49 tax = $23.48; Bambu Lab: $25.19 additions + $57.69 tax = $82.88). Already included in the corresponding vendor order totals, not added again. FramingTech: $300.66 paid ($179.15 parts + $121.51 provisional shipping). West3D: $17.55 paid per vendor invoice. Domain: $4.19 paid. Verified vendor/receipt payments: $322.40, partial, not all spending.
 
 Other vendor order totals (not settled-bank-payment evidence):
 - Bambu Lab: $881.86; Shipped.
