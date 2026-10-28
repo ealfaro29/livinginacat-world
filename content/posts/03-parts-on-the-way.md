@@ -6,7 +6,7 @@ title: "The parts are on their way"
 excerpt: "The printer is ordered, shipments are being tracked, and the first consolidation is full. Here is what has changed and what still needs to be tested."
 ---
 
-**Update, October 27:** Three packages are now prealerted in a second consolidation, including a UPS shipment estimated to reach Miami on October 30. Speedy’s package listing now shows one earlier shipment received, although the consolidation view has not yet reflected it. The [shipment record](/shipments/) has the latest details.
+**Update, October 27:** Three packages are now prealerted in a second consolidation, including a UPS shipment estimated to reach Miami on October 30. Amazon reports two further deliveries; Speedy has not yet confirmed receiving them. Its package listing shows one earlier shipment received, although the consolidation view has not yet reflected it. The [shipment record](/shipments/) has the latest details.
 
 The original report follows.
 
