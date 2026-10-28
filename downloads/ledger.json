@@ -34,7 +34,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "authenticated-order-page",
-      "notes": "Six confirmed orders total $1,534.50. Four have carrier tracking; one carrier reports delivery to reception, pending confirmation by the forwarder. The remaining orders are preparing. Order totals do not prove settled bank charges.",
+      "notes": "Six confirmed orders total $1,534.50. Five have carrier tracking; three are reported delivered by carriers, including one received by Speedy. Order totals do not prove settled bank charges.",
       "invoiceTotalCents": 153450
     },
     {
@@ -1268,6 +1268,11 @@
   "changes": [
     {
       "date": "2026-10-27",
+      "title": "Joining plates shipped",
+      "detail": "Amazon provided tracking for the joining plates. The package was prealerted and added to the second project consolidation. Delivery on October 28 is estimated."
+    },
+    {
+      "date": "2026-10-27",
       "title": "Two carrier deliveries reported",
       "detail": "Two further project shipments show delivered in Amazon tracking. Speedy receipt remains unconfirmed for both; carrier delivery and forwarder receipt are recorded separately."
     },
@@ -1495,7 +1500,7 @@
     },
     {
       "id": "AMZ-06",
-      "status": "ordered",
+      "status": "shipped",
       "orderedAt": "2026-10-27",
       "currency": "USD",
       "itemIds": [
@@ -1510,7 +1515,7 @@
       "actualPaidCents": null,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-27",
-      "notes": "One pack of flat joining plates for the frame. This purchase was added after the original equipment quote. Estimated delivery October 28; bank settlement and shipment tracking unconfirmed."
+      "notes": "Amazon reports shipped; delivery is estimated for October 28. Prealerted and added to the second project consolidation. Receipt is not confirmed."
     }
   ],
   "shipments": [
@@ -1732,6 +1737,22 @@
       "lastChecked": "2026-10-27",
       "source": "Vendor shipping email",
       "notes": "Vendor reports shipment via USPS. Prealerted and added to the second project consolidation. The November 2 date is the vendor estimate, not confirmation of receipt."
+    },
+    {
+      "id": "AMZ-PKG-06",
+      "vendor": "Amazon",
+      "orderRef": "AMZ-06",
+      "status": "shipped",
+      "carrier": "Amazon Logistics",
+      "title": "Frame joining plates",
+      "itemIds": [
+        "amazon-frame-plates"
+      ],
+      "expectedDeliveryDate": "2026-10-28",
+      "deliveredAt": null,
+      "lastChecked": "2026-10-27",
+      "source": "Authenticated Amazon order and tracking pages",
+      "notes": "Amazon reports shipped with estimated delivery October 28. Prealerted and added to the second project consolidation. Speedy receipt is not confirmed."
     }
   ]
 }
