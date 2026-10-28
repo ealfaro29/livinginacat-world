@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-27",
+  "updatedAt": "2026-10-28",
   "currency": "USD",
   "purchasesPaused": false,
   "equipmentQuotedTotalCents": 289888,
@@ -1267,6 +1267,11 @@
   ],
   "changes": [
     {
+      "date": "2026-10-28",
+      "title": "Walmart package shipped",
+      "detail": "Walmart supplied USPS tracking for the spacer shipment. The package was prealerted and added to the second project consolidation. November 9 is the vendor delivery estimate."
+    },
+    {
       "date": "2026-10-27",
       "title": "Joining plates shipped",
       "detail": "Amazon provided tracking for the joining plates. The package was prealerted and added to the second project consolidation. Delivery on October 28 is estimated."
@@ -1644,15 +1649,15 @@
       "id": "WMT-PREP-04",
       "vendor": "Walmart",
       "orderRef": "walmart",
-      "status": "preparing",
-      "carrier": "Unconfirmed",
+      "status": "shipped",
+      "carrier": "USPS",
       "title": "Spacers",
       "itemIds": [],
       "expectedDeliveryDate": "2026-11-09",
       "deliveredAt": null,
-      "lastChecked": "2026-10-27",
-      "source": "Vendor order or carrier tracking",
-      "notes": "Preparing separately; carrier and tracking are not yet confirmed."
+      "lastChecked": "2026-10-28",
+      "source": "Walmart shipment email",
+      "notes": "Walmart reports shipment via USPS and estimates November 9 delivery. Prealerted and added to the second project consolidation; Speedy receipt is not confirmed."
     },
     {
       "id": "VXB-PKG-01",
