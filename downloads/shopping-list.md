@@ -61,24 +61,24 @@ Equipment quoted, including allowance: $2,893.69. Listed item quotes: $2,393.69;
 | DigiKey | Adafruit 3893 · JST PH 3 cable | 1 | $1.25 | $1.25 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/3893/9603619) |
 | DigiKey | Adafruit 4873 · JST XH 3 cable pair | 1 | $0.95 | $0.95 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/4873/13922054) |
 | DigiKey | Qualtek 3021001-03 · USB-A to USB-B · 3 ft | 1 | $2.26 | $2.26 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/qualtek/3021001-03/1531288) |
-| BoltDepot | 7218 · BHCS M3×6 | 15 | $0.06 | $0.90 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=7218) |
-| BoltDepot | 7219 · BHCS M3×8 | 50 | $0.06 | $3.00 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=7219) |
-| BoltDepot | 7220 · BHCS M3×10 | 15 | $0.06 | $0.90 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=7220) |
-| BoltDepot | 7222 · BHCS M3×16 | 10 | $0.07 | $0.70 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=7222) |
-| BoltDepot | 15291 · BHCS M3×25 | 10 | $0.09 | $0.90 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=15291) |
-| BoltDepot | 6632 · BHCS M5×10 | 10 | $0.12 | $1.20 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=6632) |
-| BoltDepot | 6633 · BHCS M5×12 | 10 | $0.13 | $1.30 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=6633) |
-| BoltDepot | 6634 · BHCS M5×16 | 10 | $0.14 | $1.40 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=6634) |
-| BoltDepot | 6635 · BHCS M5×20 | 10 | $0.18 | $1.80 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=6635) |
-| BoltDepot | 7213 · FHCS M3×8 | 10 | $0.06 | $0.60 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=7213) |
-| BoltDepot | 7214 · FHCS M3×10 | 12 | $0.07 | $0.84 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=7214) |
-| BoltDepot | 6674 · FHCS M5×12 | 10 | $0.20 | $2.00 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=6674) |
-| BoltDepot | 4515 · M5 flat washer DIN125 | 10 | $0.05 | $0.50 | Order confirmed | [Product](https://boltdepot.com/Product-Details?product=4515) |
+| BoltDepot | 7218 · BHCS M3×6 | 15 | $0.06 | $0.90 | Shipped | [Product](https://boltdepot.com/Product-Details?product=7218) |
+| BoltDepot | 7219 · BHCS M3×8 | 50 | $0.06 | $3.00 | Shipped | [Product](https://boltdepot.com/Product-Details?product=7219) |
+| BoltDepot | 7220 · BHCS M3×10 | 15 | $0.06 | $0.90 | Shipped | [Product](https://boltdepot.com/Product-Details?product=7220) |
+| BoltDepot | 7222 · BHCS M3×16 | 10 | $0.07 | $0.70 | Shipped | [Product](https://boltdepot.com/Product-Details?product=7222) |
+| BoltDepot | 15291 · BHCS M3×25 | 10 | $0.09 | $0.90 | Shipped | [Product](https://boltdepot.com/Product-Details?product=15291) |
+| BoltDepot | 6632 · BHCS M5×10 | 10 | $0.12 | $1.20 | Shipped | [Product](https://boltdepot.com/Product-Details?product=6632) |
+| BoltDepot | 6633 · BHCS M5×12 | 10 | $0.13 | $1.30 | Shipped | [Product](https://boltdepot.com/Product-Details?product=6633) |
+| BoltDepot | 6634 · BHCS M5×16 | 10 | $0.14 | $1.40 | Shipped | [Product](https://boltdepot.com/Product-Details?product=6634) |
+| BoltDepot | 6635 · BHCS M5×20 | 10 | $0.18 | $1.80 | Shipped | [Product](https://boltdepot.com/Product-Details?product=6635) |
+| BoltDepot | 7213 · FHCS M3×8 | 10 | $0.06 | $0.60 | Shipped | [Product](https://boltdepot.com/Product-Details?product=7213) |
+| BoltDepot | 7214 · FHCS M3×10 | 12 | $0.07 | $0.84 | Shipped | [Product](https://boltdepot.com/Product-Details?product=7214) |
+| BoltDepot | 6674 · FHCS M5×12 | 10 | $0.20 | $2.00 | Shipped | [Product](https://boltdepot.com/Product-Details?product=6674) |
+| BoltDepot | 4515 · M5 flat washer DIN125 | 10 | $0.05 | $0.50 | Shipped | [Product](https://boltdepot.com/Product-Details?product=4515) |
 | MakerStore | PLATE-STRIP-2 · flat plate 40×18×4 mm | 2 | $2.40 | $4.80 | Awaiting final invoice | [Product](https://makerstore.cc/product/2-hole-joining-plate/) |
 | Walmart | uxcell · spacers · 5 ID / 10 OD / 9 mm high | 1 | $8.99 | $8.99 | Preparing | [Product](https://www.walmart.com/ip/5223528994) |
 | Walmart | uxcell · spiral wrap · 4 mm ID · 20 m | 1 | $9.99 | $9.99 | Shipped | [Product](https://www.walmart.com/ip/3364975377) |
 | Walmart | SUPERDANT · 1 mm adhesive EVA foam | 1 | $10.85 | $10.85 | Shipped | [Product](https://www.walmart.com/ip/9540216155) |
-| PhotonLight | Creality PTFE · 2 mm ID / 4 mm OD · 2 m | 1 | $9.99 | $9.99 | Order confirmed | [Product](https://www.photonlight.com/products/creality-ptfe-tubing-4mm-od-x-2mm-id-x-1m-length-white) |
+| PhotonLight | Creality PTFE · 2 mm ID / 4 mm OD · 2 m | 1 | $9.99 | $9.99 | Shipped | [Product](https://www.photonlight.com/products/creality-ptfe-tubing-4mm-od-x-2mm-id-x-1m-length-white) |
 | West3D | Mobil Mobilux EP2 · 10 mL syringe | 1 | $9.99 | $9.99 | Order confirmed | [Product](https://west3d.com/products/mobil-mobilux-ep2-10ml-filled-syringe-with-blunt-tip) |
 
 ## Equipment allowance
@@ -95,8 +95,8 @@ Other vendor order totals (not settled-bank-payment evidence):
 - Bambu Lab: $881.86; Partially shipped.
 - VXB: $65.22; Order confirmed.
 - DigiKey: $96.97; Order confirmed.
-- BoltDepot: $26.16; Order confirmed.
+- BoltDepot: $26.16; Shipped.
 - MakerStore: $10.18 provisional; Awaiting final invoice.
 - Walmart: $53.31; Partially shipped.
-- PhotonLight: $18.94; Order confirmed.
+- PhotonLight: $18.94; Shipped.
 - West3D: $17.55; Order confirmed.
