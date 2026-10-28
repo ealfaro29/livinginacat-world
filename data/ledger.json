@@ -34,7 +34,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "authenticated-order-page",
-      "notes": "Six confirmed orders total $1,534.50. Five have carrier tracking; three are reported delivered by carriers, including two received by Speedy. Order totals do not prove settled bank charges.",
+      "notes": "Six confirmed orders total $1,534.50. Five have carrier tracking; four are reported delivered by carriers, including two received by Speedy. Order totals do not prove settled bank charges.",
       "invoiceTotalCents": 153450
     },
     {
@@ -1268,6 +1268,11 @@
   "changes": [
     {
       "date": "2026-10-28",
+      "title": "Carrier delivery reported",
+      "detail": "Amazon reports the frame joining plates delivered to reception. The package is prealerted and consolidated; Speedy receipt remains unconfirmed."
+    },
+    {
+      "date": "2026-10-28",
       "title": "Frame shipment and receipt updates",
       "detail": "FramingTech issued its paid invoice and UPS tracking. UPS estimates October 30 arrival; the shipment is prealerted and consolidated. Speedy lists another Amazon shipment received. Walmart reports another shipment delivered; Speedy receipt remains unconfirmed."
     },
@@ -1510,7 +1515,7 @@
     },
     {
       "id": "AMZ-06",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "orderedAt": "2026-10-27",
       "currency": "USD",
       "itemIds": [
@@ -1525,7 +1530,7 @@
       "actualPaidCents": null,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-27",
-      "notes": "Amazon reports shipped; delivery is estimated for October 28. Prealerted and added to the second project consolidation. Receipt is not confirmed."
+      "notes": "Amazon reports delivery to reception October 28; Speedy receipt remains unconfirmed. Bank settlement has not been independently verified."
     }
   ],
   "shipments": [
@@ -1752,7 +1757,7 @@
       "id": "AMZ-PKG-06",
       "vendor": "Amazon",
       "orderRef": "AMZ-06",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "Amazon Logistics",
       "title": "Frame joining plates",
       "itemIds": [
@@ -1760,9 +1765,9 @@
       ],
       "expectedDeliveryDate": "2026-10-28",
       "deliveredAt": null,
-      "lastChecked": "2026-10-27",
+      "lastChecked": "2026-10-28",
       "source": "Authenticated Amazon order and tracking pages",
-      "notes": "Amazon reports shipped with estimated delivery October 28. Prealerted and added to the second project consolidation. Speedy receipt is not confirmed."
+      "notes": "Amazon reports delivery to reception on October 28. Speedy receipt is not yet confirmed."
     }
   ]
 }
