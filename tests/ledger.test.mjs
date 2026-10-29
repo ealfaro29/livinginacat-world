@@ -63,14 +63,16 @@ test("Amazon invoices reconcile without counting grouped extras twice", () => {
   );
   assert.equal(ledger.amazonOrders.flatMap((x) => x.itemIds).length, 36);
 });
-test("unverified payments stay unknown, shipping is not delivery", () => {
-  assert.equal(totals(ledger).verifiedPaid, 32240);
+test("owner-confirmed shipped payments are included without assuming delivery", () => {
+  assert.equal(totals(ledger).verifiedPaid, 221797);
   assert.equal(totals(ledger).shipped, 14);
   assert.equal(
     ledger.amazonOrders.filter((x) => x.status === "payment_attention").length,
     0,
   );
-  assert.ok(ledger.amazonOrders.every((x) => x.actualPaidCents === null));
+  assert.equal(ledger.amazonOrders.filter((x) => x.actualPaidCents != null).length, 5);
+  assert.equal(ledger.amazonOrders.find((x) => x.id === "AMZ-04").actualPaidCents, null);
+  assert.equal(ledger.orders.find((x) => x.id === "amazon").actualPaidCents, ledger.amazonOrders.reduce((n, x) => n + (x.actualPaidCents ?? 0), 0));
   assert.ok(ledger.shipments.every((x) => x.deliveredAt === null));
   assert.equal(ledger.funding.receivedCents, null);
   const ft = ledger.orders.find((x) => x.id === "framingtech");
@@ -105,7 +107,7 @@ test("BoltDepot receipt reconciles owner-selected spares and charges", () => {
     order.invoiceTotalCents,
     1604 + order.shippingInvoicedCents + order.taxInvoicedCents + order.tariffInvoicedCents,
   );
-  assert.equal(order.actualPaidCents, null);
+  assert.equal(order.actualPaidCents, 2616);
 });
 test("Walmart approved additions and tax remain included in the order total", () => {
   const order = ledger.orders.find((x) => x.id === "walmart");
@@ -132,7 +134,7 @@ test("Bambu order and grouped costs reconcile without double counting", () => {
   const confirmedOrders = ledger.orders.reduce((sum, x) => sum + x.invoiceTotalCents, 0);
   assert.equal(confirmedOrders + 419, 299936);
   assert.equal(totals(ledger).confirmedOrderTotal, confirmedOrders + 419);
-  assert.equal(order.actualPaidCents, null);
+  assert.equal(order.actualPaidCents, 88186);
 });
 test("published CAD archive matches its manifest hash", async () => {
   const release = await readJSON("data/hardware-release.json");

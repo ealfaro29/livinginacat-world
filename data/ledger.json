@@ -27,15 +27,17 @@
       "status": "partially_shipped",
       "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 111657,
-      "actualPaidCents": null,
+      "actualPaidCents": 96861,
       "shippingPaidCents": null,
       "taxPaidCents": null,
       "tariffPaidCents": null,
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "authenticated-order-page",
-      "notes": "Six confirmed orders total $1,534.50. Five have carrier tracking; four are reported delivered by carriers, including two received by Speedy. Order totals do not prove settled bank charges.",
-      "invoiceTotalCents": 153450
+      "notes": "Six confirmed orders total $1,534.50. Five shipped orders total $968.61 and are paid according to the owner; the remaining order is not included in that paid subtotal. Bank settlement has not been independently reconciled.",
+      "invoiceTotalCents": 153450,
+      "paymentEvidence": "owner-confirmed-shipped-orders-paid",
+      "paymentPartial": true
     },
     {
       "id": "bambu-lab",
@@ -43,19 +45,20 @@
       "status": "shipped",
       "orderedAt": "2026-10-27",
       "quotedSubtotalCents": 89900,
-      "actualPaidCents": null,
-      "shippingPaidCents": null,
-      "taxPaidCents": null,
+      "actualPaidCents": 88186,
+      "shippingPaidCents": 699,
+      "taxPaidCents": 5769,
       "tariffPaidCents": null,
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-and-authenticated-order-summary",
-      "notes": "Order total $881.86: $847.18 in items, less $30.00 printer coupon, plus $6.99 shipping and $57.69 tax. Equipment items include the X2D AMS Combo ($789.00 before coupon) and a switching adapter ($32.99). The remaining $25.19 is grouped under Taxes and others. Both fulfillment groups now have tracking; UPS has accepted the printer shipment and estimates delivery October 30. Both packages are prealerted and consolidated. Vendor net payment is stated; bank settlement is not independently reconciled. The $899.00 equipment quote is the original planning quote.",
+      "notes": "Order total $881.86: $847.18 in items, less $30.00 printer coupon, plus $6.99 shipping and $57.69 tax. Equipment items include the X2D AMS Combo ($789.00 before coupon) and a switching adapter ($32.99). The remaining $25.19 is grouped under Taxes and others. Both fulfillment groups now have tracking; UPS has accepted the printer shipment and estimates delivery October 30. Both packages are prealerted and consolidated. The owner confirms shipped orders are paid; bank settlement is not independently reconciled. The $899.00 equipment quote is the original planning quote.",
       "invoiceTotalCents": 88186,
       "invoiceItemsCents": 84718,
       "shippingInvoicedCents": 699,
       "taxInvoicedCents": 5769,
-      "discountCents": 3000
+      "discountCents": 3000,
+      "paymentEvidence": "owner-confirmed-shipped-orders-paid"
     },
     {
       "id": "framingtech",
@@ -119,18 +122,19 @@
       "status": "shipped",
       "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 1604,
-      "actualPaidCents": null,
-      "shippingPaidCents": null,
-      "taxPaidCents": null,
-      "tariffPaidCents": null,
+      "actualPaidCents": 2616,
+      "shippingPaidCents": 841,
+      "taxPaidCents": 171,
+      "tariffPaidCents": 0,
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-shipping-email-and-usps-tracking",
-      "notes": "Order total $26.16: $16.04 merchandise, $8.41 shipping and $1.71 tax. The vendor reports shipment; USPS shows a label created and is awaiting the parcel. Prealerted and assigned to the second project consolidation. Bank settlement and receipt by the forwarder are unconfirmed.",
+      "notes": "Order total $26.16: $16.04 merchandise, $8.41 shipping and $1.71 tax. The vendor reports shipment; USPS shows a label created and is awaiting the parcel. Prealerted and assigned to the second project consolidation. The owner confirms shipped orders are paid; bank settlement and forwarder receipt are not independently confirmed.",
       "invoiceTotalCents": 2616,
       "shippingInvoicedCents": 841,
       "taxInvoicedCents": 171,
-      "tariffInvoicedCents": 0
+      "tariffInvoicedCents": 0,
+      "paymentEvidence": "owner-confirmed-shipped-orders-paid"
     },
     {
       "id": "walmart",
@@ -145,7 +149,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-email-and-authenticated-order-page",
-      "notes": "Order confirmed: $29.83 equipment plus $23.48 Taxes and others = $53.31, with free shipping. The grouped category includes $3.49 documented sales tax and $19.99 other expenses, already in the order total. Three fulfillment groups have tracking and are prealerted; the remaining equipment group is preparing. No locker arrival or settled bank charge confirmed.",
+      "notes": "Order confirmed: $29.83 equipment plus $23.48 Taxes and others = $53.31, with free shipping. The grouped category includes $3.49 documented sales tax and $19.99 other expenses, already in the order total. Three fulfillment groups have tracking and are prealerted; the remaining equipment group is preparing. The owner confirms shipped items are paid; a reliable shipped-item payment allocation is not yet available. No locker arrival or independent bank reconciliation is confirmed.",
       "invoiceItemsCents": 4982,
       "invoiceTotalCents": 5331,
       "shippingInvoicedCents": 0,
@@ -158,18 +162,19 @@
       "status": "shipped",
       "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 999,
-      "actualPaidCents": null,
-      "shippingPaidCents": null,
-      "taxPaidCents": null,
-      "tariffPaidCents": null,
+      "actualPaidCents": 1894,
+      "shippingPaidCents": 895,
+      "taxPaidCents": 0,
+      "tariffPaidCents": 0,
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-shipping-email",
-      "notes": "Order total $18.94: $9.99 merchandise, $8.95 shipping and $0.00 tax. The vendor reports shipment with USPS tracking; prealerted and assigned to the second project consolidation. Estimated delivery November 2, 2026; bank settlement and forwarder receipt remain unconfirmed.",
+      "notes": "Order total $18.94: $9.99 merchandise, $8.95 shipping and $0.00 tax. The vendor reports shipment with USPS tracking; prealerted and assigned to the second project consolidation. Estimated delivery November 2, 2026; forwarder receipt remains unconfirmed; the owner confirms shipped orders are paid, without independent bank reconciliation.",
       "invoiceTotalCents": 1894,
       "shippingInvoicedCents": 895,
       "taxInvoicedCents": 0,
-      "tariffInvoicedCents": 0
+      "tariffInvoicedCents": 0,
+      "paymentEvidence": "owner-confirmed-shipped-orders-paid"
     },
     {
       "id": "west3d",
@@ -1268,6 +1273,11 @@
   "changes": [
     {
       "date": "2026-10-28",
+      "title": "Owner confirms payment of shipped purchases",
+      "detail": "The owner confirmed that shipped purchases have been paid. Documented order totals for shipped orders are included in the paid subtotal, attributed to the owner rather than to a bank audit. A partially shipped order is excluded from the monetary subtotal until its shipped amounts can be allocated reliably. Delivery and forwarder receipt remain separate."
+    },
+    {
+      "date": "2026-10-28",
       "title": "Carrier delivery reported",
       "detail": "Amazon reports the frame joining plates delivered to reception. The package is prealerted and consolidated; Speedy receipt remains unconfirmed."
     },
@@ -1402,10 +1412,11 @@
       "discountCents": 0,
       "taxCents": 145,
       "orderTotalCents": 2210,
-      "actualPaidCents": null,
+      "actualPaidCents": 2210,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-26",
-      "notes": "Amazon marks this order shipped. Its order total is documented but does not replace bank reconciliation."
+      "notes": "Amazon marks this order shipped. The owner confirms shipped orders are paid; bank settlement has not been independently reconciled.",
+      "paymentEvidence": "owner-confirmed-shipped-orders-paid"
     },
     {
       "id": "AMZ-02",
@@ -1426,10 +1437,11 @@
       "discountCents": 228,
       "taxCents": 1036,
       "orderTotalCents": 15840,
-      "actualPaidCents": null,
+      "actualPaidCents": 15840,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-27",
-      "notes": "Amazon reports delivery to reception on October 27. Speedy’s package listing shows receipt; its consolidation view has not yet reflected it. Bank charge remains unconfirmed."
+      "notes": "Amazon reports delivery to reception on October 27. Speedy’s package listing shows receipt; its consolidation view has not yet reflected it. The owner confirms shipped orders are paid; bank settlement has not been independently reconciled.",
+      "paymentEvidence": "owner-confirmed-shipped-orders-paid"
     },
     {
       "id": "AMZ-03",
@@ -1450,10 +1462,11 @@
       "discountCents": 0,
       "taxCents": 820,
       "orderTotalCents": 12536,
-      "actualPaidCents": null,
+      "actualPaidCents": 12536,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-27",
-      "notes": "Amazon reports carrier delivery on October 27. Speedy receipt and settled bank payment remain unconfirmed."
+      "notes": "Amazon reports carrier delivery on October 27. Speedy’s package listing shows receipt; its consolidation view has not yet reflected it. The owner confirms shipped orders are paid; bank settlement has not been independently reconciled.",
+      "paymentEvidence": "owner-confirmed-shipped-orders-paid"
     },
     {
       "id": "AMZ-04",
@@ -1508,10 +1521,11 @@
       "discountCents": 0,
       "taxCents": 4270,
       "orderTotalCents": 65260,
-      "actualPaidCents": null,
+      "actualPaidCents": 65260,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-26",
-      "notes": "Amazon reports carrier delivery on October 27. Speedy receipt and settled bank payment remain unconfirmed."
+      "notes": "Amazon reports carrier delivery on October 27. Speedy receipt remains unconfirmed. The owner confirms shipped orders are paid; bank settlement has not been independently reconciled.",
+      "paymentEvidence": "owner-confirmed-shipped-orders-paid"
     },
     {
       "id": "AMZ-06",
@@ -1527,10 +1541,11 @@
       "discountCents": 50,
       "taxCents": 66,
       "orderTotalCents": 1015,
-      "actualPaidCents": null,
+      "actualPaidCents": 1015,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-27",
-      "notes": "Amazon reports delivery to reception October 28; Speedy receipt remains unconfirmed. Bank settlement has not been independently verified."
+      "notes": "Amazon reports delivery to reception October 28; Speedy receipt remains unconfirmed. The owner confirms shipped orders are paid; bank settlement has not been independently reconciled.",
+      "paymentEvidence": "owner-confirmed-shipped-orders-paid"
     }
   ],
   "shipments": [
