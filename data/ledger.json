@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-28",
+  "updatedAt": "2026-10-29",
   "currency": "USD",
   "purchasesPaused": false,
   "equipmentQuotedTotalCents": 289888,
@@ -1272,6 +1272,11 @@
   ],
   "changes": [
     {
+      "date": "2026-10-29",
+      "title": "Forwarder charges now tracked",
+      "detail": "Speedy shows ₡67,500 in charges across two exactly matched received shipments. This is a snapshot of amounts displayed to pay, not a confirmed payment or final consolidated total. Amounts are kept in colones, separate from the USD purchase totals."
+    },
+    {
       "date": "2026-10-28",
       "title": "Owner confirms payment of shipped purchases",
       "detail": "The owner confirmed that shipped purchases have been paid. Documented order totals for shipped orders are included in the paid subtotal, attributed to the owner rather than to a bank audit. A partially shipped order is excluded from the monetary subtotal until its shipped amounts can be allocated reliably. Delivery and forwarder receipt remain separate."
@@ -1784,5 +1789,25 @@
       "source": "Authenticated Amazon order and tracking pages",
       "notes": "Amazon reports delivery to reception on October 28. Speedy receipt is not yet confirmed."
     }
-  ]
+  ],
+  "forwardingCharges": {
+    "currency": "CRC",
+    "source": "Speedy package listing: total a pagar",
+    "observedAt": "2026-10-29",
+    "notes": "Observed charges for exactly matched project shipments. Payment and final consolidated charges are not confirmed; amounts may change. The sum is separate from USD orders and is not a paid expense.",
+    "observations": [
+      {
+        "shipmentId": "AMZ-PKG-03",
+        "weightLbs": 4,
+        "amountCRC": 18000,
+        "observedAt": "2026-10-29"
+      },
+      {
+        "shipmentId": "AMZ-PKG-04",
+        "weightLbs": 11,
+        "amountCRC": 49500,
+        "observedAt": "2026-10-29"
+      }
+    ]
+  }
 }

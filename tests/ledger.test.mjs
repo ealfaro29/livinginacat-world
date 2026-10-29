@@ -145,3 +145,12 @@ test("published CAD archive matches its manifest hash", async () => {
   assert.equal(createHash("sha256").update(b).digest("hex"), release.sha256);
   assert.equal(release.physicalTested, false);
 });
+
+test("forwarder charge snapshot stays in colones and matches known shipments", () => {
+  const f = ledger.forwardingCharges;
+  assert.equal(f.currency, "CRC");
+  assert.ok(f.observations.every((x) => ledger.shipments.some((s) => s.id === x.shipmentId)));
+  const latest = [...new Map([...f.observations].sort((a,b) => a.observedAt.localeCompare(b.observedAt)).map((x) => [x.shipmentId, x])).values()];
+  assert.ok(latest.every((x) => Number.isInteger(x.amountCRC) && x.amountCRC >= 0));
+  assert.equal(new Set(latest.map((x) => x.shipmentId)).size, latest.length);
+});
