@@ -1333,6 +1333,11 @@
   "changes": [
     {
       "date": "2026-10-29",
+      "title": "Amazon shipment update",
+      "detail": "Amazon reports a carrier delivery and a new shipment from a split order. Forwarder receipt for the delivered shipment is not yet confirmed; prealert for the new shipment is being prepared."
+    },
+    {
+      "date": "2026-10-29",
       "title": "Another shipment received by Speedy",
       "detail": "Speedy confirms receipt of the frame joining plates shipment. Its displayed forwarding charge is now included in the separate colones subtotal."
     },
@@ -1485,7 +1490,7 @@
   "amazonOrders": [
     {
       "id": "AMZ-01",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "orderedAt": "2026-10-26",
       "currency": "USD",
       "itemIds": [
@@ -1500,7 +1505,7 @@
       "actualPaidCents": 2210,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-26",
-      "notes": "Amazon marks this order shipped. The owner confirms shipped orders are paid; bank settlement has not been independently reconciled.",
+      "notes": "Amazon reports carrier delivery on October 29. Speedy receipt remains unconfirmed. The owner confirms shipped orders are paid.",
       "paymentEvidence": "owner-confirmed-shipped-orders-paid"
     },
     {
@@ -1555,7 +1560,7 @@
     },
     {
       "id": "AMZ-04",
-      "status": "ordered",
+      "status": "partially_shipped",
       "orderedAt": "2026-10-26",
       "currency": "USD",
       "itemIds": [
@@ -1590,7 +1595,7 @@
       "actualPaidCents": null,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-26",
-      "notes": "The latest authenticated order history no longer shows a payment-review warning. Estimated arrival November 2, 2026; no dispatch or tracking yet verified for this order. Bank charge remains unconfirmed."
+      "notes": "Amazon reports the first shipment dispatched, estimated to arrive November 2. Remaining items are not yet shipped. No shipment payment allocation is recorded."
     },
     {
       "id": "AMZ-05",
@@ -1638,16 +1643,16 @@
       "id": "AMZ-PKG-01",
       "vendor": "Amazon",
       "orderRef": "AMZ-01",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "FedEx",
       "itemIds": [
         "B07Y2P7F1G"
       ],
       "expectedDeliveryDate": "2026-10-29",
       "deliveredAt": null,
-      "lastChecked": "2026-10-26",
-      "source": "Amazon tracking page",
-      "notes": "Amazon reports the package left the shipper facility. Estimated delivery date, not guaranteed. Forwarder prealert verified and grouped with the other tracked project package. No locker arrival is confirmed."
+      "lastChecked": "2026-10-29",
+      "source": "Authenticated Amazon tracking",
+      "notes": "Amazon reports carrier delivery October 29. Speedy receipt remains unconfirmed."
     },
     {
       "id": "AMZ-PKG-02",
@@ -1868,6 +1873,20 @@
       "lastChecked": "2026-10-29",
       "source": "Vendor tracking and Speedy package listing",
       "notes": "Amazon reports delivery on October 28. Speedy’s package listing now confirms receipt for this shipment."
+    },
+    {
+      "id": "AMZ-PKG-07",
+      "vendor": "Amazon",
+      "orderRef": "AMZ-04",
+      "status": "shipped",
+      "carrier": "Amazon Logistics",
+      "title": "Parts and supplies",
+      "itemIds": [],
+      "expectedDeliveryDate": "2026-11-02",
+      "deliveredAt": null,
+      "lastChecked": "2026-10-29",
+      "source": "Authenticated Amazon tracking",
+      "notes": "First shipment from this order is in transit; prealert is being prepared. Remaining items are not yet shipped."
     }
   ],
   "forwardingCharges": {
