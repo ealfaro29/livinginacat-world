@@ -16,23 +16,13 @@ This is a progress report, not a claim that the robot works yet. The files are p
 
 ## The printer and the purchase record
 
-The Bambu Lab order is **$881.86**, including the printer, an adapter, grouped other expenses, shipping and tax. The vendor's summary breaks it down as follows:
-
-| Bambu order | USD |
-|---|---:|
-| Items before the order coupon | $847.18 |
-| Printer coupon | −$30.00 |
-| Shipping | $6.99 |
-| Sales tax | $57.69 |
-| **Order total** | **$881.86** |
-
-The printer is $789.00 before the $30.00 printer coupon, and the adapter is $32.99. The remaining $25.19 in items is included as other expenses; the full $57.69 sales tax stays identified as tax. These figures are already part of the order total and must not be added again. The vendor displays a net payment of $881.86; we have not independently reconciled the bank transaction.
+The Bambu Lab order total is **$881.86**. The grouped category is included in the order total.
 
 The original equipment planning estimate remains **$2,893.69**, including the owner's $500 unallocated allowance. It is a historical quote, not the amount spent: for example, it used the original $899 printer quote. Confirmed order totals and shipping charges belong in the purchase ledger instead.
 
 As of this update, confirmed vendor order totals plus the first year of the domain add up to **$2,989.21**. This figure excludes future forwarding costs, any further shipping adjustment and AI usage. It includes order totals that have not all been independently verified against bank charges; it is not a reconciled cash-spending total. FramingTech's shipping may change after weighing.
 
-The [purchase record](/purchases/) keeps the quotes, vendor totals, actual tax, grouped other expenses and evidence level separate. We have not reconciled the contributions received, so there is no public balance yet.
+The [purchase record](/purchases/) keeps the quotes, vendor totals, grouped costs and evidence level separate. We have not reconciled the contributions received, so there is no public balance yet.
 
 ## A first consolidation
 
