@@ -9,7 +9,7 @@ test("public ledger excludes private purchase identities while keeping totals", 
     ledger.otherExpenses
       .filter((x) => x.includedInVendorOrderTotals)
       .reduce((n, x) => n + x.categoryTotalCents, 0),
-    52770,
+    70671,
   );
 });
 test("publication guard recognizes normalized phrases without exposing identities", () => {
@@ -18,6 +18,6 @@ test("publication guard recognizes normalized phrases without exposing identitie
     assertPublicText("Sample / prívate — item", "fixture", hashes),
   );
   assert.doesNotThrow(() =>
-    assertPublicText("Other expenses: $12.34", "fixture", hashes),
+    assertPublicText("Taxes, tariffs, shipping and others: $12.34", "fixture", hashes),
   );
 });

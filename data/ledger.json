@@ -52,7 +52,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-and-authenticated-order-summary",
-      "notes": "Order total $881.86: $847.18 in items, less $30.00 printer coupon, plus $6.99 shipping and $57.69 tax. Equipment items include the X2D AMS Combo ($789.00 before coupon) and a switching adapter ($32.99). The remaining $25.19 is grouped under Taxes and others. Both fulfillment groups now have tracking; UPS has accepted the printer shipment and estimates delivery October 30. Both packages are prealerted and consolidated. The owner confirms shipped orders are paid; bank settlement is not independently reconciled. The $899.00 equipment quote is the original planning quote.",
+      "notes": "Order total $881.86. Both fulfillment groups have tracking; UPS has accepted the shipment and estimates delivery October 30. Both packages are prealerted and consolidated. The owner confirms shipped orders are paid; bank settlement is not independently reconciled. The equipment quote is the original planning quote.",
       "invoiceTotalCents": 88186,
       "invoiceItemsCents": 84718,
       "shippingInvoicedCents": 699,
@@ -73,7 +73,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-paid-invoice-and-carrier-tracking",
-      "notes": "Vendor invoice confirms $300.66 paid, including $179.15 in parts and $121.51 in shipping. UPS has the package and estimates October 30 delivery; no forwarder receipt confirmed. Any later adjustment remains unconfirmed.",
+      "notes": "Vendor invoice confirms $300.66 paid. UPS estimates October 30 delivery; forwarder receipt and any later adjustment remain unconfirmed.",
       "invoiceTotalCents": 30066,
       "expectedShipDate": "2026-10-28",
       "shippingChargeFinal": false
@@ -91,7 +91,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-email",
-      "notes": "Vendor order total $65.22: $60.95 items + $0.00 shipping + $4.27 tax. USPS tracking is assigned; the carrier reports a label was created and is awaiting the package. Prealerted and consolidated. No locker arrival or settled bank charge confirmed.",
+      "notes": "Vendor order total $65.22. USPS tracking is assigned; the carrier reports a label was created and is awaiting the package. Prealerted and consolidated. No forwarder receipt or settled bank charge confirmed.",
       "invoiceTotalCents": 6522,
       "shippingInvoicedCents": 0,
       "taxInvoicedCents": 427,
@@ -110,7 +110,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-email",
-      "notes": "Order confirmation received October 26, 2026: 11 purchase units, $77.36 items + $8.49 shipping + $5.79 sales tax + $5.33 tariff = $96.97 order total. The vendor assigned two sales orders and states the order is being processed. No shipping notice, tracking, delivery or settled bank charge is confirmed. The cart had estimated approximately 8 days to dispatch the Remington wire; a dispatch date is not yet confirmed.",
+      "notes": "Order confirmed October 26, 2026 for $96.97. The vendor assigned two sales orders and states the order is being processed. No shipping notice, tracking or delivery confirmed.",
       "invoiceTotalCents": 9697,
       "shippingInvoicedCents": 849,
       "taxInvoicedCents": 579,
@@ -129,7 +129,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-shipping-email-and-usps-tracking",
-      "notes": "Order total $26.16: $16.04 merchandise, $8.41 shipping and $1.71 tax. The vendor reports shipment; USPS shows a label created and is awaiting the parcel. Prealerted and assigned to the second project consolidation. The owner confirms shipped orders are paid; bank settlement and forwarder receipt are not independently confirmed.",
+      "notes": "Order total $26.16. The vendor reports shipment; USPS shows a label created and is awaiting the parcel. Prealerted and assigned to the second consolidation. The owner confirms shipped orders are paid; forwarder receipt is unconfirmed.",
       "invoiceTotalCents": 2616,
       "shippingInvoicedCents": 841,
       "taxInvoicedCents": 171,
@@ -149,7 +149,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-email-and-authenticated-order-page",
-      "notes": "Order confirmed: $29.83 equipment plus $23.48 Taxes and others = $53.31, with free shipping. The grouped category includes $3.49 documented sales tax and $19.99 other expenses, already in the order total. Three fulfillment groups have tracking and are prealerted; the remaining equipment group is preparing. The owner confirms shipped items are paid; a reliable shipped-item payment allocation is not yet available. No locker arrival or independent bank reconciliation is confirmed.",
+      "notes": "Order total $53.31. Three fulfillment groups have tracking and are prealerted; the remaining equipment group is preparing. The owner confirms shipped items are paid; a reliable shipped-item payment allocation is not yet available. No locker arrival or independent bank reconciliation is confirmed.",
       "invoiceItemsCents": 4982,
       "invoiceTotalCents": 5331,
       "shippingInvoicedCents": 0,
@@ -169,7 +169,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-shipping-email",
-      "notes": "Order total $18.94: $9.99 merchandise, $8.95 shipping and $0.00 tax. The vendor reports shipment with USPS tracking; prealerted and assigned to the second project consolidation. Estimated delivery November 2, 2026; forwarder receipt remains unconfirmed; the owner confirms shipped orders are paid, without independent bank reconciliation.",
+      "notes": "Order total $18.94. The vendor reports shipment with USPS tracking; prealerted and consolidated. Estimated delivery November 2, 2026. The owner confirms shipped orders are paid; forwarder receipt is unconfirmed.",
       "invoiceTotalCents": 1894,
       "shippingInvoicedCents": 895,
       "taxInvoicedCents": 0,
@@ -189,7 +189,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-confirmation-email-and-paid-invoice-pdf",
-      "notes": "Vendor invoice records $17.55 paid: $9.99 item and $7.56 shipping, $0.00 tax. USPS tracking is assigned; the carrier reports a label was created and is awaiting the package. Prealerted and consolidated; no locker arrival confirmed.",
+      "notes": "Vendor invoice records $17.55 paid. USPS tracking is assigned; the carrier reports a label was created and is awaiting the package. Prealerted and consolidated; no forwarder receipt confirmed.",
       "invoiceTotalCents": 1755,
       "shippingInvoicedCents": 756,
       "taxInvoicedCents": 0,
@@ -1231,46 +1231,111 @@
     {
       "id": "amazon-additions-grouped",
       "vendor": "Amazon",
-      "name": "Taxes and others",
+      "name": "Taxes, tariffs, shipping and others",
       "status": "partially_shipped",
-      "quotedTotalCents": 32094,
       "actualPaidCents": null,
       "includedInVendorOrderTotals": true,
       "evidenceLevel": "authenticated-order-page-and-owner-classification",
-      "notes": "Aggregated other expenses of $320.94 plus documented Amazon tax of $100.40: $421.34 total. These amounts are already included in the six vendor orders and are not added again. Item-level details stay private.",
-      "amazonTaxCents": 10040,
+      "notes": "Included in the vendor order total.",
       "categoryTotalCents": 42134
     },
     {
       "id": "walmart-additions-grouped",
       "vendor": "Walmart",
-      "name": "Taxes and others",
+      "name": "Taxes, tariffs, shipping and others",
       "status": "ordered",
       "orderedAt": "2026-10-26",
-      "quotedTotalCents": 1999,
-      "vendorTaxCents": 349,
       "categoryTotalCents": 2348,
       "actualPaidCents": null,
       "includedInVendorOrderTotals": true,
       "evidenceLevel": "authenticated-order-page-and-owner-classification",
-      "notes": "Grouped other expenses of $19.99 plus documented sales tax of $3.49: $23.48 total. Already included in the $53.31 vendor order and not counted again. Item-level details stay private; settled bank charge unconfirmed."
+      "notes": "Included in the vendor order total."
     },
     {
       "id": "bambu-additions-grouped",
       "vendor": "Bambu Lab",
-      "name": "Taxes and others",
+      "name": "Taxes, tariffs, shipping and others",
       "status": "partially_shipped",
       "orderedAt": "2026-10-27",
-      "quotedTotalCents": 2519,
-      "vendorTaxCents": 5769,
-      "categoryTotalCents": 8288,
+      "categoryTotalCents": 8987,
       "actualPaidCents": null,
       "includedInVendorOrderTotals": true,
       "evidenceLevel": "vendor-order-confirmation-and-owner-classification",
-      "notes": "Other expenses of $25.19 and documented order tax of $57.69, totaling $82.88. Both are included in the Bambu order total and are not added again. The printer coupon is recorded separately."
+      "notes": "Included in the vendor order total."
+    },
+    {
+      "id": "framingtech-charges-grouped",
+      "vendor": "FramingTech",
+      "name": "Taxes, tariffs, shipping and others",
+      "status": "shipped",
+      "categoryTotalCents": 12151,
+      "actualPaidCents": null,
+      "includedInVendorOrderTotals": true,
+      "evidenceLevel": "vendor-paid-invoice-and-carrier-tracking",
+      "notes": "Included in the vendor order total."
+    },
+    {
+      "id": "vxb-charges-grouped",
+      "vendor": "VXB",
+      "name": "Taxes, tariffs, shipping and others",
+      "status": "ordered",
+      "categoryTotalCents": 427,
+      "actualPaidCents": null,
+      "includedInVendorOrderTotals": true,
+      "evidenceLevel": "vendor-order-confirmation-email",
+      "notes": "Included in the vendor order total."
+    },
+    {
+      "id": "digikey-charges-grouped",
+      "vendor": "DigiKey",
+      "name": "Taxes, tariffs, shipping and others",
+      "status": "ordered",
+      "categoryTotalCents": 1961,
+      "actualPaidCents": null,
+      "includedInVendorOrderTotals": true,
+      "evidenceLevel": "vendor-order-confirmation-email",
+      "notes": "Included in the vendor order total."
+    },
+    {
+      "id": "boltdepot-charges-grouped",
+      "vendor": "BoltDepot",
+      "name": "Taxes, tariffs, shipping and others",
+      "status": "shipped",
+      "categoryTotalCents": 1012,
+      "actualPaidCents": null,
+      "includedInVendorOrderTotals": true,
+      "evidenceLevel": "vendor-shipping-email-and-usps-tracking",
+      "notes": "Included in the vendor order total."
+    },
+    {
+      "id": "photonlight-charges-grouped",
+      "vendor": "PhotonLight",
+      "name": "Taxes, tariffs, shipping and others",
+      "status": "shipped",
+      "categoryTotalCents": 895,
+      "actualPaidCents": null,
+      "includedInVendorOrderTotals": true,
+      "evidenceLevel": "vendor-shipping-email",
+      "notes": "Included in the vendor order total."
+    },
+    {
+      "id": "west3d-charges-grouped",
+      "vendor": "West3D",
+      "name": "Taxes, tariffs, shipping and others",
+      "status": "ordered",
+      "categoryTotalCents": 756,
+      "actualPaidCents": null,
+      "includedInVendorOrderTotals": true,
+      "evidenceLevel": "vendor-confirmation-email-and-paid-invoice-pdf",
+      "notes": "Included in the vendor order total."
     }
   ],
   "changes": [
+    {
+      "date": "2026-10-29",
+      "title": "Grouped costs updated",
+      "detail": "Taxes, tariffs, shipping and others are grouped by store. These amounts are already included in order totals. Speedy charges are tracked separately in colones."
+    },
     {
       "date": "2026-10-29",
       "title": "Forwarder charges now tracked",
@@ -1324,7 +1389,7 @@
     {
       "date": "2026-10-27",
       "title": "Printer order and shipment tracking updated",
-      "detail": "Bambu Lab confirmed an $881.86 order, including $6.99 shipping, $57.69 tax and a $30.00 printer coupon. Other expenses are grouped and included in the order total. The first project consolidation now contains ten prealerted packages. Amazon reports one delivery to reception; forwarder receipt had not yet been confirmed at that time. Printed parts and physical tests remain ahead."
+      "detail": "Bambu Lab confirmed an $881.86 order, including $6.99 shipping, $57.69 tax and a $30.00 printer coupon. Taxes, tariffs, shipping and others are grouped and included in the order total. The first project consolidation now contains ten prealerted packages. Amazon reports one delivery to reception; forwarder receipt had not yet been confirmed at that time. Printed parts and physical tests remain ahead."
     },
     {
       "date": "2026-10-26",
@@ -1338,8 +1403,8 @@
     },
     {
       "date": "2026-10-26",
-      "title": "Walmart order confirmed with approved additional category",
-      "detail": "Walmart confirmed $53.31: $29.83 equipment and $23.48 in Taxes and others, including $3.49 sales tax, with free shipping. The grouped amount is included in the vendor total and raises the category total to $444.16 without changing the equipment estimate. No dispatch or settled bank charge is confirmed."
+      "title": "Walmart order confirmed",
+      "detail": "Walmart confirmed an order totaling $53.31, including the grouped category already reflected in the order total. No dispatch or settled bank charge was confirmed at that time."
     },
     {
       "date": "2026-10-26",
@@ -1363,13 +1428,13 @@
     },
     {
       "date": "2026-10-26",
-      "title": "Category renamed to Taxes and others",
-      "detail": "Grouped additions of $320.94 plus Amazon tax of $99.74 are presented as a $420.68 classification subtotal. Both were already included in Amazon order totals; no new expense or payment is created."
+      "title": "Grouped category recorded",
+      "detail": "The grouped category was recorded within Amazon order totals; no new expense or payment was created."
     },
     {
       "date": "2026-10-26",
       "title": "Reconciled with email and Amazon",
-      "detail": "$300.66 paid to FramingTech, including $121.51 provisional shipping. GoDaddy confirms $4.19 for the domain. Amazon lists five orders totaling $1,524.35: two shipped, three requiring payment review. $320.94 of additions are classified as Taxes and others, already included in Amazon totals."
+      "detail": "$300.66 paid to FramingTech. GoDaddy confirms $4.19 for the domain. Amazon listed five orders totaling $1,524.35; grouped charges were already included in the order totals."
     },
     {
       "date": "2026-10-26",
@@ -1639,7 +1704,7 @@
       "orderRef": "walmart",
       "status": "carrier_delivered",
       "carrier": "Walmart",
-      "title": "Other expenses shipment",
+      "title": "Grouped expenses shipment",
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,

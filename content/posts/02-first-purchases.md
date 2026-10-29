@@ -22,9 +22,9 @@ This post preserves the state on **October 26, 2026**. The [purchase record](/pu
 
 These rows overlap: **do not add them together**. We have not reconciled bank statements or final Amazon charges. There is also no verified total of contributions received, so the site does not invent an available balance.
 
-### Taxes and others
+### Taxes, tariffs, shipping and others
 
-The aggregated **“Taxes and others”** category includes **$320.94 in other expenses + $99.74 in Amazon tax = $420.68**. Item-level details are private. Both components are already included in the Amazon orders and are not added again to the $1,524.35 total. This is a classification subtotal; we do not invent a discount allocation between categories.
+The historical total for **Taxes, tariffs, shipping and others** was **$420.68**, already included in the Amazon order totals.
 
 ### Equipment allowance
 
