@@ -58,7 +58,7 @@ test("Amazon invoices reconcile without counting grouped extras twice", () => {
 });
 test("owner-confirmed shipped payments are included without assuming delivery", () => {
   assert.equal(totals(ledger).verifiedPaid, 221797);
-  assert.equal(totals(ledger).shipped, 14);
+  assert.equal(totals(ledger).shipped, 15);
   assert.equal(
     ledger.amazonOrders.filter((x) => x.status === "payment_attention").length,
     0,
