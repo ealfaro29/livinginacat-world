@@ -1333,6 +1333,11 @@
   "changes": [
     {
       "date": "2026-10-29",
+      "title": "Shipment prealerted and consolidated",
+      "detail": "The first shipment from a split Amazon order is prealerted and included in the second project consolidation."
+    },
+    {
+      "date": "2026-10-29",
       "title": "Amazon shipment update",
       "detail": "Amazon reports a carrier delivery and a new shipment from a split order. Forwarder receipt for the delivered shipment is not yet confirmed; prealert for the new shipment is being prepared."
     },
@@ -1886,7 +1891,7 @@
       "deliveredAt": null,
       "lastChecked": "2026-10-29",
       "source": "Authenticated Amazon tracking",
-      "notes": "First shipment from this order is in transit; prealert is being prepared. Remaining items are not yet shipped."
+      "notes": "First shipment from this order is in transit, prealerted and consolidated. Remaining items are not yet shipped."
     }
   ],
   "forwardingCharges": {
