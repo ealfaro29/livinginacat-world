@@ -1,6 +1,6 @@
 # Shopping list · living in a cat world
 
-Updated: 2026-10-28. USD. Item quotes; tax and shipping excluded unless noted. Purchases in progress, one store at a time.
+Updated: 2026-10-29. USD. Item quotes; tax and shipping excluded unless noted. Purchases in progress, one store at a time.
 
 Equipment quoted, including allowance: $2,898.88. Listed item quotes: $2,398.88; unallocated equipment allowance: $500.00. The allowance is a planning amount, not a vendor quote, order or payment. Payment and shipping status: https://livinginacat.world/purchases/.
 
