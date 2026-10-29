@@ -189,7 +189,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-confirmation-email-and-paid-invoice-pdf",
-      "notes": "Vendor invoice records $17.55 paid. West3D reports the USPS package is out for delivery, with October 29 estimated arrival. It is prealerted and consolidated; Speedy receipt is not confirmed.",
+      "notes": "Vendor invoice records $17.55 paid. West3D reports its USPS shipment delivered on October 29. It is prealerted and consolidated; Speedy receipt is not yet confirmed.",
       "invoiceTotalCents": 1755,
       "shippingInvoicedCents": 756,
       "taxInvoicedCents": 0,
@@ -1333,6 +1333,11 @@
   "changes": [
     {
       "date": "2026-10-29",
+      "title": "West3D carrier delivery reported",
+      "detail": "West3D reports that its USPS shipment was delivered. Speedy receipt remains unconfirmed."
+    },
+    {
+      "date": "2026-10-29",
       "title": "West3D shipment out for delivery",
       "detail": "The vendor reports its USPS shipment is out for delivery, with October 29 estimated arrival. Speedy receipt remains unconfirmed."
     },
@@ -1777,15 +1782,15 @@
       "id": "WEST-PKG-01",
       "vendor": "West3D",
       "orderRef": "west3d",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "USPS",
       "title": "Rail lubricant",
       "itemIds": [],
       "expectedDeliveryDate": "2026-10-29",
       "deliveredAt": null,
       "lastChecked": "2026-10-29",
-      "source": "West3D shipment notice",
-      "notes": "West3D reports the USPS shipment is out for delivery, with October 29 estimated arrival. Prealerted and consolidated; Speedy receipt remains unconfirmed."
+      "source": "West3D delivery notice",
+      "notes": "West3D reports carrier delivery on October 29. Prealerted and consolidated; Speedy receipt remains unconfirmed."
     },
     {
       "id": "BAMBU-PKG-01",
