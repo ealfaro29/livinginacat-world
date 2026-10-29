@@ -179,7 +179,7 @@
     {
       "id": "west3d",
       "vendor": "West3D",
-      "status": "ordered",
+      "status": "shipped",
       "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 999,
       "actualPaidCents": 1755,
@@ -189,7 +189,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-confirmation-email-and-paid-invoice-pdf",
-      "notes": "Vendor invoice records $17.55 paid. USPS tracking is assigned; the carrier reports a label was created and is awaiting the package. Prealerted and consolidated; no forwarder receipt confirmed.",
+      "notes": "Vendor invoice records $17.55 paid. West3D reports the USPS package is out for delivery, with October 29 estimated arrival. It is prealerted and consolidated; Speedy receipt is not confirmed.",
       "invoiceTotalCents": 1755,
       "shippingInvoicedCents": 756,
       "taxInvoicedCents": 0,
@@ -1333,6 +1333,11 @@
   "changes": [
     {
       "date": "2026-10-29",
+      "title": "West3D shipment out for delivery",
+      "detail": "The vendor reports its USPS shipment is out for delivery, with October 29 estimated arrival. Speedy receipt remains unconfirmed."
+    },
+    {
+      "date": "2026-10-29",
       "title": "Grouped costs updated",
       "detail": "Taxes, tariffs, shipping and others are grouped by store. These amounts are already included in order totals. Speedy charges are tracked separately in colones."
     },
@@ -1772,15 +1777,15 @@
       "id": "WEST-PKG-01",
       "vendor": "West3D",
       "orderRef": "west3d",
-      "status": "preparing",
+      "status": "shipped",
       "carrier": "USPS",
       "title": "Rail lubricant",
       "itemIds": [],
-      "expectedDeliveryDate": null,
+      "expectedDeliveryDate": "2026-10-29",
       "deliveredAt": null,
-      "lastChecked": "2026-10-27",
-      "source": "Vendor order or carrier tracking",
-      "notes": "USPS label created; awaiting carrier acceptance. Prealerted and consolidated; the forwarder date is provisional."
+      "lastChecked": "2026-10-29",
+      "source": "West3D shipment notice",
+      "notes": "West3D reports the USPS shipment is out for delivery, with October 29 estimated arrival. Prealerted and consolidated; Speedy receipt remains unconfirmed."
     },
     {
       "id": "BAMBU-PKG-01",

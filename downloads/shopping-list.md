@@ -79,7 +79,7 @@ Equipment quoted, including allowance: $2,898.88. Listed item quotes: $2,398.88;
 | Walmart | uxcell · spiral wrap · 4 mm ID · 20 m | 1 | $9.99 | $9.99 | Shipped | [Product](https://www.walmart.com/ip/3364975377) |
 | Walmart | SUPERDANT · 1 mm adhesive EVA foam | 1 | $10.85 | $10.85 | Shipped | [Product](https://www.walmart.com/ip/9540216155) |
 | PhotonLight | Creality PTFE · 2 mm ID / 4 mm OD · 2 m | 1 | $9.99 | $9.99 | Shipped | [Product](https://www.photonlight.com/products/creality-ptfe-tubing-4mm-od-x-2mm-id-x-1m-length-white) |
-| West3D | Mobil Mobilux EP2 · 10 mL syringe | 1 | $9.99 | $9.99 | Order confirmed | [Product](https://west3d.com/products/mobil-mobilux-ep2-10ml-filled-syringe-with-blunt-tip) |
+| West3D | Mobil Mobilux EP2 · 10 mL syringe | 1 | $9.99 | $9.99 | Shipped | [Product](https://west3d.com/products/mobil-mobilux-ep2-10ml-filled-syringe-with-blunt-tip) |
 
 ## Equipment allowance
 
@@ -98,4 +98,4 @@ Other vendor order totals (see the purchase record for payment status):
 - BoltDepot: $26.16; Shipped.
 - Walmart: $53.31; Partially shipped.
 - PhotonLight: $18.94; Shipped.
-- West3D: $17.55; Order confirmed.
+- West3D: $17.55; Shipped.
