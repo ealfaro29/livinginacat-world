@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-29",
+  "updatedAt": "2026-10-30",
   "currency": "USD",
   "purchasesPaused": false,
   "equipmentQuotedTotalCents": 289888,
@@ -1831,9 +1831,9 @@
       "itemIds": [],
       "expectedDeliveryDate": "2026-10-30",
       "deliveredAt": null,
-      "lastChecked": "2026-10-27",
+      "lastChecked": "2026-10-30",
       "source": "Vendor shipping email and UPS tracking",
-      "notes": "UPS reports it has the shipment and estimates arrival October 30. Prealerted and added to the second project consolidation; forwarder receipt is not yet confirmed."
+      "notes": "UPS reports the shipment is on the way with estimated arrival October 30. Prealerted and included in the second project consolidation; Speedy receipt is not yet confirmed."
     },
     {
       "id": "BOLT-PKG-01",
