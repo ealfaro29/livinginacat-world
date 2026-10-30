@@ -1332,6 +1332,11 @@
   ],
   "changes": [
     {
+      "date": "2026-10-30",
+      "title": "Shipment update",
+      "detail": "A UPS shipment was loaded on a delivery vehicle in Miami. Forwarder receipt remains unconfirmed."
+    },
+    {
       "date": "2026-10-29",
       "title": "Shipment prealerted and consolidated",
       "detail": "The first shipment from a split Amazon order is prealerted and included in the second project consolidation."
@@ -1833,7 +1838,7 @@
       "deliveredAt": null,
       "lastChecked": "2026-10-30",
       "source": "Vendor shipping email and UPS tracking",
-      "notes": "UPS reports the shipment is on the way with estimated arrival October 30. Prealerted and included in the second project consolidation; Speedy receipt is not yet confirmed."
+      "notes": "UPS reports the shipment was loaded on a delivery vehicle in Miami on October 30. It is prealerted and included in the second project consolidation; Speedy receipt is not yet confirmed."
     },
     {
       "id": "BOLT-PKG-01",
