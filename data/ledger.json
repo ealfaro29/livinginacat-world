@@ -1334,6 +1334,11 @@
     {
       "date": "2026-10-30",
       "title": "Shipment received in Miami",
+      "detail": "UPS confirmed another project shipment delivered, and Speedy lists it as received. Its observed forwarding charge was added in colones."
+    },
+    {
+      "date": "2026-10-30",
+      "title": "Shipment received in Miami",
       "detail": "UPS confirmed delivery of a project shipment and Speedy lists it as received. The observed forwarding charge was added separately in colones."
     },
     {
@@ -1692,7 +1697,7 @@
       "id": "FT-PREP-01",
       "vendor": "FramingTech",
       "orderRef": "framingtech",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "UPS",
       "itemIds": [
         "framingtech-037",
@@ -1706,9 +1711,9 @@
       "expectedShipDate": "2026-10-28",
       "expectedDeliveryDate": "2026-10-30",
       "deliveredAt": null,
-      "lastChecked": "2026-10-28",
-      "source": "Paid vendor invoice and UPS tracking",
-      "notes": "UPS confirms possession and estimates October 30 delivery. Prealerted and added to the second project consolidation. Speedy receipt is not confirmed."
+      "lastChecked": "2026-10-30",
+      "source": "Paid vendor invoice, UPS tracking and Speedy listing",
+      "notes": "UPS confirms delivery in Miami on October 30; Speedy lists this shipment as received."
     },
     {
       "id": "AMZ-PKG-03",
@@ -1832,9 +1837,9 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-10-27",
-      "source": "Vendor order or carrier tracking",
-      "notes": "A separate accessories shipment has tracking and is prealerted and consolidated. The forwarder date is provisional."
+      "lastChecked": "2026-10-30",
+      "source": "Vendor shipment notification",
+      "notes": "The vendor reports this shipment is out for delivery on October 30. Speedy receipt is not confirmed."
     },
     {
       "id": "BAMBU-PREP-01",
@@ -1937,6 +1942,12 @@
         "shipmentId": "BAMBU-PREP-01",
         "weightLbs": 49,
         "amountCRC": 220500,
+        "observedAt": "2026-10-30"
+      },
+      {
+        "shipmentId": "FT-PREP-01",
+        "weightLbs": 4,
+        "amountCRC": 18000,
         "observedAt": "2026-10-30"
       }
     ]
