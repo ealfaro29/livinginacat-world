@@ -1333,6 +1333,11 @@
   "changes": [
     {
       "date": "2026-10-30",
+      "title": "Shipment received in Miami",
+      "detail": "UPS confirmed delivery of a project shipment and Speedy lists it as received. The observed forwarding charge was added separately in colones."
+    },
+    {
+      "date": "2026-10-30",
       "title": "Shipment update",
       "detail": "A UPS shipment is out for delivery in Miami. Forwarder receipt remains unconfirmed."
     },
@@ -1835,15 +1840,15 @@
       "id": "BAMBU-PREP-01",
       "vendor": "Bambu Lab",
       "orderRef": "bambu-lab",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "UPS",
       "title": "3D printer",
       "itemIds": [],
       "expectedDeliveryDate": "2026-10-30",
       "deliveredAt": null,
       "lastChecked": "2026-10-30",
-      "source": "Vendor shipping email and UPS tracking",
-      "notes": "UPS reports the shipment is out for delivery in Miami on October 30. It is prealerted and included in the second project consolidation; Speedy receipt is not yet confirmed."
+      "source": "UPS tracking and Speedy package listing",
+      "notes": "UPS confirmed delivery in Miami on October 30; Speedy also lists this shipment as received."
     },
     {
       "id": "BOLT-PKG-01",
@@ -1907,7 +1912,7 @@
   "forwardingCharges": {
     "currency": "CRC",
     "source": "Speedy package listing: total a pagar",
-    "observedAt": "2026-10-29",
+    "observedAt": "2026-10-30",
     "notes": "Observed charges for exactly matched project shipments. Payment and final consolidated charges are not confirmed; amounts may change. The sum is separate from USD orders and is not a paid expense.",
     "observations": [
       {
@@ -1927,6 +1932,12 @@
         "weightLbs": 1,
         "amountCRC": 4500,
         "observedAt": "2026-10-29"
+      },
+      {
+        "shipmentId": "BAMBU-PREP-01",
+        "weightLbs": 49,
+        "amountCRC": 220500,
+        "observedAt": "2026-10-30"
       }
     ]
   }
