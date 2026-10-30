@@ -1333,6 +1333,11 @@
   "changes": [
     {
       "date": "2026-10-30",
+      "title": "Shipment prealerted",
+      "detail": "An additional project shipment was prealerted and added to the second consolidation."
+    },
+    {
+      "date": "2026-10-30",
       "title": "Shipment received in Miami",
       "detail": "UPS confirmed another project shipment delivered, and Speedy lists it as received. Its observed forwarding charge was added in colones."
     },
@@ -1912,6 +1917,20 @@
       "lastChecked": "2026-10-29",
       "source": "Authenticated Amazon tracking",
       "notes": "First shipment from this order is in transit, prealerted and consolidated. Remaining items are not yet shipped."
+    },
+    {
+      "id": "AMZ-PKG-08",
+      "vendor": "Amazon",
+      "orderRef": "AMZ-04",
+      "status": "shipped",
+      "carrier": "Amazon Logistics",
+      "title": "Equipment shipment",
+      "itemIds": [],
+      "expectedDeliveryDate": "2026-11-02",
+      "deliveredAt": null,
+      "lastChecked": "2026-10-30",
+      "source": "Authenticated Amazon tracking",
+      "notes": "A separate shipment is prealerted and included in the second consolidation; delivery is estimated November 2."
     }
   ],
   "forwardingCharges": {
