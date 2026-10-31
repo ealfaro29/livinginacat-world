@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-30",
+  "updatedAt": "2026-10-31",
   "currency": "USD",
   "purchasesPaused": false,
   "equipmentQuotedTotalCents": 289888,
@@ -1332,6 +1332,11 @@
   ],
   "changes": [
     {
+      "date": "2026-10-31",
+      "title": "Carrier delivery reported",
+      "detail": "Walmart reports a project shipment delivered. Speedy receipt remains unconfirmed."
+    },
+    {
       "date": "2026-10-30",
       "title": "Shipment prealerted",
       "detail": "An additional project shipment was prealerted and added to the second consolidation."
@@ -1794,15 +1799,15 @@
       "id": "WMT-PREP-04",
       "vendor": "Walmart",
       "orderRef": "walmart",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "USPS",
       "title": "Spacers",
       "itemIds": [],
       "expectedDeliveryDate": "2026-11-09",
       "deliveredAt": null,
-      "lastChecked": "2026-10-28",
-      "source": "Walmart shipment email",
-      "notes": "Walmart reports shipment via USPS and estimates November 9 delivery. Prealerted and added to the second project consolidation; Speedy receipt is not confirmed."
+      "lastChecked": "2026-10-31",
+      "source": "Walmart delivery confirmation",
+      "notes": "Walmart reported delivery on October 31. Speedy receipt is not yet confirmed."
     },
     {
       "id": "VXB-PKG-01",
