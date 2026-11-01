@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-31",
+  "updatedAt": "2026-11-01",
   "currency": "USD",
   "purchasesPaused": false,
   "equipmentQuotedTotalCents": 289888,
@@ -1332,6 +1332,11 @@
   ],
   "changes": [
     {
+      "date": "2026-11-01",
+      "title": "Another equipment shipment is on its way",
+      "detail": "An Amazon shipment received tracking and was prealerted. It awaits another eligible package to start the next consolidation."
+    },
+    {
       "date": "2026-10-31",
       "title": "Carrier delivery reported",
       "detail": "Walmart reports a project shipment delivered. Speedy receipt remains unconfirmed."
@@ -1921,7 +1926,7 @@
       "deliveredAt": null,
       "lastChecked": "2026-10-29",
       "source": "Authenticated Amazon tracking",
-      "notes": "First shipment from this order is in transit, prealerted and consolidated. Remaining items are not yet shipped."
+      "notes": "First shipment from this order is in transit, prealerted and consolidated. Further portions have shipped separately."
     },
     {
       "id": "AMZ-PKG-08",
@@ -1936,6 +1941,20 @@
       "lastChecked": "2026-10-30",
       "source": "Authenticated Amazon tracking",
       "notes": "A separate shipment is prealerted and included in the second consolidation; delivery is estimated November 2."
+    },
+    {
+      "id": "AMZ-PKG-09",
+      "vendor": "Amazon",
+      "orderRef": "AMZ-04",
+      "status": "shipped",
+      "carrier": "Amazon Logistics",
+      "title": "Equipment shipment",
+      "itemIds": [],
+      "expectedDeliveryDate": "2026-11-02",
+      "deliveredAt": null,
+      "lastChecked": "2026-11-01",
+      "source": "Authenticated Amazon tracking and Speedy prealert",
+      "notes": "A separate shipment is prealerted and awaits a second eligible package for the next consolidation. November 2 is an estimated delivery date."
     }
   ],
   "forwardingCharges": {
