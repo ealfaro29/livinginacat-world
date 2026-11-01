@@ -1333,6 +1333,11 @@
   "changes": [
     {
       "date": "2026-11-01",
+      "title": "Walmart shipment in transit",
+      "detail": "Walmart reports a previously prealerted shipment is in transit. Receipt by Speedy remains unconfirmed."
+    },
+    {
+      "date": "2026-11-01",
       "title": "Another equipment shipment is on its way",
       "detail": "An Amazon shipment received tracking and was prealerted. It awaits another eligible package to start the next consolidation."
     },
@@ -1796,9 +1801,9 @@
       "itemIds": [],
       "expectedDeliveryDate": "2026-11-09",
       "deliveredAt": null,
-      "lastChecked": "2026-10-27",
-      "source": "Vendor order or carrier tracking",
-      "notes": "Shipped, prealerted and consolidated. No forwarder receipt is confirmed."
+      "lastChecked": "2026-11-01",
+      "source": "Walmart shipment update",
+      "notes": "Walmart reports the package in transit. It is prealerted and consolidated; Speedy receipt is not yet confirmed. November 9 remains an estimated delivery date."
     },
     {
       "id": "WMT-PREP-04",
