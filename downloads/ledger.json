@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-01",
+  "updatedAt": "2026-11-02",
   "currency": "USD",
   "purchasesPaused": false,
   "equipmentQuotedTotalCents": 289888,
@@ -1332,6 +1332,11 @@
   ],
   "changes": [
     {
+      "date": "2026-11-02",
+      "title": "PhotonLight shipment delivered by carrier",
+      "detail": "PhotonLight reports its shipment delivered. Receipt by Speedy remains unconfirmed."
+    },
+    {
       "date": "2026-11-01",
       "title": "Walmart shipment in transit",
       "detail": "Walmart reports a previously prealerted shipment is in transit. Receipt by Speedy remains unconfirmed."
@@ -1893,15 +1898,15 @@
       "id": "PHOTON-PKG-01",
       "vendor": "PhotonLight",
       "orderRef": "photonlight",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "USPS",
       "title": "PTFE tubing",
       "itemIds": [],
       "expectedDeliveryDate": "2026-11-02",
       "deliveredAt": null,
-      "lastChecked": "2026-10-27",
-      "source": "Vendor shipping email",
-      "notes": "Vendor reports shipment via USPS. Prealerted and added to the second project consolidation. The November 2 date is the vendor estimate, not confirmation of receipt."
+      "lastChecked": "2026-11-02",
+      "source": "PhotonLight delivery confirmation",
+      "notes": "PhotonLight reports the shipment delivered as of November 2. Speedy receipt remains unconfirmed."
     },
     {
       "id": "AMZ-PKG-06",
