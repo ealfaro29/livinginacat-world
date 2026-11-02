@@ -34,7 +34,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "authenticated-order-page",
-      "notes": "Six confirmed orders total $1,534.50. Five shipped orders total $968.61 and are paid according to the owner; the remaining order is not included in that paid subtotal. Three shipments show receipt in Speedy. Bank settlement has not been independently reconciled.",
+      "notes": "Six confirmed orders total $1,534.50. Five shipped orders total $968.61 and are paid according to the owner; the remaining order is not included in that paid subtotal. Four shipments show receipt in Speedy, including one now shown in Costa Rica. Bank settlement has not been independently reconciled.",
       "invoiceTotalCents": 153450,
       "paymentEvidence": "owner-confirmed-shipped-orders-paid",
       "paymentPartial": true
@@ -1333,6 +1333,11 @@
   "changes": [
     {
       "date": "2026-11-02",
+      "title": "Speedy receipt and consolidation update",
+      "detail": "Speedy lists another project shipment as received and an earlier shipment in Costa Rica. The newly received shipment has been consolidated; its observed forwarding charge is recorded separately in colones."
+    },
+    {
+      "date": "2026-11-02",
       "title": "PhotonLight shipment delivered by carrier",
       "detail": "PhotonLight reports its shipment delivered. Receipt by Speedy remains unconfirmed."
     },
@@ -1580,7 +1585,7 @@
       "actualPaidCents": 15840,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-27",
-      "notes": "Amazon reports delivery to reception on October 27. Speedy’s package listing shows receipt; its consolidation view has not yet reflected it. The owner confirms shipped orders are paid; bank settlement has not been independently reconciled.",
+      "notes": "Amazon reports carrier delivery on October 27. Speedy now lists this shipment in Costa Rica. The owner confirms shipped orders are paid; bank settlement has not been independently reconciled.",
       "paymentEvidence": "owner-confirmed-shipped-orders-paid"
     },
     {
@@ -1645,7 +1650,7 @@
       "actualPaidCents": null,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-26",
-      "notes": "Amazon reports the first shipment dispatched, estimated to arrive November 2. Remaining items are not yet shipped. No shipment payment allocation is recorded."
+      "notes": "Three portions of this order have shipped. Speedy lists one shipment as received; the consolidation view has not yet reflected receipt. No shipment payment allocation is recorded."
     },
     {
       "id": "AMZ-05",
@@ -1750,9 +1755,9 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-10-27",
+      "lastChecked": "2026-11-02",
       "source": "Vendor order or carrier tracking",
-      "notes": "Amazon reports delivery to reception on October 27. Speedy’s package listing shows it received; the consolidation view has not yet reflected receipt."
+      "notes": "Amazon reported carrier delivery on October 27. Speedy now lists this shipment in Costa Rica."
     },
     {
       "id": "AMZ-PKG-04",
@@ -1962,15 +1967,15 @@
       "itemIds": [],
       "expectedDeliveryDate": "2026-11-02",
       "deliveredAt": null,
-      "lastChecked": "2026-11-01",
-      "source": "Authenticated Amazon tracking and Speedy prealert",
-      "notes": "A separate shipment is prealerted and awaits a second eligible package for the next consolidation. November 2 is an estimated delivery date."
+      "lastChecked": "2026-11-02",
+      "source": "Speedy package listing and prealert",
+      "notes": "Speedy lists this prealerted and consolidated shipment as received. The consolidation view has not yet reflected receipt."
     }
   ],
   "forwardingCharges": {
     "currency": "CRC",
     "source": "Speedy package listing: total a pagar",
-    "observedAt": "2026-10-30",
+    "observedAt": "2026-11-02",
     "notes": "Observed charges for exactly matched project shipments. Payment and final consolidated charges are not confirmed; amounts may change. The sum is separate from USD orders and is not a paid expense.",
     "observations": [
       {
@@ -2002,6 +2007,42 @@
         "weightLbs": 4,
         "amountCRC": 18000,
         "observedAt": "2026-10-30"
+      },
+      {
+        "shipmentId": "AMZ-PKG-03",
+        "weightLbs": 4,
+        "amountCRC": 18000,
+        "observedAt": "2026-11-02"
+      },
+      {
+        "shipmentId": "AMZ-PKG-04",
+        "weightLbs": 11,
+        "amountCRC": 49500,
+        "observedAt": "2026-11-02"
+      },
+      {
+        "shipmentId": "AMZ-PKG-06",
+        "weightLbs": 1,
+        "amountCRC": 4500,
+        "observedAt": "2026-11-02"
+      },
+      {
+        "shipmentId": "BAMBU-PREP-01",
+        "weightLbs": 49,
+        "amountCRC": 220500,
+        "observedAt": "2026-11-02"
+      },
+      {
+        "shipmentId": "FT-PREP-01",
+        "weightLbs": 4,
+        "amountCRC": 18000,
+        "observedAt": "2026-11-02"
+      },
+      {
+        "shipmentId": "AMZ-PKG-09",
+        "weightLbs": 11,
+        "amountCRC": 49500,
+        "observedAt": "2026-11-02"
       }
     ]
   }
