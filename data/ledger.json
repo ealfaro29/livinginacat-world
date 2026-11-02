@@ -1333,6 +1333,11 @@
   "changes": [
     {
       "date": "2026-11-02",
+      "title": "Amazon shipment deliveries confirmed",
+      "detail": "Amazon confirms four separate shipments delivered. One is also listed as received by Speedy; the others await forwarder confirmation. A newly identified shipment was prealerted and added to an existing consolidation."
+    },
+    {
+      "date": "2026-11-02",
       "title": "Speedy receipt and consolidation update",
       "detail": "Speedy lists another project shipment as received and an earlier shipment in Costa Rica. The newly received shipment has been consolidated; its observed forwarding charge is recorded separately in colones."
     },
@@ -1650,7 +1655,7 @@
       "actualPaidCents": null,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-26",
-      "notes": "Three portions of this order have shipped. Speedy lists one shipment as received; the consolidation view has not yet reflected receipt. No shipment payment allocation is recorded."
+      "notes": "Amazon confirms delivery of four separate shipments on November 2. Speedy lists one as received; receipt of the others remains unconfirmed. No shipment payment allocation is recorded."
     },
     {
       "id": "AMZ-05",
@@ -1933,43 +1938,57 @@
       "id": "AMZ-PKG-07",
       "vendor": "Amazon",
       "orderRef": "AMZ-04",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "Amazon Logistics",
       "title": "Parts and supplies",
       "itemIds": [],
-      "expectedDeliveryDate": "2026-11-02",
+      "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-10-29",
+      "lastChecked": "2026-11-02",
       "source": "Authenticated Amazon tracking",
-      "notes": "First shipment from this order is in transit, prealerted and consolidated. Further portions have shipped separately."
+      "notes": "Amazon reports delivery on November 2. This shipment is prealerted and consolidated; Speedy receipt is not confirmed."
     },
     {
       "id": "AMZ-PKG-08",
       "vendor": "Amazon",
       "orderRef": "AMZ-04",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "Amazon Logistics",
       "title": "Equipment shipment",
       "itemIds": [],
-      "expectedDeliveryDate": "2026-11-02",
+      "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-10-30",
+      "lastChecked": "2026-11-02",
       "source": "Authenticated Amazon tracking",
-      "notes": "A separate shipment is prealerted and included in the second consolidation; delivery is estimated November 2."
+      "notes": "Amazon reports delivery on November 2. This shipment is prealerted and consolidated; Speedy receipt is not confirmed."
     },
     {
       "id": "AMZ-PKG-09",
       "vendor": "Amazon",
       "orderRef": "AMZ-04",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "Amazon Logistics",
       "title": "Equipment shipment",
       "itemIds": [],
-      "expectedDeliveryDate": "2026-11-02",
+      "expectedDeliveryDate": null,
       "deliveredAt": null,
       "lastChecked": "2026-11-02",
       "source": "Speedy package listing and prealert",
-      "notes": "Speedy lists this prealerted and consolidated shipment as received. The consolidation view has not yet reflected receipt."
+      "notes": "Amazon reports delivery on November 2. Speedy lists this prealerted and consolidated shipment as received; the consolidation view has not yet reflected receipt."
+    },
+    {
+      "id": "AMZ-PKG-10",
+      "vendor": "Amazon",
+      "orderRef": "AMZ-04",
+      "status": "carrier_delivered",
+      "carrier": "Amazon Logistics",
+      "title": "Equipment shipment",
+      "itemIds": [],
+      "expectedDeliveryDate": null,
+      "deliveredAt": null,
+      "lastChecked": "2026-11-02",
+      "source": "Authenticated Amazon tracking and Speedy prealert",
+      "notes": "Amazon reports delivery on November 2. The shipment is prealerted and consolidated; Speedy receipt remains unconfirmed."
     }
   ],
   "forwardingCharges": {
