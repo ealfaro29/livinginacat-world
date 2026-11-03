@@ -102,6 +102,6 @@ Other vendor order totals (see the purchase record for payment status):
 
 ## Shipping and Speedy
 
-Project shipment locations checked 2026-11-03: 3 in Costa Rica; 3 received in Miami; 14 awaiting Speedy confirmation. Carrier delivery does not establish Speedy receipt or delivery to the recipient.
+Project shipment locations checked 2026-11-03: 3 in Costa Rica; 4 received in Miami; 13 awaiting Speedy confirmation. Carrier delivery does not establish Speedy receipt or delivery to the recipient.
 
-Speedy - Taxes, tariffs, shipping and others: CRC 346,500 combined amount shown as Total a pagar on 2026-11-03. Covers all owner-authorized shipments. Payment and final consolidated balance are unconfirmed; amounts may change or require consolidation adjustments. Kept separate from USD orders.
+Speedy - Taxes, tariffs, shipping and others: CRC 355,500 combined amount shown as Total a pagar on 2026-11-03. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.
