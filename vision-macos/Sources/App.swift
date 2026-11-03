@@ -33,7 +33,7 @@ struct ScreenView: View {
             }
             .contentShape(Rectangle())
             .gesture(DragGesture(minimumDistance: 0).onEnded { event in
-                guard let p = map.imagePoint(event.location) else { return }
+                guard model.image != nil, let p = map.imagePoint(event.location) else { return }
                 model.addCalibrationPoint(p)
             })
             .contextMenu {
@@ -51,6 +51,8 @@ struct ScreenView: View {
 
 struct ContentView: View {
     @StateObject private var model = CameraModel()
+    private let cornerNames = ["Arriba izquierda", "Arriba derecha", "Abajo derecha", "Abajo izquierda"]
+    private let cornerArrows = ["↖", "↗", "↘", "↙"]
     var body: some View {
         VStack(spacing: 10) {
             ScreenView(model: model).frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -73,11 +75,28 @@ struct ContentView: View {
                     .disabled(!model.focusSupported).help(model.focusMessage.isEmpty ? "Ajustar la lente de la cámara" : model.focusMessage)
                 Button("Auto") { model.enableAutoFocus() }.buttonStyle(.plain)
                     .foregroundColor(model.focusAuto ? .mint : .secondary).disabled(!model.focusSupported)
-                Divider().frame(height: 20)
-                Button(action: { model.beginCalibration() }) { Image(systemName: "viewfinder") }.help("Encuadrar: marca las cuatro esquinas de la pantalla")
                 Button(action: { model.rotate() }) { Image(systemName: "rotate.right") }.help("Girar pantalla 90°")
             }
             .buttonStyle(.plain).controlSize(.small).padding(.horizontal, 6)
+            HStack(spacing: 8) {
+                if model.calibrating {
+                    Text("Punto \(min(model.calibrationPoints.count + 1, 4))/4: \(cornerNames[min(model.calibrationPoints.count, 3)])")
+                        .font(.caption).foregroundColor(.yellow).frame(maxWidth: .infinity, alignment: .leading)
+                    Button("Deshacer") { model.undoCalibrationPoint() }.disabled(model.calibrationPoints.isEmpty)
+                    Button("Cancelar") { model.cancelCalibration() }
+                } else {
+                    Button("Marcar 4 esquinas", systemImage: "viewfinder") { model.beginCalibration() }
+                        .disabled(!model.running)
+                    Spacer(minLength: 0)
+                    Text("Cursor:").font(.caption).foregroundColor(.secondary)
+                    ForEach(0..<4) { i in
+                        Button(cornerArrows[i]) { model.moveToCorner(i) }
+                            .help(cornerNames[i]).accessibilityLabel("Cursor: \(cornerNames[i])")
+                            .disabled(!model.hasScreen)
+                    }
+                }
+            }
+            .buttonStyle(.bordered).controlSize(.small).padding(.horizontal, 6)
             if !model.focusMessage.isEmpty && model.running { Text(model.focusMessage).font(.caption2).foregroundColor(.secondary) }
             if !model.lightMessage.isEmpty && model.running { Text(model.lightMessage).font(.caption2).foregroundColor(.secondary) }
         }

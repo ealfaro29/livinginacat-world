@@ -52,6 +52,7 @@ final class CameraModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
     private let stateLock = NSLock()
     private let imageContext = CIContext(options: [.cacheIntermediates: false])
     private var currentQuad: ScreenQuad?
+    private var calibrationBackup: ScreenQuad?
     private var calibrationActive = false
     private var isAnalyzing = false
     private var isRecognizing = false
@@ -145,14 +146,26 @@ final class CameraModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
         lightOff = false; lightMessage = ""
         running = false; hasScreen = false; image = nil; cursor = nil; labels = []; calibrating = false; calibrationPoints = []
         focusSupported = false; focusMessage = "Enfoque no disponible"
-        stateLock.lock(); currentQuad = nil; pendingScreen = nil; visionRevision += 1; calibrationActive = false; stateLock.unlock()
+        stateLock.lock(); currentQuad = nil; calibrationBackup = nil; pendingScreen = nil; visionRevision += 1; calibrationActive = false; stateLock.unlock()
         sessionQueue.async { [weak self] in self?.session.stopRunning() }
     }
     func beginCalibration() {
         guard running else { return }
-        timer?.invalidate(); timer = nil; calibrating = true; calibrationPoints = []; hasScreen = false; cursor = nil; labels = []
-        stateLock.lock(); currentQuad = nil; pendingScreen = nil; visionRevision += 1; calibrationActive = true; stateLock.unlock()
+        guard !calibrating else { return }
+        timer?.invalidate(); timer = nil; calibrating = true; calibrationPoints = []; hasScreen = false; cursor = nil; labels = []; image = nil
+        stateLock.lock(); calibrationBackup = currentQuad; currentQuad = nil; pendingScreen = nil; visionRevision += 1; calibrationActive = true; stateLock.unlock()
         status = "Marca las 4 esquinas: arriba izquierda, arriba derecha, abajo derecha y abajo izquierda."
+    }
+    func undoCalibrationPoint() {
+        guard calibrating, !calibrationPoints.isEmpty else { return }
+        calibrationPoints.removeLast()
+    }
+    func cancelCalibration() {
+        guard calibrating else { return }
+        stateLock.lock(); currentQuad = calibrationBackup; calibrationBackup = nil; calibrationActive = false; visionRevision += 1
+        let restored = currentQuad != nil; stateLock.unlock()
+        calibrating = false; calibrationPoints = []; hasScreen = restored; image = nil
+        status = restored ? "" : "Buscando la pantalla…"
     }
     func addCalibrationPoint(_ point: CGPoint) {
         guard calibrating else { cursor = point; return }
@@ -160,7 +173,7 @@ final class CameraModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
         if calibrationPoints.count == 4 {
             let q = ScreenQuad(points: calibrationPoints)
             guard q.isValid else { calibrationPoints = []; status = "Esquinas inválidas. Márcalas otra vez en orden."; return }
-            stateLock.lock(); currentQuad = q; calibrationActive = false
+            stateLock.lock(); currentQuad = q; calibrationBackup = nil; calibrationActive = false
             saveScreen(q, width: rawWidth, height: rawHeight, camera: activeCameraID); stateLock.unlock()
             calibrating = false; hasScreen = true; calibrationPoints = []; status = ""
         }
@@ -222,6 +235,8 @@ final class CameraModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
         guard let cg = imageContext.createCGImage(outputImage, from: outputImage.extent) else { return }
         DispatchQueue.main.async { [weak self] in
             guard let self = self, self.running else { return }
+            self.stateLock.lock(); let isCurrent = self.visionRevision == revision; self.stateLock.unlock()
+            guard isCurrent else { return }
             self.image = cg; self.imageSize = CGSize(width: cg.width, height: cg.height)
         }
     }
