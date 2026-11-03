@@ -14,6 +14,7 @@ An open build journal about creating an AI that can perceive and act in the real
 - `public/`: original visuals, styles and CAD download.
 - `scripts/`: static generator, checks and publication.
 - `backend/`: authenticated, synchronized dispatch room; private PDFs and records stay outside Git.
+- `vision-macos/`: local camera and virtual-cursor prototype for observing an iPhone before the robot is assembled. See its [setup guide](vision-macos/README.md).
 
 ## Read the guides
 

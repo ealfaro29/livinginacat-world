@@ -8,3 +8,4 @@ receipts/
 
 .wrangler/
 .dev.vars*
+vision-macos/build/
