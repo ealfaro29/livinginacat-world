@@ -141,10 +141,11 @@ test("combined forwarder total stays in colones without exposing package details
   const f = ledger.forwardingCharges;
   assert.equal(f.currency, "CRC");
   assert.ok(Number.isInteger(f.amountCRC) && f.amountCRC >= 0);
-  assert.equal(f.scope, "owner_authorized_combined_total");
+  assert.equal(f.scope, "all_current_packages");
+  assert.ok(["currently_quoted", "awaiting_remaining_quotes"].includes(f.quoteStatus));
   assert.equal(f.payment, "unconfirmed");
   assert.equal(f.finalConsolidatedChargeConfirmed, false);
-  const allowed = new Set(["currency", "amountCRC", "source", "observedAt", "verifiedAt", "scope", "payment", "finalConsolidatedChargeConfirmed", "notes"]);
+  const allowed = new Set(["currency", "amountCRC", "source", "observedAt", "verifiedAt", "scope", "quoteStatus", "payment", "finalConsolidatedChargeConfirmed", "notes"]);
   assert.ok(Object.keys(f).every((key) => allowed.has(key)), "individual forwarding records must stay private");
   assert.ok(Object.values(f).every((value) => typeof value !== "object"));
 });

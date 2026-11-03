@@ -2,7 +2,7 @@
 
 The public journal remains on GitHub Pages. `/admin/` links to a separate HTTPS Cloudflare Worker. D1 stores orders, packages and changes; a private KV namespace stores original PDFs. No private records are committed or built into `dist/`.
 
-Personal purchase details must never appear in messages or in the interactive owner room. Shared-order records use generic titles and omit restricted descriptions, notes, item values and original-document links from owner snapshots and exports. Saved document URLs are also blocked for these records. Stored originals and owner fields are preserved outside the interactive view for authorized ingestion; redaction does not change shipping evidence or readiness. The public site shows only the authorized combined Speedy amount, without a package-level breakdown.
+Personal purchase details must never appear in messages or in the interactive owner room. Shared-order records use generic titles and omit restricted descriptions, notes, item values and original-document links from owner snapshots and exports. Saved document URLs are also blocked for these records. Stored originals and owner fields are preserved outside the interactive view for authorized ingestion; redaction does not change shipping evidence or readiness. The public site shows only the combined Speedy amount for all current packages, without a project-membership filter or a package-level breakdown. Unquoted charges remain pending.
 
 ## Owner workflow
 

@@ -128,7 +128,7 @@ const itemRows = ledger.items
   })
   .join("");
 const forwarding = ledger.forwardingCharges;
-const forwardingSummary = `<div class="note-card mt" id="speedy-total"><p class="eyebrow">SPEEDY · CRC · ${date(forwarding.observedAt)}</p><h2>${crc(forwarding.amountCRC)}</h2><h3>Taxes, tariffs, shipping and others</h3><p>Combined amount shown by Speedy as “Total a pagar” for all owner-authorized shipments.</p><p class="caption">Payment and the final consolidated balance are not confirmed. This observed amount may change or require consolidation adjustments. Kept separate from USD purchase totals.</p></div>`;
+const forwardingSummary = `<div class="note-card mt" id="speedy-total"><p class="eyebrow">SPEEDY · ALL CURRENT PACKAGES · CRC · ${date(forwarding.observedAt)}</p><h2>${crc(forwarding.amountCRC)}</h2><h3>Taxes, tariffs, shipping and others</h3><p>All current packages are included, with no project filter. This is the combined amount currently quoted by Speedy as “Total a pagar”.</p><p class="caption">${forwarding.quoteStatus === "awaiting_remaining_quotes" ? "Further charges are still awaiting a Speedy quote. The final total remains pending. " : ""}Payment and the final consolidated balance are not confirmed. Kept separate from USD purchase totals.</p></div>`;
 await write(
   "purchases/index.html",
   shell(
@@ -253,7 +253,7 @@ await write(
       (x) =>
         `- ${x.vendor}: ${money(x.invoiceTotalCents)}${x.invoiceTotalFinal === false ? " provisional" : ""}; ${labels[x.status]}.`,
     )
-    .join("\n")}\n\n## Shipping and Speedy\n\nProject shipment locations checked ${ledger.updatedAt}: ${ledger.shipments.filter((s) => s.speedyLocation === "costa_rica").length} in Costa Rica; ${ledger.shipments.filter((s) => s.speedyLocation === "miami").length} received in Miami; ${ledger.shipments.filter((s) => !s.speedyLocation && s.speedyStatus !== "delivered").length} awaiting Speedy confirmation. Carrier delivery does not establish Speedy receipt or delivery to the recipient.\n\nSpeedy - Taxes, tariffs, shipping and others: CRC ${forwarding.amountCRC.toLocaleString("en-US")} combined amount shown as Total a pagar on ${forwarding.observedAt}. Covers all owner-authorized shipments. Payment and final consolidated balance are unconfirmed; amounts may change or require consolidation adjustments. Kept separate from USD orders.\n`,
+    .join("\n")}\n\n## Shipping and Speedy\n\nProject shipment locations checked ${ledger.updatedAt}: ${ledger.shipments.filter((s) => s.speedyLocation === "costa_rica").length} in Costa Rica; ${ledger.shipments.filter((s) => s.speedyLocation === "miami").length} received in Miami; ${ledger.shipments.filter((s) => !s.speedyLocation && s.speedyStatus !== "delivered").length} awaiting Speedy confirmation. Carrier delivery does not establish Speedy receipt or delivery to the recipient.\n\nSpeedy - Taxes, tariffs, shipping and others: CRC ${forwarding.amountCRC.toLocaleString("en-US")} combined amount shown as Total a pagar on ${forwarding.observedAt}. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.\n`,
 );
 await fs.copyFile(
   new URL("docs/PROJECT.md", root),

@@ -1333,8 +1333,13 @@
   "changes": [
     {
       "date": "2026-11-03",
+      "title": "All current packages included in Speedy total",
+      "detail": "The Speedy amount now reflects the complete current account review with no project filter. Packages awaiting a quoted charge remain pending, so the final consolidated balance is not yet confirmed. Only the combined amount is displayed."
+    },
+    {
+      "date": "2026-11-03",
       "title": "Current shipment locations and combined Speedy amount",
-      "detail": "Speedy confirms three project shipments in Costa Rica and three received in Miami. Other project shipments still await confirmed Speedy receipt. The combined amount displayed as payable is CRC 346,500; payment and the final consolidation balance remain unconfirmed. Forwarding details are kept private."
+      "detail": "Confirmed project locations were reviewed, and the combined Speedy amount was published. Forwarding details are kept outside user-facing views."
     },
     {
       "date": "2026-11-03",
@@ -2025,11 +2030,12 @@
       "expectedDeliveryDate": null,
       "deliveredAt": null,
       "lastChecked": "2026-11-02",
-      "source": "Authenticated Amazon tracking",
-      "notes": "Amazon reports delivery on November 2. This shipment is prealerted and consolidated; Speedy receipt is not confirmed.",
-      "speedyStatus": "unconfirmed",
-      "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-03"
+      "source": "Vendor evidence and Speedy package listing",
+      "notes": "Amazon reports delivery on November 2. This shipment is prealerted and consolidated; Speedy confirms receipt in Miami.",
+      "speedyStatus": "received",
+      "speedyLocation": "miami",
+      "speedyCheckedAt": "2026-11-03",
+      "speedyConfirmedAt": "2026-11-03"
     },
     {
       "id": "AMZ-PKG-09",
@@ -2069,13 +2075,14 @@
   ],
   "forwardingCharges": {
     "currency": "CRC",
-    "amountCRC": 346500,
-    "source": "Speedy package listing: Total a pagar",
-    "observedAt": "2026-11-03",
-    "verifiedAt": "2026-11-03T14:50:33.640Z",
-    "scope": "owner_authorized_combined_total",
+    "amountCRC": 355500,
+    "scope": "all_current_packages",
+    "quoteStatus": "awaiting_remaining_quotes",
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
-    "notes": "One combined amount covering all owner-authorized shipments. Package identities, counts, weights and individual charges remain private. This is the sum of amounts currently displayed by Speedy, not a confirmed paid expense or final consolidated balance. It may change or require consolidation adjustments. Kept separate from USD orders."
+    "source": "Speedy current package listing and all current consolidations: Total a pagar",
+    "observedAt": "2026-11-03",
+    "verifiedAt": "2026-11-03T15:30:45.310Z",
+    "notes": "Includes all current Speedy packages with no project-membership filter. The displayed amount sums every currently quoted charge once. Remaining unquoted charges and the final consolidated balance are pending. Kept separate from USD purchase totals; payment remains unconfirmed."
   }
 }
