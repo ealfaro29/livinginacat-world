@@ -17,7 +17,7 @@ struct ScreenView: View {
                     ForEach(model.labels) { label in
                         RoundedRectangle(cornerRadius: 3)
                             .stroke(Color.mint.opacity(0.8), lineWidth: 1.5)
-                            .frame(width: max(2, label.bounds.width * map.fitted.width), height: max(2, label.bounds.height * map.fitted.height))
+                            .frame(width: max(2, label.targetBounds.width * map.fitted.width), height: max(2, label.targetBounds.height * map.fitted.height))
                             .position(map.display(label.center)).allowsHitTesting(false)
                     }
                 }
@@ -113,7 +113,7 @@ struct ContentView: View {
                     }
                     GroupBox("Elementos detectados · \(model.labels.count)") {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Selecciona un texto para mover el cursor y simular un clic.").font(.caption).foregroundColor(.secondary).fixedSize(horizontal: false, vertical: true)
+                            Text("Selecciona un elemento para mover el cursor y simular un clic.").font(.caption).foregroundColor(.secondary).fixedSize(horizontal: false, vertical: true)
                             Toggle("Mostrar recuadros", isOn: $model.showElements).toggleStyle(.checkbox)
                             if model.labels.isEmpty {
                                 Text(model.hasScreen ? "Buscando texto en la pantalla…" : "Primero encuadra la pantalla del iPhone.")
@@ -123,14 +123,14 @@ struct ContentView: View {
                                     LazyVStack(spacing: 4) {
                                         ForEach(model.labels) { label in
                                             Button { model.selectLabel(label) } label: {
-                                                HStack { Text(label.text).multilineTextAlignment(.leading).lineLimit(2); Spacer(); Image(systemName: "cursorarrow.click") }
+                                                HStack { Text(label.text).multilineTextAlignment(.leading).lineLimit(2); Spacer(); if label.iconBounds != nil { Text("Icono").font(.caption2).foregroundColor(.mint) }; Image(systemName: "cursorarrow.click") }
                                                     .frame(maxWidth: .infinity, alignment: .leading).padding(8).background(.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 6))
                                             }.buttonStyle(.plain)
                                         }
                                     }
                                 }.frame(minHeight: 120, maxHeight: 260)
                             }
-                            Text("El texto se reconoce visualmente: no todos son botones y algunos iconos no tienen texto.").font(.caption2).foregroundColor(.secondary).fixedSize(horizontal: false, vertical: true)
+                            Text("Las posiciones de iconos se estiman visualmente; revisa los recuadros. Otros textos se apuntan directamente.").font(.caption2).foregroundColor(.secondary).fixedSize(horizontal: false, vertical: true)
                         }.frame(maxWidth: .infinity, alignment: .leading).padding(.vertical, 4)
                     }
                 }.padding(.trailing, 4)

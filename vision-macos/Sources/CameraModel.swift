@@ -9,7 +9,9 @@ struct DetectedLabel: Identifiable {
     let id = UUID()
     let text: String
     let bounds: CGRect
-    var center: CGPoint { CGPoint(x: bounds.midX, y: bounds.midY) }
+    var iconBounds: CGRect? = nil
+    var targetBounds: CGRect { iconBounds ?? bounds }
+    var center: CGPoint { CGPoint(x: targetBounds.midX, y: targetBounds.midY) }
 }
 
 private struct SavedScreen: Codable {
@@ -296,7 +298,9 @@ final class CameraModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
                         let label = candidate.string.trimmingCharacters(in: .whitespacesAndNewlines)
                         guard !label.isEmpty else { return nil }
                         return DetectedLabel(text: String(label.prefix(80)), bounds: observation.boundingBox)
-                    }.sorted { $0.center.y > $1.center.y }
+                    }.sorted { $0.bounds.midY > $1.bounds.midY }
+                    let targets = IconGrid.targets(for: found.map(\.bounds), imageSize: corrected.extent.size)
+                    for (index, target) in targets { found[index].iconBounds = target }
                 }
             }
             self.stateLock.lock(); self.isRecognizing = false; let currentRotation = self.manualRotation, currentRevision = self.visionRevision; self.stateLock.unlock()
