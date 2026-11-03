@@ -1339,7 +1339,7 @@
     {
       "date": "2026-11-03",
       "title": "Speedy shipment and charge update",
-      "detail": "Speedy lists a project shipment in Costa Rica. For another received shipment, its displayed weight changed from 11 lb to 1 lb and its amount to pay from ₡49,500 to ₡4,500. The charge is an observation, not confirmation of payment or a final consolidated total."
+      "detail": "Speedy lists a project shipment in Costa Rica and corrected the displayed forwarding charge for another received shipment. The complete dated charge and weight history is preserved privately."
     },
     {
       "date": "2026-11-02",
@@ -1429,7 +1429,7 @@
     {
       "date": "2026-10-29",
       "title": "Forwarder charges now tracked",
-      "detail": "Speedy shows ₡67,500 in charges across two exactly matched received shipments. This is a snapshot of amounts displayed to pay, not a confirmed payment or final consolidated total. Amounts are kept in colones, separate from the USD purchase totals."
+      "detail": "Speedy forwarding charges are tracked in colones, separate from USD purchase totals. Dated observations are preserved privately; displayed charges do not establish payment or the final consolidated balance."
     },
     {
       "date": "2026-10-28",
@@ -1479,7 +1479,7 @@
     {
       "date": "2026-10-27",
       "title": "Printer order and shipment tracking updated",
-      "detail": "Bambu Lab confirmed an $881.86 order, including $6.99 shipping, $57.69 tax and a $30.00 printer coupon. Taxes, tariffs, shipping and others are grouped and included in the order total. The first project consolidation now contains ten prealerted packages. Amazon reports one delivery to reception; forwarder receipt had not yet been confirmed at that time. Printed parts and physical tests remain ahead."
+      "detail": "Bambu Lab confirmed an $881.86 order. Taxes, tariffs, shipping and others are grouped and included in the order total. The first project consolidation reached its package limit. Amazon reported delivery to reception; forwarder receipt was not yet confirmed at that time. Printed parts and physical tests remain ahead."
     },
     {
       "date": "2026-10-26",
