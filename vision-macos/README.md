@@ -1,24 +1,24 @@
-# Cat Vision · prototipo de observación
+# Cat Vision · vista de pantalla
 
-Una primera app de macOS para observar un iPhone con una cámara web y mover un cursor **virtual** sobre la imagen. No se conecta a motores, no toca el teléfono y no envía capturas ni texto a ningún servidor.
+App de macOS para mostrar la pantalla de un iPhone vista por una cámara web. Detecta el contorno, lo recorta y corrige la perspectiva para presentar la pantalla en posición vertical. La cámara funciona localmente; no se envían ni guardan imágenes.
 
-## Empezar
+## Usar
 
-1. Conecta una cámara web a la Mac y coloca el iPhone con la pantalla encendida frente a ella. Busca una vista lo más perpendicular posible y evita reflejos.
-2. Abre `vision-macos/build/Cat Vision.app`. Si aún no existe, compílala desde la raíz del proyecto con `vision-macos/scripts/build.sh`.
-3. Selecciona la cámara, pulsa **Iniciar cámara** y permite el acceso cuando macOS lo solicite.
-4. Comprueba que el rectángulo verde siga los bordes de la pantalla útil. Si no coincide, pulsa **Marcar 4 esquinas** y haz clic en la pantalla en este orden: superior izquierda, superior derecha, inferior derecha e inferior izquierda. Repite la calibración si el teléfono o la cámara se mueven.
-5. Pulsa una esquina, **Recorrer esquinas**, un texto reconocido o cualquier punto dentro de la pantalla del video. El cursor naranja se moverá en la vista previa; no interactúa con el iPhone.
+1. Conecta la webcam y coloca el iPhone encendido frente a ella, procurando que se vean las cuatro esquinas y evitando reflejos.
+2. Abre `vision-macos/build/Cat Vision.app` y acepta el permiso de cámara de macOS. La app prefiere una webcam externa; el icono de cámara permite escoger otra.
+3. Si el recorte no corresponde a la pantalla, pulsa el icono **Encuadrar** y marca las cuatro esquinas en orden: superior izquierda, superior derecha, inferior derecha e inferior izquierda. Si cambias la posición de la cámara o el teléfono, vuelve a encuadrar.
+4. La detección coloca la pantalla en vertical. Si el iPhone está invertido o deseas otra orientación, usa el icono de **girar**.
+5. El slider **Enfoque** controla el foco óptico de las webcams USB UVC que admiten foco manual. Al moverlo se desactiva el enfoque automático; pulsa **Auto** para recuperarlo. Si la cámara no expone controles compatibles, el slider se desactiva y se muestra el motivo.
 
-El texto se reconoce en la imagen de la cámara mediante Apple Vision. Sus resultados son candidatos visuales, no una identificación semántica garantizada de botones: algunos textos no son controles, y los botones sin texto, los iconos, reflejos o letras pequeñas pueden no detectarse. La detección automática puede confundirse con otros rectángulos. La calibración manual es fija hasta reiniciarla.
+Un clic sobre la pantalla coloca un cursor virtual. Las teclas 1–4 apuntan a las cuatro esquinas y la barra espaciadora inicia o detiene el recorrido. No se envían acciones al teléfono ni a motores. Con clic derecho sobre la imagen puedes elegir un texto detectado para colocar el cursor. El reconocimiento es visual: un texto no siempre corresponde a un botón y los iconos sin texto pueden no detectarse.
 
-El programa usa AVFoundation y Vision localmente en la Mac. No se guardan imágenes ni registros de lo observado. Requiere macOS 14 o posterior, una cámara compatible y las herramientas de línea de comandos de Apple para compilar. Esta prueba no calibra coordenadas físicas del robot ni establece precisión o seguridad de movimientos mecánicos.
+Requiere macOS 14 o posterior. Compilar desde la raíz con `vision-macos/scripts/build.sh`; requiere las herramientas de línea de comandos de Apple. La detección visual, la orientación inicial y la compatibilidad de foco pueden variar según el teléfono, iluminación y webcam. Un rectángulo detectado no demuestra calibración mecánica ni precisión de movimiento.
 
-## Pruebas de desarrollo
+## Pruebas
 
 ```sh
-swiftc -swift-version 5 -parse-as-library vision-macos/Sources/Geometry.swift vision-macos/Tests/GeometryTests.swift -o /tmp/cat-vision-geometry-test
-/tmp/cat-vision-geometry-test
-swiftc -target "$(uname -m)-apple-macosx14.0" -sdk "$(xcrun --show-sdk-path)" -swift-version 5 -parse-as-library vision-macos/Tests/VisionSmoke.swift -framework Vision -framework AppKit -o /tmp/cat-vision-smoke
-/tmp/cat-vision-smoke
+swiftc -swift-version 5 -parse-as-library vision-macos/Sources/Geometry.swift vision-macos/Tests/GeometryTests.swift -o /tmp/cat-vision-geometry-test && /tmp/cat-vision-geometry-test
+swiftc -target "$(uname -m)-apple-macosx14.0" -sdk "$(xcrun --show-sdk-path)" -swift-version 5 -parse-as-library vision-macos/Sources/Geometry.swift vision-macos/Sources/CameraModel.swift vision-macos/Tests/PerspectiveTests.swift -framework Vision -framework AVFoundation -framework AppKit -framework CoreImage -o /tmp/cat-perspective-test && /tmp/cat-perspective-test
 ```
+
+El acceso a los controles UVC usa [uvc-util](https://github.com/jtfrey/uvc-util), revisión `8110da7025c95eea3096a7181af9a46c0cc7ac37`, bajo licencia MIT. Su licencia se conserva en `vendor/uvc-util/LICENSE` y en la aplicación compilada.
