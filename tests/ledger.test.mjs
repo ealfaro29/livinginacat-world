@@ -137,11 +137,26 @@ test("published CAD archive matches its manifest hash", async () => {
   assert.equal(release.physicalTested, false);
 });
 
-test("forwarder charge snapshot stays in colones and matches known shipments", () => {
+test("combined forwarder total stays in colones without exposing package details", () => {
   const f = ledger.forwardingCharges;
   assert.equal(f.currency, "CRC");
-  assert.ok(f.observations.every((x) => ledger.shipments.some((s) => s.id === x.shipmentId)));
-  const latest = [...new Map([...f.observations].sort((a,b) => a.observedAt.localeCompare(b.observedAt)).map((x) => [x.shipmentId, x])).values()];
-  assert.ok(latest.every((x) => Number.isInteger(x.amountCRC) && x.amountCRC >= 0));
-  assert.equal(new Set(latest.map((x) => x.shipmentId)).size, latest.length);
+  assert.ok(Number.isInteger(f.amountCRC) && f.amountCRC >= 0);
+  assert.equal(f.scope, "owner_authorized_combined_total");
+  assert.equal(f.payment, "unconfirmed");
+  assert.equal(f.finalConsolidatedChargeConfirmed, false);
+  const allowed = new Set(["currency", "amountCRC", "source", "observedAt", "verifiedAt", "scope", "payment", "finalConsolidatedChargeConfirmed", "notes"]);
+  assert.ok(Object.keys(f).every((key) => allowed.has(key)), "individual forwarding records must stay private");
+  assert.ok(Object.values(f).every((value) => typeof value !== "object"));
+});
+
+test("project locations distinguish Speedy progress from carrier delivery", () => {
+  for (const s of ledger.shipments) {
+    assert.ok(["received", "in_transit", "delivered", "unconfirmed"].includes(s.speedyStatus));
+    assert.match(s.speedyCheckedAt, /^\d{4}-\d{2}-\d{2}$/);
+    if (s.speedyLocation === "miami") assert.equal(s.speedyStatus, "received");
+    else if (s.speedyLocation === "costa_rica") assert.equal(s.speedyStatus, "in_transit");
+    else assert.equal(s.speedyLocation, null);
+    if (s.speedyLocation) assert.ok(s.speedyConfirmedAt);
+    if (s.speedyStatus !== "delivered") assert.equal(s.deliveredAt, null);
+  }
 });
