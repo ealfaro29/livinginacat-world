@@ -301,6 +301,10 @@ final class CameraModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
                     }.sorted { $0.bounds.midY > $1.bounds.midY }
                     let targets = IconGrid.targets(for: found.map(\.bounds), imageSize: corrected.extent.size)
                     for (index, target) in targets { found[index].iconBounds = target }
+                    let dock = DockDetector.detect(in: corrected, grid: Array(targets.values), context: self.imageContext)
+                    for item in dock {
+                        found.append(DetectedLabel(text: "Icono inferior \(item.slot)", bounds: item.bounds, iconBounds: item.bounds))
+                    }
                 }
             }
             self.stateLock.lock(); self.isRecognizing = false; let currentRotation = self.manualRotation, currentRevision = self.visionRevision; self.stateLock.unlock()

@@ -14,14 +14,17 @@ Con una Logitech C922 compatible, la app intenta apagar su luz y permite volver 
 
 Un clic sobre la pantalla coloca un cursor virtual. Los cuatro botones de flechas o las teclas 1–4 apuntan a las esquinas; la barra espaciadora inicia o detiene el recorrido. El cuadro **Elementos detectados** enumera el texto reconocido. Cuando detecta filas alineadas de nombres, estima la posición del icono encima del texto y marca el elemento como **Icono**; al seleccionarlo, el cursor apunta al centro estimado del icono y muestra un clic simulado. Para otros textos apunta al texto. Los recuadros muestran el destino y se pueden ocultar. El reconocimiento es visual y aproximado: puede equivocarse, un texto no siempre corresponde a un botón y los iconos sin texto pueden no detectarse. No se envían acciones al teléfono ni a motores.
 
+Cuando hay una cuadrícula de apps visible, la imagen también se analiza para buscar iconos sin texto en la barra inferior. Los que se distinguen aparecen como **Icono inferior 1**, **2**, etc., de izquierda a derecha. Estos nombres describen su posición, no identifican la aplicación; la detección puede fallar con poco contraste o reflejos. Todo el análisis es local.
+
 Requiere macOS 14 o posterior. Compilar desde la raíz con `vision-macos/scripts/build.sh`; requiere las herramientas de línea de comandos de Apple. La detección visual, la orientación inicial y la compatibilidad de foco pueden variar según el teléfono, iluminación y webcam. Un rectángulo detectado no demuestra calibración mecánica ni precisión de movimiento.
 
 ## Pruebas
 
 ```sh
 swiftc -swift-version 5 -parse-as-library vision-macos/Sources/Geometry.swift vision-macos/Tests/GeometryTests.swift -o /tmp/cat-vision-geometry-test && /tmp/cat-vision-geometry-test
-swiftc -target "$(uname -m)-apple-macosx14.0" -sdk "$(xcrun --show-sdk-path)" -swift-version 5 -parse-as-library vision-macos/Sources/Geometry.swift vision-macos/Sources/CameraModel.swift vision-macos/Tests/PerspectiveTests.swift -framework Vision -framework AVFoundation -framework AppKit -framework CoreImage -o /tmp/cat-perspective-test && /tmp/cat-perspective-test
-swiftc -target "$(uname -m)-apple-macosx14.0" -sdk "$(xcrun --show-sdk-path)" -swift-version 5 -parse-as-library vision-macos/Sources/Geometry.swift vision-macos/Sources/CameraModel.swift vision-macos/Tests/ElementTests.swift -framework Vision -framework AVFoundation -framework AppKit -framework CoreImage -o /tmp/cat-elements-test && /tmp/cat-elements-test
+swiftc -target "$(uname -m)-apple-macosx14.0" -sdk "$(xcrun --show-sdk-path)" -swift-version 5 -parse-as-library vision-macos/Sources/Geometry.swift vision-macos/Sources/DockDetector.swift vision-macos/Sources/CameraModel.swift vision-macos/Tests/PerspectiveTests.swift -framework Vision -framework AVFoundation -framework AppKit -framework CoreImage -o /tmp/cat-perspective-test && /tmp/cat-perspective-test
+swiftc -target "$(uname -m)-apple-macosx14.0" -sdk "$(xcrun --show-sdk-path)" -swift-version 5 -parse-as-library vision-macos/Sources/Geometry.swift vision-macos/Sources/DockDetector.swift vision-macos/Sources/CameraModel.swift vision-macos/Tests/ElementTests.swift -framework Vision -framework AVFoundation -framework AppKit -framework CoreImage -o /tmp/cat-elements-test && /tmp/cat-elements-test
+swiftc -target "$(uname -m)-apple-macosx14.0" -sdk "$(xcrun --show-sdk-path)" -swift-version 5 -parse-as-library vision-macos/Sources/Geometry.swift vision-macos/Sources/DockDetector.swift vision-macos/Tests/DockTests.swift -framework AppKit -framework CoreImage -o /tmp/cat-dock-test && /tmp/cat-dock-test
 ```
 
 El acceso a los controles UVC usa [uvc-util](https://github.com/jtfrey/uvc-util), revisión `8110da7025c95eea3096a7181af9a46c0cc7ac37`, bajo licencia MIT. Su licencia se conserva en `vendor/uvc-util/LICENSE` y en la aplicación compilada.
