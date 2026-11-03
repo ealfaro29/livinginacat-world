@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { Miniflare, convertV4MiniflareOptions } from "miniflare";
-import { ready, mergeImport, editPackage } from "../backend/model.mjs";
+import { ready, mergeImport, editPackage, projectRoomSnapshot } from "../backend/model.mjs";
 import worker from "../backend/worker.mjs";
 const hash = (x) => createHash("sha256").update(x).digest("hex");
 test("private admin protects evidence and persists versioned changes", async (t) => {
@@ -385,6 +385,28 @@ test("private admin protects evidence and persists versioned changes", async (t)
   const out = await exported.json();
   assert.ok(out.history.length);
   assert.equal(JSON.stringify(out).includes("password_hash"), false);
+  // A shared-order original must remain inaccessible from every owner view,
+  // including export, the ingestion URL with an owner cookie, and a saved PDF URL.
+  assert.equal((await request("/api/ingest", {
+    method: "POST", service: true,
+    payload: { orders: [{ ...input.orders[0], id: "AMZ-05" }] },
+  })).status, 200);
+  await db.prepare("UPDATE packages SET order_id=? WHERE id=?").bind("AMZ-05", "test-pkg").run();
+  for (const route of ["/api/snapshot", "/api/export", "/api/ingest/snapshot"]) {
+    const restrictedView = await (await request(route, { cookie: device2 })).json();
+    const pkg = restrictedView.packages.find((p) => p.id === "test-pkg");
+    assert.equal(pkg.title, "Project shipment");
+    assert.equal(pkg.contents, "");
+    assert.equal(pkg.notes, "");
+    assert.equal(pkg.declaredValueCents, null);
+    assert.equal(pkg.document, null);
+    assert.equal(pkg.invoiceVerified, true);
+    assert.equal(pkg.speedyStatus, "delivered");
+  }
+  assert.equal((await request(pdfPath, { cookie: device2 })).status, 403);
+  const preserved = await (await request("/api/ingest/snapshot", { service: true })).json();
+  assert.equal(preserved.packages[0].document.id, pdfPath.split("/").pop());
+  assert.equal(preserved.packages[0].notes, "Shared note");
   assert.equal(
     (await request("/api/logout", { method: "POST", cookie, payload: {} }))
       .status,
@@ -402,6 +424,19 @@ test("private admin protects evidence and persists versioned changes", async (t)
     (await request("/api/snapshot", { cookie: device2 })).status,
     403,
   );
+});
+test("room redaction preserves original evidence and operational fields", () => {
+  const original = {
+    orders: [{ id: "AMZ-05", title: "RESTRICTED_FIXTURE", notes: "RESTRICTED_FIXTURE", source: "RESTRICTED_FIXTURE" }],
+    packages: [{ id: "test", orderId: "AMZ-05", title: "RESTRICTED_FIXTURE", contents: "RESTRICTED_FIXTURE", notes: "RESTRICTED_FIXTURE", source: "RESTRICTED_FIXTURE", speedyEvidence: { note: "RESTRICTED_FIXTURE" }, declaredValueCents: 1234, tracking: "TEST-PROJECT-TRACKING", speedyStatus: "received", document: { id: "fixture", filename: "RESTRICTED_FIXTURE.pdf", kind: "invoice" } }],
+    history: [{ action: "PDF attached", detail: { filename: "RESTRICTED_FIXTURE.pdf" } }],
+  };
+  const view = projectRoomSnapshot(original);
+  assert.equal(JSON.stringify(view).includes("RESTRICTED_FIXTURE"), false);
+  assert.equal(view.packages[0].tracking, "TEST-PROJECT-TRACKING");
+  assert.equal(view.packages[0].speedyStatus, "received");
+  assert.equal(original.packages[0].contents, "RESTRICTED_FIXTURE");
+  assert.equal(original.packages[0].document.id, "fixture");
 });
 test("closed registration rejects setup even when an activation key is supplied", async () => {
   const response = await worker.fetch(

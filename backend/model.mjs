@@ -126,3 +126,37 @@ export function editPackage(existing, input) {
   // PDF was collected. Preserve that truthful state and show missing files.
   return next;
 }
+
+// Shared-order originals are evidence for ingestion, not content for the room.
+// Preserve stored evidence and owner fields; redact only the interactive view.
+const restrictedOrders = new Set([
+  "AMZ-02", "AMZ-03", "AMZ-04", "AMZ-05", "walmart", "bambu-lab",
+]);
+export const hasRestrictedDetails = (record) =>
+  restrictedOrders.has(record.orderId ?? record.id);
+export function projectRoomSnapshot(snapshot) {
+  return {
+    ...snapshot,
+    orders: snapshot.orders.map((order) => hasRestrictedDetails(order) ? {
+      ...order,
+      title: "Project order",
+      orderReference: order.id,
+      notes: "Taxes, tariffs, shipping and others are grouped in the order total.",
+      source: "Reviewed order evidence",
+    } : order),
+    packages: snapshot.packages.map((pkg) => hasRestrictedDetails(pkg) ? {
+      ...pkg,
+      title: "Project shipment",
+      contents: "",
+      notes: "",
+      declaredValueCents: null,
+      source: "Reviewed shipment evidence",
+      speedyStatusSource: pkg.speedyStatus ? "Speedy status verified" : undefined,
+      speedyEvidence: undefined,
+      invoiceVerified: pkg.document?.kind === "invoice",
+      document: null,
+      restrictedDetails: true,
+    } : pkg),
+    history: snapshot.history.map(({ detail, ...event }) => ({ ...event, detail: {} })),
+  };
+}

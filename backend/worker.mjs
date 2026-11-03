@@ -8,6 +8,8 @@ import {
   ready,
   mergeImport,
   editPackage,
+  hasRestrictedDetails,
+  projectRoomSnapshot,
 } from "./model.mjs";
 const encoder = new TextEncoder();
 const COOKIE = "__Host-lica_session";
@@ -308,7 +310,7 @@ async function handle(request, env) {
     method === "GET"
   ) {
     return json(
-      await snapshot(env),
+      actor === "mail-sync" ? await snapshot(env) : projectRoomSnapshot(await snapshot(env)),
       200,
       path === "/api/export"
         ? {
@@ -543,6 +545,9 @@ async function handle(request, env) {
       .bind(download[1])
       .first();
     if (!doc) throw new ApiError(404, "Document not found.");
+    const pkg = record(await packageRow(env, doc.package_id));
+    if (hasRestrictedDetails(pkg))
+      throw new ApiError(403, "This original is retained outside the project room.");
     const file = await env.DOCUMENTS.get(doc.file_key, { type: "arrayBuffer" });
     if (!file)
       throw new ApiError(503, "The PDF is synchronizing. Try again shortly.");

@@ -243,10 +243,10 @@ function renderPackages() {
         .map((p) => {
           const order = data.orders.find((o) => o.id === p.orderId),
             [label, cls] = state(p);
-          return `<article class="package ${cls}"><div class="package-top"><span>${esc(order?.vendor)} / ${esc(p.id)}</span><span class="badge ${cls}">${label}</span></div><h3>${esc(p.title)}</h3><p class="contents" title="${esc(p.contents)}">${esc(p.contents)}</p><div class="tracking-row"><div><strong>${esc(p.tracking || "Tracking not issued yet")}</strong><small>${esc(p.carrier || "Carrier not confirmed")}</small></div>${p.tracking ? `<button class="text-button" data-action="copy" data-id="${esc(p.id)}">Copy ↗</button>` : ""}</div><dl><div><dt>Carrier status</dt><dd>${esc(carrierLabels[p.shippingStatus] || "Unknown")}</dd></div><div><dt>Speedy status</dt><dd>${esc(speedyLabels[p.speedyStatus] || (p.lockerArrivedAt ? "Received at locker" : "Not confirmed"))}</dd></div><div><dt>Estimated arrival</dt><dd>${date(p.expectedArrival)}</dd></div><div><dt>Locker arrival</dt><dd>${p.lockerArrivedAt ? date(p.lockerArrivedAt) : "Not received"}</dd></div><div><dt>Prealert</dt><dd>${p.prealertedAt ? date(p.prealertedAt) : "Not submitted"}</dd></div><div><dt>Goods value</dt><dd>${money(p.declaredValueCents)}</dd></div>${p.expectedShipDate ? `<div><dt>Planned dispatch</dt><dd>${date(p.expectedShipDate)}</dd></div>` : ""}</dl><div class="requirements">${[
+          return `<article class="package ${cls}"><div class="package-top"><span>${esc(order?.vendor)} / ${esc(p.id)}</span><span class="badge ${cls}">${label}</span></div><h3>${esc(p.title)}</h3><p class="contents" title="${esc(p.contents)}">${esc(p.contents)}</p><div class="tracking-row"><div><strong>${esc(p.tracking || "Tracking not issued yet")}</strong><small>${esc(p.carrier || "Carrier not confirmed")}</small></div>${p.tracking ? `<button class="text-button" data-action="copy" data-id="${esc(p.id)}">Copy ↗</button>` : ""}</div><dl><div><dt>Carrier status</dt><dd>${esc(carrierLabels[p.shippingStatus] || "Unknown")}</dd></div><div><dt>Speedy status</dt><dd>${esc(speedyLabels[p.speedyStatus] || (p.lockerArrivedAt ? "Received at locker" : "Not confirmed"))}</dd></div><div><dt>Estimated arrival</dt><dd>${date(p.expectedArrival)}</dd></div><div><dt>Locker arrival</dt><dd>${p.lockerArrivedAt ? date(p.lockerArrivedAt) : "Not received"}</dd></div><div><dt>Prealert</dt><dd>${p.prealertedAt ? date(p.prealertedAt) : "Not submitted"}</dd></div><div><dt>Goods value</dt><dd>${p.restrictedDetails ? "Not displayed" : money(p.declaredValueCents)}</dd></div>${p.expectedShipDate ? `<div><dt>Planned dispatch</dt><dd>${date(p.expectedShipDate)}</dd></div>` : ""}</dl><div class="requirements">${[
             ["Tracking", !!p.tracking],
             ["Carrier", !!p.carrier],
-            ["Invoice PDF", p.document?.kind === "invoice"],
+            ["Invoice PDF", p.document?.kind === "invoice" || p.invoiceVerified],
           ]
             .map(
               ([l, done]) =>
@@ -254,7 +254,7 @@ function renderPackages() {
             )
             .join(
               "",
-            )}</div><div class="file-row">${p.document ? `<a href="/api/documents/${esc(p.document.id)}" download>${esc(p.document.kind === "invoice" ? "Invoice / receipt PDF ↓" : p.document.kind === "provisional_invoice" ? "Provisional invoice ↓" : "Order confirmation ↓")}</a>` : '<span class="muted">No PDF attached</span>'}<button class="text-button" data-action="pdf" data-id="${esc(p.id)}">${p.document ? "Replace" : "Attach PDF"} +</button></div><div class="package-actions"><button class="secondary" data-action="edit" data-id="${esc(p.id)}">Edit details</button>${!p.lockerArrivedAt ? `<button class="secondary" data-action="arrive" data-id="${esc(p.id)}">Mark locker arrival ✓</button>` : ""}${p.readiness.ready && !p.prealertedAt ? `<button class="secondary" data-action="prealert" data-id="${esc(p.id)}">Mark prealert submitted</button>` : ""}</div>${p.consolidationReference ? `<p class="private-notes">↳ Consolidation: <strong>${esc(p.consolidationReference)}</strong></p>` : ""}${p.notes ? `<p class="private-notes">${esc(p.notes)}</p>` : ""}<p class="source">Evidence: ${esc(p.source || "Manual entry")} · checked ${date(p.sourceCheckedAt)}${p.prealertReference ? "<br>Speedy reference: " + esc(p.prealertReference) : ""}${p.speedyStatusVerifiedAt ? "<br>Speedy status checked: " + date(p.speedyStatusVerifiedAt) : ""}</p></article>`;
+            )}</div><div class="file-row">${p.restrictedDetails ? '<span class="muted">Original retained outside this view</span>' : p.document ? `<a href="/api/documents/${esc(p.document.id)}" download>${esc(p.document.kind === "invoice" ? "Invoice / receipt PDF ↓" : p.document.kind === "provisional_invoice" ? "Provisional invoice ↓" : "Order confirmation ↓")}</a>` : '<span class="muted">No PDF attached</span>'}${p.restrictedDetails ? "" : `<button class="text-button" data-action="pdf" data-id="${esc(p.id)}">${p.document ? "Replace" : "Attach PDF"} +</button>`}</div><div class="package-actions"><button class="secondary" data-action="edit" data-id="${esc(p.id)}">Edit details</button>${!p.lockerArrivedAt ? `<button class="secondary" data-action="arrive" data-id="${esc(p.id)}">Mark locker arrival ✓</button>` : ""}${p.readiness.ready && !p.prealertedAt ? `<button class="secondary" data-action="prealert" data-id="${esc(p.id)}">Mark prealert submitted</button>` : ""}</div>${p.consolidationReference ? `<p class="private-notes">↳ Consolidation: <strong>${esc(p.consolidationReference)}</strong></p>` : ""}${p.notes ? `<p class="private-notes">${esc(p.notes)}</p>` : ""}<p class="source">Evidence: ${esc(p.source || "Manual entry")} · checked ${date(p.sourceCheckedAt)}${p.prealertReference ? "<br>Speedy reference: " + esc(p.prealertReference) : ""}${p.speedyStatusVerifiedAt ? "<br>Speedy status checked: " + date(p.speedyStatusVerifiedAt) : ""}</p></article>`;
         })
         .join("")
     : '<p class="empty">No packages match this view.</p>';
@@ -296,6 +296,8 @@ function openEditor(p) {
   ])
     f.elements[field].value =
       p?.[field] || (field === "shippingStatus" ? "awaiting_tracking" : "");
+  for (const field of ["title", "contents", "notes", "value"])
+    f.elements[field].disabled = !!p?.restrictedDetails;
   f.elements.value.value =
     p?.declaredValueCents == null
       ? ""
@@ -357,6 +359,8 @@ $("#package-form").addEventListener("submit", async (e) => {
     fields.get("value") === ""
       ? null
       : Math.round(Number(fields.get("value")) * 100);
+  if (editing?.restrictedDetails)
+    for (const key of ["title", "contents", "notes", "declaredValueCents"]) delete payload[key];
   payload.prealertedAt = fields.get("prealerted")
     ? editing?.prealertedAt || new Date().toISOString()
     : null;

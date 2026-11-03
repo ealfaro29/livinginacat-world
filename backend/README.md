@@ -2,6 +2,8 @@
 
 The public journal remains on GitHub Pages. `/admin/` links to a separate HTTPS Cloudflare Worker. D1 stores orders, packages and changes; a private KV namespace stores original PDFs. No private records are committed or built into `dist/`.
 
+Personal purchase details must never appear in messages or in the interactive owner room. Shared-order records use generic titles and omit restricted descriptions, notes, item values and original-document links from owner snapshots and exports. Saved document URLs are also blocked for these records. Stored originals and owner fields are preserved outside the interactive view for authorized ingestion; redaction does not change shipping evidence or readiness. The public site shows only the authorized combined Speedy amount, without a package-level breakdown.
+
 ## Owner workflow
 
 Open the one-time activation link locally and choose a password (14–128 characters). The owner username is `ealfaro29`. Subsequent visits use the sign-in form. Sessions last 12 hours. There is no public signup. Production is locked to owner `ealfaro29`; `OWNER_SETUP_ENABLED=false` also closes the original activation endpoint. A fresh deployment must explicitly enable one-time setup and close it after activation. Use **Add package** when a store splits an order, **Edit details** to record a submitted Speedy prealert or confirmed locker arrival, and **Attach PDF** to keep the original invoice. These actions synchronize across devices. A version conflict requires refreshing before saving; it does not silently overwrite another device.
