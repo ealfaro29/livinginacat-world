@@ -89,7 +89,7 @@ Item quotes $2,398.88 + allowance $500.00 = total estimate $2,898.88.
 
 ## Reconciliation
 
-Amazon: 6 orders totaling $1,534.50, including the Taxes, tariffs, shipping and others category; five have carrier tracking, including four carrier-reported deliveries. AMZ-06 adds a pack of frame joining plates after the original estimate. The owner confirms shipped orders are paid; the remaining order is not included in the paid subtotal. Bank settlement has not been independently reconciled. Taxes, tariffs, shipping and others: $706.71 (Amazon: $421.34; Walmart: $23.48; Bambu Lab: $89.87; FramingTech: $121.51; VXB: $4.27; DigiKey: $19.61; BoltDepot: $10.12; PhotonLight: $8.95; West3D: $7.56). Already included in vendor order totals. FramingTech: $300.66 paid ($179.15 parts + $121.51 provisional shipping). West3D: $17.55 paid per vendor invoice. Domain: $4.19 paid. Owner- or vendor-confirmed payments: $2,217.97, a partial subtotal. Shipped items of a partially shipped order are excluded until their payment can be allocated reliably.
+Amazon: 6 orders totaling $1,534.50, including the Taxes, tariffs, shipping and others category. Current carrier and Speedy locations are listed in the shipment record. AMZ-06 adds a pack of frame joining plates after the original estimate. The owner confirms shipped orders are paid; the remaining order is not included in the paid subtotal. Bank settlement has not been independently reconciled. Taxes, tariffs, shipping and others: $706.71 (Amazon: $421.34; Walmart: $23.48; Bambu Lab: $89.87; FramingTech: $121.51; VXB: $4.27; DigiKey: $19.61; BoltDepot: $10.12; PhotonLight: $8.95; West3D: $7.56). Already included in vendor order totals. FramingTech: $300.66 paid; shipping remains provisional. West3D: $17.55 paid per vendor invoice. Domain: $4.19 paid. Owner- or vendor-confirmed payments: $2,217.97, a partial subtotal. Shipped items of a partially shipped order are excluded until their payment can be allocated reliably.
 
 Other vendor order totals (see the purchase record for payment status):
 - Bambu Lab: $881.86; Shipped.
@@ -99,3 +99,9 @@ Other vendor order totals (see the purchase record for payment status):
 - Walmart: $53.31; Partially shipped.
 - PhotonLight: $18.94; Shipped.
 - West3D: $17.55; Shipped.
+
+## Shipping and Speedy
+
+Project shipment locations checked 2026-11-03: 3 in Costa Rica; 3 received in Miami; 14 awaiting Speedy confirmation. Carrier delivery does not establish Speedy receipt or delivery to the recipient.
+
+Speedy - Taxes, tariffs, shipping and others: CRC 346,500 combined amount shown as Total a pagar on 2026-11-03. Covers all owner-authorized shipments. Payment and final consolidated balance are unconfirmed; amounts may change or require consolidation adjustments. Kept separate from USD orders.
