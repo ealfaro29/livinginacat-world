@@ -1334,6 +1334,11 @@
     {
       "date": "2026-11-03",
       "title": "Speedy aggregate updated",
+      "detail": "The combined amount currently quoted by Speedy was updated after reviewing all current packages and consolidations. Newly confirmed project shipment statuses are recorded separately from carrier deliveries. Remaining unquoted charges and the final consolidated balance remain pending. Only the aggregate amount is displayed."
+    },
+    {
+      "date": "2026-11-03",
+      "title": "Speedy aggregate updated",
       "detail": "The combined amount currently quoted by Speedy was updated after reviewing all current packages and consolidations. Newly confirmed project receipts are recorded separately from carrier deliveries. Remaining unquoted charges and the final consolidated balance remain pending. Only the aggregate amount is displayed."
     },
     {
@@ -2072,23 +2077,24 @@
       "expectedDeliveryDate": null,
       "deliveredAt": null,
       "lastChecked": "2026-11-02",
-      "source": "Authenticated Amazon tracking and Speedy prealert",
-      "notes": "Amazon reports delivery on November 2. The shipment is prealerted and consolidated; Speedy receipt remains unconfirmed.",
-      "speedyStatus": "unconfirmed",
-      "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-03"
+      "source": "Vendor evidence and Speedy package listing",
+      "notes": "Amazon reports delivery on November 2. The shipment is prealerted and consolidated; Speedy confirms receipt in Miami.",
+      "speedyStatus": "received",
+      "speedyLocation": "miami",
+      "speedyCheckedAt": "2026-11-03",
+      "speedyConfirmedAt": "2026-11-03"
     }
   ],
   "forwardingCharges": {
     "currency": "CRC",
-    "amountCRC": 364500,
+    "amountCRC": 337500,
     "scope": "all_current_packages",
     "quoteStatus": "awaiting_remaining_quotes",
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Speedy current package listing and all current consolidations: Total a pagar",
     "observedAt": "2026-11-03",
-    "verifiedAt": "2026-11-03T18:34:44.941Z",
+    "verifiedAt": "2026-11-03T22:38:40.185Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. The displayed amount sums every currently quoted charge once. Remaining unquoted charges and the final consolidated balance are pending. Kept separate from USD purchase totals; payment remains unconfirmed."
   }
 }
