@@ -64,6 +64,10 @@ struct ContentView: View {
                     Button("Actualizar cámaras") { model.refreshCameras() }
                 } label: { Image(systemName: "camera.fill").frame(width: 24) }
                 .help("Elegir cámara")
+                if model.running {
+                    Circle().fill(Color.orange).frame(width: 7, height: 7)
+                        .help(model.lightOff ? "Cámara activa · luz de la cámara apagada" : "Cámara activa")
+                }
                 Text("Enfoque").font(.callout)
                 Slider(value: Binding(get: { model.focus }, set: { model.focus = $0; model.setFocus($0) }), in: 0...1)
                     .disabled(!model.focusSupported).help(model.focusMessage.isEmpty ? "Ajustar la lente de la cámara" : model.focusMessage)
@@ -75,6 +79,7 @@ struct ContentView: View {
             }
             .buttonStyle(.plain).controlSize(.small).padding(.horizontal, 6)
             if !model.focusMessage.isEmpty && model.running { Text(model.focusMessage).font(.caption2).foregroundColor(.secondary) }
+            if !model.lightMessage.isEmpty && model.running { Text(model.lightMessage).font(.caption2).foregroundColor(.secondary) }
         }
         .padding(12).frame(minWidth: 350, minHeight: 520).background(Color(red: 0.055, green: 0.06, blue: 0.07))
         .preferredColorScheme(.dark)

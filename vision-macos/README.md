@@ -6,9 +6,11 @@ App de macOS para mostrar la pantalla de un iPhone vista por una cámara web. De
 
 1. Conecta la webcam y coloca el iPhone encendido frente a ella, procurando que se vean las cuatro esquinas y evitando reflejos.
 2. Abre `vision-macos/build/Cat Vision.app` y acepta el permiso de cámara de macOS. La app prefiere una webcam externa; el icono de cámara permite escoger otra.
-3. Si el recorte no corresponde a la pantalla, pulsa el icono **Encuadrar** y marca las cuatro esquinas en orden: superior izquierda, superior derecha, inferior derecha e inferior izquierda. Si cambias la posición de la cámara o el teléfono, vuelve a encuadrar.
+3. La detección de las esquinas se hace una vez. El encuadre y la orientación se guardan localmente para esa cámara y resolución y se reutilizan al volver a abrir la app. Si el recorte no corresponde a la pantalla, pulsa **Encuadrar** y marca las cuatro esquinas en orden: superior izquierda, superior derecha, inferior derecha e inferior izquierda. Si cambias la posición de la cámara o el teléfono, vuelve a encuadrar.
 4. La detección coloca la pantalla en vertical. Si el iPhone está invertido o deseas otra orientación, usa el icono de **girar**.
 5. El slider **Enfoque** controla el foco óptico de las webcams USB UVC que admiten foco manual. Al moverlo se desactiva el enfoque automático; pulsa **Auto** para recuperarlo. Si la cámara no expone controles compatibles, el slider se desactiva y se muestra el motivo.
+
+Con una Logitech C922 compatible, la app intenta apagar su luz para reducir reflejos y recupera el modo anterior al cerrar o cambiar de cámara. Un punto naranja indica que la cámara está activa incluso si su luz está apagada. Tras una interrupción inesperada, podría ser necesario desconectar y reconectar la cámara para restablecer su luz. Otras cámaras conservan su comportamiento habitual. El control de la C922 sigue la [documentación del control de su LED](https://github.com/solareonk/logitech-c922-led-windows).
 
 Un clic sobre la pantalla coloca un cursor virtual. Las teclas 1–4 apuntan a las cuatro esquinas y la barra espaciadora inicia o detiene el recorrido. No se envían acciones al teléfono ni a motores. Con clic derecho sobre la imagen puedes elegir un texto detectado para colocar el cursor. El reconocimiento es visual: un texto no siempre corresponde a un botón y los iconos sin texto pueden no detectarse.
 

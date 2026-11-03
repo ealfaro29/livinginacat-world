@@ -5,6 +5,7 @@ APP="$ROOT/build/Cat Vision.app"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$ROOT/vendor/uvc-util/LICENSE" "$APP/Contents/Resources/uvc-util-LICENSE.txt"
 clang -w -mmacosx-version-min=14.0 -o "$APP/Contents/MacOS/uvc-util" -framework IOKit -framework Foundation "$ROOT/vendor/uvc-util/uvc-util.m" "$ROOT/vendor/uvc-util/UVCController.m" "$ROOT/vendor/uvc-util/UVCType.m" "$ROOT/vendor/uvc-util/UVCValue.m"
+clang -w -mmacosx-version-min=14.0 -I "$ROOT/vendor/uvc-util" -o "$APP/Contents/MacOS/c922-led" -framework IOKit -framework Foundation "$ROOT/Sources/C922LED.m" "$ROOT/vendor/uvc-util/UVCController.m" "$ROOT/vendor/uvc-util/UVCType.m" "$ROOT/vendor/uvc-util/UVCValue.m"
 ARCH="$(uname -m)"
 swiftc -target "$ARCH-apple-macosx14.0" -sdk "$(xcrun --show-sdk-path)" -swift-version 5 -O -parse-as-library "$ROOT/Sources/Geometry.swift" "$ROOT/Sources/CameraModel.swift" "$ROOT/Sources/App.swift" -o "$APP/Contents/MacOS/CatVision" -framework SwiftUI -framework AppKit -framework AVFoundation -framework Vision -framework CoreImage
 cat > "$APP/Contents/Info.plist" <<'PLIST'

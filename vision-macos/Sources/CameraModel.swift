@@ -11,6 +11,17 @@ struct DetectedLabel: Identifiable {
     let center: CGPoint
 }
 
+private struct SavedScreen: Codable {
+    let points: [[Double]]
+    let width: Int
+    let height: Int
+    var quad: ScreenQuad? {
+        guard points.count == 4, points.allSatisfy({ $0.count == 2 }) else { return nil }
+        let value = ScreenQuad(points: points.map { CGPoint(x: $0[0], y: $0[1]) })
+        return value.isValid && width > 0 && height > 0 ? value : nil
+    }
+}
+
 final class CameraModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     @Published var cameras: [AVCaptureDevice] = []
     @Published var cameraID = ""
@@ -28,6 +39,8 @@ final class CameraModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
     @Published var focusAuto = true
     @Published var focusMessage = "Enfoque no disponible"
     @Published var rotation = 0
+    @Published var lightOff = false
+    @Published var lightMessage = ""
 
     private let session = AVCaptureSession()
     private let captureQueue = DispatchQueue(label: "cat.camera.capture")
@@ -35,15 +48,19 @@ final class CameraModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
     private let visionQueue = DispatchQueue(label: "cat.camera.vision")
     private let textQueue = DispatchQueue(label: "cat.camera.text")
     private let focusQueue = DispatchQueue(label: "cat.camera.focus")
+    private let lightQueue = DispatchQueue(label: "cat.camera.light")
     private let stateLock = NSLock()
     private let imageContext = CIContext(options: [.cacheIntermediates: false])
     private var currentQuad: ScreenQuad?
-    private var manualQuad: ScreenQuad?
     private var calibrationActive = false
     private var isAnalyzing = false
     private var isRecognizing = false
+    private var visionRevision = 0
+    private var pendingScreen: SavedScreen?
+    private var rawWidth = 0
+    private var rawHeight = 0
+    private var activeCameraID = ""
     private var lastAnalysis: CFTimeInterval = 0
-    private var lastDetected: CFTimeInterval = 0
     private var lastRender: CFTimeInterval = 0
     private var lastRecognition: CFTimeInterval = 0
     private var generation = 0
@@ -56,8 +73,14 @@ final class CameraModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
     private var cornerIndex = 0
     private var timer: Timer?
     private var manualRotation = 0
+    private var lightRestore: (name: String, mode: Int)?
+    private var terminationObserver: NSObjectProtocol?
 
-    override init() { super.init(); refreshCameras() }
+    override init() {
+        super.init(); refreshCameras()
+        terminationObserver = NotificationCenter.default.addObserver(forName: NSApplication.willTerminateNotification, object: nil, queue: .main) { [weak self] _ in self?.stop() }
+    }
+    deinit { if let observer = terminationObserver { NotificationCenter.default.removeObserver(observer) } }
     func refreshCameras() {
         let list = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera, .external], mediaType: .video, position: .unspecified).devices
         cameras = list
@@ -77,6 +100,10 @@ final class CameraModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
     func restart() { stop(); start() }
     private func configure() {
         let id = cameraID
+        let saved = UserDefaults.standard.data(forKey: "cat-screen-" + id).flatMap { try? JSONDecoder().decode(SavedScreen.self, from: $0) }
+        let savedRotation = UserDefaults.standard.integer(forKey: "cat-rotation-" + id)
+        rotation = (savedRotation % 4 + 4) % 4
+        stateLock.lock(); visionRevision += 1; activeCameraID = id; pendingScreen = saved; manualRotation = rotation; rawWidth = 0; rawHeight = 0; stateLock.unlock()
         generation += 1
         let currentGeneration = generation
         status = "Iniciando cámara…"
@@ -100,24 +127,31 @@ final class CameraModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
                 self.session.startRunning()
                 DispatchQueue.main.async {
                     guard currentGeneration == self.generation else { return }
-                    self.running = true; self.status = "Buscando la pantalla…"
+                    self.stateLock.lock(); let screenReady = self.currentQuad != nil; self.stateLock.unlock()
+                    self.running = true; self.hasScreen = screenReady
+                    self.status = screenReady ? "" : "Buscando la pantalla…"
                     self.deviceName = device.localizedName
                     self.inspectFocus(deviceName: device.localizedName)
+                    self.turnOffLight(deviceName: device.localizedName, generation: currentGeneration)
                 }
             } catch { DispatchQueue.main.async { self.running = false; self.status = "No se pudo iniciar la cámara: \(error.localizedDescription)" } }
         }
     }
     func stop() {
         generation += 1; focusGeneration += 1; focusWork?.cancel(); timer?.invalidate(); timer = nil
+        lightQueue.sync {
+            if let saved = lightRestore { _ = lightHelper(name: saved.name, mode: saved.mode); lightRestore = nil }
+        }
+        lightOff = false; lightMessage = ""
         running = false; hasScreen = false; image = nil; cursor = nil; labels = []; calibrating = false; calibrationPoints = []
         focusSupported = false; focusMessage = "Enfoque no disponible"
-        stateLock.lock(); currentQuad = nil; manualQuad = nil; calibrationActive = false; lastDetected = 0; stateLock.unlock()
+        stateLock.lock(); currentQuad = nil; pendingScreen = nil; visionRevision += 1; calibrationActive = false; stateLock.unlock()
         sessionQueue.async { [weak self] in self?.session.stopRunning() }
     }
     func beginCalibration() {
         guard running else { return }
         timer?.invalidate(); timer = nil; calibrating = true; calibrationPoints = []; hasScreen = false; cursor = nil; labels = []
-        stateLock.lock(); currentQuad = nil; manualQuad = nil; calibrationActive = true; stateLock.unlock()
+        stateLock.lock(); currentQuad = nil; pendingScreen = nil; visionRevision += 1; calibrationActive = true; stateLock.unlock()
         status = "Marca las 4 esquinas: arriba izquierda, arriba derecha, abajo derecha y abajo izquierda."
     }
     func addCalibrationPoint(_ point: CGPoint) {
@@ -126,13 +160,15 @@ final class CameraModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
         if calibrationPoints.count == 4 {
             let q = ScreenQuad(points: calibrationPoints)
             guard q.isValid else { calibrationPoints = []; status = "Esquinas inválidas. Márcalas otra vez en orden."; return }
-            stateLock.lock(); manualQuad = q; currentQuad = q; calibrationActive = false; stateLock.unlock()
+            stateLock.lock(); currentQuad = q; calibrationActive = false
+            saveScreen(q, width: rawWidth, height: rawHeight, camera: activeCameraID); stateLock.unlock()
             calibrating = false; hasScreen = true; calibrationPoints = []; status = ""
         }
     }
     func rotate() {
         rotation = (rotation + 1) % 4
         stateLock.lock(); manualRotation = rotation; stateLock.unlock()
+        UserDefaults.standard.set(rotation, forKey: "cat-rotation-" + cameraID)
         cursor = nil; labels = []
     }
     func selectLabel(_ label: DetectedLabel) { timer?.invalidate(); timer = nil; cursor = label.center }
@@ -154,13 +190,28 @@ final class CameraModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
         guard let buffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         let now = CACurrentMediaTime()
         stateLock.lock()
-        let q = currentQuad, rotation = manualRotation
-        let shouldAnalyze = manualQuad == nil && !calibrationActive && !isAnalyzing && now-lastAnalysis >= 1.6
+        rawWidth = CVPixelBufferGetWidth(buffer); rawHeight = CVPixelBufferGetHeight(buffer)
+        var restored = false
+        if let saved = pendingScreen {
+            pendingScreen = nil
+            if saved.width == rawWidth, saved.height == rawHeight, let q = saved.quad {
+                currentQuad = q; restored = true
+            }
+        }
+        let q = currentQuad, rotation = manualRotation, revision = visionRevision, camera = activeCameraID
+        // The phone and camera are stationary: once a screen is found, hold
+        // those corners until the user explicitly recalibrates or restarts.
+        let shouldAnalyze = currentQuad == nil && !calibrationActive && !isAnalyzing && now-lastAnalysis >= 1.6
         let shouldRecognize = q != nil && !isRecognizing && now-lastRecognition >= 3.0
         if shouldAnalyze { isAnalyzing = true; lastAnalysis = now }
         if shouldRecognize { isRecognizing = true; lastRecognition = now }
         stateLock.unlock()
-        if shouldAnalyze { analyze(buffer) }
+        if restored { DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.stateLock.lock(); let isCurrent = self.visionRevision == revision; self.stateLock.unlock()
+            guard isCurrent, self.running, !self.calibrating else { return }; self.hasScreen = true; self.status = ""
+        } }
+        if shouldAnalyze { analyze(buffer, revision: revision, camera: camera) }
         if shouldRecognize, let q = q { recognize(buffer, quad: q, rotation: rotation) }
         guard now - lastRender >= 0.08 else { return }
         lastRender = now
@@ -211,7 +262,13 @@ final class CameraModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
         let orientations: [CGImagePropertyOrientation] = [.up, .right, .down, .left]
         return result.oriented(orientations[(rotation % 4 + 4) % 4])
     }
-    private func analyze(_ buffer: CVPixelBuffer) {
+    private func saveScreen(_ quad: ScreenQuad, width: Int, height: Int, camera: String) {
+        guard width > 0, height > 0, !camera.isEmpty else { return }
+        let record = SavedScreen(points: quad.points.map { [Double($0.x), Double($0.y)] }, width: width, height: height)
+        if let data = try? JSONEncoder().encode(record) { UserDefaults.standard.set(data, forKey: "cat-screen-" + camera) }
+    }
+    private func analyze(_ buffer: CVPixelBuffer, revision: Int, camera: String) {
+        let width = CVPixelBufferGetWidth(buffer), height = CVPixelBufferGetHeight(buffer)
         visionQueue.async { [weak self] in
             guard let self = self else { return }
             let request = VNDetectRectanglesRequest()
@@ -229,25 +286,17 @@ final class CameraModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
                 }
             } catch { detected = nil }
             self.stateLock.lock()
-            if self.manualQuad == nil && !self.calibrationActive {
-                if let next = detected {
-                    if let old = self.currentQuad {
-                        let distance = zip(old.points, next.points).reduce(CGFloat.zero) { $0 + hypot($1.0.x - $1.1.x, $1.0.y - $1.1.y) } / 4
-                        if distance < 0.12 {
-                            self.currentQuad = ScreenQuad(points: zip(old.points, next.points).map { pair in
-                                let (a, b) = pair
-                                return CGPoint(x: a.x * 0.7 + b.x * 0.3, y: a.y * 0.7 + b.y * 0.3)
-                            })
-                        } else { self.currentQuad = next }
-                    } else { self.currentQuad = next }
-                    self.lastDetected = CACurrentMediaTime()
-                } else if CACurrentMediaTime() - self.lastDetected > 5 { self.currentQuad = nil }
+            let accepted = self.visionRevision == revision && self.currentQuad == nil && !self.calibrationActive && detected != nil
+            if accepted, let detected = detected {
+                self.currentQuad = detected
+                self.saveScreen(detected, width: width, height: height, camera: camera)
             }
             let effective = self.currentQuad
             self.isAnalyzing = false
             self.stateLock.unlock()
             DispatchQueue.main.async {
-                guard self.running && !self.calibrating else { return }
+                self.stateLock.lock(); let isCurrent = self.visionRevision == revision; self.stateLock.unlock()
+                guard isCurrent && self.running && !self.calibrating else { return }
                 self.hasScreen = effective != nil
                 self.status = effective == nil ? "No se detecta la pantalla. Usa Encuadrar para marcar sus esquinas." : ""
                 if effective == nil { self.cursor = nil; self.labels = [] }
@@ -261,6 +310,29 @@ final class CameraModel: NSObject, ObservableObject, AVCaptureVideoDataOutputSam
         do { try process.run() } catch { return (-1, "") }
         let data = pipe.fileHandleForReading.readDataToEndOfFile(); process.waitUntilExit()
         return (process.terminationStatus, String(data: data, encoding: .utf8) ?? "")
+    }
+    private func lightHelper(name: String, mode: Int) -> (Int32, String) {
+        guard let path = Bundle.main.path(forAuxiliaryExecutable: "c922-led") else { return (-1, "") }
+        let process = Process(); process.executableURL = URL(fileURLWithPath: path); process.arguments = [name, String(mode)]
+        let pipe = Pipe(); process.standardOutput = pipe; process.standardError = pipe
+        do { try process.run() } catch { return (-1, "") }
+        let data = pipe.fileHandleForReading.readDataToEndOfFile(); process.waitUntilExit()
+        return (process.terminationStatus, String(data: data, encoding: .utf8) ?? "")
+    }
+    private func turnOffLight(deviceName: String, generation: Int) {
+        guard cameras.filter({ $0.localizedName == deviceName }).count == 1, deviceName == "C922 Pro Stream Webcam" else { return }
+        lightQueue.async { [weak self] in
+            guard let self = self else { return }
+            let (result, output) = self.lightHelper(name: deviceName, mode: 0)
+            if result == 0, let previous = Int(output.trimmingCharacters(in: .whitespacesAndNewlines)) {
+                self.lightRestore = (deviceName, previous)
+            }
+            DispatchQueue.main.async {
+                guard self.generation == generation, self.running else { return }
+                self.lightOff = result == 0
+                self.lightMessage = result == 0 ? "" : "No se pudo apagar la luz de la cámara."
+            }
+        }
     }
     private func inspectFocus(deviceName: String) {
         focusGeneration += 1
