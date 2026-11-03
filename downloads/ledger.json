@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-02",
+  "updatedAt": "2026-11-03",
   "currency": "USD",
   "purchasesPaused": false,
   "equipmentQuotedTotalCents": 289888,
@@ -1332,6 +1332,11 @@
   ],
   "changes": [
     {
+      "date": "2026-11-03",
+      "title": "Speedy shipment and charge update",
+      "detail": "Speedy lists a project shipment in Costa Rica. For another received shipment, its displayed weight changed from 11 lb to 1 lb and its amount to pay from ₡49,500 to ₡4,500. The charge is an observation, not confirmation of payment or a final consolidated total."
+    },
+    {
       "date": "2026-11-02",
       "title": "Amazon shipment deliveries confirmed",
       "detail": "Amazon confirms four separate shipments delivered. One is also listed as received by Speedy; the others await forwarder confirmation. A newly identified shipment was prealerted and added to an existing consolidation."
@@ -1930,9 +1935,9 @@
       ],
       "expectedDeliveryDate": "2026-10-28",
       "deliveredAt": null,
-      "lastChecked": "2026-10-29",
+      "lastChecked": "2026-11-03",
       "source": "Vendor tracking and Speedy package listing",
-      "notes": "Amazon reports delivery on October 28. Speedy’s package listing now confirms receipt for this shipment."
+      "notes": "Amazon reports carrier delivery on October 28. Speedy now lists this shipment in Costa Rica; delivery to the recipient is not confirmed."
     },
     {
       "id": "AMZ-PKG-07",
@@ -1994,7 +1999,7 @@
   "forwardingCharges": {
     "currency": "CRC",
     "source": "Speedy package listing: total a pagar",
-    "observedAt": "2026-11-02",
+    "observedAt": "2026-11-03",
     "notes": "Observed charges for exactly matched project shipments. Payment and final consolidated charges are not confirmed; amounts may change. The sum is separate from USD orders and is not a paid expense.",
     "observations": [
       {
@@ -2062,6 +2067,12 @@
         "weightLbs": 11,
         "amountCRC": 49500,
         "observedAt": "2026-11-02"
+      },
+      {
+        "shipmentId": "AMZ-PKG-09",
+        "weightLbs": 1,
+        "amountCRC": 4500,
+        "observedAt": "2026-11-03"
       }
     ]
   }
