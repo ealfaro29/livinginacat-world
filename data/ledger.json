@@ -1334,6 +1334,11 @@
     {
       "date": "2026-11-04",
       "title": "Speedy aggregate updated",
+      "detail": "The combined amount currently quoted by Speedy was updated after reviewing all current packages and consolidations. Remaining unquoted charges and the final consolidated balance remain pending. Only the aggregate amount is displayed."
+    },
+    {
+      "date": "2026-11-04",
+      "title": "Speedy aggregate updated",
       "detail": "The combined amount currently quoted by Speedy was updated after reviewing all current packages and consolidations. Newly confirmed project shipment statuses are recorded separately from carrier deliveries. Remaining unquoted charges and the final consolidated balance remain pending. Only the aggregate amount is displayed."
     },
     {
@@ -2092,14 +2097,14 @@
   ],
   "forwardingCharges": {
     "currency": "CRC",
-    "amountCRC": 377500,
+    "amountCRC": 373000,
     "scope": "all_current_packages",
     "quoteStatus": "awaiting_remaining_quotes",
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Speedy current package listing and all current consolidations: Total a pagar",
     "observedAt": "2026-11-04",
-    "verifiedAt": "2026-11-04T16:45:59.310Z",
+    "verifiedAt": "2026-11-04T20:54:35.427Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. The displayed amount sums every currently quoted charge once. Remaining unquoted charges and the final consolidated balance are pending. Kept separate from USD purchase totals; payment remains unconfirmed."
   }
 }
