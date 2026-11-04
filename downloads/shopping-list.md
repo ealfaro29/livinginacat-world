@@ -1,6 +1,6 @@
 # Shopping list · living in a cat world
 
-Updated: 2026-11-03. USD. Item quotes; tax and shipping excluded unless noted. Purchases in progress, one store at a time.
+Updated: 2026-11-04. USD. Item quotes; tax and shipping excluded unless noted. Purchases in progress, one store at a time.
 
 Equipment quoted, including allowance: $2,898.88. Listed item quotes: $2,398.88; unallocated equipment allowance: $500.00. The allowance is a planning amount, not a vendor quote, order or payment. Payment and shipping status: https://livinginacat.world/purchases/.
 
@@ -102,6 +102,6 @@ Other vendor order totals (see the purchase record for payment status):
 
 ## Shipping and Speedy
 
-Project shipment locations checked 2026-11-03: 3 in Costa Rica; 6 received in Miami; 11 awaiting Speedy confirmation. Carrier delivery does not establish Speedy receipt or delivery to the recipient.
+Project shipment locations checked 2026-11-04: 6 in Costa Rica; 3 received in Miami; 11 awaiting Speedy confirmation. Carrier delivery does not establish Speedy receipt or delivery to the recipient.
 
-Speedy - Taxes, tariffs, shipping and others: CRC 337,500 combined amount shown as Total a pagar on 2026-11-03. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.
+Speedy - Taxes, tariffs, shipping and others: CRC 377,500 combined amount shown as Total a pagar on 2026-11-04. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.
