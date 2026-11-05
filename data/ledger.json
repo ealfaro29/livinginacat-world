@@ -1334,6 +1334,11 @@
   "changes": [
     {
       "date": "2026-11-05",
+      "title": "Vendor follow-up confirmed",
+      "detail": "The owner confirmed contacting the vendor about the carrier-return exception. A vendor response, refund and replacement remain unconfirmed."
+    },
+    {
+      "date": "2026-11-05",
       "title": "Speedy aggregate updated",
       "detail": "The combined amount currently quoted by Speedy was updated after reviewing all current packages and consolidations. Remaining unquoted charges and the final consolidated balance remain pending. Only the aggregate amount is displayed."
     },
@@ -1968,7 +1973,7 @@
       "deliveredAt": null,
       "lastChecked": "2026-11-05",
       "source": "Official OnTrac tracking result",
-      "notes": "OnTrac confirms a return to the sender as of 2026-11-05. The return date, refund and replacement remain unconfirmed. Speedy receipt and delivery to the recipient are unconfirmed.",
+      "notes": "OnTrac confirms a return to the sender as of 2026-11-05. The return date, refund and replacement remain unconfirmed. Speedy receipt and delivery to the recipient are unconfirmed. The owner confirms contacting the vendor on November 5; a response remains pending.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-05"
