@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-04",
+  "updatedAt": "2026-11-05",
   "currency": "USD",
   "purchasesPaused": false,
   "equipmentQuotedTotalCents": 289888,
@@ -24,25 +24,25 @@
     {
       "id": "amazon",
       "vendor": "Amazon",
-      "status": "partially_shipped",
+      "status": "carrier_delivered",
       "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 111657,
-      "actualPaidCents": 96861,
+      "actualPaidCents": 153450,
       "shippingPaidCents": null,
       "taxPaidCents": null,
       "tariffPaidCents": null,
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "authenticated-order-page",
-      "notes": "Six confirmed orders total $1,534.50. Five shipped orders total $968.61 and are paid according to the owner; the remaining order is not included in that paid subtotal. Four shipments show receipt in Speedy, including one now shown in Costa Rica. Bank settlement has not been independently reconciled.",
+      "notes": "All recorded Amazon orders are carrier-delivered. Owner-confirmed payments include the complete documented order totals and grouped Taxes, tariffs, shipping and others. Bank settlement remains unverified.",
       "invoiceTotalCents": 153450,
-      "paymentEvidence": "owner-confirmed-shipped-orders-paid",
-      "paymentPartial": true
+      "paymentEvidence": "Owner confirmation that shipped purchases are paid. Complete carrier delivery and unchanged documentary order totals verified on 2026-11-05. Bank settlement is not independently verified.",
+      "paymentPartial": false
     },
     {
       "id": "bambu-lab",
       "vendor": "Bambu Lab",
-      "status": "shipped",
+      "status": "on_hold",
       "orderedAt": "2026-10-27",
       "quotedSubtotalCents": 89900,
       "actualPaidCents": 88186,
@@ -52,7 +52,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-and-authenticated-order-summary",
-      "notes": "Order total $881.86. Both fulfillment groups have tracking; UPS has accepted the shipment and estimates delivery October 30. Both packages are prealerted and consolidated. The owner confirms shipped orders are paid; bank settlement is not independently reconciled. The equipment quote is the original planning quote.",
+      "notes": "Documented order totals and the recorded payment are unchanged. Speedy lists the UPS project shipment in Costa Rica. OnTrac confirms a carrier return for another project shipment as of 2026-11-05. Refund and replacement remain unconfirmed. Equipment prices remain the original planning quote; bank settlement has not been independently reconciled.",
       "invoiceTotalCents": 88186,
       "invoiceItemsCents": 84718,
       "shippingInvoicedCents": 699,
@@ -63,7 +63,7 @@
     {
       "id": "framingtech",
       "vendor": "FramingTech",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 17915,
       "actualPaidCents": 30066,
@@ -73,7 +73,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-paid-invoice-and-carrier-tracking",
-      "notes": "Vendor invoice confirms $300.66 paid. UPS estimates October 30 delivery; forwarder receipt and any later adjustment remain unconfirmed.",
+      "notes": "The paid vendor invoice is recorded. UPS carrier delivery on October 30 is confirmed, and Speedy lists the project shipment in Costa Rica. Supplier shipping charges remain provisional as documented.",
       "invoiceTotalCents": 30066,
       "expectedShipDate": "2026-10-28",
       "shippingChargeFinal": false
@@ -91,7 +91,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-email",
-      "notes": "Vendor order total $65.22. USPS tracking is assigned; the carrier reports a label was created and is awaiting the package. Prealerted and consolidated. No forwarder receipt or settled bank charge confirmed.",
+      "notes": "The vendor previously reported shipment. USPS still shows label created and awaiting the item as of 2026-11-05. Carrier acceptance and Speedy receipt remain unconfirmed. The shipment is prealerted and consolidated.",
       "invoiceTotalCents": 6522,
       "shippingInvoicedCents": 0,
       "taxInvoicedCents": 427,
@@ -110,16 +110,17 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-email",
-      "notes": "Order confirmed October 26, 2026 for $96.97. The vendor assigned two sales orders and states the order is being processed. No shipping notice, tracking or delivery confirmed.",
+      "notes": "Order confirmed October 26, 2026 for $96.97. The vendor assigned two sales orders and states the order is being processed. No shipping notice, tracking or delivery confirmed. Available order mail was reviewed on 2026-11-05; dispatch and tracking remain unconfirmed.",
       "invoiceTotalCents": 9697,
       "shippingInvoicedCents": 849,
       "taxInvoicedCents": 579,
-      "tariffInvoicedCents": 533
+      "tariffInvoicedCents": 533,
+      "lastChecked": "2026-11-05"
     },
     {
       "id": "boltdepot",
       "vendor": "BoltDepot",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 1604,
       "actualPaidCents": 2616,
@@ -129,7 +130,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-shipping-email-and-usps-tracking",
-      "notes": "Order total $26.16. The vendor reports shipment; USPS shows a label created and is awaiting the parcel. Prealerted and assigned to the second consolidation. The owner confirms shipped orders are paid; forwarder receipt is unconfirmed.",
+      "notes": "The vendor order and receipt totals are unchanged. USPS confirms carrier delivery on October 31. The shipment is prealerted and consolidated; Speedy receipt remains unconfirmed.",
       "invoiceTotalCents": 2616,
       "shippingInvoicedCents": 841,
       "taxInvoicedCents": 171,
@@ -149,7 +150,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-email-and-authenticated-order-page",
-      "notes": "Order total $53.31. Three fulfillment groups have tracking and are prealerted; the remaining equipment group is preparing. The owner confirms shipped items are paid; a reliable shipped-item payment allocation is not yet available. No locker arrival or independent bank reconciliation is confirmed.",
+      "notes": "The documented order totals are unchanged. Shipment records retain confirmed retailer deliveries, a USPS shipment still in transit, and an earlier SF Express dispatch awaiting newer carrier confirmation. Speedy receipt for these shipments remains unconfirmed. Payment is not independently reconciled.",
       "invoiceItemsCents": 4982,
       "invoiceTotalCents": 5331,
       "shippingInvoicedCents": 0,
@@ -159,7 +160,7 @@
     {
       "id": "photonlight",
       "vendor": "PhotonLight",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 999,
       "actualPaidCents": 1894,
@@ -169,7 +170,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-shipping-email",
-      "notes": "Order total $18.94. The vendor reports shipment with USPS tracking; prealerted and consolidated. Estimated delivery November 2, 2026. The owner confirms shipped orders are paid; forwarder receipt is unconfirmed.",
+      "notes": "The vendor delivery confirmation as of November 2 has been reviewed. The shipment is prealerted and consolidated; Speedy receipt remains unconfirmed. The documented order and payment records are unchanged.",
       "invoiceTotalCents": 1894,
       "shippingInvoicedCents": 895,
       "taxInvoicedCents": 0,
@@ -179,7 +180,7 @@
     {
       "id": "west3d",
       "vendor": "West3D",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 999,
       "actualPaidCents": 1755,
@@ -189,7 +190,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-confirmation-email-and-paid-invoice-pdf",
-      "notes": "Vendor invoice records $17.55 paid. West3D reports its USPS shipment delivered on October 29. It is prealerted and consolidated; Speedy receipt is not yet confirmed.",
+      "notes": "Payment remains backed by the vendor invoice. Carrier delivery on October 29 is confirmed. The shipment is prealerted and consolidated; Speedy receipt remains unconfirmed.",
       "invoiceTotalCents": 1755,
       "shippingInvoicedCents": 756,
       "taxInvoicedCents": 0,
@@ -1332,6 +1333,11 @@
   ],
   "changes": [
     {
+      "date": "2026-11-05",
+      "title": "Full shipment and accounts review",
+      "detail": "A carrier delivery and a carrier return were verified. Current Amazon fulfillment and owner-confirmed payment totals were refreshed after matching documentary order totals. Speedy locations and the combined current amount were checked across current and completed records. Remaining quotes, the final forwarder balance and any refund or replacement remain unconfirmed."
+    },
+    {
       "date": "2026-11-04",
       "title": "Speedy aggregate updated",
       "detail": "The combined amount currently quoted by Speedy was updated after reviewing all current packages and consolidations. Remaining unquoted charges and the final consolidated balance remain pending. Only the aggregate amount is displayed."
@@ -1606,7 +1612,8 @@
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-26",
       "notes": "Amazon reports carrier delivery on October 29. Speedy receipt remains unconfirmed. The owner confirms shipped orders are paid.",
-      "paymentEvidence": "owner-confirmed-shipped-orders-paid"
+      "paymentEvidence": "owner-confirmed-shipped-orders-paid",
+      "lastChecked": "2026-11-05"
     },
     {
       "id": "AMZ-02",
@@ -1630,8 +1637,9 @@
       "actualPaidCents": 15840,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-27",
-      "notes": "Amazon reports carrier delivery on October 27. Speedy now lists this shipment in Costa Rica. The owner confirms shipped orders are paid; bank settlement has not been independently reconciled.",
-      "paymentEvidence": "owner-confirmed-shipped-orders-paid"
+      "notes": "Amazon carrier delivery is confirmed. Speedy currently lists the project shipment in Costa Rica. The owner confirms shipped purchases are paid; bank settlement remains unverified.",
+      "paymentEvidence": "owner-confirmed-shipped-orders-paid",
+      "lastChecked": "2026-11-05"
     },
     {
       "id": "AMZ-03",
@@ -1655,12 +1663,13 @@
       "actualPaidCents": 12536,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-27",
-      "notes": "Amazon reports carrier delivery on October 27. Speedy’s package listing shows receipt; its consolidation view has not yet reflected it. The owner confirms shipped orders are paid; bank settlement has not been independently reconciled.",
-      "paymentEvidence": "owner-confirmed-shipped-orders-paid"
+      "notes": "Amazon carrier delivery is confirmed. Speedy currently lists the project shipment in Costa Rica. The owner confirms shipped purchases are paid; bank settlement remains unverified.",
+      "paymentEvidence": "owner-confirmed-shipped-orders-paid",
+      "lastChecked": "2026-11-05"
     },
     {
       "id": "AMZ-04",
-      "status": "partially_shipped",
+      "status": "carrier_delivered",
       "orderedAt": "2026-10-26",
       "currency": "USD",
       "itemIds": [
@@ -1692,10 +1701,12 @@
       "discountCents": 63,
       "taxCents": 3703,
       "orderTotalCents": 56589,
-      "actualPaidCents": null,
+      "actualPaidCents": 56589,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-26",
-      "notes": "Amazon confirms delivery of four separate shipments on November 2. Speedy lists one as received; receipt of the others remains unconfirmed. No shipment payment allocation is recorded."
+      "notes": "Authenticated Amazon review confirms complete carrier delivery. The owner confirms shipped purchases are paid. The documentary order total matches the current order page; bank settlement is not independently verified.",
+      "lastChecked": "2026-11-05",
+      "paymentEvidence": "Owner confirmation that shipped purchases are paid, applied after authenticated Amazon review confirms complete carrier delivery. Bank settlement is not independently verified."
     },
     {
       "id": "AMZ-05",
@@ -1715,7 +1726,8 @@
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-26",
       "notes": "Amazon reports carrier delivery on October 27. Speedy receipt remains unconfirmed. The owner confirms shipped orders are paid; bank settlement has not been independently reconciled.",
-      "paymentEvidence": "owner-confirmed-shipped-orders-paid"
+      "paymentEvidence": "owner-confirmed-shipped-orders-paid",
+      "lastChecked": "2026-11-05"
     },
     {
       "id": "AMZ-06",
@@ -1734,8 +1746,9 @@
       "actualPaidCents": 1015,
       "evidenceLevel": "authenticated-order-page",
       "sourceDate": "2026-10-27",
-      "notes": "Amazon reports delivery to reception October 28; Speedy’s package listing confirms receipt. The owner confirms shipped orders are paid; bank settlement has not been independently reconciled.",
-      "paymentEvidence": "owner-confirmed-shipped-orders-paid"
+      "notes": "Amazon carrier delivery is confirmed. Speedy currently lists the project shipment in Costa Rica. The owner confirms shipped purchases are paid; bank settlement remains unverified.",
+      "paymentEvidence": "owner-confirmed-shipped-orders-paid",
+      "lastChecked": "2026-11-05"
     }
   ],
   "shipments": [
@@ -1750,12 +1763,12 @@
       ],
       "expectedDeliveryDate": "2026-10-29",
       "deliveredAt": null,
-      "lastChecked": "2026-10-29",
+      "lastChecked": "2026-11-05",
       "source": "Authenticated Amazon tracking",
       "notes": "Amazon reports carrier delivery October 29. Speedy receipt remains unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-03"
+      "speedyCheckedAt": "2026-11-05"
     },
     {
       "id": "AMZ-PKG-02",
@@ -1766,13 +1779,13 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-10-26",
+      "lastChecked": "2026-11-05",
       "source": "Amazon tracking page",
       "notes": "Amazon reports carrier delivery to the dock on October 27. Speedy receipt is not yet confirmed.",
       "title": "Project shipment",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-03"
+      "speedyCheckedAt": "2026-11-05"
     },
     {
       "id": "FT-PREP-01",
@@ -1797,7 +1810,7 @@
       "notes": "UPS confirms delivery in Miami on October 30; Speedy lists this shipment in Costa Rica; recipient delivery is unconfirmed.",
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-04",
+      "speedyCheckedAt": "2026-11-05",
       "speedyConfirmedAt": "2026-11-04"
     },
     {
@@ -1810,12 +1823,12 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-11-02",
+      "lastChecked": "2026-11-05",
       "source": "Vendor order or carrier tracking; Speedy package listing",
       "notes": "Amazon reported carrier delivery on October 27. Speedy lists this shipment in Costa Rica. Delivery to the recipient is not confirmed.",
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-03",
+      "speedyCheckedAt": "2026-11-05",
       "speedyConfirmedAt": "2026-11-03"
     },
     {
@@ -1828,12 +1841,12 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-10-28",
+      "lastChecked": "2026-11-05",
       "source": "Vendor order or carrier tracking; Speedy package listing",
       "notes": "Amazon reports carrier delivery on October 27. Speedy lists this shipment in Costa Rica. Delivery to the recipient is not confirmed.",
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-03",
+      "speedyCheckedAt": "2026-11-05",
       "speedyConfirmedAt": "2026-11-03"
     },
     {
@@ -1851,7 +1864,7 @@
       "notes": "Walmart reports delivery on October 28. Speedy receipt is not yet confirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-03"
+      "speedyCheckedAt": "2026-11-05"
     },
     {
       "id": "WMT-PKG-02",
@@ -1863,12 +1876,12 @@
       "itemIds": [],
       "expectedDeliveryDate": "2026-11-06",
       "deliveredAt": null,
-      "lastChecked": "2026-10-27",
+      "lastChecked": "2026-11-05",
       "source": "Vendor order or carrier tracking",
-      "notes": "Shipped, prealerted and consolidated. No forwarder receipt is confirmed.",
+      "notes": "Earlier retailer evidence reports this shipment dispatched. A newer carrier status remains unconfirmed. It is prealerted and consolidated; Speedy receipt is unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-03"
+      "speedyCheckedAt": "2026-11-05"
     },
     {
       "id": "WMT-PKG-03",
@@ -1880,12 +1893,12 @@
       "itemIds": [],
       "expectedDeliveryDate": "2026-11-09",
       "deliveredAt": null,
-      "lastChecked": "2026-11-01",
-      "source": "Walmart shipment update",
-      "notes": "Walmart reports the package in transit. It is prealerted and consolidated; Speedy receipt is not yet confirmed. November 9 remains an estimated delivery date.",
+      "lastChecked": "2026-11-05",
+      "source": "USPS exact tracking and earlier Walmart shipment notice",
+      "notes": "USPS reports the shipment in transit as of 2026-11-05. It is prealerted and consolidated. November 9 remains an estimate; carrier delivery and Speedy receipt are unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-03"
+      "speedyCheckedAt": "2026-11-05"
     },
     {
       "id": "WMT-PREP-04",
@@ -1902,7 +1915,7 @@
       "notes": "Walmart reported delivery on October 31. Speedy receipt is not yet confirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-03"
+      "speedyCheckedAt": "2026-11-05"
     },
     {
       "id": "VXB-PKG-01",
@@ -1914,12 +1927,12 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-10-27",
-      "source": "Vendor order or carrier tracking",
-      "notes": "USPS label created; awaiting carrier acceptance. Prealerted and consolidated; the forwarder date is provisional.",
+      "lastChecked": "2026-11-05",
+      "source": "USPS exact tracking and recorded Speedy prealert",
+      "notes": "USPS still shows label created and awaiting the item as of 2026-11-05. The shipment is prealerted and consolidated. Carrier acceptance and Speedy receipt remain unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-03"
+      "speedyCheckedAt": "2026-11-05"
     },
     {
       "id": "WEST-PKG-01",
@@ -1936,24 +1949,24 @@
       "notes": "West3D reports carrier delivery on October 29. Prealerted and consolidated; Speedy receipt remains unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-03"
+      "speedyCheckedAt": "2026-11-05"
     },
     {
       "id": "BAMBU-PKG-01",
       "vendor": "Bambu Lab",
       "orderRef": "bambu-lab",
-      "status": "shipped",
+      "status": "returned",
       "carrier": "OnTrac",
       "title": "Accessories shipment",
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-10-30",
-      "source": "Vendor shipment notification",
-      "notes": "The vendor reports this shipment is out for delivery on October 30. Speedy receipt is not confirmed.",
+      "lastChecked": "2026-11-05",
+      "source": "Official OnTrac tracking result",
+      "notes": "OnTrac confirms a return to the sender as of 2026-11-05. The return date, refund and replacement remain unconfirmed. Speedy receipt and delivery to the recipient are unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-03"
+      "speedyCheckedAt": "2026-11-05"
     },
     {
       "id": "BAMBU-PREP-01",
@@ -1970,25 +1983,25 @@
       "notes": "UPS confirmed delivery in Miami on October 30; Speedy lists this shipment in Costa Rica; recipient delivery is unconfirmed.",
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-04",
+      "speedyCheckedAt": "2026-11-05",
       "speedyConfirmedAt": "2026-11-04"
     },
     {
       "id": "BOLT-PKG-01",
       "vendor": "BoltDepot",
       "orderRef": "boltdepot",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "USPS",
       "title": "Fasteners",
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-10-27",
-      "source": "Vendor shipping email and USPS tracking",
-      "notes": "Vendor reports shipment; USPS shows label created and awaits the package. Prealerted and added to the second project consolidation. The date entered in Speedy is provisional, not a USPS delivery estimate.",
+      "lastChecked": "2026-11-05",
+      "source": "USPS exact tracking and recorded Speedy prealert",
+      "notes": "USPS confirms carrier delivery on October 31. The shipment remains prealerted and consolidated. Speedy receipt is unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-03"
+      "speedyCheckedAt": "2026-11-05"
     },
     {
       "id": "PHOTON-PKG-01",
@@ -2005,7 +2018,7 @@
       "notes": "PhotonLight reports the shipment delivered as of November 2. Speedy receipt remains unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-03"
+      "speedyCheckedAt": "2026-11-05"
     },
     {
       "id": "AMZ-PKG-06",
@@ -2019,12 +2032,12 @@
       ],
       "expectedDeliveryDate": "2026-10-28",
       "deliveredAt": null,
-      "lastChecked": "2026-11-03",
+      "lastChecked": "2026-11-05",
       "source": "Vendor tracking and Speedy package listing",
       "notes": "Amazon reports carrier delivery on October 28. Speedy lists this shipment in Costa Rica. Delivery to the recipient is not confirmed.",
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-03",
+      "speedyCheckedAt": "2026-11-05",
       "speedyConfirmedAt": "2026-11-03"
     },
     {
@@ -2037,12 +2050,12 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-11-02",
+      "lastChecked": "2026-11-05",
       "source": "Vendor evidence and Speedy package listing",
       "notes": "Amazon reports delivery on November 2. This shipment is prealerted and consolidated; Speedy confirms receipt in Miami.",
       "speedyStatus": "received",
       "speedyLocation": "miami",
-      "speedyCheckedAt": "2026-11-03",
+      "speedyCheckedAt": "2026-11-05",
       "speedyConfirmedAt": "2026-11-03"
     },
     {
@@ -2055,12 +2068,12 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-11-02",
+      "lastChecked": "2026-11-05",
       "source": "Vendor evidence and Speedy package listing",
       "notes": "Amazon reports delivery on November 2. This shipment is prealerted and consolidated; Speedy confirms receipt in Miami.",
       "speedyStatus": "received",
       "speedyLocation": "miami",
-      "speedyCheckedAt": "2026-11-03",
+      "speedyCheckedAt": "2026-11-05",
       "speedyConfirmedAt": "2026-11-03"
     },
     {
@@ -2073,12 +2086,12 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-11-02",
+      "lastChecked": "2026-11-05",
       "source": "Vendor evidence and Speedy package listing",
       "notes": "Amazon reports delivery on November 2. Speedy lists this shipment in Costa Rica; recipient delivery is unconfirmed.",
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-04",
+      "speedyCheckedAt": "2026-11-05",
       "speedyConfirmedAt": "2026-11-04"
     },
     {
@@ -2091,12 +2104,12 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-11-02",
+      "lastChecked": "2026-11-05",
       "source": "Vendor evidence and Speedy package listing",
       "notes": "Amazon reports delivery on November 2. The shipment is prealerted and consolidated; Speedy confirms receipt in Miami.",
       "speedyStatus": "received",
       "speedyLocation": "miami",
-      "speedyCheckedAt": "2026-11-03",
+      "speedyCheckedAt": "2026-11-05",
       "speedyConfirmedAt": "2026-11-03"
     }
   ],
@@ -2108,8 +2121,8 @@
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Speedy current package listing and all current consolidations: Total a pagar",
-    "observedAt": "2026-11-04",
-    "verifiedAt": "2026-11-04T22:58:53.273Z",
+    "observedAt": "2026-11-05",
+    "verifiedAt": "2026-11-05T07:56:20.631Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. The displayed amount sums every currently quoted charge once. Remaining unquoted charges and the final consolidated balance are pending. Kept separate from USD purchase totals; payment remains unconfirmed."
   }
 }

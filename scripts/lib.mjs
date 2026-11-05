@@ -36,6 +36,8 @@ export const labels = {
   ordered: "Order confirmed",
   shipped: "Shipped",
   carrier_delivered: "Carrier reports delivery",
+  returned: "Returned to sender",
+  on_hold: "Carrier exception",
   preparing: "Preparing",
   payment_attention: "Payment review",
   partial_payment_attention: "3 orders: payment review",
@@ -67,7 +69,7 @@ export function totals(ledger) {
       0,
     ),
     amazon: ledger.amazonOrders.reduce((n, x) => n + x.orderTotalCents, 0),
-    shipped: ledger.shipments.filter((x) => ["shipped", "carrier_delivered"].includes(x.status)).length,
+    shipped: ledger.shipments.filter((x) => ["shipped", "carrier_delivered", "returned"].includes(x.status)).length,
   };
 }
 export function csv(rows) {

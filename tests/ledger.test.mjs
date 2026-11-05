@@ -57,14 +57,14 @@ test("Amazon invoices reconcile without counting grouped extras twice", () => {
   assert.equal(ledger.amazonOrders.flatMap((x) => x.itemIds).length, 36);
 });
 test("owner-confirmed shipped payments are included without assuming delivery", () => {
-  assert.equal(totals(ledger).verifiedPaid, 221797);
+  assert.equal(totals(ledger).verifiedPaid, 278386);
   assert.equal(totals(ledger).shipped, 19);
   assert.equal(
     ledger.amazonOrders.filter((x) => x.status === "payment_attention").length,
     0,
   );
-  assert.equal(ledger.amazonOrders.filter((x) => x.actualPaidCents != null).length, 5);
-  assert.equal(ledger.amazonOrders.find((x) => x.id === "AMZ-04").actualPaidCents, null);
+  assert.equal(ledger.amazonOrders.filter((x) => x.actualPaidCents != null).length, 6);
+  assert.equal(ledger.amazonOrders.find((x) => x.id === "AMZ-04").actualPaidCents, ledger.amazonOrders.find((x) => x.id === "AMZ-04").orderTotalCents);
   assert.equal(ledger.orders.find((x) => x.id === "amazon").actualPaidCents, ledger.amazonOrders.reduce((n, x) => n + (x.actualPaidCents ?? 0), 0));
   assert.ok(ledger.shipments.every((x) => x.deliveredAt === null));
   assert.equal(ledger.funding.receivedCents, null);
@@ -94,7 +94,7 @@ test("BoltDepot receipt reconciles owner-selected spares and charges", () => {
   assert.equal(items.length, 13);
   assert.equal(items.reduce((sum, x) => sum + x.quantity, 0), 182);
   assert.equal(items.reduce((sum, x) => sum + x.quotedTotalCents, 0), 1604);
-  assert.equal(order.status, "shipped");
+  assert.equal(order.status, "carrier_delivered");
   assert.equal(order.invoiceTotalCents, 2616);
   assert.equal(
     order.invoiceTotalCents,
@@ -160,4 +160,15 @@ test("project locations distinguish Speedy progress from carrier delivery", () =
     if (s.speedyLocation) assert.ok(s.speedyConfirmedAt);
     if (s.speedyStatus !== "delivered") assert.equal(s.deliveredAt, null);
   }
+});
+
+test("a confirmed carrier return keeps recipient delivery and reimbursement unconfirmed", () => {
+  const shipment = ledger.shipments.find((x) => x.id === "BAMBU-PKG-01");
+  assert.equal(shipment.status, "returned");
+  assert.equal(shipment.speedyStatus, "unconfirmed");
+  assert.equal(shipment.deliveredAt, null);
+  assert.equal(shipment.expectedDeliveryDate, null);
+  assert.match(shipment.notes, /refund and replacement remain unconfirmed/i);
+  assert.ok(ledger.orders.find((x) => x.id === "bambu-lab").actualPaidCents > 0);
+  assert.equal(totals(ledger).shipped, 19);
 });
