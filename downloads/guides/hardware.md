@@ -105,6 +105,8 @@ Received rails may have fewer holes than the maximum 13+13+8 envelope. Use all a
 
 Print only `fdm_pcb_holder_electronics_x1`, replacing the simple PCB holder, plus `fdm_5648_retainer_x1`. The wing mounts Adafruit 5648 and the NKK S301 panel/guard. Four ties from the Fermerry kit pass through 6×3 mm slots; no new screws. Insulate both switch tabs individually. The open guard is low-voltage only, not a mains enclosure. See `ELECTRONICS.md`.
 
+The Mouser order confirmed November 5 substitutes **S301T screw terminals** for the S301 solder lugs used in this CAD release. Verify the received terminal geometry, connections and guard clearance before installation. The solenoid and MOSFET board remain Adafruit 412 and 5648; the alternate Amazon actuator/driver redesign is not being adopted. The 18 AWG wire is planned for local purchase on November 6, with supplier, length and price pending.
+
 ## Travel and commissioning
 
 The 250 mm Y rail fits a 251 mm opening with nominal 0.5 mm end clearance. Initial X travel is limited by the 412 wall to 92 mm, centers −46..+46. Initial Y travel is 206 mm, carriage center CAD Z63.5..269.5. These are **geometry positions, not ready-to-use G-code coordinates or a homing origin**. Calibrate signs, origin, steps/mm and limits on the actual machine.

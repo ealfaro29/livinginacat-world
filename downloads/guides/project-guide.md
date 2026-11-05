@@ -1,6 +1,8 @@
 # living in a cat world · Project guide
 
-Updated: October 26, 2026. DIY prototype without physical assembly or testing. Purchases resumed, one store at a time. See the current [purchase record](/purchases/) for confirmed orders and payment status.
+Updated: November 5, 2026. DIY prototype without physical assembly or testing. Purchases resumed, one store at a time. See the current [purchase record](/purchases/) for confirmed orders and payment status.
+
+The owner and Mouser confirm a ten-component replacement order for $82.07 after the DigiKey cancellation. The Adafruit 412 solenoid, 5648 driver and original harness references are retained. NKK S301T replaces S301 and uses screw terminals; check the existing printed guard and terminal clearance before assembly. The order awaits dispatch, tracking and a final invoice; bank settlement is unconfirmed. Suitable 18 AWG stranded copper wire is planned for local purchase in Costa Rica on November 6. Its supplier, length and price are still unknown; there is no confirmed Remington order.
 
 ## Goal
 

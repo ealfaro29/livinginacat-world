@@ -2,7 +2,7 @@
 
 Updated: 2026-11-05. USD. Item quotes; tax and shipping excluded unless noted. Purchases in progress, one store at a time.
 
-Equipment quoted, including allowance: $2,898.88. Listed item quotes: $2,398.88; unallocated equipment allowance: $500.00. The allowance is a planning amount, not a vendor quote, order or payment. Payment and shipping status: https://livinginacat.world/purchases/.
+Equipment quoted, including allowance: $2,885.96. Listed item quotes: $2,385.96; unallocated equipment allowance: $500.00. The allowance is a planning amount, not a vendor quote, order or payment. Payment and shipping status: https://livinginacat.world/purchases/. 1 equipment line remains unquoted and is excluded from this estimate; the local wire purchase is planned, not confirmed.
 
 | Store | Item | Quantity | Unit price | Subtotal | Status | Offer |
 |---|---|---:|---:|---:|---|---|
@@ -50,17 +50,17 @@ Equipment quoted, including allowance: $2,898.88. Listed item quotes: $2,398.88;
 | FramingTech | RN05BM3 · M3, slot 5 | 38 | $2.02 | $76.76 | Order confirmed | [Product](https://www.framingtech.com/shop/rn05bm3-m3-roll-in-t-nut-with-ball-plunger-5-slot-484695) |
 | FramingTech | RN05BM5 · M5, slot 5 | 20 | $1.42 | $28.40 | Order confirmed | [Product](https://www.framingtech.com/shop/rn05bm5-m5-roll-in-t-nut-with-ball-plunger-5-slot-484697) |
 | VXB | DLC32 V2.1 · 1169-0401 | 1 | $60.95 | $60.95 | Order confirmed | [Product](https://vxb.com/products/dlc32-v2-1-32-bit-offline-controller-board-for-cnc) |
-| DigiKey | NKK S301 · SPST switch | 1 | $10.87 | $10.87 | Cancelled | [Product](https://www.digikey.com/en/products/detail/nkk-switches/S301/1006974) |
-| DigiKey | Littelfuse FHAS101 · fuse holder | 1 | $14.86 | $14.86 | Cancelled | [Product](https://www.digikey.com/en/products/detail/littelfuse-commercial-vehicle-products/FHAS101/27496166) |
-| DigiKey | Littelfuse 0287003.U · ATO 3 A fuse | 1 | $0.50 | $0.50 | Cancelled | [Product](https://www.digikey.com/en/products/detail/littelfuse-inc/0287003-U/3996895) |
-| DigiKey | Remington 18UL1007STRRED25 | 1 | $17.15 | $17.15 | Cancelled | [Product](https://www.digikey.com/en/products/detail/remington-industries/18UL1007STRRED25/11613023) |
-| DigiKey | Desco 09838 · ground adapter | 1 | $8.09 | $8.09 | Cancelled | [Product](https://www.digikey.com/en/products/detail/desco/09838/3043259) |
-| DigiKey | Pomona 1166-36-0 · banana-to-clip lead | 1 | $9.98 | $9.98 | Cancelled | [Product](https://www.digikey.com/en/products/detail/pomona-electronics/1166-36-0/736125) |
-| DigiKey | Adafruit 412 · 12 V solenoid | 1 | $7.50 | $7.50 | Cancelled | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/412/5819056) |
-| DigiKey | Adafruit 5648 · protected MOSFET driver | 1 | $3.95 | $3.95 | Cancelled | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/5648/17282414) |
-| DigiKey | Adafruit 3893 · JST PH 3 cable | 1 | $1.25 | $1.25 | Cancelled | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/3893/9603619) |
-| DigiKey | Adafruit 4873 · JST XH 3 cable pair | 1 | $0.95 | $0.95 | Cancelled | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/4873/13922054) |
-| DigiKey | Qualtek 3021001-03 · USB-A to USB-B · 3 ft | 1 | $2.26 | $2.26 | Cancelled | [Product](https://www.digikey.com/en/products/detail/qualtek/3021001-03/1531288) |
+| Mouser | NKK S301T · SPST switch | 1 | $15.78 | $15.78 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/NKK-Switches/S301T?qs=0mfovmz9yvpf4HNSyeqf2Q%3D%3D) |
+| Mouser | Littelfuse FHAS101 · fuse holder | 1 | $13.36 | $13.36 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Littelfuse/FHAS101?qs=BJlw7L4Cy790Sq9g31NH4g%3D%3D) |
+| Mouser | Littelfuse 0287003.U · ATO 3 A fuse | 1 | $0.50 | $0.50 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Littelfuse/0287003.U?qs=TVaBpCI%2FeOjpzUEhB65zGA%3D%3D) |
+| Local purchase (Costa Rica) | 18 AWG stranded copper wire · local purchase pending | 1 | Unconfirmed | Unconfirmed | Not ordered | [Product](https://www.dbuelectronics.cr/cables-accesorios/913-cable-rojo-18awg.html) |
+| Mouser | Desco 09838 · ground adapter | 1 | $8.09 | $8.09 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Desco/09838?qs=MA90IRdNH%2FGdWlNa38pjQQ%3D%3D) |
+| Mouser | Pomona 1166-36-0 · banana-to-clip lead | 1 | $9.98 | $9.98 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Pomona-Electronics/1166-36-0?qs=nZsw%2FpC7E%252Bt3JqAYAu1yfQ%3D%3D) |
+| Mouser | Adafruit 412 · 12 V solenoid | 1 | $7.50 | $7.50 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Adafruit/412?qs=GURawfaeGuBVsKnEJX3AiQ%3D%3D) |
+| Mouser | Adafruit 5648 · protected MOSFET driver | 1 | $3.95 | $3.95 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Adafruit/5648?qs=mELouGlnn3cY6k7nhOkonA%3D%3D) |
+| Mouser | Adafruit 3893 · JST PH 3 cable | 1 | $1.25 | $1.25 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Adafruit/3893?qs=qSfuJ%252Bfl%2Fd7tNPgahO%2Fnaw%3D%3D) |
+| Mouser | Adafruit 4873 · JST XH 3 cable pair | 1 | $0.95 | $0.95 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Adafruit/4873?qs=pBJMDPsKWf0WVFcnNr1Piw%3D%3D) |
+| Mouser | Qualtek 3021001-03 · USB-A to USB-B · 3 ft | 1 | $3.08 | $3.08 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Qualtek/3021001-03?qs=yhNIDeTE%252BcZAqmE%2FaZRG%2Fg%3D%3D) |
 | BoltDepot | 7218 · BHCS M3×6 | 15 | $0.06 | $0.90 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=7218) |
 | BoltDepot | 7219 · BHCS M3×8 | 50 | $0.06 | $3.00 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=7219) |
 | BoltDepot | 7220 · BHCS M3×10 | 15 | $0.06 | $0.90 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=7220) |
@@ -85,11 +85,11 @@ Equipment quoted, including allowance: $2,898.88. Listed item quotes: $2,398.88;
 
 - Additional equipment allowance: $500.00. Unallocated planning allowance requested by the project owner. Not a vendor quote, purchase order or verified payment.
 
-Item quotes $2,398.88 + allowance $500.00 = total estimate $2,898.88.
+Item quotes $2,385.96 + allowance $500.00 = total estimate $2,885.96.
 
 ## Reconciliation
 
-Amazon: 6 orders totaling $1,534.50, including the Taxes, tariffs, shipping and others category. Current carrier and Speedy locations are listed in the shipment record. AMZ-06 adds a pack of frame joining plates after the original estimate. The owner confirms fulfilled orders are paid. All recorded Amazon order payments are included. Bank settlement has not been independently reconciled. Taxes, tariffs, shipping and others: $687.10 (Amazon: $421.34; Walmart: $23.48; Bambu Lab: $89.87; FramingTech: $121.51; VXB: $4.27; BoltDepot: $10.12; PhotonLight: $8.95; West3D: $7.56). Already included in vendor order totals. FramingTech: $300.66 paid; shipping remains provisional. West3D: $17.55 paid per vendor invoice. Domain: $4.19 paid. Owner- or vendor-confirmed payments: $2,783.86, a partial subtotal. Shipped items of a partially shipped order are excluded until their payment can be allocated reliably.
+Amazon: 6 orders totaling $1,534.50, including the Taxes, tariffs, shipping and others category. Current carrier and Speedy locations are listed in the shipment record. AMZ-06 adds a pack of frame joining plates after the original estimate. The owner confirms fulfilled orders are paid. All recorded Amazon order payments are included. Bank settlement has not been independently reconciled. Taxes, tariffs, shipping and others: $704.73 (Amazon: $421.34; Walmart: $23.48; Bambu Lab: $89.87; FramingTech: $121.51; VXB: $4.27; BoltDepot: $10.12; PhotonLight: $8.95; West3D: $7.56; Mouser: $17.63). Already included in vendor order totals. FramingTech: $300.66 paid; shipping remains provisional. West3D: $17.55 paid per vendor invoice. Domain: $4.19 paid. Owner- or vendor-confirmed payments: $2,783.86, a partial subtotal. Shipped items of a partially shipped order are excluded until their payment can be allocated reliably.
 
 Documentary vendor order totals, including cancelled orders (see the purchase record for status):
 - Bambu Lab: $881.86; Carrier exception.
@@ -99,11 +99,12 @@ Documentary vendor order totals, including cancelled orders (see the purchase re
 - Walmart: $53.31; Partially shipped.
 - PhotonLight: $18.94; Carrier reports delivery.
 - West3D: $17.55; Carrier reports delivery.
+- Mouser: $82.07; Order confirmed.
 
 ## Shipping and Speedy
 
-Tracking assigned: 20 of 20 recorded project shipments. The owner reports the DigiKey order as cancelled; a replacement purchase, any charge and any refund remain unconfirmed. Tracking assignment alone does not confirm carrier acceptance or Speedy receipt.
+Tracking assigned: 20 of 21 recorded project shipments. The original DigiKey order remains cancelled, with its documentary amounts retained in the history. The owner and Mouser confirm the replacement order on November 5, 2026. The wire is planned for local purchase on November 6, 2026. Original charges and any refund remain unconfirmed. Tracking assignment alone does not confirm carrier acceptance or Speedy receipt.
 
-Project shipment locations checked 2026-11-05: 8 in Costa Rica; 1 received in Miami; 10 awaiting Speedy confirmation; 1 with a carrier return. Carrier delivery does not establish Speedy receipt or delivery to the recipient. A carrier return does not establish a refund or replacement.
+Project shipment locations checked 2026-11-05: 8 in Costa Rica; 1 received in Miami; 11 awaiting Speedy confirmation; 1 with a carrier return. Carrier delivery does not establish Speedy receipt or delivery to the recipient. A carrier return does not establish a refund or replacement.
 
 Speedy - Taxes, tariffs, shipping and others: CRC 646,500 combined amount shown as Total a pagar on 2026-11-05. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.
