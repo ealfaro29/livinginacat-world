@@ -135,6 +135,19 @@ const restrictedOrders = new Set([
 export const hasRestrictedDetails = (record) =>
   restrictedOrders.has(record.orderId ?? record.id);
 export function projectRoomSnapshot(snapshot) {
+  const completedOrders = new Set(snapshot.orders
+    .filter((order) => order.status === "carrier_delivered")
+    .map((order) => order.id));
+  const trackedOrders = new Set(snapshot.packages
+    .filter((pkg) => pkg.tracking)
+    .map((pkg) => pkg.orderId));
+  // Imported *-AWAIT preparation records become order summaries after complete
+  // fulfillment. Preserve manual records, stored originals and owner evidence.
+  const packages = snapshot.packages.filter((pkg) => !(
+    pkg.id.endsWith("-AWAIT") && !pkg.tracking && completedOrders.has(pkg.orderId) && trackedOrders.has(pkg.orderId) &&
+    !pkg.notes && !pkg.document && !pkg.prealertedAt && !pkg.prealertReference &&
+    !pkg.consolidationReference && !pkg.lockerArrivedAt && !pkg.speedyStatus
+  ));
   return {
     ...snapshot,
     orders: snapshot.orders.map((order) => hasRestrictedDetails(order) ? {
@@ -144,7 +157,7 @@ export function projectRoomSnapshot(snapshot) {
       notes: "Taxes, tariffs, shipping and others are grouped in the order total.",
       source: "Reviewed order evidence",
     } : order),
-    packages: snapshot.packages.map((pkg) => hasRestrictedDetails(pkg) ? {
+    packages: packages.map((pkg) => hasRestrictedDetails(pkg) ? {
       ...pkg,
       title: "Project shipment",
       contents: "",

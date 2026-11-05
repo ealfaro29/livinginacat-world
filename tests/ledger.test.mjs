@@ -151,7 +151,9 @@ test("combined forwarder total stays in colones without exposing package details
 });
 
 test("project locations distinguish Speedy progress from carrier delivery", () => {
+  assert.equal(totals(ledger).tracked, 20);
   for (const s of ledger.shipments) {
+    assert.equal(typeof s.trackingAssigned, "boolean");
     assert.ok(["received", "in_transit", "delivered", "unconfirmed"].includes(s.speedyStatus));
     assert.match(s.speedyCheckedAt, /^\d{4}-\d{2}-\d{2}$/);
     if (s.speedyLocation === "miami") assert.equal(s.speedyStatus, "received");

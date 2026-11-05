@@ -438,6 +438,28 @@ test("room redaction preserves original evidence and operational fields", () => 
   assert.equal(original.packages[0].contents, "RESTRICTED_FIXTURE");
   assert.equal(original.packages[0].document.id, "fixture");
 });
+test("completed order summaries do not create false tracking gaps or discard owner evidence", () => {
+  const original = {
+    orders: [{ id: "complete", status: "carrier_delivered" }, { id: "partial", status: "partially_shipped" }],
+    packages: [
+      { id: "summary-AWAIT", orderId: "complete", tracking: "" },
+      { id: "tracked", orderId: "complete", tracking: "FIXTURE12345" },
+      { id: "noted-AWAIT", orderId: "complete", tracking: "", notes: "Owner note" },
+      { id: "documented-AWAIT", orderId: "complete", tracking: "", document: { id: "original", kind: "invoice" } },
+      { id: "prealerted-AWAIT", orderId: "complete", tracking: "", prealertedAt: "2026-10-26T20:00:00Z" },
+      { id: "pending-AWAIT", orderId: "partial", tracking: "" },
+      { id: "partial-tracked", orderId: "partial", tracking: "FIXTURE67890" },
+      { id: "pkg-manual", orderId: "complete", tracking: "", source: "Manual entry" },
+    ],
+    history: [],
+  };
+  const before = JSON.stringify(original);
+  const view = projectRoomSnapshot(original);
+  assert.equal(view.packages.some((pkg) => pkg.id === "summary-AWAIT"), false);
+  for (const id of ["tracked", "noted-AWAIT", "documented-AWAIT", "prealerted-AWAIT", "pending-AWAIT", "partial-tracked", "pkg-manual"])
+    assert.ok(view.packages.some((pkg) => pkg.id === id), id);
+  assert.equal(JSON.stringify(original), before);
+});
 test("closed registration rejects setup even when an activation key is supplied", async () => {
   const response = await worker.fetch(
     new Request("https://admin.test/api/setup", {

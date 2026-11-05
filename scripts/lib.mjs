@@ -70,6 +70,7 @@ export function totals(ledger) {
     ),
     amazon: ledger.amazonOrders.reduce((n, x) => n + x.orderTotalCents, 0),
     shipped: ledger.shipments.filter((x) => ["shipped", "carrier_delivered", "returned"].includes(x.status)).length,
+    tracked: ledger.shipments.filter((x) => x.trackingAssigned === true).length,
   };
 }
 export function csv(rows) {
