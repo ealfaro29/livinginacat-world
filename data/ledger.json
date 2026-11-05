@@ -91,7 +91,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-email",
-      "notes": "The vendor previously reported shipment. USPS still shows label created and awaiting the item as of 2026-11-05. Carrier acceptance and Speedy receipt remain unconfirmed. The shipment is prealerted and consolidated.",
+      "notes": "Vendor support replied November 5: stock is expected November 16, with dispatch after it is received. USPS still shows label created and awaiting the item. The restock date is not a delivery estimate or confirmed dispatch. The shipment is already prealerted and consolidated; carrier acceptance and Speedy receipt remain unconfirmed.",
       "invoiceTotalCents": 6522,
       "shippingInvoicedCents": 0,
       "taxInvoicedCents": 427,
@@ -217,7 +217,9 @@
       "paymentEvidence": null,
       "replacesOrderId": "digikey",
       "lastChecked": "2026-11-05",
-      "notes": "The owner and vendor confirm ten replacement components, one of each, for a documented order total of $82.07. Includes the grouped vendor charges; the final invoice and bank settlement remain unconfirmed. All ten lines are pending dispatch. NKK S301T replaces S301; the wire will be sourced locally."
+      "notes": "The owner and vendor confirm ten replacement components, one of each, for a documented order total of $82.07. Includes the grouped vendor charges; the final invoice and bank settlement remain unconfirmed. All ten lines are pending dispatch. NKK S301T replaces S301; the wire will be sourced locally. The current order page still shows $82.07; a later confirmation email lists provisional charges. Final charges remain pending the final invoice.",
+      "invoiceTotalFinal": false,
+      "shippingChargeFinal": false
     },
     {
       "id": "local-sourcing",
@@ -1509,6 +1511,11 @@
   "changes": [
     {
       "date": "2026-11-05",
+      "title": "Controller vendor confirms stock delay",
+      "detail": "VXB expects stock on November 16 and will dispatch after receipt. This date is a restock estimate, not confirmed dispatch or recipient delivery. The existing shipping label, prealert and consolidation remain recorded; carrier acceptance and Speedy receipt are still unconfirmed."
+    },
+    {
+      "date": "2026-11-05",
       "title": "Mouser replacement purchased; wire planned locally",
       "detail": "The owner and Mouser confirm the ten-component replacement order for $82.07. Vendor charges are included once under Taxes, tariffs, shipping and others. Dispatch, tracking, final invoice and bank settlement remain unconfirmed. The wire is planned for local purchase on November 6; supplier, length and price remain unknown. The cancelled DigiKey order stays in the history without assuming a refund."
     },
@@ -2142,8 +2149,8 @@
       "expectedDeliveryDate": null,
       "deliveredAt": null,
       "lastChecked": "2026-11-05",
-      "source": "USPS exact tracking and recorded Speedy prealert",
-      "notes": "USPS still shows label created and awaiting the item as of 2026-11-05. The shipment is prealerted and consolidated. Carrier acceptance and Speedy receipt remain unconfirmed.",
+      "source": "VXB support email and existing USPS label evidence",
+      "notes": "Vendor support expects stock on November 16 and will dispatch after receipt. This is a restock estimate, not a promised shipping or delivery date. USPS label created; carrier acceptance and Speedy receipt remain unconfirmed. The shipment is already prealerted and consolidated.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-05",

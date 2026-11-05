@@ -25,6 +25,8 @@ FramingTech: payment email and PDF confirmation. GoDaddy: email receipt. Amazon:
 
 Mouser: owner purchase confirmation, vendor email, authenticated order detail and original order-summary PDF, observed November 5, 2026. Ten pending lines total $82.07; this replaces ten components from the cancelled DigiKey order. The PDF has no invoice number and is stored as `order_confirmation`, not `invoice`. It does not establish dispatch or a settled bank charge. Only the combined vendor charges are published under Taxes, tariffs, shipping and others. The wire is planned for local purchase on November 6; supplier, length and price remain unconfirmed.
 
+VXB: support replied November 5 that stock is expected November 16, with dispatch after receipt. This is an expected restock date, not a confirmed shipping or delivery date. Preserve the existing USPS label, Speedy prealert and consolidation; carrier acceptance and Speedy receipt remain unconfirmed.
+
 ## Updating
 
 1. Read current evidence and retain its original reference privately.
