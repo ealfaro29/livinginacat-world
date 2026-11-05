@@ -47,13 +47,15 @@ export const labels = {
   partially_shipped: "Partially shipped",
 };
 export function totals(ledger) {
-  const quotedItems = ledger.items.reduce((n, x) => n + x.quotedTotalCents, 0);
+  const quotedItems = ledger.items.reduce((n, x) => n + (x.quotedTotalCents ?? 0), 0);
+  const unquotedItems = ledger.items.filter((x) => x.quotedTotalCents == null).length;
   const equipmentAllowance = (ledger.equipmentAllowances ?? []).reduce(
     (n, x) => n + x.amountCents,
     0,
   );
   return {
     quotedItems,
+    unquotedItems,
     confirmedOrderTotal:
       ledger.orders
         .filter((x) => x.invoiceTotalCents != null && x.invoiceTotalFinal !== false && !["pending", "deferred", "awaiting_invoice", "cancelled", "canceled"].includes(x.status))

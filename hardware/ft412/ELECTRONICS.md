@@ -4,6 +4,8 @@ CAD prototype, not printed or physically tested. Replace the previous PCB holder
 
 The wing faces outside the frame. It carries Adafruit 5648 and NKK S301 with an open-top side/rear low-voltage terminal guard. This is not a closed enclosure or a mains enclosure. Reuse the four DLC32 M3×10 and two frame FHCS M5×12 already counted. Retainer and strain relief use four 4-inch Fermerry ties, with no additional screws.
 
+Procurement update, November 5, 2026: the confirmed Mouser replacement order uses **NKK S301T**, with screw terminals, instead of the S301 solder-lug variant used for the CAD checks below. The electrical function and M12 mounting family are retained, but the purchased terminal envelope and guard clearance have not been validated. Compare the received switch and adjust the guard if needed; insulate both terminals. The existing CAD archive and intersection checks still describe S301.
+
 1. Print the oriented STL in PETG, initially 0.2 mm layers, six walls and 60% gyroid. Inspect wing/panel/guard supports in the slicer. Test fit before installing electronics.
 2. Seat the 5648 on four supports. Two Ø2.1 mm locating pins enter Ø2.5 mm holes at 22.86/2.54 and 22.86/15.24 in the official Eagle coordinates. PCB underside is 2 mm above the platform.
 3. The retainer contacts only two bare mounting ears. Use two ties around outer posts/slots, never over components. Two other ties strain-relieve the JST cable and switch harness. Trim tails with the kit’s cutters.

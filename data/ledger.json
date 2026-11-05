@@ -3,7 +3,7 @@
   "updatedAt": "2026-11-05",
   "currency": "USD",
   "purchasesPaused": false,
-  "equipmentQuotedTotalCents": 289888,
+  "equipmentQuotedTotalCents": 288596,
   "equipmentAllowances": [
     {
       "id": "equipment-allowance-2026-10-26",
@@ -110,14 +110,15 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "owner-observed-vendor-order-status",
-      "notes": "The owner reports that the vendor lists this order as cancelled, observed November 5. The original documentary amount is retained in the history. Any charge, refund, cancellation reason and replacement purchase remain unconfirmed.",
+      "notes": "The owner reports the original order as cancelled on November 5. Its original documentary amounts are retained; charge and refund remain unconfirmed. Ten components were reordered from Mouser on November 5; the wire is planned for local purchase on November 6.",
       "invoiceTotalCents": 9697,
       "shippingInvoicedCents": 849,
       "taxInvoicedCents": 579,
       "tariffInvoicedCents": 533,
       "lastChecked": "2026-11-05",
       "cancellationObservedAt": "2026-11-05",
-      "refundCents": null
+      "refundCents": null,
+      "replacedByOrderId": "mouser"
     },
     {
       "id": "boltdepot",
@@ -197,6 +198,43 @@
       "shippingInvoicedCents": 756,
       "taxInvoicedCents": 0,
       "tariffInvoicedCents": 0
+    },
+    {
+      "id": "mouser",
+      "vendor": "Mouser",
+      "status": "ordered",
+      "orderedAt": "2026-11-05",
+      "quotedSubtotalCents": 6444,
+      "invoiceItemsCents": 6444,
+      "invoiceTotalCents": 8207,
+      "actualPaidCents": null,
+      "shippingPaidCents": null,
+      "taxPaidCents": null,
+      "tariffPaidCents": null,
+      "receivedAt": null,
+      "publicReceiptUrl": null,
+      "evidenceLevel": "owner-and-vendor-order-confirmation",
+      "paymentEvidence": null,
+      "replacesOrderId": "digikey",
+      "lastChecked": "2026-11-05",
+      "notes": "The owner and vendor confirm ten replacement components, one of each, for a documented order total of $82.07. Includes the grouped vendor charges; the final invoice and bank settlement remain unconfirmed. All ten lines are pending dispatch. NKK S301T replaces S301; the wire will be sourced locally."
+    },
+    {
+      "id": "local-sourcing",
+      "vendor": "Local purchase (Costa Rica)",
+      "status": "pending",
+      "orderedAt": null,
+      "plannedPurchaseDate": "2026-11-06",
+      "quotedSubtotalCents": null,
+      "invoiceTotalCents": null,
+      "actualPaidCents": null,
+      "shippingPaidCents": null,
+      "taxPaidCents": null,
+      "tariffPaidCents": null,
+      "receivedAt": null,
+      "publicReceiptUrl": null,
+      "evidenceLevel": "owner-planned-purchase",
+      "notes": "Wire only: planned local purchase on November 6, not yet bought. Supplier, length, currency and price are unconfirmed. No imported Remington order or shipment exists."
     }
   ],
   "items": [
@@ -850,135 +888,257 @@
     },
     {
       "id": "digikey-045",
-      "vendor": "DigiKey",
-      "orderId": "digikey",
-      "name": "NKK S301 · SPST switch",
+      "vendor": "Mouser",
+      "orderId": "mouser",
+      "name": "NKK S301T · SPST switch",
       "quantity": 1,
-      "quotedUnitCents": 1087,
-      "quotedTotalCents": 1087,
+      "quotedUnitCents": 1578,
+      "quotedTotalCents": 1578,
       "actualPaidCents": null,
-      "url": "https://www.digikey.com/en/products/detail/nkk-switches/S301/1006974",
-      "notes": "Cuts the 12 V bus; panel nuts/washers included."
+      "url": "https://www.mouser.com/en/ProductDetail/NKK-Switches/S301T?qs=0mfovmz9yvpf4HNSyeqf2Q%3D%3D",
+      "notes": "Confirmed replacement for cancelled NKK S301 purchase. Same SPST ON/OFF electrical family and M12 mounting; screw terminals replace solder lugs. Verify terminal-guard clearance and connections before assembly.",
+      "previousProcurement": {
+        "vendor": "DigiKey",
+        "orderId": "digikey",
+        "name": "NKK S301 · SPST switch",
+        "quotedUnitCents": 1087,
+        "quotedTotalCents": 1087,
+        "url": "https://www.digikey.com/en/products/detail/nkk-switches/S301/1006974"
+      },
+      "orderUnitCents": 1578,
+      "shipmentOrderRef": "MOUSER-01",
+      "procurementStatus": "ordered"
     },
     {
       "id": "digikey-046",
-      "vendor": "DigiKey",
-      "orderId": "digikey",
+      "vendor": "Mouser",
+      "orderId": "mouser",
       "name": "Littelfuse FHAS101 · fuse holder",
       "quantity": 1,
-      "quotedUnitCents": 1486,
-      "quotedTotalCents": 1486,
+      "quotedUnitCents": 1336,
+      "quotedTotalCents": 1336,
       "actualPaidCents": null,
-      "url": "https://www.digikey.com/en/products/detail/littelfuse-commercial-vehicle-products/FHAS101/27496166",
-      "notes": "Inline ATO fuse holder."
+      "url": "https://www.mouser.com/en/ProductDetail/Littelfuse/FHAS101?qs=BJlw7L4Cy790Sq9g31NH4g%3D%3D",
+      "notes": "Inline ATO fuse holder. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "previousProcurement": {
+        "vendor": "DigiKey",
+        "orderId": "digikey",
+        "name": "Littelfuse FHAS101 · fuse holder",
+        "quotedUnitCents": 1486,
+        "quotedTotalCents": 1486,
+        "url": "https://www.digikey.com/en/products/detail/littelfuse-commercial-vehicle-products/FHAS101/27496166"
+      },
+      "orderUnitCents": 1336,
+      "shipmentOrderRef": "MOUSER-01",
+      "procurementStatus": "ordered"
     },
     {
       "id": "digikey-047",
-      "vendor": "DigiKey",
-      "orderId": "digikey",
+      "vendor": "Mouser",
+      "orderId": "mouser",
       "name": "Littelfuse 0287003.U · ATO 3 A fuse",
       "quantity": 1,
       "quotedUnitCents": 50,
       "quotedTotalCents": 50,
       "actualPaidCents": null,
-      "url": "https://www.digikey.com/en/products/detail/littelfuse-inc/0287003-U/3996895",
-      "notes": "One installed fuse; do not add another fuse kit."
+      "url": "https://www.mouser.com/en/ProductDetail/Littelfuse/0287003.U?qs=TVaBpCI%2FeOjpzUEhB65zGA%3D%3D",
+      "notes": "One installed fuse; do not add another fuse kit. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "previousProcurement": {
+        "vendor": "DigiKey",
+        "orderId": "digikey",
+        "name": "Littelfuse 0287003.U · ATO 3 A fuse",
+        "quotedUnitCents": 50,
+        "quotedTotalCents": 50,
+        "url": "https://www.digikey.com/en/products/detail/littelfuse-inc/0287003-U/3996895"
+      },
+      "orderUnitCents": 50,
+      "shipmentOrderRef": "MOUSER-01",
+      "procurementStatus": "ordered"
     },
     {
       "id": "digikey-048",
-      "vendor": "DigiKey",
-      "orderId": "digikey",
-      "name": "Remington 18UL1007STRRED25",
+      "vendor": "Local purchase (Costa Rica)",
+      "orderId": "local-sourcing",
+      "name": "18 AWG stranded copper wire · local purchase pending",
       "quantity": 1,
-      "quotedUnitCents": 1715,
-      "quotedTotalCents": 1715,
+      "quotedUnitCents": null,
+      "quotedTotalCents": null,
       "actualPaidCents": null,
-      "url": "https://www.digikey.com/en/products/detail/remington-industries/18UL1007STRRED25/11613023",
-      "notes": "18 AWG red, 25 ft roll; about 2 m needed depending on routing. Cart estimated dispatch in about 8 days; marketplace seller may charge separate shipping."
+      "url": "https://www.dbuelectronics.cr/cables-accesorios/913-cable-rojo-18awg.html",
+      "notes": "The owner plans to buy suitable 18 AWG stranded copper wire locally on November 6. Vendor, length and price are unconfirmed; approximately 2 m was the original routing allowance. Remington was a quotation, not a confirmed purchase. The linked local listing is a candidate; stock remains unverified.",
+      "previousProcurement": {
+        "vendor": "DigiKey",
+        "orderId": "digikey",
+        "name": "Remington 18UL1007STRRED25",
+        "quotedUnitCents": 1715,
+        "quotedTotalCents": 1715,
+        "url": "https://www.digikey.com/en/products/detail/remington-industries/18UL1007STRRED25/11613023"
+      },
+      "orderUnitCents": null,
+      "procurementStatus": "pending",
+      "plannedPurchaseDate": "2026-11-06",
+      "shipmentOrderRef": null
     },
     {
       "id": "digikey-049",
-      "vendor": "DigiKey",
-      "orderId": "digikey",
+      "vendor": "Mouser",
+      "orderId": "mouser",
       "name": "Desco 09838 · ground adapter",
       "quantity": 1,
       "quotedUnitCents": 809,
       "quotedTotalCents": 809,
       "actualPaidCents": null,
-      "url": "https://www.digikey.com/en/products/detail/desco/09838/3043259",
-      "notes": "Capacitive reference through verified protective earth; does not provide power. Electrical connection remains subject to commissioning checks."
+      "url": "https://www.mouser.com/en/ProductDetail/Desco/09838?qs=MA90IRdNH%2FGdWlNa38pjQQ%3D%3D",
+      "notes": "Capacitive reference through verified protective earth; does not provide power. Electrical connection remains subject to commissioning checks. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "previousProcurement": {
+        "vendor": "DigiKey",
+        "orderId": "digikey",
+        "name": "Desco 09838 · ground adapter",
+        "quotedUnitCents": 809,
+        "quotedTotalCents": 809,
+        "url": "https://www.digikey.com/en/products/detail/desco/09838/3043259"
+      },
+      "orderUnitCents": 809,
+      "shipmentOrderRef": "MOUSER-01",
+      "procurementStatus": "ordered"
     },
     {
       "id": "digikey-050",
-      "vendor": "DigiKey",
-      "orderId": "digikey",
+      "vendor": "Mouser",
+      "orderId": "mouser",
       "name": "Pomona 1166-36-0 · banana-to-clip lead",
       "quantity": 1,
       "quotedUnitCents": 998,
       "quotedTotalCents": 998,
       "actualPaidCents": null,
-      "url": "https://www.digikey.com/en/products/detail/pomona-electronics/1166-36-0/736125",
-      "notes": "Clip connects to a flexible lead ending at the metal tip."
+      "url": "https://www.mouser.com/en/ProductDetail/Pomona-Electronics/1166-36-0?qs=nZsw%2FpC7E%252Bt3JqAYAu1yfQ%3D%3D",
+      "notes": "Clip connects to a flexible lead ending at the metal tip. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "previousProcurement": {
+        "vendor": "DigiKey",
+        "orderId": "digikey",
+        "name": "Pomona 1166-36-0 · banana-to-clip lead",
+        "quotedUnitCents": 998,
+        "quotedTotalCents": 998,
+        "url": "https://www.digikey.com/en/products/detail/pomona-electronics/1166-36-0/736125"
+      },
+      "orderUnitCents": 998,
+      "shipmentOrderRef": "MOUSER-01",
+      "procurementStatus": "ordered"
     },
     {
       "id": "digikey-051",
-      "vendor": "DigiKey",
-      "orderId": "digikey",
+      "vendor": "Mouser",
+      "orderId": "mouser",
       "name": "Adafruit 412 · 12 V solenoid",
       "quantity": 1,
       "quotedUnitCents": 750,
       "quotedTotalCents": 750,
       "actualPaidCents": null,
-      "url": "https://www.digikey.com/en/products/detail/adafruit-industries-llc/412/5819056",
-      "notes": "1528-1551-ND. Same Adafruit 412 solenoid; retains the FT412 cradle and design."
+      "url": "https://www.mouser.com/en/ProductDetail/Adafruit/412?qs=GURawfaeGuBVsKnEJX3AiQ%3D%3D",
+      "notes": "1528-1551-ND. Same Adafruit 412 solenoid; retains the FT412 cradle and design. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "previousProcurement": {
+        "vendor": "DigiKey",
+        "orderId": "digikey",
+        "name": "Adafruit 412 · 12 V solenoid",
+        "quotedUnitCents": 750,
+        "quotedTotalCents": 750,
+        "url": "https://www.digikey.com/en/products/detail/adafruit-industries-llc/412/5819056"
+      },
+      "orderUnitCents": 750,
+      "shipmentOrderRef": "MOUSER-01",
+      "procurementStatus": "ordered"
     },
     {
       "id": "digikey-052",
-      "vendor": "DigiKey",
-      "orderId": "digikey",
+      "vendor": "Mouser",
+      "orderId": "mouser",
       "name": "Adafruit 5648 · protected MOSFET driver",
       "quantity": 1,
       "quotedUnitCents": 395,
       "quotedTotalCents": 395,
       "actualPaidCents": null,
-      "url": "https://www.digikey.com/en/products/detail/adafruit-industries-llc/5648/17282414",
-      "notes": "1528-5648-ND. Same module; retains the mount and planned connections."
+      "url": "https://www.mouser.com/en/ProductDetail/Adafruit/5648?qs=mELouGlnn3cY6k7nhOkonA%3D%3D",
+      "notes": "1528-5648-ND. Same module; retains the mount and planned connections. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "previousProcurement": {
+        "vendor": "DigiKey",
+        "orderId": "digikey",
+        "name": "Adafruit 5648 · protected MOSFET driver",
+        "quotedUnitCents": 395,
+        "quotedTotalCents": 395,
+        "url": "https://www.digikey.com/en/products/detail/adafruit-industries-llc/5648/17282414"
+      },
+      "orderUnitCents": 395,
+      "shipmentOrderRef": "MOUSER-01",
+      "procurementStatus": "ordered"
     },
     {
       "id": "digikey-053",
-      "vendor": "DigiKey",
-      "orderId": "digikey",
+      "vendor": "Mouser",
+      "orderId": "mouser",
       "name": "Adafruit 3893 · JST PH 3 cable",
       "quantity": 1,
       "quotedUnitCents": 125,
       "quotedTotalCents": 125,
       "actualPaidCents": null,
-      "url": "https://www.digikey.com/en/products/detail/adafruit-industries-llc/3893/9603619",
-      "notes": "1528-2696-ND. Input harness for module 5648."
+      "url": "https://www.mouser.com/en/ProductDetail/Adafruit/3893?qs=qSfuJ%252Bfl%2Fd7tNPgahO%2Fnaw%3D%3D",
+      "notes": "1528-2696-ND. Input harness for module 5648. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "previousProcurement": {
+        "vendor": "DigiKey",
+        "orderId": "digikey",
+        "name": "Adafruit 3893 · JST PH 3 cable",
+        "quotedUnitCents": 125,
+        "quotedTotalCents": 125,
+        "url": "https://www.digikey.com/en/products/detail/adafruit-industries-llc/3893/9603619"
+      },
+      "orderUnitCents": 125,
+      "shipmentOrderRef": "MOUSER-01",
+      "procurementStatus": "ordered"
     },
     {
       "id": "digikey-054",
-      "vendor": "DigiKey",
-      "orderId": "digikey",
+      "vendor": "Mouser",
+      "orderId": "mouser",
       "name": "Adafruit 4873 · JST XH 3 cable pair",
       "quantity": 1,
       "quotedUnitCents": 95,
       "quotedTotalCents": 95,
       "actualPaidCents": null,
-      "url": "https://www.digikey.com/en/products/detail/adafruit-industries-llc/4873/13922054",
-      "notes": "1528-4873-ND. Same cable pack; use the end compatible with J18 TTL after pinout verification."
+      "url": "https://www.mouser.com/en/ProductDetail/Adafruit/4873?qs=pBJMDPsKWf0WVFcnNr1Piw%3D%3D",
+      "notes": "1528-4873-ND. Same cable pack; use the end compatible with J18 TTL after pinout verification. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "previousProcurement": {
+        "vendor": "DigiKey",
+        "orderId": "digikey",
+        "name": "Adafruit 4873 · JST XH 3 cable pair",
+        "quotedUnitCents": 95,
+        "quotedTotalCents": 95,
+        "url": "https://www.digikey.com/en/products/detail/adafruit-industries-llc/4873/13922054"
+      },
+      "orderUnitCents": 95,
+      "shipmentOrderRef": "MOUSER-01",
+      "procurementStatus": "ordered"
     },
     {
       "id": "digikey-055",
-      "vendor": "DigiKey",
-      "orderId": "digikey",
+      "vendor": "Mouser",
+      "orderId": "mouser",
       "name": "Qualtek 3021001-03 · USB-A to USB-B · 3 ft",
       "quantity": 1,
-      "quotedUnitCents": 226,
-      "quotedTotalCents": 226,
+      "quotedUnitCents": 308,
+      "quotedTotalCents": 308,
       "actualPaidCents": null,
-      "url": "https://www.digikey.com/en/products/detail/qualtek/3021001-03/1531288",
-      "notes": "Q361-ND. Shielded USB 2.0 data cable, A male to B male, 914.4 mm. Replaces Adafruit 62 for Pi-to-DLC32."
+      "url": "https://www.mouser.com/en/ProductDetail/Qualtek/3021001-03?qs=yhNIDeTE%252BcZAqmE%2FaZRG%2Fg%3D%3D",
+      "notes": "Q361-ND. Shielded USB 2.0 data cable, A male to B male, 914.4 mm. Replaces Adafruit 62 for Pi-to-DLC32. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "previousProcurement": {
+        "vendor": "DigiKey",
+        "orderId": "digikey",
+        "name": "Qualtek 3021001-03 · USB-A to USB-B · 3 ft",
+        "quotedUnitCents": 226,
+        "quotedTotalCents": 226,
+        "url": "https://www.digikey.com/en/products/detail/qualtek/3021001-03/1531288"
+      },
+      "orderUnitCents": 308,
+      "shipmentOrderRef": "MOUSER-01",
+      "procurementStatus": "ordered"
     },
     {
       "id": "boltdepot-056",
@@ -1331,9 +1491,27 @@
       "includedInVendorOrderTotals": true,
       "evidenceLevel": "vendor-confirmation-email-and-paid-invoice-pdf",
       "notes": "Included in the vendor order total."
+    },
+    {
+      "id": "mouser-charges-grouped",
+      "vendor": "Mouser",
+      "name": "Taxes, tariffs, shipping and others",
+      "status": "ordered",
+      "orderedAt": "2026-11-05",
+      "actualPaidCents": null,
+      "categoryTotalCents": 1763,
+      "includedInVendorOrderTotals": true,
+      "publicReceiptUrl": null,
+      "evidenceLevel": "vendor-order-confirmation",
+      "notes": "Combined vendor charges are already included in the $82.07 order total. The original breakdown remains private; final invoice and settlement remain unconfirmed."
     }
   ],
   "changes": [
+    {
+      "date": "2026-11-05",
+      "title": "Mouser replacement purchased; wire planned locally",
+      "detail": "The owner and Mouser confirm the ten-component replacement order for $82.07. Vendor charges are included once under Taxes, tariffs, shipping and others. Dispatch, tracking, final invoice and bank settlement remain unconfirmed. The wire is planned for local purchase on November 6; supplier, length and price remain unknown. The cancelled DigiKey order stays in the history without assuming a refund."
+    },
     {
       "date": "2026-11-05",
       "title": "Costa Rica arrivals and combined Speedy amount updated",
@@ -2158,6 +2336,36 @@
       "speedyCheckedAt": "2026-11-05",
       "speedyConfirmedAt": "2026-11-03",
       "trackingAssigned": true
+    },
+    {
+      "id": "MOUSER-AWAIT-01",
+      "title": "Electronics replacement order",
+      "vendor": "Mouser",
+      "orderRef": "MOUSER-01",
+      "status": "preparing",
+      "carrier": null,
+      "itemIds": [
+        "digikey-045",
+        "digikey-046",
+        "digikey-047",
+        "digikey-049",
+        "digikey-050",
+        "digikey-051",
+        "digikey-052",
+        "digikey-053",
+        "digikey-054",
+        "digikey-055"
+      ],
+      "expectedDeliveryDate": null,
+      "expectedShipDate": null,
+      "deliveredAt": null,
+      "lastChecked": "2026-11-05",
+      "source": "Owner confirmation, vendor confirmation email and authenticated order detail",
+      "notes": "Ten confirmed replacement components await dispatch, tracking and the final invoice. This is an order-preparation record, not evidence of a dispatched parcel, Speedy prealert or receipt. The wire is a separate planned local purchase.",
+      "speedyStatus": "unconfirmed",
+      "speedyLocation": null,
+      "speedyCheckedAt": "2026-11-05",
+      "trackingAssigned": false
     }
   ],
   "forwardingCharges": {

@@ -10,9 +10,16 @@ test("equipment estimate reconciles item quotes, vendors and planning allowances
     ledger.items.length,
   );
   assert.equal(ledger.items.length, 74);
-  for (const x of ledger.items)
-    assert.equal(x.quotedUnitCents * x.quantity, x.quotedTotalCents, x.id);
-  for (const o of ledger.orders)
+  for (const x of ledger.items) {
+    if (x.quotedUnitCents == null) assert.equal(x.quotedTotalCents, null, x.id);
+    else assert.equal(x.quotedUnitCents * x.quantity, x.quotedTotalCents, x.id);
+  }
+  for (const o of ledger.orders) {
+    if (["cancelled", "canceled"].includes(o.status)) continue;
+    if (o.quotedSubtotalCents == null) {
+      assert.ok(ledger.items.filter((x) => x.orderId === o.id).every((x) => x.quotedTotalCents === null));
+      continue;
+    }
     assert.equal(
       ledger.items
         .filter((x) => x.orderId === o.id)
@@ -20,9 +27,11 @@ test("equipment estimate reconciles item quotes, vendors and planning allowances
       o.quotedSubtotalCents,
       o.vendor,
     );
-  assert.equal(totals(ledger).quotedItems, 239888);
+  }
+  assert.equal(totals(ledger).quotedItems, 238596);
+  assert.equal(totals(ledger).unquotedItems, 1);
   assert.equal(totals(ledger).equipmentAllowance, 50000);
-  assert.equal(totals(ledger).quoted, 289888);
+  assert.equal(totals(ledger).quoted, 288596);
   assert.equal(totals(ledger).quoted, ledger.equipmentQuotedTotalCents);
   assert.ok(
     ledger.equipmentAllowances.every((x) => x.actualPaidCents === null),
@@ -85,7 +94,7 @@ test("DigiKey cancellation preserves documentary charges without assuming a paym
   );
   assert.equal(order.actualPaidCents, null);
   assert.equal(order.refundCents, null);
-  assert.equal(totals(ledger).confirmedOrderTotal, 290239);
+  assert.equal(totals(ledger).confirmedOrderTotal, 298446);
   assert.equal(order.shippingPaidCents, null);
   assert.equal(order.taxPaidCents, null);
   assert.equal(order.tariffPaidCents, null);
@@ -113,7 +122,7 @@ test("Walmart grouped costs remain included in the order total", () => {
   assert.equal(order.invoiceTotalCents, 5331);
   assert.equal(extra.includedInVendorOrderTotals, true);
   assert.ok(extra.categoryTotalCents >= order.taxInvoicedCents);
-  assert.equal(totals(ledger).taxesAndOthers, 68710);
+  assert.equal(totals(ledger).taxesAndOthers, 70473);
   assert.equal(order.actualPaidCents, null);
   assert.equal(extra.actualPaidCents, null);
 });
@@ -125,9 +134,50 @@ test("Bambu order and grouped costs reconcile without double counting", () => {
   assert.ok(extra.categoryTotalCents >= order.taxInvoicedCents + order.shippingInvoicedCents);
   assert.equal(extra.includedInVendorOrderTotals, true);
   const confirmedOrders = ledger.orders.reduce((sum, x) => sum + x.invoiceTotalCents, 0);
-  assert.equal(confirmedOrders + 419, 299936);
+  assert.equal(confirmedOrders + 419, 308143);
   assert.equal(totals(ledger).confirmedOrderTotal, confirmedOrders + 419 - ledger.orders.find((x) => x.id === "digikey").invoiceTotalCents);
   assert.equal(order.actualPaidCents, 88186);
+});
+test("Mouser replacement is confirmed without reviving the cancelled order or assuming dispatch and payment", () => {
+  const order = ledger.orders.find((x) => x.id === "mouser");
+  const replaced = ledger.orders.find((x) => x.id === order.replacesOrderId);
+  const items = ledger.items.filter((x) => x.orderId === order.id);
+  const costs = ledger.otherExpenses.find((x) => x.id === "mouser-charges-grouped");
+  assert.equal(order.status, "ordered");
+  assert.equal(replaced.status, "cancelled");
+  assert.equal(replaced.quotedSubtotalCents, 7736);
+  assert.equal(replaced.invoiceTotalCents, 9697);
+  assert.equal(items.length, 10);
+  assert.ok(items.every((x) => x.quantity === 1 && x.procurementStatus === "ordered" && x.previousProcurement.orderId === "digikey"));
+  assert.equal(items.reduce((sum, x) => sum + x.orderUnitCents, 0), 6444);
+  assert.match(items.find((x) => x.id === "digikey-045").name, /S301T/);
+  assert.equal(order.invoiceTotalCents, 8207);
+  assert.equal(costs.name, "Taxes, tariffs, shipping and others");
+  assert.equal(costs.categoryTotalCents, 1763);
+  assert.equal(order.invoiceItemsCents + costs.categoryTotalCents, order.invoiceTotalCents);
+  assert.equal(costs.includedInVendorOrderTotals, true);
+  assert.equal(order.actualPaidCents, null);
+  assert.equal(costs.actualPaidCents, null);
+  const shipment = ledger.shipments.find((x) => x.orderRef === "MOUSER-01");
+  assert.equal(shipment.status, "preparing");
+  assert.equal(shipment.trackingAssigned, false);
+  assert.equal(shipment.speedyLocation, null);
+  assert.equal(shipment.speedyStatus, "unconfirmed");
+  assert.equal(shipment.deliveredAt, null);
+});
+test("tomorrow's local wire purchase remains unquoted, unbought and outside the import queue", () => {
+  const wire = ledger.items.find((x) => x.id === "digikey-048");
+  const plan = ledger.orders.find((x) => x.id === wire.orderId);
+  assert.equal(wire.procurementStatus, "pending");
+  assert.equal(wire.plannedPurchaseDate, "2026-11-06");
+  assert.equal(wire.quotedUnitCents, null);
+  assert.equal(wire.quotedTotalCents, null);
+  assert.equal(wire.actualPaidCents, null);
+  assert.equal(plan.status, "pending");
+  assert.equal(plan.orderedAt, null);
+  assert.equal(plan.invoiceTotalCents, null);
+  assert.equal(wire.previousProcurement.quotedTotalCents, 1715);
+  assert.ok(ledger.shipments.every((x) => !x.itemIds.includes(wire.id)));
 });
 test("published CAD archive matches its manifest hash", async () => {
   const release = await readJSON("data/hardware-release.json");
