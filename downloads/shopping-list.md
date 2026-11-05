@@ -1,6 +1,6 @@
 # Shopping list · living in a cat world
 
-Updated: 2026-11-04. USD. Item quotes; tax and shipping excluded unless noted. Purchases in progress, one store at a time.
+Updated: 2026-11-05. USD. Item quotes; tax and shipping excluded unless noted. Purchases in progress, one store at a time.
 
 Equipment quoted, including allowance: $2,898.88. Listed item quotes: $2,398.88; unallocated equipment allowance: $500.00. The allowance is a planning amount, not a vendor quote, order or payment. Payment and shipping status: https://livinginacat.world/purchases/.
 
@@ -61,25 +61,25 @@ Equipment quoted, including allowance: $2,898.88. Listed item quotes: $2,398.88;
 | DigiKey | Adafruit 3893 · JST PH 3 cable | 1 | $1.25 | $1.25 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/3893/9603619) |
 | DigiKey | Adafruit 4873 · JST XH 3 cable pair | 1 | $0.95 | $0.95 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/adafruit-industries-llc/4873/13922054) |
 | DigiKey | Qualtek 3021001-03 · USB-A to USB-B · 3 ft | 1 | $2.26 | $2.26 | Order confirmed | [Product](https://www.digikey.com/en/products/detail/qualtek/3021001-03/1531288) |
-| BoltDepot | 7218 · BHCS M3×6 | 15 | $0.06 | $0.90 | Shipped | [Product](https://boltdepot.com/Product-Details?product=7218) |
-| BoltDepot | 7219 · BHCS M3×8 | 50 | $0.06 | $3.00 | Shipped | [Product](https://boltdepot.com/Product-Details?product=7219) |
-| BoltDepot | 7220 · BHCS M3×10 | 15 | $0.06 | $0.90 | Shipped | [Product](https://boltdepot.com/Product-Details?product=7220) |
-| BoltDepot | 7222 · BHCS M3×16 | 10 | $0.07 | $0.70 | Shipped | [Product](https://boltdepot.com/Product-Details?product=7222) |
-| BoltDepot | 15291 · BHCS M3×25 | 10 | $0.09 | $0.90 | Shipped | [Product](https://boltdepot.com/Product-Details?product=15291) |
-| BoltDepot | 6632 · BHCS M5×10 | 10 | $0.12 | $1.20 | Shipped | [Product](https://boltdepot.com/Product-Details?product=6632) |
-| BoltDepot | 6633 · BHCS M5×12 | 10 | $0.13 | $1.30 | Shipped | [Product](https://boltdepot.com/Product-Details?product=6633) |
-| BoltDepot | 6634 · BHCS M5×16 | 10 | $0.14 | $1.40 | Shipped | [Product](https://boltdepot.com/Product-Details?product=6634) |
-| BoltDepot | 6635 · BHCS M5×20 | 10 | $0.18 | $1.80 | Shipped | [Product](https://boltdepot.com/Product-Details?product=6635) |
-| BoltDepot | 7213 · FHCS M3×8 | 10 | $0.06 | $0.60 | Shipped | [Product](https://boltdepot.com/Product-Details?product=7213) |
-| BoltDepot | 7214 · FHCS M3×10 | 12 | $0.07 | $0.84 | Shipped | [Product](https://boltdepot.com/Product-Details?product=7214) |
-| BoltDepot | 6674 · FHCS M5×12 | 10 | $0.20 | $2.00 | Shipped | [Product](https://boltdepot.com/Product-Details?product=6674) |
-| BoltDepot | 4515 · M5 flat washer DIN125 | 10 | $0.05 | $0.50 | Shipped | [Product](https://boltdepot.com/Product-Details?product=4515) |
+| BoltDepot | 7218 · BHCS M3×6 | 15 | $0.06 | $0.90 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=7218) |
+| BoltDepot | 7219 · BHCS M3×8 | 50 | $0.06 | $3.00 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=7219) |
+| BoltDepot | 7220 · BHCS M3×10 | 15 | $0.06 | $0.90 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=7220) |
+| BoltDepot | 7222 · BHCS M3×16 | 10 | $0.07 | $0.70 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=7222) |
+| BoltDepot | 15291 · BHCS M3×25 | 10 | $0.09 | $0.90 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=15291) |
+| BoltDepot | 6632 · BHCS M5×10 | 10 | $0.12 | $1.20 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=6632) |
+| BoltDepot | 6633 · BHCS M5×12 | 10 | $0.13 | $1.30 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=6633) |
+| BoltDepot | 6634 · BHCS M5×16 | 10 | $0.14 | $1.40 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=6634) |
+| BoltDepot | 6635 · BHCS M5×20 | 10 | $0.18 | $1.80 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=6635) |
+| BoltDepot | 7213 · FHCS M3×8 | 10 | $0.06 | $0.60 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=7213) |
+| BoltDepot | 7214 · FHCS M3×10 | 12 | $0.07 | $0.84 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=7214) |
+| BoltDepot | 6674 · FHCS M5×12 | 10 | $0.20 | $2.00 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=6674) |
+| BoltDepot | 4515 · M5 flat washer DIN125 | 10 | $0.05 | $0.50 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=4515) |
 | Amazon | 2020 flat joining plates · 40×18 mm · pack of 12 | 1 | $9.99 | $9.99 | Order confirmed | [Product](https://www.amazon.com/dp/B0DX9MSB7N) |
 | Walmart | uxcell · spacers · 5 ID / 10 OD / 9 mm high | 1 | $8.99 | $8.99 | Preparing | [Product](https://www.walmart.com/ip/5223528994) |
 | Walmart | uxcell · spiral wrap · 4 mm ID · 20 m | 1 | $9.99 | $9.99 | Shipped | [Product](https://www.walmart.com/ip/3364975377) |
 | Walmart | SUPERDANT · 1 mm adhesive EVA foam | 1 | $10.85 | $10.85 | Shipped | [Product](https://www.walmart.com/ip/9540216155) |
-| PhotonLight | Creality PTFE · 2 mm ID / 4 mm OD · 2 m | 1 | $9.99 | $9.99 | Shipped | [Product](https://www.photonlight.com/products/creality-ptfe-tubing-4mm-od-x-2mm-id-x-1m-length-white) |
-| West3D | Mobil Mobilux EP2 · 10 mL syringe | 1 | $9.99 | $9.99 | Shipped | [Product](https://west3d.com/products/mobil-mobilux-ep2-10ml-filled-syringe-with-blunt-tip) |
+| PhotonLight | Creality PTFE · 2 mm ID / 4 mm OD · 2 m | 1 | $9.99 | $9.99 | Carrier reports delivery | [Product](https://www.photonlight.com/products/creality-ptfe-tubing-4mm-od-x-2mm-id-x-1m-length-white) |
+| West3D | Mobil Mobilux EP2 · 10 mL syringe | 1 | $9.99 | $9.99 | Carrier reports delivery | [Product](https://west3d.com/products/mobil-mobilux-ep2-10ml-filled-syringe-with-blunt-tip) |
 
 ## Equipment allowance
 
@@ -89,19 +89,19 @@ Item quotes $2,398.88 + allowance $500.00 = total estimate $2,898.88.
 
 ## Reconciliation
 
-Amazon: 6 orders totaling $1,534.50, including the Taxes, tariffs, shipping and others category. Current carrier and Speedy locations are listed in the shipment record. AMZ-06 adds a pack of frame joining plates after the original estimate. The owner confirms shipped orders are paid; the remaining order is not included in the paid subtotal. Bank settlement has not been independently reconciled. Taxes, tariffs, shipping and others: $706.71 (Amazon: $421.34; Walmart: $23.48; Bambu Lab: $89.87; FramingTech: $121.51; VXB: $4.27; DigiKey: $19.61; BoltDepot: $10.12; PhotonLight: $8.95; West3D: $7.56). Already included in vendor order totals. FramingTech: $300.66 paid; shipping remains provisional. West3D: $17.55 paid per vendor invoice. Domain: $4.19 paid. Owner- or vendor-confirmed payments: $2,217.97, a partial subtotal. Shipped items of a partially shipped order are excluded until their payment can be allocated reliably.
+Amazon: 6 orders totaling $1,534.50, including the Taxes, tariffs, shipping and others category. Current carrier and Speedy locations are listed in the shipment record. AMZ-06 adds a pack of frame joining plates after the original estimate. The owner confirms fulfilled orders are paid. All recorded Amazon order payments are included. Bank settlement has not been independently reconciled. Taxes, tariffs, shipping and others: $706.71 (Amazon: $421.34; Walmart: $23.48; Bambu Lab: $89.87; FramingTech: $121.51; VXB: $4.27; DigiKey: $19.61; BoltDepot: $10.12; PhotonLight: $8.95; West3D: $7.56). Already included in vendor order totals. FramingTech: $300.66 paid; shipping remains provisional. West3D: $17.55 paid per vendor invoice. Domain: $4.19 paid. Owner- or vendor-confirmed payments: $2,783.86, a partial subtotal. Shipped items of a partially shipped order are excluded until their payment can be allocated reliably.
 
 Other vendor order totals (see the purchase record for payment status):
-- Bambu Lab: $881.86; Shipped.
+- Bambu Lab: $881.86; Carrier exception.
 - VXB: $65.22; Order confirmed.
 - DigiKey: $96.97; Order confirmed.
-- BoltDepot: $26.16; Shipped.
+- BoltDepot: $26.16; Carrier reports delivery.
 - Walmart: $53.31; Partially shipped.
-- PhotonLight: $18.94; Shipped.
-- West3D: $17.55; Shipped.
+- PhotonLight: $18.94; Carrier reports delivery.
+- West3D: $17.55; Carrier reports delivery.
 
 ## Shipping and Speedy
 
-Project shipment locations checked 2026-11-04: 6 in Costa Rica; 3 received in Miami; 11 awaiting Speedy confirmation. Carrier delivery does not establish Speedy receipt or delivery to the recipient.
+Project shipment locations checked 2026-11-05: 6 in Costa Rica; 3 received in Miami; 10 awaiting Speedy confirmation; 1 with a carrier return. Carrier delivery does not establish Speedy receipt or delivery to the recipient. A carrier return does not establish a refund or replacement.
 
-Speedy - Taxes, tariffs, shipping and others: CRC 377,000 combined amount shown as Total a pagar on 2026-11-04. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.
+Speedy - Taxes, tariffs, shipping and others: CRC 377,000 combined amount shown as Total a pagar on 2026-11-05. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.
