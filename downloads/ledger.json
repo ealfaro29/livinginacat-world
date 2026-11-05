@@ -1334,6 +1334,11 @@
   "changes": [
     {
       "date": "2026-11-05",
+      "title": "Tracking coverage reconciled",
+      "detail": "All recorded project shipments have assigned tracking. A completed order’s initial preparation record is retained privately and excluded from active package counts. DigiKey tracking remains unconfirmed in the reviewed records."
+    },
+    {
+      "date": "2026-11-05",
       "title": "Vendor follow-up confirmed",
       "detail": "The owner confirmed contacting the vendor about the carrier-return exception. A vendor response, refund and replacement remain unconfirmed."
     },
@@ -1778,7 +1783,8 @@
       "notes": "Amazon reports carrier delivery October 29. Speedy receipt remains unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05"
+      "speedyCheckedAt": "2026-11-05",
+      "trackingAssigned": true
     },
     {
       "id": "AMZ-PKG-02",
@@ -1795,7 +1801,8 @@
       "title": "Project shipment",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05"
+      "speedyCheckedAt": "2026-11-05",
+      "trackingAssigned": true
     },
     {
       "id": "FT-PREP-01",
@@ -1821,7 +1828,8 @@
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
       "speedyCheckedAt": "2026-11-05",
-      "speedyConfirmedAt": "2026-11-04"
+      "speedyConfirmedAt": "2026-11-04",
+      "trackingAssigned": true
     },
     {
       "id": "AMZ-PKG-03",
@@ -1839,7 +1847,8 @@
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
       "speedyCheckedAt": "2026-11-05",
-      "speedyConfirmedAt": "2026-11-03"
+      "speedyConfirmedAt": "2026-11-03",
+      "trackingAssigned": true
     },
     {
       "id": "AMZ-PKG-04",
@@ -1857,7 +1866,8 @@
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
       "speedyCheckedAt": "2026-11-05",
-      "speedyConfirmedAt": "2026-11-03"
+      "speedyConfirmedAt": "2026-11-03",
+      "trackingAssigned": true
     },
     {
       "id": "WMT-PKG-01",
@@ -1874,7 +1884,8 @@
       "notes": "Walmart reports delivery on October 28. Speedy receipt is not yet confirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05"
+      "speedyCheckedAt": "2026-11-05",
+      "trackingAssigned": true
     },
     {
       "id": "WMT-PKG-02",
@@ -1891,7 +1902,8 @@
       "notes": "Earlier retailer evidence reports this shipment dispatched. A newer carrier status remains unconfirmed. It is prealerted and consolidated; Speedy receipt is unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05"
+      "speedyCheckedAt": "2026-11-05",
+      "trackingAssigned": true
     },
     {
       "id": "WMT-PKG-03",
@@ -1908,7 +1920,8 @@
       "notes": "USPS reports the shipment in transit as of 2026-11-05. It is prealerted and consolidated. November 9 remains an estimate; carrier delivery and Speedy receipt are unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05"
+      "speedyCheckedAt": "2026-11-05",
+      "trackingAssigned": true
     },
     {
       "id": "WMT-PREP-04",
@@ -1925,7 +1938,8 @@
       "notes": "Walmart reported delivery on October 31. Speedy receipt is not yet confirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05"
+      "speedyCheckedAt": "2026-11-05",
+      "trackingAssigned": true
     },
     {
       "id": "VXB-PKG-01",
@@ -1942,7 +1956,8 @@
       "notes": "USPS still shows label created and awaiting the item as of 2026-11-05. The shipment is prealerted and consolidated. Carrier acceptance and Speedy receipt remain unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05"
+      "speedyCheckedAt": "2026-11-05",
+      "trackingAssigned": true
     },
     {
       "id": "WEST-PKG-01",
@@ -1959,7 +1974,8 @@
       "notes": "West3D reports carrier delivery on October 29. Prealerted and consolidated; Speedy receipt remains unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05"
+      "speedyCheckedAt": "2026-11-05",
+      "trackingAssigned": true
     },
     {
       "id": "BAMBU-PKG-01",
@@ -1976,7 +1992,8 @@
       "notes": "OnTrac confirms a return to the sender as of 2026-11-05. The return date, refund and replacement remain unconfirmed. Speedy receipt and delivery to the recipient are unconfirmed. The owner confirms contacting the vendor on November 5; a response remains pending.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05"
+      "speedyCheckedAt": "2026-11-05",
+      "trackingAssigned": true
     },
     {
       "id": "BAMBU-PREP-01",
@@ -1994,7 +2011,8 @@
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
       "speedyCheckedAt": "2026-11-05",
-      "speedyConfirmedAt": "2026-11-04"
+      "speedyConfirmedAt": "2026-11-04",
+      "trackingAssigned": true
     },
     {
       "id": "BOLT-PKG-01",
@@ -2011,7 +2029,8 @@
       "notes": "USPS confirms carrier delivery on October 31. The shipment remains prealerted and consolidated. Speedy receipt is unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05"
+      "speedyCheckedAt": "2026-11-05",
+      "trackingAssigned": true
     },
     {
       "id": "PHOTON-PKG-01",
@@ -2028,7 +2047,8 @@
       "notes": "PhotonLight reports the shipment delivered as of November 2. Speedy receipt remains unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05"
+      "speedyCheckedAt": "2026-11-05",
+      "trackingAssigned": true
     },
     {
       "id": "AMZ-PKG-06",
@@ -2048,7 +2068,8 @@
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
       "speedyCheckedAt": "2026-11-05",
-      "speedyConfirmedAt": "2026-11-03"
+      "speedyConfirmedAt": "2026-11-03",
+      "trackingAssigned": true
     },
     {
       "id": "AMZ-PKG-07",
@@ -2066,7 +2087,8 @@
       "speedyStatus": "received",
       "speedyLocation": "miami",
       "speedyCheckedAt": "2026-11-05",
-      "speedyConfirmedAt": "2026-11-03"
+      "speedyConfirmedAt": "2026-11-03",
+      "trackingAssigned": true
     },
     {
       "id": "AMZ-PKG-08",
@@ -2084,7 +2106,8 @@
       "speedyStatus": "received",
       "speedyLocation": "miami",
       "speedyCheckedAt": "2026-11-05",
-      "speedyConfirmedAt": "2026-11-03"
+      "speedyConfirmedAt": "2026-11-03",
+      "trackingAssigned": true
     },
     {
       "id": "AMZ-PKG-09",
@@ -2102,7 +2125,8 @@
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
       "speedyCheckedAt": "2026-11-05",
-      "speedyConfirmedAt": "2026-11-04"
+      "speedyConfirmedAt": "2026-11-04",
+      "trackingAssigned": true
     },
     {
       "id": "AMZ-PKG-10",
@@ -2120,7 +2144,8 @@
       "speedyStatus": "received",
       "speedyLocation": "miami",
       "speedyCheckedAt": "2026-11-05",
-      "speedyConfirmedAt": "2026-11-03"
+      "speedyConfirmedAt": "2026-11-03",
+      "trackingAssigned": true
     }
   ],
   "forwardingCharges": {
