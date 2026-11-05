@@ -100,7 +100,7 @@
     {
       "id": "digikey",
       "vendor": "DigiKey",
-      "status": "ordered",
+      "status": "cancelled",
       "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 7736,
       "actualPaidCents": null,
@@ -109,13 +109,15 @@
       "tariffPaidCents": null,
       "receivedAt": null,
       "publicReceiptUrl": null,
-      "evidenceLevel": "vendor-order-confirmation-email",
-      "notes": "Order confirmed October 26, 2026 for $96.97. The vendor assigned two sales orders and states the order is being processed. No shipping notice, tracking or delivery confirmed. Available order mail was reviewed on 2026-11-05; dispatch and tracking remain unconfirmed.",
+      "evidenceLevel": "owner-observed-vendor-order-status",
+      "notes": "The owner reports that the vendor lists this order as cancelled, observed November 5. The original documentary amount is retained in the history. Any charge, refund, cancellation reason and replacement purchase remain unconfirmed.",
       "invoiceTotalCents": 9697,
       "shippingInvoicedCents": 849,
       "taxInvoicedCents": 579,
       "tariffInvoicedCents": 533,
-      "lastChecked": "2026-11-05"
+      "lastChecked": "2026-11-05",
+      "cancellationObservedAt": "2026-11-05",
+      "refundCents": null
     },
     {
       "id": "boltdepot",
@@ -1290,7 +1292,7 @@
       "id": "digikey-charges-grouped",
       "vendor": "DigiKey",
       "name": "Taxes, tariffs, shipping and others",
-      "status": "ordered",
+      "status": "cancelled",
       "categoryTotalCents": 1961,
       "actualPaidCents": null,
       "includedInVendorOrderTotals": true,
@@ -1332,6 +1334,11 @@
     }
   ],
   "changes": [
+    {
+      "date": "2026-11-05",
+      "title": "Order cancellation reported by owner",
+      "detail": "The owner reports the DigiKey order as cancelled. It is excluded from active order and grouped-cost totals and from the tracking queue; original documentary amounts are retained. A replacement purchase, charge or refund remains unconfirmed."
+    },
     {
       "date": "2026-11-05",
       "title": "Tracking coverage reconciled",
