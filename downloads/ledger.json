@@ -1336,6 +1336,11 @@
   "changes": [
     {
       "date": "2026-11-05",
+      "title": "Costa Rica arrivals and combined Speedy amount updated",
+      "detail": "Speedy now confirms 8 project shipments in Costa Rica and 1 received in Miami. The observed combined Total a pagar for all current packages is CRC 646,500. Other charges remain unquoted; payment, recipient delivery and the final consolidated balance remain unconfirmed."
+    },
+    {
+      "date": "2026-11-05",
       "title": "Order cancellation reported by owner",
       "detail": "The owner reports the DigiKey order as cancelled. It is excluded from active order and grouped-cost totals and from the tracking queue; original documentary amounts are retained. A replacement purchase, charge or refund remains unconfirmed."
     },
@@ -2090,11 +2095,11 @@
       "deliveredAt": null,
       "lastChecked": "2026-11-05",
       "source": "Vendor evidence and Speedy package listing",
-      "notes": "Amazon reports delivery on November 2. This shipment is prealerted and consolidated; Speedy confirms receipt in Miami.",
-      "speedyStatus": "received",
-      "speedyLocation": "miami",
+      "notes": "Amazon reports delivery on November 2. This shipment is prealerted and consolidated; Speedy confirms receipt in Miami. Speedy confirms arrival in Costa Rica on 2026-11-05; delivery to the recipient remains unconfirmed.",
+      "speedyStatus": "in_transit",
+      "speedyLocation": "costa_rica",
       "speedyCheckedAt": "2026-11-05",
-      "speedyConfirmedAt": "2026-11-03",
+      "speedyConfirmedAt": "2026-11-05T15:35:13.229Z",
       "trackingAssigned": true
     },
     {
@@ -2109,11 +2114,11 @@
       "deliveredAt": null,
       "lastChecked": "2026-11-05",
       "source": "Vendor evidence and Speedy package listing",
-      "notes": "Amazon reports delivery on November 2. This shipment is prealerted and consolidated; Speedy confirms receipt in Miami.",
-      "speedyStatus": "received",
-      "speedyLocation": "miami",
+      "notes": "Amazon reports delivery on November 2. This shipment is prealerted and consolidated; Speedy confirms receipt in Miami. Speedy confirms arrival in Costa Rica on 2026-11-05; delivery to the recipient remains unconfirmed.",
+      "speedyStatus": "in_transit",
+      "speedyLocation": "costa_rica",
       "speedyCheckedAt": "2026-11-05",
-      "speedyConfirmedAt": "2026-11-03",
+      "speedyConfirmedAt": "2026-11-05T15:35:13.229Z",
       "trackingAssigned": true
     },
     {
@@ -2157,14 +2162,14 @@
   ],
   "forwardingCharges": {
     "currency": "CRC",
-    "amountCRC": 642500,
+    "amountCRC": 646500,
     "scope": "all_current_packages",
     "quoteStatus": "awaiting_remaining_quotes",
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Speedy current package listing and all current consolidations: Total a pagar",
     "observedAt": "2026-11-05",
-    "verifiedAt": "2026-11-05T07:56:20.631Z",
+    "verifiedAt": "2026-11-05T15:35:13.229Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. The displayed amount sums every currently quoted charge once. Remaining unquoted charges and the final consolidated balance are pending. Kept separate from USD purchase totals; payment remains unconfirmed."
   }
 }

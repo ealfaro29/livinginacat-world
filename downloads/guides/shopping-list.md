@@ -104,6 +104,6 @@ Documentary vendor order totals, including cancelled orders (see the purchase re
 
 Tracking assigned: 20 of 20 recorded project shipments. The owner reports the DigiKey order as cancelled; a replacement purchase, any charge and any refund remain unconfirmed. Tracking assignment alone does not confirm carrier acceptance or Speedy receipt.
 
-Project shipment locations checked 2026-11-05: 6 in Costa Rica; 3 received in Miami; 10 awaiting Speedy confirmation; 1 with a carrier return. Carrier delivery does not establish Speedy receipt or delivery to the recipient. A carrier return does not establish a refund or replacement.
+Project shipment locations checked 2026-11-05: 8 in Costa Rica; 1 received in Miami; 10 awaiting Speedy confirmation; 1 with a carrier return. Carrier delivery does not establish Speedy receipt or delivery to the recipient. A carrier return does not establish a refund or replacement.
 
-Speedy - Taxes, tariffs, shipping and others: CRC 642,500 combined amount shown as Total a pagar on 2026-11-05. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.
+Speedy - Taxes, tariffs, shipping and others: CRC 646,500 combined amount shown as Total a pagar on 2026-11-05. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.
