@@ -161,7 +161,9 @@ function state(p) {
 }
 const activeOrders = () => data.orders.filter((o) => o.status !== "removed_from_project");
 const activePackages = () => {
-  const active = new Set(activeOrders().map((o) => o.id));
+  const active = new Set(activeOrders()
+    .filter((o) => !["cancelled", "canceled"].includes(o.status))
+    .map((o) => o.id));
   return data.packages.filter((p) => active.has(p.orderId));
 };
 function render() {

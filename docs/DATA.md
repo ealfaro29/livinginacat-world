@@ -14,6 +14,8 @@ Public source: `data/ledger.json`. USD amounts are integer cents. `null` means u
 - `shipments`: real project shipment or preparation record. `trackingAssigned` records that the private project shipment has a verified assigned number; the number itself stays private. It does not establish carrier acceptance, Speedy receipt or recipient delivery. `status` describes the carrier; `speedyStatus` describes separately confirmed forwarder progress. `speedyLocation` is `miami` or `costa_rica` only when Speedy's exact tracking entry supports it; otherwise it is `null`. `speedyCheckedAt` records the review date, and `speedyConfirmedAt` records the latest affirmative observation. Planned dispatch is distinct from estimated arrival. Complete `deliveredAt` only with recipient-delivery evidence. A suffix-only tracking match is insufficient for a project location assertion.
 - `funding`: preserve unknown amounts until reconciled. Do not publish individual supporters or contributions without authorization.
 
+Cancelled orders retain their original documentary amounts and grouped charges, with unknown payments and refunds unchanged. Exclude them from active order totals, active grouped-cost summaries and the tracking queue. Cancellation does not itself establish a refund. The equipment list remains a planning record until a replacement order is confirmed.
+
 ## Initial evidence
 
 Carrier returns use `shipments.status: returned` and remain separate from recipient delivery, refunds and replacements. Keep the original purchase and payment evidence. A return still counts as a reported shipment; it appears in the carrier-return group instead of the queue awaiting Speedy confirmation. The private carrier record uses `on_hold` with the verified return evidence.

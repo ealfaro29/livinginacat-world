@@ -75,15 +75,17 @@ test("owner-confirmed shipped payments are included without assuming delivery", 
   );
   assert.equal(ft.shippingChargeFinal, false);
 });
-test("DigiKey order charges reconcile without establishing settled payment", () => {
+test("DigiKey cancellation preserves documentary charges without assuming a payment or refund", () => {
   const order = ledger.orders.find((x) => x.id === "digikey");
-  assert.equal(order.status, "ordered");
+  assert.equal(order.status, "cancelled");
   assert.equal(order.invoiceTotalCents, 9697);
   assert.equal(
     order.invoiceTotalCents,
     7736 + order.shippingInvoicedCents + order.taxInvoicedCents + order.tariffInvoicedCents,
   );
   assert.equal(order.actualPaidCents, null);
+  assert.equal(order.refundCents, null);
+  assert.equal(totals(ledger).confirmedOrderTotal, 290239);
   assert.equal(order.shippingPaidCents, null);
   assert.equal(order.taxPaidCents, null);
   assert.equal(order.tariffPaidCents, null);
@@ -111,7 +113,7 @@ test("Walmart grouped costs remain included in the order total", () => {
   assert.equal(order.invoiceTotalCents, 5331);
   assert.equal(extra.includedInVendorOrderTotals, true);
   assert.ok(extra.categoryTotalCents >= order.taxInvoicedCents);
-  assert.equal(totals(ledger).taxesAndOthers, 70671);
+  assert.equal(totals(ledger).taxesAndOthers, 68710);
   assert.equal(order.actualPaidCents, null);
   assert.equal(extra.actualPaidCents, null);
 });
@@ -124,7 +126,7 @@ test("Bambu order and grouped costs reconcile without double counting", () => {
   assert.equal(extra.includedInVendorOrderTotals, true);
   const confirmedOrders = ledger.orders.reduce((sum, x) => sum + x.invoiceTotalCents, 0);
   assert.equal(confirmedOrders + 419, 299936);
-  assert.equal(totals(ledger).confirmedOrderTotal, confirmedOrders + 419);
+  assert.equal(totals(ledger).confirmedOrderTotal, confirmedOrders + 419 - ledger.orders.find((x) => x.id === "digikey").invoiceTotalCents);
   assert.equal(order.actualPaidCents, 88186);
 });
 test("published CAD archive matches its manifest hash", async () => {

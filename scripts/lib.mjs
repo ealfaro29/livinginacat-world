@@ -38,6 +38,8 @@ export const labels = {
   carrier_delivered: "Carrier reports delivery",
   returned: "Returned to sender",
   on_hold: "Carrier exception",
+  cancelled: "Cancelled",
+  canceled: "Cancelled",
   preparing: "Preparing",
   payment_attention: "Payment review",
   partial_payment_attention: "3 orders: payment review",
@@ -62,7 +64,7 @@ export function totals(ledger) {
     equipmentAllowance,
     quoted: quotedItems + equipmentAllowance,
     taxesAndOthers: ledger.otherExpenses
-      .filter((x) => x.name === "Taxes, tariffs, shipping and others" && x.includedInVendorOrderTotals)
+      .filter((x) => x.name === "Taxes, tariffs, shipping and others" && x.includedInVendorOrderTotals && !["cancelled", "canceled"].includes(x.status))
       .reduce((sum, x) => sum + x.categoryTotalCents, 0),
     verifiedPaid: [...ledger.orders, ...ledger.otherExpenses].reduce(
       (n, x) => n + (x.actualPaidCents ?? 0),
