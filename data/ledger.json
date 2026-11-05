@@ -218,7 +218,6 @@
       "replacesOrderId": "digikey",
       "lastChecked": "2026-11-05",
       "notes": "The owner and vendor confirm ten replacement components, one of each, for a documented order total of $82.07. Includes the grouped vendor charges; the final invoice and bank settlement remain unconfirmed. All ten lines are pending dispatch. NKK S301T replaces S301; the wire will be sourced locally. The current order page still shows $82.07; a later confirmation email lists provisional charges. Final charges remain pending the final invoice.",
-      "invoiceTotalFinal": false,
       "shippingChargeFinal": false
     },
     {
