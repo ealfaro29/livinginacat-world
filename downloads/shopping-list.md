@@ -107,4 +107,4 @@ Tracking assigned: 20 of 21 recorded project shipments. The original DigiKey ord
 
 Project shipment locations checked 2026-11-06: 8 in Costa Rica; 1 received in Miami; 11 awaiting Speedy confirmation; 1 with a carrier return. Carrier delivery does not establish Speedy receipt or delivery to the recipient. A carrier return does not establish a refund or replacement.
 
-Speedy - Taxes, tariffs, shipping and others: CRC 381,000 combined amount shown as Total a pagar on 2026-11-06. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.
+Speedy - Taxes, tariffs, shipping and others: CRC 405,000 combined amount shown as Total a pagar on 2026-11-06. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.

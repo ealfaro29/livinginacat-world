@@ -1510,23 +1510,28 @@
   "changes": [
     {
       "date": "2026-11-06",
+      "title": "Current Speedy amount refreshed",
+      "detail": "The complete Speedy account review updated the combined observed Total a pagar. Every quoted current charge is counted once, including charges without a verified project association. Historical paid or delivered shipments remain excluded. Other charges still await quotation; payment and the final consolidated balance remain unconfirmed. Project shipment locations and USD purchase totals are unchanged. Earlier amount observations are retained privately; this ledger displays the current combined amount separately."
+    },
+    {
+      "date": "2026-11-06",
       "title": "Replacement offered for the returned shipment",
-      "detail": "Bambu Lab confirms the returned shipment is back with the vendor and offered a replacement at no additional vendor charge. The owner replied to the support request. Replacement dispatch, new tracking and recipient delivery remain unconfirmed; no refund is assumed. The original returned shipment and purchase evidence are retained. The current combined Speedy amount remains CRC 381,000, with further quotes and the final consolidated balance still pending."
+      "detail": "Bambu Lab confirms the returned shipment is back with the vendor and offered a replacement at no additional vendor charge. The owner replied to the support request. Replacement dispatch, new tracking and recipient delivery remain unconfirmed; no refund is assumed. The original returned shipment and purchase evidence are retained. The combined Speedy amount is recorded separately; further quotes and the final consolidated balance remain pending."
     },
     {
       "date": "2026-11-06",
       "title": "Controller cancellation request sent; pending deliveries reviewed",
-      "detail": "The owner sent the VXB cancellation request on November 5; vendor confirmation, any refund and the Amazon replacement purchase remain unconfirmed. The original order stays active. Mouser still awaits dispatch, tracking and its final invoice. The current combined Speedy amount remains CRC 381,000 after excluding owner-confirmed historical settlements; remaining quotes and the final balance are pending. Carrier delivery, Speedy receipt and delivery to the recipient remain separate facts. The local wire purchase planned for November 6 is not yet confirmed."
+      "detail": "The owner sent the VXB cancellation request on November 5; vendor confirmation, any refund and the Amazon replacement purchase remain unconfirmed. The original order stays active. Mouser still awaits dispatch, tracking and its final invoice. The combined Speedy amount excludes owner-confirmed historical settlements; remaining quotes and the final balance are pending. Carrier delivery, Speedy receipt and delivery to the recipient remain separate facts. The local wire purchase planned for November 6 is not yet confirmed."
     },
     {
       "date": "2026-11-05",
       "title": "Historical settled charges removed from the current Speedy amount",
-      "detail": "The owner confirms that historical shipments still marked Enviado were already received and paid. Those settled records are excluded from the current aggregate, while their original observations are preserved privately. The corrected combined Total a pagar for all current packages is CRC 381,000. The prior aggregate included historical settled records and must not be treated as current debt. Further quotes, payment of current charges and the final consolidated balance remain unconfirmed. Project shipment locations and USD order totals are unchanged."
+      "detail": "The owner confirms that historical shipments still marked Enviado were already received and paid. Those settled records are excluded from the current aggregate, while their original observations are preserved privately. The corrected combined Total a pagar for all current packages is recorded separately. The prior aggregate included historical settled records and must not be treated as current debt. Further quotes, payment of current charges and the final consolidated balance remain unconfirmed. Project shipment locations and USD order totals are unchanged."
     },
     {
       "date": "2026-11-05",
       "title": "Amazon controller replacement planned; account review completed",
-      "detail": "An Amazon DLC32 V2.1 kit was selected as a replacement candidate for the delayed VXB controller after checking the reference design and published hardware documents. The Amazon purchase, VXB cancellation and any refund remain unconfirmed; the original order is still included in active totals. The latest complete Speedy account review confirms the existing shipment states and the observed combined Total a pagar of CRC 646,500. Further charges await quotation; payment and the final consolidated balance remain unconfirmed. Mouser still awaits dispatch, tracking and a final invoice; local wire purchase remains planned for November 6."
+      "detail": "An Amazon DLC32 V2.1 kit was selected as a replacement candidate for the delayed VXB controller after checking the reference design and published hardware documents. The Amazon purchase, VXB cancellation and any refund remain unconfirmed; the original order is still included in active totals. The Speedy amount from this earlier review was later corrected to exclude historical settled charges; the latest combined amount is recorded separately. Further charges await quotation; payment and the final consolidated balance remain unconfirmed. Mouser still awaits dispatch, tracking and a final invoice; local wire purchase remains planned for November 6."
     },
     {
       "date": "2026-11-05",
@@ -1541,7 +1546,7 @@
     {
       "date": "2026-11-05",
       "title": "Costa Rica arrivals and combined Speedy amount updated",
-      "detail": "Speedy now confirms 8 project shipments in Costa Rica and 1 received in Miami. The observed combined Total a pagar for all current packages is CRC 646,500. Other charges remain unquoted; payment, recipient delivery and the final consolidated balance remain unconfirmed."
+      "detail": "Speedy now confirms 8 project shipments in Costa Rica and 1 received in Miami. The Speedy amount from this earlier review was later corrected to exclude historical settled charges; the latest combined amount is recorded separately. Other charges remain unquoted; payment, recipient delivery and the final consolidated balance remain unconfirmed."
     },
     {
       "date": "2026-11-05",
@@ -2399,14 +2404,14 @@
   ],
   "forwardingCharges": {
     "currency": "CRC",
-    "amountCRC": 381000,
+    "amountCRC": 405000,
     "scope": "all_current_packages",
     "quoteStatus": "awaiting_remaining_quotes",
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Authenticated Speedy quoted package charges and owner-confirmed settlement exclusions",
     "observedAt": "2026-11-06",
-    "verifiedAt": "2026-11-06T07:27:01.209Z",
+    "verifiedAt": "2026-11-06T15:28:00.495Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. Excludes historical packages confirmed paid and delivered by the owner, even when Speedy retains Enviado. Every currently quoted unsettled charge is counted once. Remaining quotes and the final consolidated balance are pending. Kept separate from USD purchase totals; payment of the current charges remains unconfirmed."
   }
 }
