@@ -52,7 +52,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-and-authenticated-order-summary",
-      "notes": "Documented order totals and the recorded payment are unchanged. Speedy lists the UPS project shipment in Costa Rica. OnTrac confirms a carrier return for another project shipment as of 2026-11-05. Refund and replacement remain unconfirmed. Equipment prices remain the original planning quote; bank settlement has not been independently reconciled. November 6: Bambu Lab confirms the accessories shipment returned and offered a replacement at no additional vendor charge. The owner replied; replacement dispatch and tracking remain pending. Original order amounts and recorded payment are retained; no refund is confirmed.",
+      "notes": "Documented order totals and the recorded payment are unchanged. Speedy lists the UPS project shipment in Costa Rica. The other shipment returned to the vendor. On November 6, Bambu Lab offered a replacement at no additional vendor charge and the owner replied. Replacement dispatch, new tracking and any refund remain unconfirmed. Equipment prices remain the original planning quote; bank settlement has not been independently reconciled.",
       "invoiceTotalCents": 88186,
       "invoiceItemsCents": 84718,
       "shippingInvoicedCents": 699,
