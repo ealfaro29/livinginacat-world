@@ -17,6 +17,8 @@ Public source: `data/ledger.json`. USD amounts are integer cents. `null` means u
 
 Cancelled orders retain their original documentary amounts and grouped charges, with unknown payments and refunds unchanged. Exclude them from active order totals, active grouped-cost summaries and the tracking queue. Cancellation does not itself establish a refund. Confirmed replacements get their own order and preparation record; a planned local purchase gets no imported shipment or Speedy prealert.
 
+Owner-confirmed payment and recipient delivery exclude historical forwarding charges even when Speedy retains an old `Enviado` label. Pass explicitly settled references through `aggregateForwardingCharges`'s `settledTrackings` option; preserve those references and the confirmation privately. Do not exclude an unsettled charge merely because it is old or marked `Enviado`. Only new evidence of an outstanding balance can reopen a confirmed settlement.
+
 ## Initial evidence
 
 Carrier returns use `shipments.status: returned` and remain separate from recipient delivery, refunds and replacements. Keep the original purchase and payment evidence. A return still counts as a reported shipment; it appears in the carrier-return group instead of the queue awaiting Speedy confirmation. The private carrier record uses `on_hold` with the verified return evidence.
