@@ -4,6 +4,8 @@ Updated: November 5, 2026. DIY prototype without physical assembly or testing. P
 
 The owner and Mouser confirm a ten-component replacement order for $82.07 after the DigiKey cancellation. The Adafruit 412 solenoid, 5648 driver and original harness references are retained. NKK S301T replaces S301 and uses screw terminals; check the existing printed guard and terminal clearance before assembly. The order awaits dispatch, tracking and a final invoice; bank settlement is unconfirmed. Suitable 18 AWG stranded copper wire is planned for local purchase in Costa Rica on November 6. Its supplier, length and price are still unknown; there is no confirmed Remington order.
 
+The delayed VXB controller has an [Amazon DLC32 V2.1 replacement candidate](https://www.amazon.com/dp/B0GY43P1CL). The [reference configuration](https://github.com/physiclaw/PhysiClaw/blob/main/firmware/config.yaml) specifies MKS DLC32 V2.1 and CoreXY. The published V2.1 hardware schematics, pinout and dimensions match the Makerbase documents; physical inspection and commissioning remain necessary. Keep the two TMC2209 drivers already ordered. The Amazon purchase, VXB cancellation and any refund are not confirmed, so the original VXB order remains active.
+
 ## Goal
 
 Build an AI that can perceive and act in the real world. The first project connects that goal to a concrete task: physically using an iPhone.

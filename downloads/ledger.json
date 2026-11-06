@@ -91,7 +91,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-email",
-      "notes": "Vendor support replied November 5: stock is expected November 16, with dispatch after it is received. USPS still shows label created and awaiting the item. The restock date is not a delivery estimate or confirmed dispatch. The shipment is already prealerted and consolidated; carrier acceptance and Speedy receipt remain unconfirmed.",
+      "notes": "Vendor support replied November 5: stock is expected November 16, with dispatch after receipt. This is a restock estimate, not confirmed dispatch or delivery. USPS still shows label created and awaiting the item; its prealert and consolidation are retained. The owner plans to replace this delayed controller with an Amazon DLC32 V2.1 kit. Compatibility with the reference design is documented; the delivered unit still needs inspection. VXB cancellation, any refund and the Amazon replacement purchase remain unconfirmed. The original VXB order stays active until cancellation is confirmed.",
       "invoiceTotalCents": 6522,
       "shippingInvoicedCents": 0,
       "taxInvoicedCents": 427,
@@ -885,7 +885,7 @@
       "quotedTotalCents": 6095,
       "actualPaidCents": null,
       "url": "https://vxb.com/products/dlc32-v2-1-32-bit-offline-controller-board-for-cnc",
-      "notes": "Board without display. Offer labeled “for MKS”; verify revision and silkscreen on arrival."
+      "notes": "Original VXB order: board without display, offer labeled “for MKS”. An Amazon DLC32 V2.1 kit is the selected replacement candidate; its purchase is not confirmed. Retain the two TMC2209 drivers already ordered. Verify the actual board revision, pinout and condition before assembly. The original quote remains unchanged until a replacement purchase is confirmed."
     },
     {
       "id": "digikey-045",
@@ -1508,6 +1508,11 @@
     }
   ],
   "changes": [
+    {
+      "date": "2026-11-05",
+      "title": "Amazon controller replacement planned; account review completed",
+      "detail": "An Amazon DLC32 V2.1 kit was selected as a replacement candidate for the delayed VXB controller after checking the reference design and published hardware documents. The Amazon purchase, VXB cancellation and any refund remain unconfirmed; the original order is still included in active totals. The latest complete Speedy account review confirms the existing shipment states and the observed combined Total a pagar of CRC 646,500. Further charges await quotation; payment and the final consolidated balance remain unconfirmed. Mouser still awaits dispatch, tracking and a final invoice; local wire purchase remains planned for November 6."
+    },
     {
       "date": "2026-11-05",
       "title": "Controller vendor confirms stock delay",
@@ -2149,7 +2154,7 @@
       "deliveredAt": null,
       "lastChecked": "2026-11-05",
       "source": "VXB support email and existing USPS label evidence",
-      "notes": "Vendor support expects stock on November 16 and will dispatch after receipt. This is a restock estimate, not a promised shipping or delivery date. USPS label created; carrier acceptance and Speedy receipt remain unconfirmed. The shipment is already prealerted and consolidated.",
+      "notes": "VXB expects stock on November 16, with dispatch after receipt; this is not a promised shipping or delivery date. The owner plans an Amazon replacement, but VXB cancellation and the replacement purchase remain unconfirmed. Preserve the existing USPS label, prealert and consolidation. Carrier acceptance and Speedy receipt remain unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-05",
@@ -2383,7 +2388,7 @@
     "finalConsolidatedChargeConfirmed": false,
     "source": "Speedy current package listing and all current consolidations: Total a pagar",
     "observedAt": "2026-11-05",
-    "verifiedAt": "2026-11-05T15:35:13.229Z",
+    "verifiedAt": "2026-11-06T05:29:16.728Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. The displayed amount sums every currently quoted charge once. Remaining unquoted charges and the final consolidated balance are pending. Kept separate from USD purchase totals; payment remains unconfirmed."
   }
 }
