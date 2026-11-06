@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-05",
+  "updatedAt": "2026-11-06",
   "currency": "USD",
   "purchasesPaused": false,
   "equipmentQuotedTotalCents": 288596,
@@ -91,7 +91,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-email",
-      "notes": "Vendor support replied November 5: stock is expected November 16, with dispatch after receipt. This is a restock estimate, not confirmed dispatch or delivery. USPS still shows label created and awaiting the item; its prealert and consolidation are retained. The owner plans to replace this delayed controller with an Amazon DLC32 V2.1 kit. Compatibility with the reference design is documented; the delivered unit still needs inspection. VXB cancellation, any refund and the Amazon replacement purchase remain unconfirmed. The original VXB order stays active until cancellation is confirmed.",
+      "notes": "The owner sent the cancellation request on November 5. VXB confirmation and any refund remain pending, so the order is still active. The vendor previously expected stock November 16, with dispatch after receipt. USPS has a label only; carrier acceptance and Speedy receipt remain unconfirmed. The Amazon DLC32 V2.1 replacement remains a candidate, not a confirmed purchase.",
       "invoiceTotalCents": 6522,
       "shippingInvoicedCents": 0,
       "taxInvoicedCents": 427,
@@ -1509,6 +1509,11 @@
   ],
   "changes": [
     {
+      "date": "2026-11-06",
+      "title": "Controller cancellation request sent; pending deliveries reviewed",
+      "detail": "The owner sent the VXB cancellation request on November 5; vendor confirmation, any refund and the Amazon replacement purchase remain unconfirmed. The original order stays active. Mouser still awaits dispatch, tracking and its final invoice. The current combined Speedy amount remains CRC 381,000 after excluding owner-confirmed historical settlements; remaining quotes and the final balance are pending. Carrier delivery, Speedy receipt and delivery to the recipient remain separate facts. The local wire purchase planned for November 6 is not yet confirmed."
+    },
+    {
       "date": "2026-11-05",
       "title": "Historical settled charges removed from the current Speedy amount",
       "detail": "The owner confirms that historical shipments still marked Enviado were already received and paid. Those settled records are excluded from the current aggregate, while their original observations are preserved privately. The corrected combined Total a pagar for all current packages is CRC 381,000. The prior aggregate included historical settled records and must not be treated as current debt. Further quotes, payment of current charges and the final consolidated balance remain unconfirmed. Project shipment locations and USD order totals are unchanged."
@@ -1989,7 +1994,7 @@
       "notes": "Amazon reports carrier delivery October 29. Speedy receipt remains unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "trackingAssigned": true
     },
     {
@@ -2007,7 +2012,7 @@
       "title": "Project shipment",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "trackingAssigned": true
     },
     {
@@ -2033,7 +2038,7 @@
       "notes": "UPS confirms delivery in Miami on October 30; Speedy lists this shipment in Costa Rica; recipient delivery is unconfirmed.",
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "speedyConfirmedAt": "2026-11-04",
       "trackingAssigned": true
     },
@@ -2052,7 +2057,7 @@
       "notes": "Amazon reported carrier delivery on October 27. Speedy lists this shipment in Costa Rica. Delivery to the recipient is not confirmed.",
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "speedyConfirmedAt": "2026-11-03",
       "trackingAssigned": true
     },
@@ -2071,7 +2076,7 @@
       "notes": "Amazon reports carrier delivery on October 27. Speedy lists this shipment in Costa Rica. Delivery to the recipient is not confirmed.",
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "speedyConfirmedAt": "2026-11-03",
       "trackingAssigned": true
     },
@@ -2090,7 +2095,7 @@
       "notes": "Walmart reports delivery on October 28. Speedy receipt is not yet confirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "trackingAssigned": true
     },
     {
@@ -2108,7 +2113,7 @@
       "notes": "Earlier retailer evidence reports this shipment dispatched. A newer carrier status remains unconfirmed. It is prealerted and consolidated; Speedy receipt is unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "trackingAssigned": true
     },
     {
@@ -2126,7 +2131,7 @@
       "notes": "USPS reports the shipment in transit as of 2026-11-05. It is prealerted and consolidated. November 9 remains an estimate; carrier delivery and Speedy receipt are unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "trackingAssigned": true
     },
     {
@@ -2144,7 +2149,7 @@
       "notes": "Walmart reported delivery on October 31. Speedy receipt is not yet confirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "trackingAssigned": true
     },
     {
@@ -2157,12 +2162,12 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-11-05",
-      "source": "VXB support email and existing USPS label evidence",
-      "notes": "VXB expects stock on November 16, with dispatch after receipt; this is not a promised shipping or delivery date. The owner plans an Amazon replacement, but VXB cancellation and the replacement purchase remain unconfirmed. Preserve the existing USPS label, prealert and consolidation. Carrier acceptance and Speedy receipt remain unconfirmed.",
+      "lastChecked": "2026-11-06",
+      "source": "Owner-sent cancellation request, VXB support and existing USPS label evidence",
+      "notes": "Cancellation requested by the owner on November 5; the vendor has not confirmed cancellation or a refund. Preserve the existing USPS label, prealert and consolidation. Carrier acceptance and Speedy receipt remain unconfirmed. The Amazon replacement purchase is not confirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "trackingAssigned": true
     },
     {
@@ -2180,7 +2185,7 @@
       "notes": "West3D reports carrier delivery on October 29. Prealerted and consolidated; Speedy receipt remains unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "trackingAssigned": true
     },
     {
@@ -2198,7 +2203,7 @@
       "notes": "OnTrac confirms a return to the sender as of 2026-11-05. The return date, refund and replacement remain unconfirmed. Speedy receipt and delivery to the recipient are unconfirmed. The owner confirms contacting the vendor on November 5; a response remains pending.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "trackingAssigned": true
     },
     {
@@ -2216,7 +2221,7 @@
       "notes": "UPS confirmed delivery in Miami on October 30; Speedy lists this shipment in Costa Rica; recipient delivery is unconfirmed.",
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "speedyConfirmedAt": "2026-11-04",
       "trackingAssigned": true
     },
@@ -2235,7 +2240,7 @@
       "notes": "USPS confirms carrier delivery on October 31. The shipment remains prealerted and consolidated. Speedy receipt is unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "trackingAssigned": true
     },
     {
@@ -2253,7 +2258,7 @@
       "notes": "PhotonLight reports the shipment delivered as of November 2. Speedy receipt remains unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "trackingAssigned": true
     },
     {
@@ -2273,7 +2278,7 @@
       "notes": "Amazon reports carrier delivery on October 28. Speedy lists this shipment in Costa Rica. Delivery to the recipient is not confirmed.",
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "speedyConfirmedAt": "2026-11-03",
       "trackingAssigned": true
     },
@@ -2292,7 +2297,7 @@
       "notes": "Amazon reports delivery on November 2. This shipment is prealerted and consolidated; Speedy confirms receipt in Miami. Speedy confirms arrival in Costa Rica on 2026-11-05; delivery to the recipient remains unconfirmed.",
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "speedyConfirmedAt": "2026-11-05T15:35:13.229Z",
       "trackingAssigned": true
     },
@@ -2311,7 +2316,7 @@
       "notes": "Amazon reports delivery on November 2. This shipment is prealerted and consolidated; Speedy confirms receipt in Miami. Speedy confirms arrival in Costa Rica on 2026-11-05; delivery to the recipient remains unconfirmed.",
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "speedyConfirmedAt": "2026-11-05T15:35:13.229Z",
       "trackingAssigned": true
     },
@@ -2330,7 +2335,7 @@
       "notes": "Amazon reports delivery on November 2. Speedy lists this shipment in Costa Rica; recipient delivery is unconfirmed.",
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "speedyConfirmedAt": "2026-11-04",
       "trackingAssigned": true
     },
@@ -2349,7 +2354,7 @@
       "notes": "Amazon reports delivery on November 2. The shipment is prealerted and consolidated; Speedy confirms receipt in Miami.",
       "speedyStatus": "received",
       "speedyLocation": "miami",
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "speedyConfirmedAt": "2026-11-03",
       "trackingAssigned": true
     },
@@ -2375,12 +2380,12 @@
       "expectedDeliveryDate": null,
       "expectedShipDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-11-05",
+      "lastChecked": "2026-11-06",
       "source": "Owner confirmation, vendor confirmation email and authenticated order detail",
       "notes": "Ten confirmed replacement components await dispatch, tracking and the final invoice. This is an order-preparation record, not evidence of a dispatched parcel, Speedy prealert or receipt. The wire is a separate planned local purchase.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-05",
+      "speedyCheckedAt": "2026-11-06",
       "trackingAssigned": false
     }
   ],
@@ -2392,8 +2397,8 @@
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Authenticated Speedy quoted package charges and owner-confirmed settlement exclusions",
-    "observedAt": "2026-11-05",
-    "verifiedAt": "2026-11-06T05:54:07.232411+00:00",
+    "observedAt": "2026-11-06",
+    "verifiedAt": "2026-11-06T06:26:04.380Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. Excludes historical packages confirmed paid and delivered by the owner, even when Speedy retains Enviado. Every currently quoted unsettled charge is counted once. Remaining quotes and the final consolidated balance are pending. Kept separate from USD purchase totals; payment of the current charges remains unconfirmed."
   }
 }

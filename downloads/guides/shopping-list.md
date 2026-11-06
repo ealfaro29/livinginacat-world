@@ -1,6 +1,6 @@
 # Shopping list · living in a cat world
 
-Updated: 2026-11-05. USD. Item quotes; tax and shipping excluded unless noted. Purchases in progress, one store at a time.
+Updated: 2026-11-06. USD. Item quotes; tax and shipping excluded unless noted. Purchases in progress, one store at a time.
 
 Equipment quoted, including allowance: $2,885.96. Listed item quotes: $2,385.96; unallocated equipment allowance: $500.00. The allowance is a planning amount, not a vendor quote, order or payment. Payment and shipping status: https://livinginacat.world/purchases/. 1 equipment line remains unquoted and is excluded from this estimate; the local wire purchase is planned, not confirmed.
 
@@ -105,6 +105,6 @@ Documentary vendor order totals, including cancelled orders (see the purchase re
 
 Tracking assigned: 20 of 21 recorded project shipments. The original DigiKey order remains cancelled, with its documentary amounts retained in the history. The owner and Mouser confirm the replacement order on November 5, 2026. The wire is planned for local purchase on November 6, 2026. Original charges and any refund remain unconfirmed. Tracking assignment alone does not confirm carrier acceptance or Speedy receipt.
 
-Project shipment locations checked 2026-11-05: 8 in Costa Rica; 1 received in Miami; 11 awaiting Speedy confirmation; 1 with a carrier return. Carrier delivery does not establish Speedy receipt or delivery to the recipient. A carrier return does not establish a refund or replacement.
+Project shipment locations checked 2026-11-06: 8 in Costa Rica; 1 received in Miami; 11 awaiting Speedy confirmation; 1 with a carrier return. Carrier delivery does not establish Speedy receipt or delivery to the recipient. A carrier return does not establish a refund or replacement.
 
-Speedy - Taxes, tariffs, shipping and others: CRC 381,000 combined amount shown as Total a pagar on 2026-11-05. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.
+Speedy - Taxes, tariffs, shipping and others: CRC 381,000 combined amount shown as Total a pagar on 2026-11-06. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.
