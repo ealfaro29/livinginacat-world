@@ -17,6 +17,8 @@ Public source: `data/ledger.json`. USD amounts are integer cents. `null` means u
 
 Cancelled orders retain their original documentary amounts and grouped charges, with unknown payments and refunds unchanged. Exclude them from active order totals, active grouped-cost summaries and the tracking queue. Cancellation does not itself establish a refund. Confirmed replacements get their own order and preparation record; a planned local purchase gets no imported shipment or Speedy prealert.
 
+Keep cancelled shipment records in `shipments` as history. `activeShipments` excludes them, and shipments whose parent order is cancelled, from public tracking groups, coverage and location counts. A vendor-reported refund may have `refundCents` while `refundStatus: vendor_reported` and `refundBankSettlementConfirmed: false` preserve the distinction from a verified bank credit.
+
 Owner-confirmed payment and recipient delivery exclude historical forwarding charges even when Speedy retains an old `Enviado` label. Pass explicitly settled references through `aggregateForwardingCharges`'s `settledTrackings` option; preserve those references and the confirmation privately. Do not exclude an unsettled charge merely because it is old or marked `Enviado`. Only new evidence of an outstanding balance can reopen a confirmed settlement.
 
 ## Initial evidence
@@ -29,7 +31,9 @@ FramingTech: payment email and PDF confirmation. GoDaddy: email receipt. Amazon:
 
 Mouser: owner purchase confirmation, vendor email, authenticated order detail and original order-summary PDF, observed November 5, 2026. Ten pending lines total $82.07; this replaces ten components from the cancelled DigiKey order. The PDF has no invoice number and is stored as `order_confirmation`, not `invoice`. It does not establish dispatch or a settled bank charge. Only the combined vendor charges are published under Taxes, tariffs, shipping and others. The wire is planned for local purchase on November 6; supplier, length and price remain unconfirmed.
 
-VXB: support replied November 5 that stock is expected November 16, with dispatch after receipt. This is an expected restock date, not a confirmed shipping or delivery date. Preserve the existing USPS label, Speedy prealert and consolidation; carrier acceptance and Speedy receipt remain unconfirmed. The owner plans an Amazon DLC32 V2.1 replacement. Its documented compatibility does not establish a purchase or verify the unit that would be shipped. The owner sent the cancellation request on November 5, verified in Gmail Sent on November 6; VXB cancellation and any refund remain unconfirmed. A confirmed replacement gets a separate order; only confirmed cancellation removes the original from active totals.
+VXB: the owner sent the cancellation request on November 5. The vendor confirmed cancellation on November 6 and reports a full $65.22 refund; receipt by the bank is not independently verified. Retain the original order amounts, USPS label, Speedy prealert and consolidation as history, excluded from active order totals and shipment counts. The earlier expected restock date is superseded by cancellation. The Amazon DLC32 V2.1 replacement remains a candidate, not a confirmed purchase. A confirmed replacement gets a separate order.
+
+Walmart: the authenticated exact-order page showed every fulfillment group delivered on the November 6 review. The arrival email and matching wrap group confirm its carrier delivery on November 6, tied to the existing tracking through the earlier shipment evidence. Complete order fulfillment also confirms the foam's carrier delivery; do not assign an individual delivery date that has not been matched. Payment amounts remain unchanged. Carrier delivery does not establish Speedy receipt or delivery to the recipient.
 
 ## Updating
 

@@ -46,7 +46,16 @@ export const labels = {
   partially_shipped_payment_attention: "Mixed status",
   partially_shipped: "Partially shipped",
 };
+export function activeShipments(ledger) {
+  const cancelledOrders = new Set(ledger.orders
+    .filter((order) => ["cancelled", "canceled"].includes(order.status))
+    .map((order) => order.id));
+  return ledger.shipments.filter((shipment) =>
+    !cancelledOrders.has(shipment.orderRef) &&
+    !["cancelled", "canceled"].includes(shipment.status));
+}
 export function totals(ledger) {
+  const shipments = activeShipments(ledger);
   const quotedItems = ledger.items.reduce((n, x) => n + (x.quotedTotalCents ?? 0), 0);
   const unquotedItems = ledger.items.filter((x) => x.quotedTotalCents == null).length;
   const equipmentAllowance = (ledger.equipmentAllowances ?? []).reduce(
@@ -73,8 +82,8 @@ export function totals(ledger) {
       0,
     ),
     amazon: ledger.amazonOrders.reduce((n, x) => n + x.orderTotalCents, 0),
-    shipped: ledger.shipments.filter((x) => ["shipped", "carrier_delivered", "returned"].includes(x.status)).length,
-    tracked: ledger.shipments.filter((x) => x.trackingAssigned === true).length,
+    shipped: shipments.filter((x) => ["shipped", "carrier_delivered", "returned"].includes(x.status)).length,
+    tracked: shipments.filter((x) => x.trackingAssigned === true).length,
   };
 }
 export function csv(rows) {

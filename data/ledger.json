@@ -81,7 +81,7 @@
     {
       "id": "vxb",
       "vendor": "VXB",
-      "status": "ordered",
+      "status": "cancelled",
       "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 6095,
       "actualPaidCents": null,
@@ -90,12 +90,17 @@
       "tariffPaidCents": null,
       "receivedAt": null,
       "publicReceiptUrl": null,
-      "evidenceLevel": "vendor-order-confirmation-email",
-      "notes": "The owner sent the cancellation request on November 5. VXB confirmation and any refund remain pending, so the order is still active. The vendor previously expected stock November 16, with dispatch after receipt. USPS has a label only; carrier acceptance and Speedy receipt remain unconfirmed. The Amazon DLC32 V2.1 replacement remains a candidate, not a confirmed purchase.",
+      "evidenceLevel": "vendor-cancellation-and-refund-confirmation-email",
+      "notes": "VXB confirmed cancellation on November 6 and reports a full $65.22 refund. Receipt of the refund by the bank is not independently verified. The original documentary amounts are retained and excluded from active totals. The earlier USPS label, prealert and consolidation remain historical. The Amazon DLC32 V2.1 replacement is still a candidate; its purchase is not confirmed.",
       "invoiceTotalCents": 6522,
       "shippingInvoicedCents": 0,
       "taxInvoicedCents": 427,
-      "tariffInvoicedCents": 0
+      "tariffInvoicedCents": 0,
+      "cancelledAt": "2026-11-06",
+      "refundCents": 6522,
+      "refundStatus": "vendor_reported",
+      "refundBankSettlementConfirmed": false,
+      "refundSource": "VXB cancellation and refund confirmation email, observed November 6, 2026"
     },
     {
       "id": "digikey",
@@ -143,7 +148,7 @@
     {
       "id": "walmart",
       "vendor": "Walmart",
-      "status": "partially_shipped",
+      "status": "carrier_delivered",
       "orderedAt": "2026-10-26",
       "quotedSubtotalCents": 2983,
       "actualPaidCents": null,
@@ -153,7 +158,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-email-and-authenticated-order-page",
-      "notes": "The documented order totals are unchanged. Shipment records retain confirmed retailer deliveries, a USPS shipment still in transit, and an earlier SF Express dispatch awaiting newer carrier confirmation. Speedy receipt for these shipments remains unconfirmed. Payment is not independently reconciled.",
+      "notes": "The authenticated exact-order page shows all fulfillment groups delivered, observed November 6. The cable-management group arrived November 6; the foam delivery is confirmed by complete order fulfillment without assigning an individual delivery date. Monetary amounts and payment uncertainty are unchanged. Carrier delivery to the shipping address does not establish Speedy receipt or delivery to the recipient.",
       "invoiceItemsCents": 4982,
       "invoiceTotalCents": 5331,
       "shippingInvoicedCents": 0,
@@ -885,7 +890,8 @@
       "quotedTotalCents": 6095,
       "actualPaidCents": null,
       "url": "https://vxb.com/products/dlc32-v2-1-32-bit-offline-controller-board-for-cnc",
-      "notes": "Original VXB order: board without display, offer labeled “for MKS”. An Amazon DLC32 V2.1 kit is the selected replacement candidate; its purchase is not confirmed. Retain the two TMC2209 drivers already ordered. Verify the actual board revision, pinout and condition before assembly. The original quote remains unchanged until a replacement purchase is confirmed."
+      "notes": "Original VXB order: board without display, offer labeled “for MKS”. An Amazon DLC32 V2.1 kit is the selected replacement candidate; its purchase is not confirmed. Retain the two TMC2209 drivers already ordered. Verify the actual board revision, pinout and condition before assembly. The original quote remains unchanged until a replacement purchase is confirmed. VXB confirmed cancellation and reports a refund. An Amazon replacement is planned but not confirmed purchased; this remains the historical planning quote.",
+      "procurementStatus": "pending"
     },
     {
       "id": "digikey-045",
@@ -1442,7 +1448,7 @@
       "id": "vxb-charges-grouped",
       "vendor": "VXB",
       "name": "Taxes, tariffs, shipping and others",
-      "status": "ordered",
+      "status": "cancelled",
       "categoryTotalCents": 427,
       "actualPaidCents": null,
       "includedInVendorOrderTotals": true,
@@ -1508,6 +1514,11 @@
     }
   ],
   "changes": [
+    {
+      "date": "2026-11-06",
+      "title": "Vendor cancellation, carrier deliveries and forwarder arrival verified",
+      "detail": "VXB confirmed cancellation and reports a full $65.22 refund; bank receipt remains unverified. Its original order, charges and label are retained as history and excluded from active totals and tracking. The Amazon replacement purchase remains unconfirmed. Walmart confirms complete carrier fulfillment of its order, including the cable-management arrival on November 6; this does not establish Speedy receipt. Speedy separately confirms another exact project tracking in Costa Rica. The combined observed Speedy amount has been refreshed across the complete account; other quotes, payment and the final consolidated balance remain pending."
+    },
     {
       "date": "2026-11-06",
       "title": "Current Speedy amount refreshed",
@@ -2112,15 +2123,15 @@
       "id": "WMT-PKG-02",
       "vendor": "Walmart",
       "orderRef": "walmart",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "SF Express",
       "title": "Foam",
       "itemIds": [],
       "expectedDeliveryDate": "2026-11-06",
       "deliveredAt": null,
-      "lastChecked": "2026-11-05",
-      "source": "Vendor order or carrier tracking",
-      "notes": "Earlier retailer evidence reports this shipment dispatched. A newer carrier status remains unconfirmed. It is prealerted and consolidated; Speedy receipt is unconfirmed.",
+      "lastChecked": "2026-11-06",
+      "source": "Authenticated Walmart exact-order complete fulfillment and arrival notice, observed November 6",
+      "notes": "Walmart now shows every fulfillment group of this exact order delivered. The individual delivery date for this shipment is not assigned. This confirms carrier delivery to the shipping address, while Speedy receipt and delivery to the recipient remain unconfirmed. The existing prealert and consolidation are retained.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-06",
@@ -2130,19 +2141,20 @@
       "id": "WMT-PKG-03",
       "vendor": "Walmart",
       "orderRef": "walmart",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "USPS",
       "title": "Cable management",
       "itemIds": [],
       "expectedDeliveryDate": "2026-11-09",
       "deliveredAt": null,
-      "lastChecked": "2026-11-05",
-      "source": "USPS exact tracking and earlier Walmart shipment notice",
-      "notes": "USPS reports the shipment in transit as of 2026-11-05. It is prealerted and consolidated. November 9 remains an estimate; carrier delivery and Speedy receipt are unconfirmed.",
+      "lastChecked": "2026-11-06",
+      "source": "Authenticated Walmart exact-order complete fulfillment and arrival notice, observed November 6",
+      "notes": "Walmart confirms carrier delivery on November 6 for the fulfillment group tied to the existing USPS tracking. The earlier November 9 estimate is superseded. This is delivery to the shipping address; Speedy receipt and delivery to the recipient remain unconfirmed. The existing prealert and consolidation are retained.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-06",
-      "trackingAssigned": true
+      "trackingAssigned": true,
+      "carrierDeliveredDate": "2026-11-06"
     },
     {
       "id": "WMT-PREP-04",
@@ -2166,19 +2178,20 @@
       "id": "VXB-PKG-01",
       "vendor": "VXB",
       "orderRef": "vxb",
-      "status": "preparing",
+      "status": "cancelled",
       "carrier": "USPS",
       "title": "Controller board",
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
       "lastChecked": "2026-11-06",
-      "source": "Owner-sent cancellation request, VXB support and existing USPS label evidence",
-      "notes": "Cancellation requested by the owner on November 5; the vendor has not confirmed cancellation or a refund. Preserve the existing USPS label, prealert and consolidation. Carrier acceptance and Speedy receipt remain unconfirmed. The Amazon replacement purchase is not confirmed.",
+      "source": "VXB cancellation and vendor-reported refund confirmation, November 6",
+      "notes": "VXB confirmed cancellation and reports a full refund. This historical label is excluded from the active tracking queue. The original prealert and consolidation are preserved privately. No carrier acceptance, Speedy receipt or Amazon replacement purchase is confirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-06",
-      "trackingAssigned": true
+      "trackingAssigned": true,
+      "cancelledAt": "2026-11-06"
     },
     {
       "id": "WEST-PKG-01",
@@ -2362,13 +2375,13 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-11-05",
-      "source": "Vendor evidence and Speedy package listing",
-      "notes": "Amazon reports delivery on November 2. The shipment is prealerted and consolidated; Speedy confirms receipt in Miami.",
-      "speedyStatus": "received",
-      "speedyLocation": "miami",
+      "lastChecked": "2026-11-06",
+      "source": "Authenticated Speedy exact tracking entry, observed November 6",
+      "notes": "Speedy now lists this exact project tracking in Costa Rica. Carrier delivery, Speedy receipt and arrival in Costa Rica are confirmed separately; delivery to the recipient is still unconfirmed.",
+      "speedyStatus": "in_transit",
+      "speedyLocation": "costa_rica",
       "speedyCheckedAt": "2026-11-06",
-      "speedyConfirmedAt": "2026-11-03",
+      "speedyConfirmedAt": "2026-11-06",
       "trackingAssigned": true
     },
     {
@@ -2404,14 +2417,14 @@
   ],
   "forwardingCharges": {
     "currency": "CRC",
-    "amountCRC": 405000,
+    "amountCRC": 418300,
     "scope": "all_current_packages",
     "quoteStatus": "awaiting_remaining_quotes",
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Authenticated Speedy quoted package charges and owner-confirmed settlement exclusions",
     "observedAt": "2026-11-06",
-    "verifiedAt": "2026-11-06T15:28:00.495Z",
+    "verifiedAt": "2026-11-06T17:30:46.749Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. Excludes historical packages confirmed paid and delivered by the owner, even when Speedy retains Enviado. Every currently quoted unsettled charge is counted once. Remaining quotes and the final consolidated balance are pending. Kept separate from USD purchase totals; payment of the current charges remains unconfirmed."
   }
 }

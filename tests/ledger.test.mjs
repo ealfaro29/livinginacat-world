@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import { createHash } from "node:crypto";
-import { readJSON, root, totals } from "../scripts/lib.mjs";
+import { readJSON, root, totals, activeShipments } from "../scripts/lib.mjs";
 const ledger = await readJSON("data/ledger.json");
 test("equipment estimate reconciles item quotes, vendors and planning allowances", () => {
   assert.equal(
@@ -94,10 +94,37 @@ test("DigiKey cancellation preserves documentary charges without assuming a paym
   );
   assert.equal(order.actualPaidCents, null);
   assert.equal(order.refundCents, null);
-  assert.equal(totals(ledger).confirmedOrderTotal, 298446);
+  assert.equal(totals(ledger).confirmedOrderTotal, 291924);
   assert.equal(order.shippingPaidCents, null);
   assert.equal(order.taxPaidCents, null);
   assert.equal(order.tariffPaidCents, null);
+});
+test("VXB cancellation retains its original amounts and vendor-reported refund outside active tracking", () => {
+  const order = ledger.orders.find((x) => x.id === "vxb");
+  const historicalShipment = ledger.shipments.find((x) => x.id === "VXB-PKG-01");
+  assert.equal(order.status, "cancelled");
+  assert.equal(order.invoiceTotalCents, 6522);
+  assert.equal(order.refundCents, 6522);
+  assert.equal(order.refundStatus, "vendor_reported");
+  assert.equal(order.refundBankSettlementConfirmed, false);
+  assert.equal(order.actualPaidCents, null);
+  assert.equal(historicalShipment.status, "cancelled");
+  assert.equal(historicalShipment.trackingAssigned, true);
+  assert.ok(!activeShipments(ledger).some((x) => x.id === historicalShipment.id));
+  assert.equal(ledger.otherExpenses.find((x) => x.vendor === "VXB").status, "cancelled");
+  assert.equal(totals(ledger).taxesAndOthers, 70046);
+});
+test("Walmart complete carrier fulfillment does not establish Speedy or recipient delivery", () => {
+  assert.equal(ledger.orders.find((x) => x.id === "walmart").status, "carrier_delivered");
+  for (const id of ["WMT-PKG-02", "WMT-PKG-03"]) {
+    const shipment = ledger.shipments.find((x) => x.id === id);
+    assert.equal(shipment.status, "carrier_delivered");
+    assert.equal(shipment.speedyStatus, "unconfirmed");
+    assert.equal(shipment.speedyLocation, null);
+    assert.equal(shipment.deliveredAt, null);
+  }
+  assert.equal(ledger.shipments.find((x) => x.id === "WMT-PKG-03").carrierDeliveredDate, "2026-11-06");
+  assert.equal(ledger.shipments.find((x) => x.id === "WMT-PKG-02").carrierDeliveredDate, undefined);
 });
 test("BoltDepot receipt reconciles owner-selected spares and charges", () => {
   const order = ledger.orders.find((x) => x.id === "boltdepot");
@@ -116,13 +143,13 @@ test("BoltDepot receipt reconciles owner-selected spares and charges", () => {
 test("Walmart grouped costs remain included in the order total", () => {
   const order = ledger.orders.find((x) => x.id === "walmart");
   const extra = ledger.otherExpenses.find((x) => x.id === "walmart-additions-grouped");
-  assert.equal(order.status, "partially_shipped");
+  assert.equal(order.status, "carrier_delivered");
   assert.equal(order.invoiceItemsCents, order.quotedSubtotalCents + extra.categoryTotalCents - order.taxInvoicedCents);
   assert.equal(order.invoiceTotalCents, order.invoiceItemsCents + order.taxInvoicedCents);
   assert.equal(order.invoiceTotalCents, 5331);
   assert.equal(extra.includedInVendorOrderTotals, true);
   assert.ok(extra.categoryTotalCents >= order.taxInvoicedCents);
-  assert.equal(totals(ledger).taxesAndOthers, 70473);
+  assert.equal(totals(ledger).taxesAndOthers, 70046);
   assert.equal(order.actualPaidCents, null);
   assert.equal(extra.actualPaidCents, null);
 });
@@ -135,7 +162,7 @@ test("Bambu order and grouped costs reconcile without double counting", () => {
   assert.equal(extra.includedInVendorOrderTotals, true);
   const confirmedOrders = ledger.orders.reduce((sum, x) => sum + x.invoiceTotalCents, 0);
   assert.equal(confirmedOrders + 419, 308143);
-  assert.equal(totals(ledger).confirmedOrderTotal, confirmedOrders + 419 - ledger.orders.find((x) => x.id === "digikey").invoiceTotalCents);
+  assert.equal(totals(ledger).confirmedOrderTotal, confirmedOrders + 419 - ledger.orders.find((x) => x.id === "digikey").invoiceTotalCents - ledger.orders.find((x) => x.id === "vxb").invoiceTotalCents);
   assert.equal(order.actualPaidCents, 88186);
 });
 test("Mouser replacement is confirmed without reviving the cancelled order or assuming dispatch and payment", () => {
@@ -203,7 +230,7 @@ test("combined forwarder total stays in colones without exposing package details
 });
 
 test("project locations distinguish Speedy progress from carrier delivery", () => {
-  assert.equal(totals(ledger).tracked, 20);
+  assert.equal(totals(ledger).tracked, 19);
   for (const s of ledger.shipments) {
     assert.equal(typeof s.trackingAssigned, "boolean");
     assert.ok(["received", "in_transit", "delivered", "unconfirmed"].includes(s.speedyStatus));

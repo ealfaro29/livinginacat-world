@@ -13,12 +13,14 @@ import {
   esc,
   date,
   labels,
+  activeShipments,
   totals,
   csv,
 } from "./lib.mjs";
 const site = await readJSON("data/site.json"),
   ledger = await readJSON("data/ledger.json"),
   hardware = await readJSON("data/hardware-release.json");
+const projectShipments = activeShipments(ledger);
 const groupedExpenses = ledger.otherExpenses.filter(
   (x) => x.name === "Taxes, tariffs, shipping and others" && x.includedInVendorOrderTotals && !["cancelled", "canceled"].includes(x.status),
 );
@@ -28,9 +30,13 @@ const unquotedNotice = sum.unquotedItems
   ? `${sum.unquotedItems} equipment line remains unquoted and is excluded from this estimate; the local wire purchase is planned, not confirmed.`
   : "";
 const replacementOrder = ledger.orders.find((o) => o.replacesOrderId === "digikey" && !["pending", "cancelled", "canceled"].includes(o.status));
-const cancellationUpdate = replacementOrder
+const replacementUpdate = replacementOrder
   ? `The original DigiKey order remains cancelled, with its documentary amounts retained in the history. The owner and ${replacementOrder.vendor} confirm the replacement order on ${date(replacementOrder.orderedAt)}. The wire is planned for local purchase on ${date(ledger.items.find((x) => x.orderId === "local-sourcing").plannedPurchaseDate)}. Original charges and any refund remain unconfirmed.`
   : "The owner reports that DigiKey lists the order as cancelled. Its original amount is retained in the purchase history. A replacement purchase, any charge and any refund remain unconfirmed.";
+const cancelledControllerOrder = ledger.orders.find((order) => order.id === "vxb" && ["cancelled", "canceled"].includes(order.status));
+const cancellationUpdate = replacementUpdate + (cancelledControllerOrder
+  ? ` VXB also confirmed cancellation and reports a ${money(cancelledControllerOrder.refundCents)} refund; bank receipt remains unverified. Its historical label is excluded from active shipment counts. The Amazon controller replacement purchase remains unconfirmed.`
+  : "");
 
 const assetVersions = Object.fromEntries(
   await Promise.all(
@@ -83,7 +89,7 @@ const intro = (eyebrow, title, text) =>
   `<section class="page-intro wrap"><p class="eyebrow">${eyebrow}</p><h1>${title}</h1><p class="lead">${text}</p></section>`;
 const card = (p) => postCard(p, ledger);
 const crc = (amount) => new Intl.NumberFormat("es-CR", {style: "currency", currency: "CRC", maximumFractionDigits: 0}).format(amount);
-const finances = `<div class="stats"><div><strong>${money(sum.confirmedOrderTotal)}</strong><span>Active orders + domain</span><small>Includes documented tax, shipping and grouped expenses. Bank settlement is not fully reconciled.</small></div><div><strong>${sum.shipped}</strong><span>Reported shipments</span><small>Based on vendor and carrier notices; some parcels still await carrier acceptance.</small></div><div><strong>${hardware.installedPrintedParts}</strong><span>Parts to print</span><small>${hardware.stlDesigns} designs + ${hardware.coupons} fit coupons.</small></div></div><p class="caption">Project shipments: ${ledger.shipments.filter((s) => s.speedyLocation === "costa_rica").length} in Costa Rica · ${ledger.shipments.filter((s) => s.speedyLocation === "miami").length} received in Miami. <a href="/shipments/">Current locations and combined Speedy amount: ${crc(ledger.forwardingCharges.amountCRC)} →</a></p>`;
+const finances = `<div class="stats"><div><strong>${money(sum.confirmedOrderTotal)}</strong><span>Active orders + domain</span><small>Includes documented tax, shipping and grouped expenses. Bank settlement is not fully reconciled.</small></div><div><strong>${sum.shipped}</strong><span>Reported shipments</span><small>Based on vendor and carrier notices; some parcels still await carrier acceptance.</small></div><div><strong>${hardware.installedPrintedParts}</strong><span>Parts to print</span><small>${hardware.stlDesigns} designs + ${hardware.coupons} fit coupons.</small></div></div><p class="caption">Project shipments: ${projectShipments.filter((s) => s.speedyLocation === "costa_rica").length} in Costa Rica · ${projectShipments.filter((s) => s.speedyLocation === "miami").length} received in Miami. <a href="/shipments/">Current locations and combined Speedy amount: ${crc(ledger.forwardingCharges.amountCRC)} →</a></p>`;
 await write(
   "index.html",
   shell(
@@ -152,15 +158,15 @@ await write(
 );
 const locationLabel = (s) => s.status === "returned" ? "Returned to sender" : s.speedyLocation === "costa_rica" ? "In Costa Rica" : s.speedyLocation === "miami" ? "Received in Miami" : s.speedyStatus === "delivered" ? "Delivered to recipient" : "Awaiting Speedy confirmation";
 const locationGroups = [
-  { id: "costa-rica", title: "In Costa Rica", description: "Speedy confirms arrival in Costa Rica. Delivery to the recipient is still unconfirmed.", shipments: ledger.shipments.filter((s) => s.speedyLocation === "costa_rica") },
-  { id: "miami", title: "Received in Miami", description: "Speedy lists these project shipments as received, with Miami as their origin. Arrival in Costa Rica is still unconfirmed.", shipments: ledger.shipments.filter((s) => s.speedyLocation === "miami") },
-  { id: "carrier-returns", title: "Carrier return", description: "The carrier confirms a return to the sender. Each record tracks the vendor resolution and any replacement separately. A return does not establish a refund, receipt by Speedy or delivery to the recipient.", shipments: ledger.shipments.filter((s) => s.status === "returned") },
-  { id: "awaiting-speedy", title: "Awaiting Speedy confirmation", description: "Carrier delivery, a prealert or a consolidation alone does not confirm receipt by Speedy. These shipments have no confirmed current Speedy location.", shipments: ledger.shipments.filter((s) => !s.speedyLocation && s.speedyStatus !== "delivered" && s.status !== "returned") },
-  { id: "delivered", title: "Delivered to recipient", description: "Delivery confirmed by Speedy or the owner.", shipments: ledger.shipments.filter((s) => s.speedyStatus === "delivered") },
+  { id: "costa-rica", title: "In Costa Rica", description: "Speedy confirms arrival in Costa Rica. Delivery to the recipient is still unconfirmed.", shipments: projectShipments.filter((s) => s.speedyLocation === "costa_rica") },
+  { id: "miami", title: "Received in Miami", description: "Speedy lists these project shipments as received, with Miami as their origin. Arrival in Costa Rica is still unconfirmed.", shipments: projectShipments.filter((s) => s.speedyLocation === "miami") },
+  { id: "carrier-returns", title: "Carrier return", description: "The carrier confirms a return to the sender. Each record tracks the vendor resolution and any replacement separately. A return does not establish a refund, receipt by Speedy or delivery to the recipient.", shipments: projectShipments.filter((s) => s.status === "returned") },
+  { id: "awaiting-speedy", title: "Awaiting Speedy confirmation", description: "Carrier delivery, a prealert or a consolidation alone does not confirm receipt by Speedy. These shipments have no confirmed current Speedy location.", shipments: projectShipments.filter((s) => !s.speedyLocation && s.speedyStatus !== "delivered" && s.status !== "returned") },
+  { id: "delivered", title: "Delivered to recipient", description: "Delivery confirmed by Speedy or the owner.", shipments: projectShipments.filter((s) => s.speedyStatus === "delivered") },
 ];
 const visibleLocationGroups = locationGroups.filter((g) => !["delivered", "carrier-returns"].includes(g.id) || g.shipments.length);
-const locationSummary = `<div class="stats shipment-stats" style="--shipment-groups:${visibleLocationGroups.length}">${visibleLocationGroups.map((g) => `<div><strong>${g.shipments.length}</strong><span><a href="#${g.id}">${g.title} ↓</a></span><small>Project shipments only</small></div>`).join("")}</div>`;
-const trackingCoverage = `<p class="caption"><strong>Tracking assigned: ${sum.tracked} of ${ledger.shipments.length} recorded project shipments.</strong> Tracking assignment alone does not confirm carrier acceptance or Speedy receipt. Tracking coverage refers to the recorded project shipments.</p>`;
+const locationSummary = `<div class="stats shipment-stats" style="--shipment-groups:${visibleLocationGroups.length}">${visibleLocationGroups.map((g) => `<div><strong>${g.shipments.length}</strong><span>${g.shipments.length ? `<a href="#${g.id}">${g.title} ↓</a>` : g.title}</span><small>Project shipments only</small></div>`).join("")}</div>`;
+const trackingCoverage = `<p class="caption"><strong>Tracking assigned: ${sum.tracked} of ${projectShipments.length} recorded project shipments.</strong> Tracking assignment alone does not confirm carrier acceptance or Speedy receipt. Tracking coverage refers to the recorded project shipments.</p>`;
 const shipCard = (s) =>
   `<article class="shipment-card"><div class="card-meta"><span>${esc(s.id)}</span><span class="badge">${locationLabel(s)}</span></div><h3>${esc(s.title ?? (s.id === "AMZ-PKG-01" ? "Assembly file" : "Project shipment"))}</h3><p class="carrier">${esc(s.vendor)} · ${esc(s.carrier ?? "Carrier pending")}</p><dl><div><dt>Carrier status</dt><dd>${badge(s.status)}</dd></div><div><dt>${s.expectedDeliveryDate ? "Estimated carrier arrival" : "Planned dispatch"}</dt><dd>${date(s.expectedDeliveryDate ?? s.expectedShipDate)}</dd></div><div><dt>Delivery to recipient</dt><dd>${s.deliveredAt ? date(s.deliveredAt) : "Unconfirmed"}</dd></div><div><dt>Speedy checked</dt><dd>${date(s.speedyCheckedAt)}</dd></div></dl><p>${esc(s.notes)}</p><small>Source: ${esc(s.source ?? "Vendor evidence")} · ${esc(s.orderRef)}</small></article>`;
 await write(
@@ -264,7 +270,7 @@ await write(
       (x) =>
         `- ${x.vendor}: ${money(x.invoiceTotalCents)}${x.invoiceTotalFinal === false ? " provisional" : ""}; ${labels[x.status]}.`,
     )
-    .join("\n")}\n\n## Shipping and Speedy\n\nTracking assigned: ${sum.tracked} of ${ledger.shipments.length} recorded project shipments. ${cancellationUpdate} Tracking assignment alone does not confirm carrier acceptance or Speedy receipt.\n\nProject shipment locations checked ${ledger.updatedAt}: ${ledger.shipments.filter((s) => s.speedyLocation === "costa_rica").length} in Costa Rica; ${ledger.shipments.filter((s) => s.speedyLocation === "miami").length} received in Miami; ${ledger.shipments.filter((s) => !s.speedyLocation && s.speedyStatus !== "delivered" && s.status !== "returned").length} awaiting Speedy confirmation; ${ledger.shipments.filter((s) => s.status === "returned").length} with a carrier return. Carrier delivery does not establish Speedy receipt or delivery to the recipient. A carrier return does not establish a refund or replacement.\n\nSpeedy - Taxes, tariffs, shipping and others: CRC ${forwarding.amountCRC.toLocaleString("en-US")} combined amount shown as Total a pagar on ${forwarding.observedAt}. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.\n`,
+    .join("\n")}\n\n## Shipping and Speedy\n\nTracking assigned: ${sum.tracked} of ${projectShipments.length} recorded project shipments. ${cancellationUpdate} Tracking assignment alone does not confirm carrier acceptance or Speedy receipt.\n\nProject shipment locations checked ${ledger.updatedAt}: ${projectShipments.filter((s) => s.speedyLocation === "costa_rica").length} in Costa Rica; ${projectShipments.filter((s) => s.speedyLocation === "miami").length} received in Miami; ${projectShipments.filter((s) => !s.speedyLocation && s.speedyStatus !== "delivered" && s.status !== "returned").length} awaiting Speedy confirmation; ${projectShipments.filter((s) => s.status === "returned").length} with a carrier return. Carrier delivery does not establish Speedy receipt or delivery to the recipient. A carrier return does not establish a refund or replacement.\n\nSpeedy - Taxes, tariffs, shipping and others: CRC ${forwarding.amountCRC.toLocaleString("en-US")} combined amount shown as Total a pagar on ${forwarding.observedAt}. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.\n`,
 );
 await fs.copyFile(
   new URL("docs/PROJECT.md", root),
