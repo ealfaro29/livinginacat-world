@@ -222,7 +222,9 @@ test("a confirmed carrier return keeps recipient delivery and reimbursement unco
   assert.equal(shipment.speedyStatus, "unconfirmed");
   assert.equal(shipment.deliveredAt, null);
   assert.equal(shipment.expectedDeliveryDate, null);
-  assert.match(shipment.notes, /refund and replacement remain unconfirmed/i);
+  assert.equal(shipment.replacementStatus, "awaiting_dispatch");
+  assert.equal(shipment.replacementTrackingAssigned, false);
+  assert.equal(shipment.trackingAssigned, true);
   assert.ok(ledger.orders.find((x) => x.id === "bambu-lab").actualPaidCents > 0);
   assert.equal(totals(ledger).shipped, 19);
 });

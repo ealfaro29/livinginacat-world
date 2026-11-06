@@ -52,7 +52,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-and-authenticated-order-summary",
-      "notes": "Documented order totals and the recorded payment are unchanged. Speedy lists the UPS project shipment in Costa Rica. OnTrac confirms a carrier return for another project shipment as of 2026-11-05. Refund and replacement remain unconfirmed. Equipment prices remain the original planning quote; bank settlement has not been independently reconciled.",
+      "notes": "Documented order totals and the recorded payment are unchanged. Speedy lists the UPS project shipment in Costa Rica. OnTrac confirms a carrier return for another project shipment as of 2026-11-05. Refund and replacement remain unconfirmed. Equipment prices remain the original planning quote; bank settlement has not been independently reconciled. November 6: Bambu Lab confirms the accessories shipment returned and offered a replacement at no additional vendor charge. The owner replied; replacement dispatch and tracking remain pending. Original order amounts and recorded payment are retained; no refund is confirmed.",
       "invoiceTotalCents": 88186,
       "invoiceItemsCents": 84718,
       "shippingInvoicedCents": 699,
@@ -1510,6 +1510,11 @@
   "changes": [
     {
       "date": "2026-11-06",
+      "title": "Replacement offered for the returned shipment",
+      "detail": "Bambu Lab confirms the returned shipment is back with the vendor and offered a replacement at no additional vendor charge. The owner replied to the support request. Replacement dispatch, new tracking and recipient delivery remain unconfirmed; no refund is assumed. The original returned shipment and purchase evidence are retained. The current combined Speedy amount remains CRC 381,000, with further quotes and the final consolidated balance still pending."
+    },
+    {
+      "date": "2026-11-06",
       "title": "Controller cancellation request sent; pending deliveries reviewed",
       "detail": "The owner sent the VXB cancellation request on November 5; vendor confirmation, any refund and the Amazon replacement purchase remain unconfirmed. The original order stays active. Mouser still awaits dispatch, tracking and its final invoice. The current combined Speedy amount remains CRC 381,000 after excluding owner-confirmed historical settlements; remaining quotes and the final balance are pending. Carrier delivery, Speedy receipt and delivery to the recipient remain separate facts. The local wire purchase planned for November 6 is not yet confirmed."
     },
@@ -2198,13 +2203,16 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-11-05",
-      "source": "Official OnTrac tracking result",
-      "notes": "OnTrac confirms a return to the sender as of 2026-11-05. The return date, refund and replacement remain unconfirmed. Speedy receipt and delivery to the recipient are unconfirmed. The owner confirms contacting the vendor on November 5; a response remains pending.",
+      "lastChecked": "2026-11-06",
+      "source": "Bambu Lab support and owner reply, November 6; exact original shipment matched",
+      "notes": "Bambu Lab confirms the shipment returned to the vendor and offered a replacement at no additional vendor charge on November 6. The owner replied with the requested delivery information. Replacement dispatch, new tracking and recipient delivery remain unconfirmed; no refund is confirmed. The original carrier return remains recorded. Speedy receipt is unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-06",
-      "trackingAssigned": true
+      "trackingAssigned": true,
+      "replacementStatus": "awaiting_dispatch",
+      "replacementTrackingAssigned": false,
+      "replacementOfferedAt": "2026-11-06"
     },
     {
       "id": "BAMBU-PREP-01",
@@ -2398,7 +2406,7 @@
     "finalConsolidatedChargeConfirmed": false,
     "source": "Authenticated Speedy quoted package charges and owner-confirmed settlement exclusions",
     "observedAt": "2026-11-06",
-    "verifiedAt": "2026-11-06T06:26:04.380Z",
+    "verifiedAt": "2026-11-06T07:27:01.209Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. Excludes historical packages confirmed paid and delivered by the owner, even when Speedy retains Enviado. Every currently quoted unsettled charge is counted once. Remaining quotes and the final consolidated balance are pending. Kept separate from USD purchase totals; payment of the current charges remains unconfirmed."
   }
 }
