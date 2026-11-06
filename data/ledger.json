@@ -1510,6 +1510,11 @@
   "changes": [
     {
       "date": "2026-11-05",
+      "title": "Historical settled charges removed from the current Speedy amount",
+      "detail": "The owner confirms that historical shipments still marked Enviado were already received and paid. Those settled records are excluded from the current aggregate, while their original observations are preserved privately. The corrected combined Total a pagar for all current packages is CRC 381,000. The prior aggregate included historical settled records and must not be treated as current debt. Further quotes, payment of current charges and the final consolidated balance remain unconfirmed. Project shipment locations and USD order totals are unchanged."
+    },
+    {
+      "date": "2026-11-05",
       "title": "Amazon controller replacement planned; account review completed",
       "detail": "An Amazon DLC32 V2.1 kit was selected as a replacement candidate for the delayed VXB controller after checking the reference design and published hardware documents. The Amazon purchase, VXB cancellation and any refund remain unconfirmed; the original order is still included in active totals. The latest complete Speedy account review confirms the existing shipment states and the observed combined Total a pagar of CRC 646,500. Further charges await quotation; payment and the final consolidated balance remain unconfirmed. Mouser still awaits dispatch, tracking and a final invoice; local wire purchase remains planned for November 6."
     },
@@ -2381,14 +2386,14 @@
   ],
   "forwardingCharges": {
     "currency": "CRC",
-    "amountCRC": 646500,
+    "amountCRC": 381000,
     "scope": "all_current_packages",
     "quoteStatus": "awaiting_remaining_quotes",
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
-    "source": "Speedy current package listing and all current consolidations: Total a pagar",
+    "source": "Authenticated Speedy quoted package charges and owner-confirmed settlement exclusions",
     "observedAt": "2026-11-05",
-    "verifiedAt": "2026-11-06T05:29:16.728Z",
-    "notes": "Includes all current Speedy packages with no project-membership filter. The displayed amount sums every currently quoted charge once. Remaining unquoted charges and the final consolidated balance are pending. Kept separate from USD purchase totals; payment remains unconfirmed."
+    "verifiedAt": "2026-11-06T05:54:07.232411+00:00",
+    "notes": "Includes all current Speedy packages with no project-membership filter. Excludes historical packages confirmed paid and delivered by the owner, even when Speedy retains Enviado. Every currently quoted unsettled charge is counted once. Remaining quotes and the final consolidated balance are pending. Kept separate from USD purchase totals; payment of the current charges remains unconfirmed."
   }
 }

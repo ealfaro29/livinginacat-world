@@ -24,3 +24,14 @@ test("repeated package references are counted once and conflicting amounts block
     { tracking: "FIXTURE-A", amountCRC: 2000 },
   ]), /Conflicting/);
 });
+
+test("confirmed settlements are excluded even when Speedy retains Enviado, without excluding other Enviado charges", () => {
+  const result = aggregateForwardingCharges([
+    { tracking: "FIXTURE-SETTLED", amountCRC: 2700, status: "Enviado" },
+    { tracking: "FIXTURE-CURRENT", amountCRC: 4000, status: "Enviado" },
+    { tracking: "FIXTURE-SETTLED-UNQUOTED", amountCRC: null },
+  ], { settledTrackings: ["FIXTURE-SETTLED", "FIXTURE-SETTLED-UNQUOTED"] });
+  assert.equal(result.amountCRC, 4000);
+  assert.equal(result.quoteStatus, "currently_quoted");
+  assert.equal(JSON.stringify(result).includes("FIXTURE"), false);
+});

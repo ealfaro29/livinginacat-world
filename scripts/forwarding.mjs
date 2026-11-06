@@ -1,8 +1,11 @@
 // Consume the complete current Speedy review. Membership in the project does
 // not affect the amount, and no package-level fields leave this calculation.
-export function aggregateForwardingCharges(packages, { hasUnquotedPackages = false } = {}) {
+export function aggregateForwardingCharges(packages, { hasUnquotedPackages = false, settledTrackings = [] } = {}) {
   const amounts = new Map();
+  const settled = new Set(settledTrackings);
   for (const pkg of packages) {
+    // Settlement is explicit evidence, independent of an unchanged Speedy label.
+    if (settled.has(pkg.tracking)) continue;
     if (pkg.amountCRC == null) {
       hasUnquotedPackages = true;
       continue;
