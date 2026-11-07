@@ -1,10 +1,10 @@
 # living in a cat world · Project guide
 
-Updated: November 6, 2026. DIY prototype without physical assembly or testing. Purchases resumed, one store at a time. See the current [purchase record](/purchases/) for confirmed orders and payment status.
+Updated: November 7, 2026. DIY prototype without physical assembly or testing. Purchases resumed, one store at a time. See the current [purchase record](/purchases/) for confirmed orders and payment status.
 
 The owner and Mouser confirm a ten-component replacement order for $82.07 after the DigiKey cancellation. The Adafruit 412 solenoid, 5648 driver and original harness references are retained. NKK S301T replaces S301 and uses screw terminals; check the existing printed guard and terminal clearance before assembly. The order awaits dispatch, tracking and a final invoice; bank settlement is unconfirmed. Suitable 18 AWG stranded copper wire is planned for local purchase in Costa Rica on November 6. Its supplier, length and price are still unknown; there is no confirmed Remington order.
 
-The delayed VXB controller has an [Amazon DLC32 V2.1 replacement candidate](https://www.amazon.com/dp/B0GY43P1CL). The [reference configuration](https://github.com/physiclaw/PhysiClaw/blob/main/firmware/config.yaml) specifies MKS DLC32 V2.1 and CoreXY. The published V2.1 hardware schematics, pinout and dimensions match the Makerbase documents; physical inspection and commissioning remain necessary. Keep the two TMC2209 drivers already ordered. The owner sent the VXB cancellation request on November 5. The Amazon purchase, VXB cancellation and any refund are not confirmed, so the original VXB order remains active.
+The [Amazon DLC32 V2.1 replacement kit](https://www.amazon.com/dp/B0GY43P1CL) is confirmed ordered on November 7. Amazon shows Ordered with estimated arrival November 10; dispatch, tracking, carrier and a final invoice remain unconfirmed. The protected order confirmation does not establish a bank charge. VXB confirmed cancellation and reports a full refund; bank receipt remains unverified. Its original amounts and shipment are retained as cancelled history. The [reference configuration](https://github.com/physiclaw/PhysiClaw/blob/main/firmware/config.yaml) specifies MKS DLC32 V2.1 and CoreXY. The published V2.1 hardware schematics, pinout and dimensions match the Makerbase documents; physical inspection and commissioning remain necessary. Keep the two TMC2209 drivers already ordered.
 
 ## Goal
 

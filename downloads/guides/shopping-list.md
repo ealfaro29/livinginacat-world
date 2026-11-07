@@ -1,8 +1,8 @@
 # Shopping list · living in a cat world
 
-Updated: 2026-11-06. USD. Item quotes; tax and shipping excluded unless noted. Purchases in progress, one store at a time.
+Updated: 2026-11-07. USD. Item quotes; tax and shipping excluded unless noted. Purchases in progress, one store at a time.
 
-Equipment quoted, including allowance: $2,885.96. Listed item quotes: $2,385.96; unallocated equipment allowance: $500.00. The allowance is a planning amount, not a vendor quote, order or payment. Payment and shipping status: https://livinginacat.world/purchases/. 1 equipment line remains unquoted and is excluded from this estimate; the local wire purchase is planned, not confirmed.
+Equipment quoted, including allowance: $2,864.51. Listed item quotes: $2,364.51; unallocated equipment allowance: $500.00. The allowance is a planning amount, not a vendor quote, order or payment. Payment and shipping status: https://livinginacat.world/purchases/. 1 equipment line remains unquoted and is excluded from this estimate; the local wire purchase is planned, not confirmed.
 
 | Store | Item | Quantity | Unit price | Subtotal | Status | Offer |
 |---|---|---:|---:|---:|---|---|
@@ -49,7 +49,7 @@ Equipment quoted, including allowance: $2,885.96. Listed item quotes: $2,385.96;
 | FramingTech | GS20-05W · complete bracket kit | 8 | $3.46 | $27.68 | Order confirmed | [Product](https://www.framingtech.com/shop/gs20-05w-gusset-20x20-with-5-slot-hardware-432568) |
 | FramingTech | RN05BM3 · M3, slot 5 | 38 | $2.02 | $76.76 | Order confirmed | [Product](https://www.framingtech.com/shop/rn05bm3-m3-roll-in-t-nut-with-ball-plunger-5-slot-484695) |
 | FramingTech | RN05BM5 · M5, slot 5 | 20 | $1.42 | $28.40 | Order confirmed | [Product](https://www.framingtech.com/shop/rn05bm5-m5-roll-in-t-nut-with-ball-plunger-5-slot-484697) |
-| VXB | DLC32 V2.1 · 1169-0401 | 1 | $60.95 | $60.95 | Not ordered | [Product](https://vxb.com/products/dlc32-v2-1-32-bit-offline-controller-board-for-cnc) |
+| Amazon | MKS DLC32 V2.1 controller kit with TS24 display | 1 | $39.50 | $39.50 | Order confirmed | [Product](https://www.amazon.com/dp/B0GY43P1CL) |
 | Mouser | NKK S301T · SPST switch | 1 | $15.78 | $15.78 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/NKK-Switches/S301T?qs=0mfovmz9yvpf4HNSyeqf2Q%3D%3D) |
 | Mouser | Littelfuse FHAS101 · fuse holder | 1 | $13.36 | $13.36 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Littelfuse/FHAS101?qs=BJlw7L4Cy790Sq9g31NH4g%3D%3D) |
 | Mouser | Littelfuse 0287003.U · ATO 3 A fuse | 1 | $0.50 | $0.50 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Littelfuse/0287003.U?qs=TVaBpCI%2FeOjpzUEhB65zGA%3D%3D) |
@@ -85,11 +85,11 @@ Equipment quoted, including allowance: $2,885.96. Listed item quotes: $2,385.96;
 
 - Additional equipment allowance: $500.00. Unallocated planning allowance requested by the project owner. Not a vendor quote, purchase order or verified payment.
 
-Item quotes $2,385.96 + allowance $500.00 = total estimate $2,885.96.
+Item quotes $2,364.51 + allowance $500.00 = total estimate $2,864.51.
 
 ## Reconciliation
 
-Amazon: 6 orders totaling $1,534.50, including the Taxes, tariffs, shipping and others category. Current carrier and Speedy locations are listed in the shipment record. AMZ-06 adds a pack of frame joining plates after the original estimate. The owner confirms fulfilled orders are paid. All recorded Amazon order payments are included. Bank settlement has not been independently reconciled. Taxes, tariffs, shipping and others: $700.46 (Amazon: $421.34; Walmart: $23.48; Bambu Lab: $89.87; FramingTech: $121.51; BoltDepot: $10.12; PhotonLight: $8.95; West3D: $7.56; Mouser: $17.63). Already included in vendor order totals. FramingTech: $300.66 paid; shipping remains provisional. West3D: $17.55 paid per vendor invoice. Domain: $4.19 paid. Owner- or vendor-confirmed payments: $2,783.86, a partial subtotal. Shipped items of a partially shipped order are excluded until their payment can be allocated reliably.
+Amazon: 7 orders totaling $1,598.16, including the Taxes, tariffs, shipping and others category. Current carrier and Speedy locations are listed in the shipment record. AMZ-06 adds a pack of frame joining plates after the original estimate. The owner confirms fulfilled orders are paid. Unconfirmed order payments remain excluded from the paid subtotal. Bank settlement has not been independently reconciled. Taxes, tariffs, shipping and others: $724.62 (Amazon: $445.50; Walmart: $23.48; Bambu Lab: $89.87; FramingTech: $121.51; BoltDepot: $10.12; PhotonLight: $8.95; West3D: $7.56; Mouser: $17.63). Already included in vendor order totals. FramingTech: $300.66 paid; shipping remains provisional. West3D: $17.55 paid per vendor invoice. Domain: $4.19 paid. Owner- or vendor-confirmed payments: $2,783.86, a partial subtotal. Shipped items of a partially shipped order are excluded until their payment can be allocated reliably.
 
 Documentary vendor order totals, including cancelled orders (see the purchase record for status):
 - Bambu Lab: $881.86; Carrier exception.
@@ -103,8 +103,8 @@ Documentary vendor order totals, including cancelled orders (see the purchase re
 
 ## Shipping and Speedy
 
-Tracking assigned: 19 of 20 recorded project shipments. The original DigiKey order remains cancelled, with its documentary amounts retained in the history. The owner and Mouser confirm the replacement order on November 5, 2026. The wire is planned for local purchase on November 6, 2026. Original charges and any refund remain unconfirmed. VXB also confirmed cancellation and reports a $65.22 refund; bank receipt remains unverified. Its historical label is excluded from active shipment counts. The Amazon controller replacement purchase remains unconfirmed. Tracking assignment alone does not confirm carrier acceptance or Speedy receipt.
+Tracking assigned: 19 of 21 recorded project shipments. The original DigiKey order remains cancelled, with its documentary amounts retained in the history. The owner and Mouser confirm the replacement order on November 5, 2026. The wire is planned for local purchase on November 6, 2026. Original charges and any refund remain unconfirmed. VXB also confirmed cancellation and reports a $65.22 refund; bank receipt remains unverified. Its historical label is excluded from active shipment counts. The Amazon controller replacement purchase remains unconfirmed. Tracking assignment alone does not confirm carrier acceptance or Speedy receipt.
 
-Project shipment locations checked 2026-11-06: 9 in Costa Rica; 0 received in Miami; 10 awaiting Speedy confirmation; 1 with a carrier return. Carrier delivery does not establish Speedy receipt or delivery to the recipient. A carrier return does not establish a refund or replacement.
+Project shipment locations checked 2026-11-07: 9 in Costa Rica; 0 received in Miami; 11 awaiting Speedy confirmation; 1 with a carrier return. Carrier delivery does not establish Speedy receipt or delivery to the recipient. A carrier return does not establish a refund or replacement.
 
-Speedy - Taxes, tariffs, shipping and others: CRC 418,300 combined amount shown as Total a pagar on 2026-11-06. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.
+Speedy - Taxes, tariffs, shipping and others: CRC 418,300 combined amount shown as Total a pagar on 2026-11-07. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.

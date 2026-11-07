@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-06",
+  "updatedAt": "2026-11-07",
   "currency": "USD",
   "purchasesPaused": false,
-  "equipmentQuotedTotalCents": 288596,
+  "equipmentQuotedTotalCents": 286451,
   "equipmentAllowances": [
     {
       "id": "equipment-allowance-2026-10-26",
@@ -24,9 +24,9 @@
     {
       "id": "amazon",
       "vendor": "Amazon",
-      "status": "carrier_delivered",
+      "status": "partially_shipped",
       "orderedAt": "2026-10-26",
-      "quotedSubtotalCents": 111657,
+      "quotedSubtotalCents": 115607,
       "actualPaidCents": 153450,
       "shippingPaidCents": null,
       "taxPaidCents": null,
@@ -34,10 +34,10 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "authenticated-order-page",
-      "notes": "All recorded Amazon orders are carrier-delivered. Owner-confirmed payments include the complete documented order totals and grouped Taxes, tariffs, shipping and others. Bank settlement remains unverified.",
-      "invoiceTotalCents": 153450,
+      "notes": "Earlier fulfilled Amazon orders retain their owner-confirmed payment subtotal. A controller replacement is confirmed ordered on November 7, awaiting dispatch, tracking, carrier and final invoice. Its bank settlement is unconfirmed. Grouped charges are included in the documentary order totals.",
+      "invoiceTotalCents": 159816,
       "paymentEvidence": "Owner confirmation that shipped purchases are paid. Complete carrier delivery and unchanged documentary order totals verified on 2026-11-05. Bank settlement is not independently verified.",
-      "paymentPartial": false
+      "paymentPartial": true
     },
     {
       "id": "bambu-lab",
@@ -882,16 +882,26 @@
     },
     {
       "id": "vxb-044",
-      "vendor": "VXB",
-      "orderId": "vxb",
-      "name": "DLC32 V2.1 · 1169-0401",
+      "vendor": "Amazon",
+      "orderId": "amazon",
+      "name": "MKS DLC32 V2.1 controller kit with TS24 display",
       "quantity": 1,
-      "quotedUnitCents": 6095,
-      "quotedTotalCents": 6095,
+      "quotedUnitCents": 3950,
+      "quotedTotalCents": 3950,
       "actualPaidCents": null,
-      "url": "https://vxb.com/products/dlc32-v2-1-32-bit-offline-controller-board-for-cnc",
-      "notes": "Original VXB order: board without display, offer labeled “for MKS”. An Amazon DLC32 V2.1 kit is the selected replacement candidate; its purchase is not confirmed. Retain the two TMC2209 drivers already ordered. Verify the actual board revision, pinout and condition before assembly. The original quote remains unchanged until a replacement purchase is confirmed. VXB confirmed cancellation and reports a refund. An Amazon replacement is planned but not confirmed purchased; this remains the historical planning quote.",
-      "procurementStatus": "pending"
+      "url": "https://www.amazon.com/dp/B0GY43P1CL",
+      "notes": "Amazon replacement ordered November 7. Retain the two TMC2209 drivers already ordered. Verify the actual board revision, pinout and physical fit before assembly. The cancelled VXB quote remains historical in previousProcurement.",
+      "procurementStatus": "ordered",
+      "previousProcurement": {
+        "vendor": "VXB",
+        "orderId": "vxb",
+        "name": "DLC32 V2.1 · 1169-0401",
+        "quotedUnitCents": 6095,
+        "quotedTotalCents": 6095,
+        "url": "https://vxb.com/products/dlc32-v2-1-32-bit-offline-controller-board-for-cnc"
+      },
+      "orderUnitCents": 3950,
+      "shipmentOrderRef": "AMZ-07"
     },
     {
       "id": "digikey-045",
@@ -1407,7 +1417,7 @@
       "includedInVendorOrderTotals": true,
       "evidenceLevel": "authenticated-order-page-and-owner-classification",
       "notes": "Included in the vendor order total.",
-      "categoryTotalCents": 42134
+      "categoryTotalCents": 44550
     },
     {
       "id": "walmart-additions-grouped",
@@ -1514,6 +1524,11 @@
     }
   ],
   "changes": [
+    {
+      "date": "2026-11-07",
+      "title": "Amazon controller replacement confirmed",
+      "detail": "The DLC32 V2.1 replacement is confirmed ordered from Amazon. The current equipment line replaces the cancelled VXB quote while retaining its history. Amazon shows Ordered with estimated arrival November 10; tracking, carrier, final invoice and bank settlement remain unconfirmed. Grouped costs are updated once at vendor level."
+    },
     {
       "date": "2026-11-06",
       "title": "Vendor cancellation, carrier deliveries and forwarder arrival verified",
@@ -1996,6 +2011,23 @@
       "notes": "Amazon carrier delivery is confirmed. Speedy currently lists the project shipment in Costa Rica. The owner confirms shipped purchases are paid; bank settlement remains unverified.",
       "paymentEvidence": "owner-confirmed-shipped-orders-paid",
       "lastChecked": "2026-11-05"
+    },
+    {
+      "id": "AMZ-07",
+      "status": "ordered",
+      "orderedAt": "2026-11-07",
+      "currency": "USD",
+      "itemIds": [
+        "vxb-044"
+      ],
+      "orderTotalCents": 6366,
+      "actualPaidCents": null,
+      "costVisibility": "vendor_grouped",
+      "evidenceLevel": "authenticated-order-confirmation",
+      "sourceDate": "2026-11-07",
+      "lastChecked": "2026-11-07",
+      "invoiceVerified": false,
+      "notes": "Confirmed controller replacement. Amazon tracking shows Ordered, with estimated arrival November 10. Tracking, carrier, final invoice and bank settlement remain unconfirmed. Taxes, tariffs, shipping and others are grouped at vendor level."
     }
   ],
   "shipments": [
@@ -2413,6 +2445,25 @@
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-06",
       "trackingAssigned": false
+    },
+    {
+      "id": "AMZ-PKG-11",
+      "vendor": "Amazon",
+      "orderRef": "AMZ-07",
+      "status": "preparing",
+      "carrier": null,
+      "itemIds": [
+        "vxb-044"
+      ],
+      "expectedDeliveryDate": "2026-11-10",
+      "deliveredAt": null,
+      "lastChecked": "2026-11-07",
+      "source": "Authenticated Amazon order and tracking pages",
+      "notes": "Amazon shows Ordered. This is an untracked preparation record, not dispatch or Speedy receipt. Final invoice and bank settlement remain unconfirmed.",
+      "speedyStatus": "unconfirmed",
+      "speedyLocation": null,
+      "speedyCheckedAt": "2026-11-07",
+      "trackingAssigned": false
     }
   ],
   "forwardingCharges": {
@@ -2423,8 +2474,8 @@
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Authenticated Speedy quoted package charges and owner-confirmed settlement exclusions",
-    "observedAt": "2026-11-06",
-    "verifiedAt": "2026-11-06T17:30:46.749Z",
+    "observedAt": "2026-11-07",
+    "verifiedAt": "2026-11-07T09:35:41.304Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. Excludes historical packages confirmed paid and delivered by the owner, even when Speedy retains Enviado. Every currently quoted unsettled charge is counted once. Remaining quotes and the final consolidated balance are pending. Kept separate from USD purchase totals; payment of the current charges remains unconfirmed."
   }
 }
