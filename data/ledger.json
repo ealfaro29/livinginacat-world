@@ -1530,6 +1530,11 @@
   "changes": [
     {
       "date": "2026-11-07",
+      "title": "Mouser prealert confirmed",
+      "detail": "The Mouser shipment is prealerted in Speedy with the authentic final invoice and all ten matching article entries. Consolidation awaits a second eligible package; Speedy requires at least two. Prealerting does not confirm carrier delivery or receipt by Speedy."
+    },
+    {
+      "date": "2026-11-07",
       "title": "Combined Speedy observation updated",
       "detail": "The observed combined Speedy Total a pagar is ₡430,300 for all current account packages, counted once. Some packages remain unquoted; this is not a verified final consolidated balance or payment."
     },
@@ -2454,13 +2459,13 @@
       "deliveredAt": null,
       "lastChecked": "2026-11-07",
       "source": "Authentic Mouser final invoice, shipping email and authenticated order details",
-      "notes": "Mouser confirms all ten references shipped. FedEx tracking is assigned; carrier acceptance, delivery date and Speedy receipt are not independently confirmed. Speedy prealert remains pending.",
+      "notes": "Mouser confirms all ten references shipped with FedEx tracking assigned. Speedy prealert is confirmed with the authentic final invoice and matching article values. Consolidation awaits a second eligible package because Speedy requires at least two. Carrier acceptance, delivery date and Speedy receipt remain unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-06",
+      "speedyCheckedAt": "2026-11-07",
       "trackingAssigned": true,
       "invoiceVerified": true,
-      "prealertStatus": "awaiting_submission"
+      "prealertStatus": "confirmed"
     },
     {
       "id": "AMZ-PKG-11",
