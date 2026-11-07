@@ -88,8 +88,8 @@ test("Amazon controller replacement preserves cancellation, privacy and unconfir
   assert.equal(shipment.deliveredAt, null);
 });
 test("owner-confirmed shipped payments are included without assuming delivery", () => {
-  assert.equal(totals(ledger).verifiedPaid, 278386);
-  assert.equal(totals(ledger).shipped, 19);
+  assert.equal(totals(ledger).verifiedPaid, 287108);
+  assert.equal(totals(ledger).shipped, 20);
   assert.equal(
     ledger.amazonOrders.filter((x) => x.status === "payment_attention").length,
     0,
@@ -116,7 +116,7 @@ test("DigiKey cancellation preserves documentary charges without assuming a paym
   );
   assert.equal(order.actualPaidCents, null);
   assert.equal(order.refundCents, null);
-  assert.equal(totals(ledger).confirmedOrderTotal, 298290);
+  assert.equal(totals(ledger).confirmedOrderTotal, 298805);
   assert.equal(order.shippingPaidCents, null);
   assert.equal(order.taxPaidCents, null);
   assert.equal(order.tariffPaidCents, null);
@@ -134,7 +134,7 @@ test("VXB cancellation retains its original amounts and vendor-reported refund o
   assert.equal(historicalShipment.trackingAssigned, true);
   assert.ok(!activeShipments(ledger).some((x) => x.id === historicalShipment.id));
   assert.equal(ledger.otherExpenses.find((x) => x.vendor === "VXB").status, "cancelled");
-  assert.equal(totals(ledger).taxesAndOthers, 72462);
+  assert.equal(totals(ledger).taxesAndOthers, 72977);
 });
 test("Walmart complete carrier fulfillment does not establish Speedy or recipient delivery", () => {
   assert.equal(ledger.orders.find((x) => x.id === "walmart").status, "carrier_delivered");
@@ -171,7 +171,7 @@ test("Walmart grouped costs remain included in the order total", () => {
   assert.equal(order.invoiceTotalCents, 5331);
   assert.equal(extra.includedInVendorOrderTotals, true);
   assert.ok(extra.categoryTotalCents >= order.taxInvoicedCents);
-  assert.equal(totals(ledger).taxesAndOthers, 72462);
+  assert.equal(totals(ledger).taxesAndOthers, 72977);
   assert.equal(order.actualPaidCents, null);
   assert.equal(extra.actualPaidCents, null);
 });
@@ -183,33 +183,39 @@ test("Bambu order and grouped costs reconcile without double counting", () => {
   assert.ok(extra.categoryTotalCents >= order.taxInvoicedCents + order.shippingInvoicedCents);
   assert.equal(extra.includedInVendorOrderTotals, true);
   const confirmedOrders = ledger.orders.reduce((sum, x) => sum + x.invoiceTotalCents, 0);
-  assert.equal(confirmedOrders + 419, 314509);
+  assert.equal(confirmedOrders + 419, 315024);
   assert.equal(totals(ledger).confirmedOrderTotal, confirmedOrders + 419 - ledger.orders.find((x) => x.id === "digikey").invoiceTotalCents - ledger.orders.find((x) => x.id === "vxb").invoiceTotalCents);
   assert.equal(order.actualPaidCents, 88186);
 });
-test("Mouser replacement is confirmed without reviving the cancelled order or assuming dispatch and payment", () => {
+test("Mouser final invoice and dispatch preserve cancellation and separate vendor payment from bank settlement", () => {
   const order = ledger.orders.find((x) => x.id === "mouser");
   const replaced = ledger.orders.find((x) => x.id === order.replacesOrderId);
   const items = ledger.items.filter((x) => x.orderId === order.id);
   const costs = ledger.otherExpenses.find((x) => x.id === "mouser-charges-grouped");
-  assert.equal(order.status, "ordered");
+  assert.equal(order.status, "shipped");
   assert.equal(replaced.status, "cancelled");
   assert.equal(replaced.quotedSubtotalCents, 7736);
   assert.equal(replaced.invoiceTotalCents, 9697);
   assert.equal(items.length, 10);
-  assert.ok(items.every((x) => x.quantity === 1 && x.procurementStatus === "ordered" && x.previousProcurement.orderId === "digikey"));
+  assert.ok(items.every((x) => x.quantity === 1 && x.procurementStatus === "shipped" && x.previousProcurement.orderId === "digikey"));
   assert.equal(items.reduce((sum, x) => sum + x.orderUnitCents, 0), 6444);
   assert.match(items.find((x) => x.id === "digikey-045").name, /S301T/);
-  assert.equal(order.invoiceTotalCents, 8207);
+  assert.equal(order.orderConfirmationTotalCents, 8207);
+  assert.equal(order.invoiceTotalCents, 8722);
+  assert.equal(order.invoiceTotalFinal, true);
   assert.equal(costs.name, "Taxes, tariffs, shipping and others");
-  assert.equal(costs.categoryTotalCents, 1763);
+  assert.equal(costs.categoryTotalCents, 2278);
   assert.equal(order.invoiceItemsCents + costs.categoryTotalCents, order.invoiceTotalCents);
   assert.equal(costs.includedInVendorOrderTotals, true);
-  assert.equal(order.actualPaidCents, null);
+  assert.equal(order.actualPaidCents, 8722);
+  assert.equal(order.bankSettlementConfirmed, false);
+  assert.match(order.paymentEvidence, /vendor final invoice/);
   assert.equal(costs.actualPaidCents, null);
   const shipment = ledger.shipments.find((x) => x.orderRef === "MOUSER-01");
-  assert.equal(shipment.status, "preparing");
-  assert.equal(shipment.trackingAssigned, false);
+  assert.equal(shipment.status, "shipped");
+  assert.equal(shipment.carrier, "FedEx");
+  assert.equal(shipment.trackingAssigned, true);
+  assert.equal(shipment.invoiceVerified, true);
   assert.equal(shipment.speedyLocation, null);
   assert.equal(shipment.speedyStatus, "unconfirmed");
   assert.equal(shipment.deliveredAt, null);
@@ -252,7 +258,7 @@ test("combined forwarder total stays in colones without exposing package details
 });
 
 test("project locations distinguish Speedy progress from carrier delivery", () => {
-  assert.equal(totals(ledger).tracked, 19);
+  assert.equal(totals(ledger).tracked, 20);
   for (const s of ledger.shipments) {
     assert.equal(typeof s.trackingAssigned, "boolean");
     assert.ok(["received", "in_transit", "delivered", "unconfirmed"].includes(s.speedyStatus));
@@ -275,5 +281,5 @@ test("a confirmed carrier return keeps recipient delivery and reimbursement unco
   assert.equal(shipment.replacementTrackingAssigned, false);
   assert.equal(shipment.trackingAssigned, true);
   assert.ok(ledger.orders.find((x) => x.id === "bambu-lab").actualPaidCents > 0);
-  assert.equal(totals(ledger).shipped, 19);
+  assert.equal(totals(ledger).shipped, 20);
 });

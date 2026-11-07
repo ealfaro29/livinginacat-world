@@ -207,23 +207,27 @@
     {
       "id": "mouser",
       "vendor": "Mouser",
-      "status": "ordered",
+      "status": "shipped",
       "orderedAt": "2026-11-05",
       "quotedSubtotalCents": 6444,
       "invoiceItemsCents": 6444,
-      "invoiceTotalCents": 8207,
-      "actualPaidCents": null,
+      "invoiceTotalCents": 8722,
+      "actualPaidCents": 8722,
       "shippingPaidCents": null,
       "taxPaidCents": null,
       "tariffPaidCents": null,
       "receivedAt": null,
       "publicReceiptUrl": null,
-      "evidenceLevel": "owner-and-vendor-order-confirmation",
-      "paymentEvidence": null,
+      "evidenceLevel": "vendor-final-invoice-and-shipping-email",
+      "paymentEvidence": "Authentic vendor final invoice explicitly states paid in full. Bank settlement is not independently verified.",
       "replacesOrderId": "digikey",
       "lastChecked": "2026-11-05",
-      "notes": "The owner and vendor confirm ten replacement components, one of each, for a documented order total of $82.07. Includes the grouped vendor charges; the final invoice and bank settlement remain unconfirmed. All ten lines are pending dispatch. NKK S301T replaces S301; the wire will be sourced locally. The current order page still shows $82.07; a later confirmation email lists provisional charges. Final charges remain pending the final invoice.",
-      "shippingChargeFinal": false
+      "notes": "All ten component references are confirmed shipped by Mouser with FedEx tracking assigned. The final invoice totals $87.22 and reports paid in full; bank settlement is unverified. Carrier pickup, delivery and Speedy receipt remain unconfirmed.",
+      "shippingChargeFinal": true,
+      "orderConfirmationTotalCents": 8207,
+      "invoiceTotalFinal": true,
+      "bankSettlementConfirmed": false,
+      "paymentPartial": false
     },
     {
       "id": "local-sourcing",
@@ -924,7 +928,7 @@
       },
       "orderUnitCents": 1578,
       "shipmentOrderRef": "MOUSER-01",
-      "procurementStatus": "ordered"
+      "procurementStatus": "shipped"
     },
     {
       "id": "digikey-046",
@@ -947,7 +951,7 @@
       },
       "orderUnitCents": 1336,
       "shipmentOrderRef": "MOUSER-01",
-      "procurementStatus": "ordered"
+      "procurementStatus": "shipped"
     },
     {
       "id": "digikey-047",
@@ -970,7 +974,7 @@
       },
       "orderUnitCents": 50,
       "shipmentOrderRef": "MOUSER-01",
-      "procurementStatus": "ordered"
+      "procurementStatus": "shipped"
     },
     {
       "id": "digikey-048",
@@ -1017,7 +1021,7 @@
       },
       "orderUnitCents": 809,
       "shipmentOrderRef": "MOUSER-01",
-      "procurementStatus": "ordered"
+      "procurementStatus": "shipped"
     },
     {
       "id": "digikey-050",
@@ -1040,7 +1044,7 @@
       },
       "orderUnitCents": 998,
       "shipmentOrderRef": "MOUSER-01",
-      "procurementStatus": "ordered"
+      "procurementStatus": "shipped"
     },
     {
       "id": "digikey-051",
@@ -1063,7 +1067,7 @@
       },
       "orderUnitCents": 750,
       "shipmentOrderRef": "MOUSER-01",
-      "procurementStatus": "ordered"
+      "procurementStatus": "shipped"
     },
     {
       "id": "digikey-052",
@@ -1086,7 +1090,7 @@
       },
       "orderUnitCents": 395,
       "shipmentOrderRef": "MOUSER-01",
-      "procurementStatus": "ordered"
+      "procurementStatus": "shipped"
     },
     {
       "id": "digikey-053",
@@ -1109,7 +1113,7 @@
       },
       "orderUnitCents": 125,
       "shipmentOrderRef": "MOUSER-01",
-      "procurementStatus": "ordered"
+      "procurementStatus": "shipped"
     },
     {
       "id": "digikey-054",
@@ -1132,7 +1136,7 @@
       },
       "orderUnitCents": 95,
       "shipmentOrderRef": "MOUSER-01",
-      "procurementStatus": "ordered"
+      "procurementStatus": "shipped"
     },
     {
       "id": "digikey-055",
@@ -1155,7 +1159,7 @@
       },
       "orderUnitCents": 308,
       "shipmentOrderRef": "MOUSER-01",
-      "procurementStatus": "ordered"
+      "procurementStatus": "shipped"
     },
     {
       "id": "boltdepot-056",
@@ -1513,17 +1517,27 @@
       "id": "mouser-charges-grouped",
       "vendor": "Mouser",
       "name": "Taxes, tariffs, shipping and others",
-      "status": "ordered",
+      "status": "shipped",
       "orderedAt": "2026-11-05",
       "actualPaidCents": null,
-      "categoryTotalCents": 1763,
+      "categoryTotalCents": 2278,
       "includedInVendorOrderTotals": true,
       "publicReceiptUrl": null,
-      "evidenceLevel": "vendor-order-confirmation",
-      "notes": "Combined vendor charges are already included in the $82.07 order total. The original breakdown remains private; final invoice and settlement remain unconfirmed."
+      "evidenceLevel": "vendor-final-invoice",
+      "notes": "Included once in the documented final vendor invoice total; internal components remain private."
     }
   ],
   "changes": [
+    {
+      "date": "2026-11-07",
+      "title": "Combined Speedy observation updated",
+      "detail": "The observed combined Speedy Total a pagar is ₡430,300 for all current account packages, counted once. Some packages remain unquoted; this is not a verified final consolidated balance or payment."
+    },
+    {
+      "date": "2026-11-07",
+      "title": "Mouser shipment and final invoice confirmed",
+      "detail": "Mouser confirms shipment of all ten replacement references with FedEx tracking assigned. The final vendor invoice totals $87.22, superseding the $82.07 order confirmation, and explicitly reports paid in full. Bank settlement, carrier delivery and Speedy receipt remain unconfirmed. Taxes, tariffs, shipping and others are updated once at vendor level."
+    },
     {
       "date": "2026-11-07",
       "title": "Amazon controller replacement confirmed",
@@ -2421,8 +2435,8 @@
       "title": "Electronics replacement order",
       "vendor": "Mouser",
       "orderRef": "MOUSER-01",
-      "status": "preparing",
-      "carrier": null,
+      "status": "shipped",
+      "carrier": "FedEx",
       "itemIds": [
         "digikey-045",
         "digikey-046",
@@ -2438,13 +2452,15 @@
       "expectedDeliveryDate": null,
       "expectedShipDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-11-06",
-      "source": "Owner confirmation, vendor confirmation email and authenticated order detail",
-      "notes": "Ten confirmed replacement components await dispatch, tracking and the final invoice. This is an order-preparation record, not evidence of a dispatched parcel, Speedy prealert or receipt. The wire is a separate planned local purchase.",
+      "lastChecked": "2026-11-07",
+      "source": "Authentic Mouser final invoice, shipping email and authenticated order details",
+      "notes": "Mouser confirms all ten references shipped. FedEx tracking is assigned; carrier acceptance, delivery date and Speedy receipt are not independently confirmed. Speedy prealert remains pending.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-06",
-      "trackingAssigned": false
+      "trackingAssigned": true,
+      "invoiceVerified": true,
+      "prealertStatus": "awaiting_submission"
     },
     {
       "id": "AMZ-PKG-11",
@@ -2468,14 +2484,14 @@
   ],
   "forwardingCharges": {
     "currency": "CRC",
-    "amountCRC": 418300,
+    "amountCRC": 430300,
     "scope": "all_current_packages",
     "quoteStatus": "awaiting_remaining_quotes",
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Authenticated Speedy quoted package charges and owner-confirmed settlement exclusions",
     "observedAt": "2026-11-07",
-    "verifiedAt": "2026-11-07T09:35:41.304Z",
+    "verifiedAt": "2026-11-07T14:35:56.334Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. Excludes historical packages confirmed paid and delivered by the owner, even when Speedy retains Enviado. Every currently quoted unsettled charge is counted once. Remaining quotes and the final consolidated balance are pending. Kept separate from USD purchase totals; payment of the current charges remains unconfirmed."
   }
 }
