@@ -50,17 +50,17 @@ Equipment quoted, including allowance: $2,864.51. Listed item quotes: $2,364.51;
 | FramingTech | RN05BM3 · M3, slot 5 | 38 | $2.02 | $76.76 | Order confirmed | [Product](https://www.framingtech.com/shop/rn05bm3-m3-roll-in-t-nut-with-ball-plunger-5-slot-484695) |
 | FramingTech | RN05BM5 · M5, slot 5 | 20 | $1.42 | $28.40 | Order confirmed | [Product](https://www.framingtech.com/shop/rn05bm5-m5-roll-in-t-nut-with-ball-plunger-5-slot-484697) |
 | Amazon | MKS DLC32 V2.1 controller kit with TS24 display | 1 | $39.50 | $39.50 | Order confirmed | [Product](https://www.amazon.com/dp/B0GY43P1CL) |
-| Mouser | NKK S301T · SPST switch | 1 | $15.78 | $15.78 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/NKK-Switches/S301T?qs=0mfovmz9yvpf4HNSyeqf2Q%3D%3D) |
-| Mouser | Littelfuse FHAS101 · fuse holder | 1 | $13.36 | $13.36 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Littelfuse/FHAS101?qs=BJlw7L4Cy790Sq9g31NH4g%3D%3D) |
-| Mouser | Littelfuse 0287003.U · ATO 3 A fuse | 1 | $0.50 | $0.50 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Littelfuse/0287003.U?qs=TVaBpCI%2FeOjpzUEhB65zGA%3D%3D) |
+| Mouser | NKK S301T · SPST switch | 1 | $15.78 | $15.78 | Shipped | [Product](https://www.mouser.com/en/ProductDetail/NKK-Switches/S301T?qs=0mfovmz9yvpf4HNSyeqf2Q%3D%3D) |
+| Mouser | Littelfuse FHAS101 · fuse holder | 1 | $13.36 | $13.36 | Shipped | [Product](https://www.mouser.com/en/ProductDetail/Littelfuse/FHAS101?qs=BJlw7L4Cy790Sq9g31NH4g%3D%3D) |
+| Mouser | Littelfuse 0287003.U · ATO 3 A fuse | 1 | $0.50 | $0.50 | Shipped | [Product](https://www.mouser.com/en/ProductDetail/Littelfuse/0287003.U?qs=TVaBpCI%2FeOjpzUEhB65zGA%3D%3D) |
 | Local purchase (Costa Rica) | 18 AWG stranded copper wire · local purchase pending | 1 | Unconfirmed | Unconfirmed | Not ordered | [Product](https://www.dbuelectronics.cr/cables-accesorios/913-cable-rojo-18awg.html) |
-| Mouser | Desco 09838 · ground adapter | 1 | $8.09 | $8.09 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Desco/09838?qs=MA90IRdNH%2FGdWlNa38pjQQ%3D%3D) |
-| Mouser | Pomona 1166-36-0 · banana-to-clip lead | 1 | $9.98 | $9.98 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Pomona-Electronics/1166-36-0?qs=nZsw%2FpC7E%252Bt3JqAYAu1yfQ%3D%3D) |
-| Mouser | Adafruit 412 · 12 V solenoid | 1 | $7.50 | $7.50 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Adafruit/412?qs=GURawfaeGuBVsKnEJX3AiQ%3D%3D) |
-| Mouser | Adafruit 5648 · protected MOSFET driver | 1 | $3.95 | $3.95 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Adafruit/5648?qs=mELouGlnn3cY6k7nhOkonA%3D%3D) |
-| Mouser | Adafruit 3893 · JST PH 3 cable | 1 | $1.25 | $1.25 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Adafruit/3893?qs=qSfuJ%252Bfl%2Fd7tNPgahO%2Fnaw%3D%3D) |
-| Mouser | Adafruit 4873 · JST XH 3 cable pair | 1 | $0.95 | $0.95 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Adafruit/4873?qs=pBJMDPsKWf0WVFcnNr1Piw%3D%3D) |
-| Mouser | Qualtek 3021001-03 · USB-A to USB-B · 3 ft | 1 | $3.08 | $3.08 | Order confirmed | [Product](https://www.mouser.com/en/ProductDetail/Qualtek/3021001-03?qs=yhNIDeTE%252BcZAqmE%2FaZRG%2Fg%3D%3D) |
+| Mouser | Desco 09838 · ground adapter | 1 | $8.09 | $8.09 | Shipped | [Product](https://www.mouser.com/en/ProductDetail/Desco/09838?qs=MA90IRdNH%2FGdWlNa38pjQQ%3D%3D) |
+| Mouser | Pomona 1166-36-0 · banana-to-clip lead | 1 | $9.98 | $9.98 | Shipped | [Product](https://www.mouser.com/en/ProductDetail/Pomona-Electronics/1166-36-0?qs=nZsw%2FpC7E%252Bt3JqAYAu1yfQ%3D%3D) |
+| Mouser | Adafruit 412 · 12 V solenoid | 1 | $7.50 | $7.50 | Shipped | [Product](https://www.mouser.com/en/ProductDetail/Adafruit/412?qs=GURawfaeGuBVsKnEJX3AiQ%3D%3D) |
+| Mouser | Adafruit 5648 · protected MOSFET driver | 1 | $3.95 | $3.95 | Shipped | [Product](https://www.mouser.com/en/ProductDetail/Adafruit/5648?qs=mELouGlnn3cY6k7nhOkonA%3D%3D) |
+| Mouser | Adafruit 3893 · JST PH 3 cable | 1 | $1.25 | $1.25 | Shipped | [Product](https://www.mouser.com/en/ProductDetail/Adafruit/3893?qs=qSfuJ%252Bfl%2Fd7tNPgahO%2Fnaw%3D%3D) |
+| Mouser | Adafruit 4873 · JST XH 3 cable pair | 1 | $0.95 | $0.95 | Shipped | [Product](https://www.mouser.com/en/ProductDetail/Adafruit/4873?qs=pBJMDPsKWf0WVFcnNr1Piw%3D%3D) |
+| Mouser | Qualtek 3021001-03 · USB-A to USB-B · 3 ft | 1 | $3.08 | $3.08 | Shipped | [Product](https://www.mouser.com/en/ProductDetail/Qualtek/3021001-03?qs=yhNIDeTE%252BcZAqmE%2FaZRG%2Fg%3D%3D) |
 | BoltDepot | 7218 · BHCS M3×6 | 15 | $0.06 | $0.90 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=7218) |
 | BoltDepot | 7219 · BHCS M3×8 | 50 | $0.06 | $3.00 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=7219) |
 | BoltDepot | 7220 · BHCS M3×10 | 15 | $0.06 | $0.90 | Carrier reports delivery | [Product](https://boltdepot.com/Product-Details?product=7220) |
@@ -89,7 +89,7 @@ Item quotes $2,364.51 + allowance $500.00 = total estimate $2,864.51.
 
 ## Reconciliation
 
-Amazon: 7 orders totaling $1,598.16, including the Taxes, tariffs, shipping and others category. Current carrier and Speedy locations are listed in the shipment record. AMZ-06 adds a pack of frame joining plates after the original estimate. The owner confirms fulfilled orders are paid. Unconfirmed order payments remain excluded from the paid subtotal. Bank settlement has not been independently reconciled. Taxes, tariffs, shipping and others: $724.62 (Amazon: $445.50; Walmart: $23.48; Bambu Lab: $89.87; FramingTech: $121.51; BoltDepot: $10.12; PhotonLight: $8.95; West3D: $7.56; Mouser: $17.63). Already included in vendor order totals. FramingTech: $300.66 paid; shipping remains provisional. West3D: $17.55 paid per vendor invoice. Domain: $4.19 paid. Owner- or vendor-confirmed payments: $2,783.86, a partial subtotal. Shipped items of a partially shipped order are excluded until their payment can be allocated reliably.
+Amazon: 7 orders totaling $1,598.16, including the Taxes, tariffs, shipping and others category. Current carrier and Speedy locations are listed in the shipment record. AMZ-06 adds a pack of frame joining plates after the original estimate. The owner confirms fulfilled orders are paid. Unconfirmed order payments remain excluded from the paid subtotal. Bank settlement has not been independently reconciled. Taxes, tariffs, shipping and others: $729.77 (Amazon: $445.50; Walmart: $23.48; Bambu Lab: $89.87; FramingTech: $121.51; BoltDepot: $10.12; PhotonLight: $8.95; West3D: $7.56; Mouser: $22.78). Already included in vendor order totals. FramingTech: $300.66 paid; shipping remains provisional. West3D: $17.55 paid per vendor invoice. Domain: $4.19 paid. Owner- or vendor-confirmed payments: $2,871.08, a partial subtotal. Shipped items of a partially shipped order are excluded until their payment can be allocated reliably.
 
 Documentary vendor order totals, including cancelled orders (see the purchase record for status):
 - Bambu Lab: $881.86; Carrier exception.
@@ -99,12 +99,12 @@ Documentary vendor order totals, including cancelled orders (see the purchase re
 - Walmart: $53.31; Carrier reports delivery.
 - PhotonLight: $18.94; Carrier reports delivery.
 - West3D: $17.55; Carrier reports delivery.
-- Mouser: $82.07; Order confirmed.
+- Mouser: $87.22; Shipped.
 
 ## Shipping and Speedy
 
-Tracking assigned: 19 of 21 recorded project shipments. The original DigiKey order remains cancelled, with its documentary amounts retained in the history. The owner and Mouser confirm the replacement order on November 5, 2026. The wire is planned for local purchase on November 6, 2026. Original charges and any refund remain unconfirmed. VXB also confirmed cancellation and reports a $65.22 refund; bank receipt remains unverified. Its historical label is excluded from active shipment counts. The Amazon controller replacement purchase remains unconfirmed. Tracking assignment alone does not confirm carrier acceptance or Speedy receipt.
+Tracking assigned: 20 of 21 recorded project shipments. The original DigiKey order remains cancelled, with its documentary amounts retained in the history. The owner and Mouser confirm the replacement order on November 5, 2026. The wire is planned for local purchase on November 6, 2026. Original charges and any refund remain unconfirmed. VXB also confirmed cancellation and reports a $65.22 refund; bank receipt remains unverified. Its historical label is excluded from active shipment counts. The Amazon controller replacement purchase remains unconfirmed. Tracking assignment alone does not confirm carrier acceptance or Speedy receipt.
 
 Project shipment locations checked 2026-11-07: 9 in Costa Rica; 0 received in Miami; 11 awaiting Speedy confirmation; 1 with a carrier return. Carrier delivery does not establish Speedy receipt or delivery to the recipient. A carrier return does not establish a refund or replacement.
 
-Speedy - Taxes, tariffs, shipping and others: CRC 418,300 combined amount shown as Total a pagar on 2026-11-07. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.
+Speedy - Taxes, tariffs, shipping and others: CRC 430,300 combined amount shown as Total a pagar on 2026-11-07. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.
