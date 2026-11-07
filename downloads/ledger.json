@@ -218,11 +218,11 @@
       "tariffPaidCents": null,
       "receivedAt": null,
       "publicReceiptUrl": null,
-      "evidenceLevel": "vendor-final-invoice-and-shipping-email",
+      "evidenceLevel": "vendor-final-invoice-shipping-email-and-carrier-tracking",
       "paymentEvidence": "Authentic vendor final invoice explicitly states paid in full. Bank settlement is not independently verified.",
       "replacesOrderId": "digikey",
-      "lastChecked": "2026-11-05",
-      "notes": "All ten component references are confirmed shipped by Mouser with FedEx tracking assigned. The final invoice totals $87.22 and reports paid in full; bank settlement is unverified. Carrier pickup, delivery and Speedy receipt remain unconfirmed.",
+      "lastChecked": "2026-11-07",
+      "notes": "All ten component references shipped; FedEx now confirms the shipment is on the way, with estimated arrival Monday, November 9. The final invoice totals $87.22 and reports paid in full; bank settlement is unverified. Speedy prealert is confirmed. Carrier delivery and receipt by Speedy remain unconfirmed.",
       "shippingChargeFinal": true,
       "orderConfirmationTotalCents": 8207,
       "invoiceTotalFinal": true,
@@ -1530,6 +1530,11 @@
   "changes": [
     {
       "date": "2026-11-07",
+      "title": "Mouser shipment is on the way",
+      "detail": "FedEx confirms the Mouser shipment is on the way and estimates arrival Monday, November 9. The existing Speedy prealert arrival estimate was updated and verified. Carrier delivery and receipt by Speedy remain unconfirmed; consolidation still awaits a second eligible package."
+    },
+    {
+      "date": "2026-11-07",
       "title": "Mouser prealert confirmed",
       "detail": "The Mouser shipment is prealerted in Speedy with the authentic final invoice and all ten matching article entries. Consolidation awaits a second eligible package; Speedy requires at least two. Prealerting does not confirm carrier delivery or receipt by Speedy."
     },
@@ -2454,12 +2459,12 @@
         "digikey-054",
         "digikey-055"
       ],
-      "expectedDeliveryDate": null,
+      "expectedDeliveryDate": "2026-11-09",
       "expectedShipDate": null,
       "deliveredAt": null,
       "lastChecked": "2026-11-07",
-      "source": "Authentic Mouser final invoice, shipping email and authenticated order details",
-      "notes": "Mouser confirms all ten references shipped with FedEx tracking assigned. Speedy prealert is confirmed with the authentic final invoice and matching article values. Consolidation awaits a second eligible package because Speedy requires at least two. Carrier acceptance, delivery date and Speedy receipt remain unconfirmed.",
+      "source": "Authentic Mouser final invoice and shipment confirmation; FedEx exact tracking page",
+      "notes": "FedEx confirms this shipment is on the way, with estimated arrival Monday, November 9. Speedy prealert is confirmed with the authentic final invoice and matching article values; its arrival estimate was updated to November 9. Consolidation awaits a second eligible package because Speedy requires at least two. Carrier delivery and Speedy receipt remain unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-07",
