@@ -9,7 +9,7 @@ test("public ledger excludes private purchase identities while keeping totals", 
     ledger.otherExpenses
       .filter((x) => x.includedInVendorOrderTotals)
       .reduce((n, x) => n + x.categoryTotalCents, 0),
-    72434,
+    74850,
   );
 });
 test("publication guard recognizes normalized phrases without exposing identities", () => {

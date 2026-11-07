@@ -28,17 +28,17 @@ test("equipment estimate reconciles item quotes, vendors and planning allowances
       o.vendor,
     );
   }
-  assert.equal(totals(ledger).quotedItems, 238596);
+  assert.equal(totals(ledger).quotedItems, 236451);
   assert.equal(totals(ledger).unquotedItems, 1);
   assert.equal(totals(ledger).equipmentAllowance, 50000);
-  assert.equal(totals(ledger).quoted, 288596);
+  assert.equal(totals(ledger).quoted, 286451);
   assert.equal(totals(ledger).quoted, ledger.equipmentQuotedTotalCents);
   assert.ok(
     ledger.equipmentAllowances.every((x) => x.actualPaidCents === null),
   );
 });
 test("Amazon invoices reconcile without counting grouped extras twice", () => {
-  for (const o of ledger.amazonOrders)
+  for (const o of ledger.amazonOrders.filter((o) => o.costVisibility !== "vendor_grouped"))
     assert.equal(
       o.invoiceItemsCents +
         o.shippingCents -
@@ -52,18 +52,40 @@ test("Amazon invoices reconcile without counting grouped extras twice", () => {
     (x) => x.id === "amazon-additions-grouped",
   );
   assert.equal(extra.includedInVendorOrderTotals, true);
-  const amazonTax = ledger.amazonOrders.reduce((n, x) => n + x.taxCents, 0);
   assert.equal(
-    ledger.amazonOrders.reduce((n, x) => n + x.invoiceItemsCents, 0),
-    ledger.orders.find((x) => x.id === "amazon").quotedSubtotalCents +
-      extra.categoryTotalCents - amazonTax,
+    totals(ledger).amazon - extra.categoryTotalCents,
+    115266,
   );
-  assert.equal(totals(ledger).amazon, 153450);
+  assert.equal(totals(ledger).amazon, 159816);
   assert.equal(
     ledger.orders.find((x) => x.id === "amazon").invoiceTotalCents,
     totals(ledger).amazon,
   );
-  assert.equal(ledger.amazonOrders.flatMap((x) => x.itemIds).length, 36);
+  assert.equal(ledger.amazonOrders.flatMap((x) => x.itemIds).length, 37);
+});
+test("Amazon controller replacement preserves cancellation, privacy and unconfirmed dispatch/payment", () => {
+  const order = ledger.amazonOrders.find((o) => o.id === "AMZ-07");
+  const item = ledger.items.find((i) => i.id === "vxb-044");
+  const shipment = ledger.shipments.find((s) => s.orderRef === order.id);
+  assert.equal(order.status, "ordered");
+  assert.equal(order.orderTotalCents, 6366);
+  assert.equal(order.actualPaidCents, null);
+  assert.equal(order.invoiceVerified, false);
+  assert.equal(order.costVisibility, "vendor_grouped");
+  for (const key of ["invoiceItemsCents", "shippingCents", "shippingCreditCents", "discountCents", "taxCents"])
+    assert.equal(Object.hasOwn(order, key), false, "shared-order components stay private");
+  assert.equal(item.orderId, "amazon");
+  assert.equal(item.orderUnitCents, 3950);
+  assert.equal(item.previousProcurement.orderId, "vxb");
+  assert.equal(item.previousProcurement.quotedTotalCents, 6095);
+  assert.equal(ledger.orders.find((o) => o.id === "vxb").status, "cancelled");
+  assert.equal(ledger.orders.find((o) => o.id === "amazon").paymentPartial, true);
+  assert.equal(shipment.status, "preparing");
+  assert.equal(shipment.trackingAssigned, false);
+  assert.equal(shipment.carrier, null);
+  assert.equal(shipment.speedyStatus, "unconfirmed");
+  assert.equal(shipment.speedyLocation, null);
+  assert.equal(shipment.deliveredAt, null);
 });
 test("owner-confirmed shipped payments are included without assuming delivery", () => {
   assert.equal(totals(ledger).verifiedPaid, 278386);
@@ -94,7 +116,7 @@ test("DigiKey cancellation preserves documentary charges without assuming a paym
   );
   assert.equal(order.actualPaidCents, null);
   assert.equal(order.refundCents, null);
-  assert.equal(totals(ledger).confirmedOrderTotal, 291924);
+  assert.equal(totals(ledger).confirmedOrderTotal, 298290);
   assert.equal(order.shippingPaidCents, null);
   assert.equal(order.taxPaidCents, null);
   assert.equal(order.tariffPaidCents, null);
@@ -112,7 +134,7 @@ test("VXB cancellation retains its original amounts and vendor-reported refund o
   assert.equal(historicalShipment.trackingAssigned, true);
   assert.ok(!activeShipments(ledger).some((x) => x.id === historicalShipment.id));
   assert.equal(ledger.otherExpenses.find((x) => x.vendor === "VXB").status, "cancelled");
-  assert.equal(totals(ledger).taxesAndOthers, 70046);
+  assert.equal(totals(ledger).taxesAndOthers, 72462);
 });
 test("Walmart complete carrier fulfillment does not establish Speedy or recipient delivery", () => {
   assert.equal(ledger.orders.find((x) => x.id === "walmart").status, "carrier_delivered");
@@ -149,7 +171,7 @@ test("Walmart grouped costs remain included in the order total", () => {
   assert.equal(order.invoiceTotalCents, 5331);
   assert.equal(extra.includedInVendorOrderTotals, true);
   assert.ok(extra.categoryTotalCents >= order.taxInvoicedCents);
-  assert.equal(totals(ledger).taxesAndOthers, 70046);
+  assert.equal(totals(ledger).taxesAndOthers, 72462);
   assert.equal(order.actualPaidCents, null);
   assert.equal(extra.actualPaidCents, null);
 });
@@ -161,7 +183,7 @@ test("Bambu order and grouped costs reconcile without double counting", () => {
   assert.ok(extra.categoryTotalCents >= order.taxInvoicedCents + order.shippingInvoicedCents);
   assert.equal(extra.includedInVendorOrderTotals, true);
   const confirmedOrders = ledger.orders.reduce((sum, x) => sum + x.invoiceTotalCents, 0);
-  assert.equal(confirmedOrders + 419, 308143);
+  assert.equal(confirmedOrders + 419, 314509);
   assert.equal(totals(ledger).confirmedOrderTotal, confirmedOrders + 419 - ledger.orders.find((x) => x.id === "digikey").invoiceTotalCents - ledger.orders.find((x) => x.id === "vxb").invoiceTotalCents);
   assert.equal(order.actualPaidCents, 88186);
 });
@@ -192,7 +214,7 @@ test("Mouser replacement is confirmed without reviving the cancelled order or as
   assert.equal(shipment.speedyStatus, "unconfirmed");
   assert.equal(shipment.deliveredAt, null);
 });
-test("tomorrow's local wire purchase remains unquoted, unbought and outside the import queue", () => {
+test("planned local wire purchase remains unquoted, unbought and outside the import queue", () => {
   const wire = ledger.items.find((x) => x.id === "digikey-048");
   const plan = ledger.orders.find((x) => x.id === wire.orderId);
   assert.equal(wire.procurementStatus, "pending");

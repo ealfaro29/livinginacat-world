@@ -131,7 +131,7 @@ const vendorRows = ledger.orders
 const amazonRows = ledger.amazonOrders
   .map(
     (o) =>
-      `<tr><th>${o.id}</th><td>${money(o.invoiceItemsCents)}</td><td>${money(o.discountCents)}</td><td>${money(o.orderTotalCents)}</td><td>${money(o.actualPaidCents)}</td><td>${badge(o.status)}</td></tr>`,
+      `<tr><th>${o.id}</th><td>${o.costVisibility === "vendor_grouped" ? "Grouped at store level" : money(o.invoiceItemsCents)}</td><td>${o.costVisibility === "vendor_grouped" ? "—" : money(o.discountCents)}</td><td>${money(o.orderTotalCents)}</td><td>${money(o.actualPaidCents)}</td><td>${badge(o.status)}</td></tr>`,
   )
   .join("");
 const itemRows = ledger.items

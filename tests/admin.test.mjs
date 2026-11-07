@@ -389,9 +389,9 @@ test("private admin protects evidence and persists versioned changes", async (t)
   // including export, the ingestion URL with an owner cookie, and a saved PDF URL.
   assert.equal((await request("/api/ingest", {
     method: "POST", service: true,
-    payload: { orders: [{ ...input.orders[0], id: "AMZ-05" }] },
+    payload: { orders: [{ ...input.orders[0], id: "AMZ-07" }] },
   })).status, 200);
-  await db.prepare("UPDATE packages SET order_id=? WHERE id=?").bind("AMZ-05", "test-pkg").run();
+  await db.prepare("UPDATE packages SET order_id=? WHERE id=?").bind("AMZ-07", "test-pkg").run();
   for (const route of ["/api/snapshot", "/api/export", "/api/ingest/snapshot"]) {
     const restrictedView = await (await request(route, { cookie: device2 })).json();
     const pkg = restrictedView.packages.find((p) => p.id === "test-pkg");

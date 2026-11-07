@@ -130,7 +130,7 @@ export function editPackage(existing, input) {
 // Shared-order originals are evidence for ingestion, not content for the room.
 // Preserve stored evidence and owner fields; redact only the interactive view.
 const restrictedOrders = new Set([
-  "AMZ-02", "AMZ-03", "AMZ-04", "AMZ-05", "walmart", "bambu-lab",
+  "AMZ-02", "AMZ-03", "AMZ-04", "AMZ-05", "AMZ-07", "walmart", "bambu-lab",
 ]);
 export const hasRestrictedDetails = (record) =>
   restrictedOrders.has(record.orderId ?? record.id);
