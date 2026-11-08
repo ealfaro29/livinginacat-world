@@ -81,7 +81,7 @@ test("Amazon controller replacement preserves cancellation, privacy and unconfir
   assert.equal(ledger.orders.find((o) => o.id === "vxb").status, "cancelled");
   assert.equal(ledger.orders.find((o) => o.id === "amazon").paymentPartial, true);
   assert.equal(shipment.status, "preparing");
-  assert.equal(shipment.trackingAssigned, false);
+  assert.equal(shipment.trackingAssigned, true);
   assert.equal(shipment.carrier, null);
   assert.equal(shipment.speedyStatus, "unconfirmed");
   assert.equal(shipment.speedyLocation, null);
@@ -274,7 +274,7 @@ test("combined forwarder total stays in colones without exposing package details
 });
 
 test("project locations distinguish Speedy progress from carrier delivery", () => {
-  assert.equal(totals(ledger).tracked, 20);
+  assert.equal(totals(ledger).tracked, 21);
   for (const s of ledger.shipments) {
     assert.equal(typeof s.trackingAssigned, "boolean");
     assert.ok(["received", "in_transit", "delivered", "unconfirmed"].includes(s.speedyStatus));

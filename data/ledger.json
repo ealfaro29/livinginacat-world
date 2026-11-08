@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-07",
+  "updatedAt": "2026-11-08",
   "currency": "USD",
   "purchasesPaused": false,
   "equipmentQuotedTotalCents": 286451,
@@ -34,7 +34,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "authenticated-order-page",
-      "notes": "Earlier fulfilled Amazon orders retain their owner-confirmed payment subtotal. A controller replacement is confirmed ordered on November 7, awaiting dispatch, tracking, carrier and final invoice. Its bank settlement is unconfirmed. Grouped charges are included in the documentary order totals.",
+      "notes": "Earlier fulfilled Amazon orders retain their owner-confirmed payment subtotal. The controller replacement ordered November 7 has tracking assigned as of November 8; it remains Ordered, awaiting dispatch, the named carrier and final invoice. Its bank settlement is unconfirmed. Grouped charges are included in the documentary order totals.",
       "invoiceTotalCents": 159816,
       "paymentEvidence": "Owner confirmation that shipped purchases are paid. Complete carrier delivery and unchanged documentary order totals verified on 2026-11-05. Bank settlement is not independently verified.",
       "paymentPartial": true
@@ -1546,6 +1546,11 @@
   ],
   "changes": [
     {
+      "date": "2026-11-08",
+      "title": "Amazon replacement tracking assigned",
+      "detail": "Amazon assigned a tracking ID to the controller replacement while the delivery stage remains Ordered, with estimated arrival November 10. Dispatch, the named carrier, final invoice and Speedy receipt remain unconfirmed. Its prealert awaits the required carrier and invoice evidence. Project shipment coverage is updated without adding a shipment or changing financial totals."
+    },
+    {
       "date": "2026-11-07",
       "title": "Additional project expense recorded",
       "detail": "The owner confirms an additional TechStorex project expense of $537.00, recorded once under Taxes, tariffs, shipping and others. No shipping is associated. Payment documents support the recorded amount; bank settlement remains independently unverified."
@@ -2073,7 +2078,7 @@
       "sourceDate": "2026-11-07",
       "lastChecked": "2026-11-07",
       "invoiceVerified": false,
-      "notes": "Confirmed controller replacement. Amazon tracking shows Ordered, with estimated arrival November 10. Tracking, carrier, final invoice and bank settlement remain unconfirmed. Taxes, tariffs, shipping and others are grouped at vendor level."
+      "notes": "Confirmed controller replacement. Amazon assigned tracking on November 8 but still shows Ordered, with estimated arrival November 10. Dispatch, the named carrier, final invoice and bank settlement remain unconfirmed. Taxes, tariffs, shipping and others are grouped at vendor level."
     }
   ],
   "shipments": [
@@ -2505,13 +2510,13 @@
       ],
       "expectedDeliveryDate": "2026-11-10",
       "deliveredAt": null,
-      "lastChecked": "2026-11-07",
+      "lastChecked": "2026-11-08",
       "source": "Authenticated Amazon order and tracking pages",
-      "notes": "Amazon shows Ordered. This is an untracked preparation record, not dispatch or Speedy receipt. Final invoice and bank settlement remain unconfirmed.",
+      "notes": "Amazon assigned a tracking ID on November 8 while the delivery stage remains Ordered. Dispatch, the named carrier, final invoice, bank settlement and Speedy receipt remain unconfirmed. The prealert awaits the required carrier and invoice evidence.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-07",
-      "trackingAssigned": false
+      "speedyCheckedAt": "2026-11-08",
+      "trackingAssigned": true
     }
   ],
   "forwardingCharges": {
