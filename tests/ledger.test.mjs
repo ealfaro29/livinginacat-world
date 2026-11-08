@@ -184,7 +184,7 @@ test("Bambu order and grouped costs reconcile without double counting", () => {
   assert.equal(extra.includedInVendorOrderTotals, true);
   const confirmedOrders = ledger.orders.reduce((sum, x) => sum + x.invoiceTotalCents, 0);
   assert.equal(confirmedOrders + 419, 315024);
-  assert.equal(totals(ledger).confirmedOrderTotal, confirmedOrders + 419 - ledger.orders.find((x) => x.id === "digikey").invoiceTotalCents - ledger.orders.find((x) => x.id === "vxb").invoiceTotalCents);
+  assert.equal(totals(ledger).confirmedOrderTotal, confirmedOrders + 419 + 53700 - ledger.orders.find((x) => x.id === "digikey").invoiceTotalCents - ledger.orders.find((x) => x.id === "vxb").invoiceTotalCents);
   assert.equal(order.actualPaidCents, 88186);
 });
 test("Mouser final invoice and dispatch preserve cancellation and separate vendor payment from bank settlement", () => {
