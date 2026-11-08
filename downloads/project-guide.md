@@ -53,3 +53,5 @@ The solenoid is intermittent-duty. Initial development limits: no more than 1 se
 Current parts and purchase status: https://livinginacat.world/purchases/. Shipments: https://livinginacat.world/shipments/. USD; quotes exclude tax and shipping unless noted. Ordered, paid, shipped and delivered are distinct states. API usage, substitutions and unknown charges will be added as verified.
 
 Mechanical foundation: PhysiClaw hardware v0.51 under MIT; [attribution](ATTRIBUTION.md). This variant and its limits are documented independently. Source: https://github.com/ealfaro29/livinginacat-world.
+
+The owner confirmed a $537.00 TechStorex project expense, recorded once under Taxes, tariffs, shipping and others. It is a standalone additional expense with no shipping or equipment allocation; it does not create a parcel to prealert. Payment evidence is retained privately and bank settlement remains unverified.

@@ -1525,9 +1525,31 @@
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-final-invoice",
       "notes": "Included once in the documented final vendor invoice total; internal components remain private."
+    },
+    {
+      "id": "techstorex-project-others",
+      "vendor": "TechStorex",
+      "name": "Taxes, tariffs, shipping and others",
+      "status": "recorded",
+      "orderedAt": "2026-11-07",
+      "recordedAt": "2026-11-07",
+      "categoryTotalCents": 53700,
+      "actualPaidCents": 53700,
+      "quotedTotalCents": null,
+      "includedInVendorOrderTotals": false,
+      "shippingRequired": false,
+      "publicReceiptUrl": null,
+      "evidenceLevel": "paid-receipt-authentic-invoice-and-owner-confirmation",
+      "bankSettlementConfirmed": false,
+      "notes": "Owner-confirmed additional project expense, temporarily classified as other costs. Payment documents support the recorded amount. No shipping is associated; bank settlement has not been independently verified."
     }
   ],
   "changes": [
+    {
+      "date": "2026-11-07",
+      "title": "Additional project expense recorded",
+      "detail": "The owner confirms an additional TechStorex project expense of $537.00, recorded once under Taxes, tariffs, shipping and others. No shipping is associated. Payment documents support the recorded amount; bank settlement remains independently unverified."
+    },
     {
       "date": "2026-11-07",
       "title": "Mouser shipment is on the way",
