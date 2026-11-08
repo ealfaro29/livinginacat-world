@@ -75,7 +75,7 @@ export function totals(ledger) {
     equipmentAllowance,
     quoted: quotedItems + equipmentAllowance,
     taxesAndOthers: ledger.otherExpenses
-      .filter((x) => x.name === "Taxes, tariffs, shipping and others" && x.includedInVendorOrderTotals && !["cancelled", "canceled"].includes(x.status))
+      .filter((x) => x.name === "Taxes, tariffs, shipping and others" && !["cancelled", "canceled"].includes(x.status))
       .reduce((sum, x) => sum + x.categoryTotalCents, 0),
     verifiedPaid: [...ledger.orders, ...ledger.otherExpenses].reduce(
       (n, x) => n + (x.actualPaidCents ?? 0),

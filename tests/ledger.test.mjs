@@ -88,7 +88,7 @@ test("Amazon controller replacement preserves cancellation, privacy and unconfir
   assert.equal(shipment.deliveredAt, null);
 });
 test("owner-confirmed shipped payments are included without assuming delivery", () => {
-  assert.equal(totals(ledger).verifiedPaid, 287108);
+  assert.equal(totals(ledger).verifiedPaid, 340808);
   assert.equal(totals(ledger).shipped, 20);
   assert.equal(
     ledger.amazonOrders.filter((x) => x.status === "payment_attention").length,
@@ -116,7 +116,7 @@ test("DigiKey cancellation preserves documentary charges without assuming a paym
   );
   assert.equal(order.actualPaidCents, null);
   assert.equal(order.refundCents, null);
-  assert.equal(totals(ledger).confirmedOrderTotal, 298805);
+  assert.equal(totals(ledger).confirmedOrderTotal, 352505);
   assert.equal(order.shippingPaidCents, null);
   assert.equal(order.taxPaidCents, null);
   assert.equal(order.tariffPaidCents, null);
@@ -134,7 +134,7 @@ test("VXB cancellation retains its original amounts and vendor-reported refund o
   assert.equal(historicalShipment.trackingAssigned, true);
   assert.ok(!activeShipments(ledger).some((x) => x.id === historicalShipment.id));
   assert.equal(ledger.otherExpenses.find((x) => x.vendor === "VXB").status, "cancelled");
-  assert.equal(totals(ledger).taxesAndOthers, 72977);
+  assert.equal(totals(ledger).taxesAndOthers, 126677);
 });
 test("Walmart complete carrier fulfillment does not establish Speedy or recipient delivery", () => {
   assert.equal(ledger.orders.find((x) => x.id === "walmart").status, "carrier_delivered");
@@ -171,7 +171,7 @@ test("Walmart grouped costs remain included in the order total", () => {
   assert.equal(order.invoiceTotalCents, 5331);
   assert.equal(extra.includedInVendorOrderTotals, true);
   assert.ok(extra.categoryTotalCents >= order.taxInvoicedCents);
-  assert.equal(totals(ledger).taxesAndOthers, 72977);
+  assert.equal(totals(ledger).taxesAndOthers, 126677);
   assert.equal(order.actualPaidCents, null);
   assert.equal(extra.actualPaidCents, null);
 });
@@ -233,6 +233,22 @@ test("planned local wire purchase remains unquoted, unbought and outside the imp
   assert.equal(plan.invoiceTotalCents, null);
   assert.equal(wire.previousProcurement.quotedTotalCents, 1715);
   assert.ok(ledger.shipments.every((x) => !x.itemIds.includes(wire.id)));
+});
+test("standalone project costs are counted once without adding an order or shipment", () => {
+  const expense = ledger.otherExpenses.find((x) => x.id === "techstorex-project-others");
+  assert.equal(expense.categoryTotalCents, 53700);
+  assert.equal(expense.actualPaidCents, 53700);
+  assert.equal(expense.includedInVendorOrderTotals, false);
+  assert.equal(expense.shippingRequired, false);
+  const before = totals({ ...ledger, otherExpenses: ledger.otherExpenses.filter((x) => x.id !== expense.id) });
+  const after = totals(ledger);
+  assert.equal(after.verifiedPaid - before.verifiedPaid, 53700);
+  assert.equal(after.confirmedOrderTotal - before.confirmedOrderTotal, 53700);
+  assert.equal(after.taxesAndOthers - before.taxesAndOthers, 53700);
+  assert.ok(ledger.orders.every((x) => x.vendor !== expense.vendor));
+  assert.ok(ledger.shipments.every((x) => x.vendor !== expense.vendor));
+  assert.equal(after.shipped, before.shipped);
+  assert.equal(after.tracked, before.tracked);
 });
 test("published CAD archive matches its manifest hash", async () => {
   const release = await readJSON("data/hardware-release.json");
