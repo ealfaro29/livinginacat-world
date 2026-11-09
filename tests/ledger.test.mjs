@@ -63,11 +63,11 @@ test("Amazon invoices reconcile without counting grouped extras twice", () => {
   );
   assert.equal(ledger.amazonOrders.flatMap((x) => x.itemIds).length, 37);
 });
-test("Amazon controller replacement preserves cancellation, privacy and unconfirmed dispatch/payment", () => {
+test("Amazon controller dispatch preserves cancellation, privacy and unconfirmed payment", () => {
   const order = ledger.amazonOrders.find((o) => o.id === "AMZ-07");
   const item = ledger.items.find((i) => i.id === "vxb-044");
   const shipment = ledger.shipments.find((s) => s.orderRef === order.id);
-  assert.equal(order.status, "ordered");
+  assert.equal(order.status, "shipped");
   assert.equal(order.orderTotalCents, 6366);
   assert.equal(order.actualPaidCents, null);
   assert.equal(order.invoiceVerified, false);
@@ -80,16 +80,16 @@ test("Amazon controller replacement preserves cancellation, privacy and unconfir
   assert.equal(item.previousProcurement.quotedTotalCents, 6095);
   assert.equal(ledger.orders.find((o) => o.id === "vxb").status, "cancelled");
   assert.equal(ledger.orders.find((o) => o.id === "amazon").paymentPartial, true);
-  assert.equal(shipment.status, "preparing");
+  assert.equal(shipment.status, "shipped");
   assert.equal(shipment.trackingAssigned, true);
-  assert.equal(shipment.carrier, null);
+  assert.equal(shipment.carrier, "Amazon");
   assert.equal(shipment.speedyStatus, "unconfirmed");
   assert.equal(shipment.speedyLocation, null);
   assert.equal(shipment.deliveredAt, null);
 });
 test("owner-confirmed shipped payments are included without assuming delivery", () => {
   assert.equal(totals(ledger).verifiedPaid, 340808);
-  assert.equal(totals(ledger).shipped, 20);
+  assert.equal(totals(ledger).shipped, 21);
   assert.equal(
     ledger.amazonOrders.filter((x) => x.status === "payment_attention").length,
     0,
@@ -297,5 +297,5 @@ test("a confirmed carrier return keeps recipient delivery and reimbursement unco
   assert.equal(shipment.replacementTrackingAssigned, false);
   assert.equal(shipment.trackingAssigned, true);
   assert.ok(ledger.orders.find((x) => x.id === "bambu-lab").actualPaidCents > 0);
-  assert.equal(totals(ledger).shipped, 20);
+  assert.equal(totals(ledger).shipped, 21);
 });
