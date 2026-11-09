@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-09",
+      "title": "Mouser carrier delivery confirmed in Miami",
+      "detail": "FedEx confirms the electronics replacement shipment was delivered in Miami on November 9. This is carrier delivery; Speedy receipt and recipient delivery remain unconfirmed. The existing invoice, prealert, consolidation and recorded purchase totals are preserved."
+    },
+    {
+      "date": "2026-11-09",
       "title": "Existing consolidation reused for project prealerts",
       "detail": "Project prealerts were moved into the existing open consolidation and the unnecessary extra group was removed. Original receipts, declarations and purchase amounts are preserved. This grouping change does not confirm carrier delivery or receipt by Speedy."
     },
@@ -2513,7 +2518,7 @@
       "title": "Electronics replacement order",
       "vendor": "Mouser",
       "orderRef": "MOUSER-01",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "FedEx",
       "itemIds": [
         "digikey-045",
@@ -2531,8 +2536,8 @@
       "expectedShipDate": null,
       "deliveredAt": null,
       "lastChecked": "2026-11-09",
-      "source": "FedEx active Out for delivery progress and authenticated Speedy prealert",
-      "notes": "FedEx shows Out for delivery to Miami on November 9. The authentic final invoice, Speedy prealert and consolidation are confirmed. Carrier delivery, Speedy receipt and recipient delivery remain unconfirmed. Its prealert was regrouped into the existing open consolidation, preserving the original receipt and declaration.",
+      "source": "FedEx delivery confirmation observed November 9, 2026",
+      "notes": "FedEx confirms delivery in Miami on November 9. The authentic final invoice, Speedy prealert and existing consolidation remain verified. Receipt by Speedy and delivery to the recipient remain unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-09",
@@ -2540,7 +2545,8 @@
       "invoiceVerified": true,
       "prealertStatus": "confirmed",
       "consolidationStatus": "confirmed",
-      "consolidationConfirmedAt": "2026-11-09T13:10:43.664Z"
+      "consolidationConfirmedAt": "2026-11-09T13:10:43.664Z",
+      "carrierDeliveredDate": "2026-11-09"
     },
     {
       "id": "AMZ-PKG-11",

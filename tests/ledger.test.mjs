@@ -193,7 +193,7 @@ test("Bambu order and grouped costs reconcile without double counting", () => {
   assert.equal(totals(ledger).confirmedOrderTotal, confirmedOrders + 419 + 53700 - ledger.orders.find((x) => x.id === "digikey").invoiceTotalCents - ledger.orders.find((x) => x.id === "vxb").invoiceTotalCents);
   assert.equal(order.actualPaidCents, 88186);
 });
-test("Mouser final invoice and dispatch preserve cancellation and separate vendor payment from bank settlement", () => {
+test("Mouser carrier delivery preserves cancellation and separates Speedy receipt and bank settlement", () => {
   const order = ledger.orders.find((x) => x.id === "mouser");
   const replaced = ledger.orders.find((x) => x.id === order.replacesOrderId);
   const items = ledger.items.filter((x) => x.orderId === order.id);
@@ -218,7 +218,8 @@ test("Mouser final invoice and dispatch preserve cancellation and separate vendo
   assert.match(order.paymentEvidence, /vendor final invoice/);
   assert.equal(costs.actualPaidCents, null);
   const shipment = ledger.shipments.find((x) => x.orderRef === "MOUSER-01");
-  assert.equal(shipment.status, "shipped");
+  assert.equal(shipment.status, "carrier_delivered");
+  assert.equal(shipment.carrierDeliveredDate, "2026-11-09");
   assert.equal(shipment.carrier, "FedEx");
   assert.equal(shipment.trackingAssigned, true);
   assert.equal(shipment.invoiceVerified, true);
