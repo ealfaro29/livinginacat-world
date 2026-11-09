@@ -63,7 +63,7 @@ test("Amazon invoices reconcile without counting grouped extras twice", () => {
   );
   assert.equal(ledger.amazonOrders.flatMap((x) => x.itemIds).length, 37);
 });
-test("Amazon controller dispatch preserves cancellation, privacy and unconfirmed payment", () => {
+test("Amazon controller forwarding preserves cancellation, privacy and unverified bank settlement", () => {
   const order = ledger.amazonOrders.find((o) => o.id === "AMZ-07");
   const item = ledger.items.find((i) => i.id === "vxb-044");
   const shipment = ledger.shipments.find((s) => s.orderRef === order.id);
@@ -71,6 +71,9 @@ test("Amazon controller dispatch preserves cancellation, privacy and unconfirmed
   assert.equal(order.orderTotalCents, 6366);
   assert.equal(order.actualPaidCents, null);
   assert.equal(order.invoiceVerified, false);
+  assert.equal(order.purchaseReceiptVerified, true);
+  assert.equal(order.merchantChargeStatus, "completed");
+  assert.equal(order.bankSettlementConfirmed, false);
   assert.equal(order.costVisibility, "vendor_grouped");
   for (const key of ["invoiceItemsCents", "shippingCents", "shippingCreditCents", "discountCents", "taxCents"])
     assert.equal(Object.hasOwn(order, key), false, "shared-order components stay private");
@@ -83,6 +86,9 @@ test("Amazon controller dispatch preserves cancellation, privacy and unconfirmed
   assert.equal(shipment.status, "shipped");
   assert.equal(shipment.trackingAssigned, true);
   assert.equal(shipment.carrier, "Amazon");
+  assert.equal(shipment.expectedDeliveryDate, "2026-11-10");
+  assert.equal(shipment.prealertStatus, "confirmed");
+  assert.equal(shipment.consolidationStatus, "confirmed");
   assert.equal(shipment.speedyStatus, "unconfirmed");
   assert.equal(shipment.speedyLocation, null);
   assert.equal(shipment.deliveredAt, null);
