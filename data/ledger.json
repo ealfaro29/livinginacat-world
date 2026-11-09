@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-08",
+      "title": "Two Amazon FedEx shipments confirmed in Costa Rica",
+      "detail": "The iPhone 14 and Nicholson file shipments are now matched to Speedy entries in Costa Rica. FedEx independently resolves each vendor tracking and the longer Speedy barcode to identical shipment facts. Delivery to the recipient remains unconfirmed. The combined forwarding amount and project financial totals are unchanged."
+    },
+    {
+      "date": "2026-11-08",
       "title": "Amazon controller replacement dispatched",
       "detail": "Amazon confirms Shipped (step 2 of 4) with Amazon as carrier and estimated arrival November 9. The existing tracking is unchanged. The available printable document remains an Order Summary, and the related order transaction is Pending; final invoice/purchase receipt and bank settlement remain unconfirmed. The prealert awaits the required purchase document. Carrier delivery and Speedy receipt are separate and remain unconfirmed. Financial totals are unchanged."
     },
@@ -2098,13 +2103,14 @@
       ],
       "expectedDeliveryDate": "2026-10-29",
       "deliveredAt": null,
-      "lastChecked": "2026-11-05",
-      "source": "Authenticated Amazon tracking",
-      "notes": "Amazon reports carrier delivery October 29. Speedy receipt remains unconfirmed.",
-      "speedyStatus": "unconfirmed",
-      "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-06",
-      "trackingAssigned": true
+      "lastChecked": "2026-11-08",
+      "source": "Authenticated Speedy En Costa Rica; carrier-verified FedEx tracking alias",
+      "notes": "Speedy confirms this project shipment is in Costa Rica. FedEx independently resolves its vendor tracking and the longer Speedy barcode to identical shipment facts. Recipient delivery remains unconfirmed. Existing prealert, consolidation and original evidence are preserved.",
+      "speedyStatus": "in_transit",
+      "speedyLocation": "costa_rica",
+      "speedyCheckedAt": "2026-11-08",
+      "trackingAssigned": true,
+      "speedyConfirmedAt": "2026-11-09T05:54:02.548378Z"
     },
     {
       "id": "AMZ-PKG-02",
@@ -2115,14 +2121,15 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-11-05",
-      "source": "Amazon tracking page",
-      "notes": "Amazon reports carrier delivery to the dock on October 27. Speedy receipt is not yet confirmed.",
+      "lastChecked": "2026-11-08",
+      "source": "Authenticated Speedy En Costa Rica; carrier-verified FedEx tracking alias",
+      "notes": "Speedy confirms this project shipment is in Costa Rica. FedEx independently resolves its vendor tracking and the longer Speedy barcode to identical shipment facts. Recipient delivery remains unconfirmed. Existing prealert, consolidation and original evidence are preserved.",
       "title": "Project shipment",
-      "speedyStatus": "unconfirmed",
-      "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-06",
-      "trackingAssigned": true
+      "speedyStatus": "in_transit",
+      "speedyLocation": "costa_rica",
+      "speedyCheckedAt": "2026-11-08",
+      "trackingAssigned": true,
+      "speedyConfirmedAt": "2026-11-09T05:54:02.548378Z"
     },
     {
       "id": "FT-PREP-01",
