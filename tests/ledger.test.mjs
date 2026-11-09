@@ -89,7 +89,7 @@ test("Amazon controller dispatch preserves cancellation, privacy and unconfirmed
 });
 test("owner-confirmed shipped payments are included without assuming delivery", () => {
   assert.equal(totals(ledger).verifiedPaid, 340808);
-  assert.equal(totals(ledger).shipped, 21);
+  assert.equal(totals(ledger).shipped, 22);
   assert.equal(
     ledger.amazonOrders.filter((x) => x.status === "payment_attention").length,
     0,
@@ -274,7 +274,7 @@ test("combined forwarder total stays in colones without exposing package details
 });
 
 test("project locations distinguish Speedy progress from carrier delivery", () => {
-  assert.equal(totals(ledger).tracked, 21);
+  assert.equal(totals(ledger).tracked, 22);
   for (const s of ledger.shipments) {
     assert.equal(typeof s.trackingAssigned, "boolean");
     assert.ok(["received", "in_transit", "delivered", "unconfirmed"].includes(s.speedyStatus));
@@ -293,9 +293,9 @@ test("a confirmed carrier return keeps recipient delivery and reimbursement unco
   assert.equal(shipment.speedyStatus, "unconfirmed");
   assert.equal(shipment.deliveredAt, null);
   assert.equal(shipment.expectedDeliveryDate, null);
-  assert.equal(shipment.replacementStatus, "awaiting_dispatch");
-  assert.equal(shipment.replacementTrackingAssigned, false);
+  assert.equal(shipment.replacementStatus, "shipped");
+  assert.equal(shipment.replacementTrackingAssigned, true);
   assert.equal(shipment.trackingAssigned, true);
   assert.ok(ledger.orders.find((x) => x.id === "bambu-lab").actualPaidCents > 0);
-  assert.equal(totals(ledger).shipped, 21);
+  assert.equal(totals(ledger).shipped, 22);
 });
