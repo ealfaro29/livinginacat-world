@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-08",
+  "updatedAt": "2026-11-09",
   "currency": "USD",
   "purchasesPaused": false,
   "equipmentQuotedTotalCents": 286451,
@@ -1546,6 +1546,11 @@
   ],
   "changes": [
     {
+      "date": "2026-11-09",
+      "title": "Four project shipments confirmed received in Miami",
+      "detail": "BoltDepot, PhotonLight, West3D and the Walmart spacer shipment are received by Speedy in Miami, ready for forwarding to Costa Rica. USPS independently verifies their longer scanned barcodes against the complete vendor-tracking histories. The project tracker and location summaries are corrected. No new charges, arrivals in Costa Rica or recipient deliveries are inferred."
+    },
+    {
       "date": "2026-11-08",
       "title": "Two Amazon FedEx shipments confirmed in Costa Rica",
       "detail": "The iPhone 14 and Nicholson file shipments are now matched to Speedy entries in Costa Rica. FedEx independently resolves each vendor tracking and the longer Speedy barcode to identical shipment facts. Delivery to the recipient remains unconfirmed. The combined forwarding amount and project financial totals are unchanged."
@@ -2261,13 +2266,14 @@
       "itemIds": [],
       "expectedDeliveryDate": "2026-11-09",
       "deliveredAt": null,
-      "lastChecked": "2026-10-31",
-      "source": "Walmart delivery confirmation",
-      "notes": "Walmart reported delivery on October 31. Speedy receipt is not yet confirmed.",
-      "speedyStatus": "unconfirmed",
-      "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-06",
-      "trackingAssigned": true
+      "lastChecked": "2026-11-09",
+      "source": "Authenticated Speedy received entry and USPS-verified complete tracking history",
+      "notes": "Speedy confirms received in Miami, ready for forwarding to Costa Rica. The full scanned barcode and vendor tracking resolve at USPS to identical complete tracking histories. Arrival in Costa Rica and delivery to the recipient remain unconfirmed.",
+      "speedyStatus": "received",
+      "speedyLocation": "miami",
+      "speedyCheckedAt": "2026-11-09",
+      "trackingAssigned": true,
+      "speedyConfirmedAt": "2026-11-09T06:52:07.403Z"
     },
     {
       "id": "VXB-PKG-01",
@@ -2298,13 +2304,14 @@
       "itemIds": [],
       "expectedDeliveryDate": "2026-10-29",
       "deliveredAt": null,
-      "lastChecked": "2026-10-29",
-      "source": "West3D delivery notice",
-      "notes": "West3D reports carrier delivery on October 29. Prealerted and consolidated; Speedy receipt remains unconfirmed.",
-      "speedyStatus": "unconfirmed",
-      "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-06",
-      "trackingAssigned": true
+      "lastChecked": "2026-11-09",
+      "source": "Authenticated Speedy received entry and USPS-verified complete tracking history",
+      "notes": "Speedy confirms received in Miami, ready for forwarding to Costa Rica. The full scanned barcode and vendor tracking resolve at USPS to identical complete tracking histories. Arrival in Costa Rica and delivery to the recipient remain unconfirmed.",
+      "speedyStatus": "received",
+      "speedyLocation": "miami",
+      "speedyCheckedAt": "2026-11-09",
+      "trackingAssigned": true,
+      "speedyConfirmedAt": "2026-11-09T06:52:07.403Z"
     },
     {
       "id": "BAMBU-PKG-01",
@@ -2356,13 +2363,14 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-11-05",
-      "source": "USPS exact tracking and recorded Speedy prealert",
-      "notes": "USPS confirms carrier delivery on October 31. The shipment remains prealerted and consolidated. Speedy receipt is unconfirmed.",
-      "speedyStatus": "unconfirmed",
-      "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-06",
-      "trackingAssigned": true
+      "lastChecked": "2026-11-09",
+      "source": "Authenticated Speedy received entry, owner confirmation and USPS-verified tracking alias",
+      "notes": "Speedy confirms receipt in Miami, ready for forwarding to Costa Rica. The full Speedy barcode and vendor tracking independently resolve at USPS to identical complete tracking histories. USPS carrier delivery was October 31. Arrival in Costa Rica and delivery to the recipient remain unconfirmed.",
+      "speedyStatus": "received",
+      "speedyLocation": "miami",
+      "speedyCheckedAt": "2026-11-09",
+      "trackingAssigned": true,
+      "speedyConfirmedAt": "2026-11-09T06:49:04.225Z"
     },
     {
       "id": "PHOTON-PKG-01",
@@ -2374,13 +2382,14 @@
       "itemIds": [],
       "expectedDeliveryDate": "2026-11-02",
       "deliveredAt": null,
-      "lastChecked": "2026-11-02",
-      "source": "PhotonLight delivery confirmation",
-      "notes": "PhotonLight reports the shipment delivered as of November 2. Speedy receipt remains unconfirmed.",
-      "speedyStatus": "unconfirmed",
-      "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-06",
-      "trackingAssigned": true
+      "lastChecked": "2026-11-09",
+      "source": "Authenticated Speedy received entry and USPS-verified complete tracking history",
+      "notes": "Speedy confirms received in Miami, ready for forwarding to Costa Rica. The full scanned barcode and vendor tracking resolve at USPS to identical complete tracking histories. Arrival in Costa Rica and delivery to the recipient remain unconfirmed.",
+      "speedyStatus": "received",
+      "speedyLocation": "miami",
+      "speedyCheckedAt": "2026-11-09",
+      "trackingAssigned": true,
+      "speedyConfirmedAt": "2026-11-09T06:52:07.403Z"
     },
     {
       "id": "AMZ-PKG-06",
