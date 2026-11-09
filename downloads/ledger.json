@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-09",
+      "title": "Existing consolidation reused for project prealerts",
+      "detail": "Project prealerts were moved into the existing open consolidation and the unnecessary extra group was removed. Original receipts, declarations and purchase amounts are preserved. This grouping change does not confirm carrier delivery or receipt by Speedy."
+    },
+    {
+      "date": "2026-11-09",
       "title": "Controller tracking corrected and forwarding preparation completed",
       "detail": "The complete Amazon fulfillment view identifies the controller with its own assigned tracking and estimated Miami arrival November 10. Its genuine purchase receipt and matching merchant Completed transaction are verified without claiming bank settlement. Speedy prealerting and consolidation are now confirmed for the controller and Mouser shipments. No arrival is inferred and recorded financial totals are unchanged."
     },
@@ -2527,7 +2532,7 @@
       "deliveredAt": null,
       "lastChecked": "2026-11-09",
       "source": "FedEx active Out for delivery progress and authenticated Speedy prealert",
-      "notes": "FedEx shows Out for delivery to Miami on November 9. The authentic final invoice, Speedy prealert and consolidation are confirmed. Carrier delivery, Speedy receipt and recipient delivery remain unconfirmed.",
+      "notes": "FedEx shows Out for delivery to Miami on November 9. The authentic final invoice, Speedy prealert and consolidation are confirmed. Carrier delivery, Speedy receipt and recipient delivery remain unconfirmed. Its prealert was regrouped into the existing open consolidation, preserving the original receipt and declaration.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-09",
@@ -2535,7 +2540,7 @@
       "invoiceVerified": true,
       "prealertStatus": "confirmed",
       "consolidationStatus": "confirmed",
-      "consolidationConfirmedAt": "2026-11-09T12:22:16.942Z"
+      "consolidationConfirmedAt": "2026-11-09T13:10:43.664Z"
     },
     {
       "id": "AMZ-PKG-11",
@@ -2550,14 +2555,14 @@
       "deliveredAt": null,
       "lastChecked": "2026-11-09",
       "source": "Authenticated controller-specific Amazon tracking and complete order fulfillment details",
-      "notes": "The controller has its own verified Amazon tracking and estimated Miami arrival November 10. An authentic purchase receipt and matching merchant Completed transaction are preserved; bank settlement is unverified. Its Speedy prealert and consolidation are now confirmed. Carrier delivery and Speedy receipt remain unconfirmed.",
+      "notes": "The controller has its own verified Amazon tracking and estimated Miami arrival November 10. An authentic purchase receipt and matching merchant Completed transaction are preserved; bank settlement is unverified. Its Speedy prealert and consolidation are now confirmed. Carrier delivery and Speedy receipt remain unconfirmed. Its prealert was regrouped into the existing open consolidation, preserving the original receipt and declaration.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-09",
       "trackingAssigned": true,
       "prealertStatus": "confirmed",
       "consolidationStatus": "confirmed",
-      "consolidationConfirmedAt": "2026-11-09T12:22:16.942Z",
+      "consolidationConfirmedAt": "2026-11-09T13:10:43.664Z",
       "purchaseReceiptVerified": true
     },
     {
