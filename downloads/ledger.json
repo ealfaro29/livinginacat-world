@@ -34,7 +34,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "authenticated-order-page",
-      "notes": "Earlier fulfilled Amazon orders retain their owner-confirmed payment subtotal. The controller replacement ordered November 7 has tracking assigned as of November 8; it remains Ordered, awaiting dispatch, the named carrier and final invoice. Its bank settlement is unconfirmed. Grouped charges are included in the documentary order totals.",
+      "notes": "Earlier fulfilled Amazon orders retain their owner-confirmed payment subtotal. The controller replacement ordered November 7 is confirmed shipped with Amazon, with estimated arrival November 9. Its final invoice/purchase receipt and bank settlement remain unconfirmed. Grouped charges are included in the documentary order totals.",
       "invoiceTotalCents": 159816,
       "paymentEvidence": "Owner confirmation that shipped purchases are paid. Complete carrier delivery and unchanged documentary order totals verified on 2026-11-05. Bank settlement is not independently verified.",
       "paymentPartial": true
@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-08",
+      "title": "Amazon controller replacement dispatched",
+      "detail": "Amazon confirms Shipped (step 2 of 4) with Amazon as carrier and estimated arrival November 9. The existing tracking is unchanged. The available printable document remains an Order Summary, and the related order transaction is Pending; final invoice/purchase receipt and bank settlement remain unconfirmed. The prealert awaits the required purchase document. Carrier delivery and Speedy receipt are separate and remain unconfirmed. Financial totals are unchanged."
+    },
+    {
+      "date": "2026-11-08",
       "title": "Amazon replacement tracking assigned",
       "detail": "Amazon assigned a tracking ID to the controller replacement while the delivery stage remains Ordered, with estimated arrival November 10. Dispatch, the named carrier, final invoice and Speedy receipt remain unconfirmed. Its prealert awaits the required carrier and invoice evidence. Project shipment coverage is updated without adding a shipment or changing financial totals."
     },
@@ -2065,7 +2070,7 @@
     },
     {
       "id": "AMZ-07",
-      "status": "ordered",
+      "status": "shipped",
       "orderedAt": "2026-11-07",
       "currency": "USD",
       "itemIds": [
@@ -2078,7 +2083,7 @@
       "sourceDate": "2026-11-07",
       "lastChecked": "2026-11-07",
       "invoiceVerified": false,
-      "notes": "Confirmed controller replacement. Amazon assigned tracking on November 8 but still shows Ordered, with estimated arrival November 10. Dispatch, the named carrier, final invoice and bank settlement remain unconfirmed. Taxes, tariffs, shipping and others are grouped at vendor level."
+      "notes": "Confirmed controller replacement. Amazon confirms dispatch with Amazon as carrier and estimated arrival November 9. The assigned tracking is unchanged. Final invoice/purchase receipt, carrier delivery, Speedy receipt and bank settlement remain unconfirmed. Taxes, tariffs, shipping and others remain grouped at vendor level."
     }
   ],
   "shipments": [
@@ -2503,16 +2508,16 @@
       "id": "AMZ-PKG-11",
       "vendor": "Amazon",
       "orderRef": "AMZ-07",
-      "status": "preparing",
-      "carrier": null,
+      "status": "shipped",
+      "carrier": "Amazon",
       "itemIds": [
         "vxb-044"
       ],
-      "expectedDeliveryDate": "2026-11-10",
+      "expectedDeliveryDate": "2026-11-09",
       "deliveredAt": null,
       "lastChecked": "2026-11-08",
       "source": "Authenticated Amazon order and tracking pages",
-      "notes": "Amazon assigned a tracking ID on November 8 while the delivery stage remains Ordered. Dispatch, the named carrier, final invoice, bank settlement and Speedy receipt remain unconfirmed. The prealert awaits the required carrier and invoice evidence.",
+      "notes": "Amazon confirms Shipped (step 2 of 4), names Amazon as the carrier and estimates arrival November 9. The existing tracking is unchanged. Carrier delivery and Speedy receipt remain unconfirmed. The available printable document remains an Order Summary, so the prealert awaits a final invoice/purchase receipt. Bank settlement remains independently unverified.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-08",
