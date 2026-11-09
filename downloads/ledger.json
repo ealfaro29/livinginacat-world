@@ -42,7 +42,7 @@
     {
       "id": "bambu-lab",
       "vendor": "Bambu Lab",
-      "status": "on_hold",
+      "status": "shipped",
       "orderedAt": "2026-10-27",
       "quotedSubtotalCents": 89900,
       "actualPaidCents": 88186,
@@ -52,7 +52,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-and-authenticated-order-summary",
-      "notes": "Documented order totals and the recorded payment are unchanged. Speedy lists the UPS project shipment in Costa Rica. The other shipment returned to the vendor. On November 6, Bambu Lab offered a replacement at no additional vendor charge and the owner replied. Replacement dispatch, new tracking and any refund remain unconfirmed. Equipment prices remain the original planning quote; bank settlement has not been independently reconciled.",
+      "notes": "Documented order totals and the recorded payment are unchanged. The original UPS project shipment is in Costa Rica. The returned shipment remains historical. Bambu Lab offered a replacement at no additional vendor charge, the owner supplied the verified Miami destination, and the vendor now reports dispatch with new USPS tracking. USPS has only a label and awaits the package; no delivery estimate, carrier acceptance, Speedy receipt or refund is confirmed. Equipment prices remain the original planning quote; bank settlement has not been independently reconciled.",
       "invoiceTotalCents": 88186,
       "invoiceItemsCents": 84718,
       "shippingInvoicedCents": 699,
@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-09",
+      "title": "Bambu replacement tracking assigned",
+      "detail": "Bambu Lab reports a replacement shipped with USPS. The carrier currently shows a label created and awaits the package; no arrival estimate is available. The original return is retained, and the replacement has its own shipment record without duplicating the purchase total. Speedy prealerting awaits a supported arrival date."
+    },
+    {
+      "date": "2026-11-09",
       "title": "Four project shipments confirmed received in Miami",
       "detail": "BoltDepot, PhotonLight, West3D and the Walmart spacer shipment are received by Speedy in Miami, ready for forwarding to Costa Rica. USPS independently verifies their longer scanned barcodes against the complete vendor-tracking histories. The project tracker and location summaries are corrected. No new charges, arrivals in Costa Rica or recipient deliveries are inferred."
     },
@@ -2323,16 +2328,17 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-11-06",
+      "lastChecked": "2026-11-09",
       "source": "Bambu Lab support and owner reply, November 6; exact original shipment matched",
-      "notes": "Bambu Lab confirms the shipment returned to the vendor and offered a replacement at no additional vendor charge on November 6. The owner replied with the requested delivery information. Replacement dispatch, new tracking and recipient delivery remain unconfirmed; no refund is confirmed. The original carrier return remains recorded. Speedy receipt is unconfirmed.",
+      "notes": "The original shipment was returned. Bambu Lab now reports a replacement dispatched with new USPS tracking. USPS currently shows a label created and awaits the package; no carrier acceptance, delivery estimate or Speedy receipt is confirmed. Original purchase, payment and return evidence are preserved.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-06",
       "trackingAssigned": true,
-      "replacementStatus": "awaiting_dispatch",
-      "replacementTrackingAssigned": false,
-      "replacementOfferedAt": "2026-11-06"
+      "replacementStatus": "shipped",
+      "replacementTrackingAssigned": true,
+      "replacementOfferedAt": "2026-11-06",
+      "replacementShipmentId": "BAMBU-REPLACEMENT-01"
     },
     {
       "id": "BAMBU-PREP-01",
@@ -2538,6 +2544,25 @@
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-08",
       "trackingAssigned": true
+    },
+    {
+      "id": "BAMBU-REPLACEMENT-01",
+      "vendor": "Bambu Lab",
+      "orderRef": "bambu-lab",
+      "status": "shipped",
+      "carrier": "USPS",
+      "title": "Replacement project shipment",
+      "itemIds": [],
+      "expectedDeliveryDate": null,
+      "deliveredAt": null,
+      "lastChecked": "2026-11-09",
+      "source": "Bambu Lab replacement shipping email and USPS tracking",
+      "notes": "The vendor reports replacement dispatch. USPS shows a shipping label created and awaits the package. Miami destination is verified; no delivery estimate, carrier acceptance or Speedy receipt is confirmed. The Speedy prealert awaits a supported arrival estimate because its form requires a date. This replacement creates no new purchase or additional recorded payment.",
+      "speedyStatus": "unconfirmed",
+      "speedyLocation": null,
+      "speedyCheckedAt": "2026-11-09",
+      "trackingAssigned": true,
+      "replacesShipmentId": "BAMBU-PKG-01"
     }
   ],
   "forwardingCharges": {
@@ -2548,8 +2573,8 @@
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Authenticated Speedy quoted package charges and owner-confirmed settlement exclusions",
-    "observedAt": "2026-11-07",
-    "verifiedAt": "2026-11-07T14:35:56.334Z",
+    "observedAt": "2026-11-09",
+    "verifiedAt": "2026-11-09T09:08:36.919Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. Excludes historical packages confirmed paid and delivered by the owner, even when Speedy retains Enviado. Every currently quoted unsettled charge is counted once. Remaining quotes and the final consolidated balance are pending. Kept separate from USD purchase totals; payment of the current charges remains unconfirmed."
   }
 }

@@ -92,7 +92,7 @@ Item quotes $2,364.51 + allowance $500.00 = total estimate $2,864.51.
 Amazon: 7 orders totaling $1,598.16, including the Taxes, tariffs, shipping and others category. Current carrier and Speedy locations are listed in the shipment record. AMZ-06 adds a pack of frame joining plates after the original estimate. The owner confirms fulfilled orders are paid. Unconfirmed order payments remain excluded from the paid subtotal. Bank settlement has not been independently reconciled. Taxes, tariffs, shipping and others: $1,266.77 (Amazon: $445.50; Walmart: $23.48; Bambu Lab: $89.87; FramingTech: $121.51; BoltDepot: $10.12; PhotonLight: $8.95; West3D: $7.56; Mouser: $22.78; TechStorex: $537.00). Included once through vendor order totals or as standalone project expenses. FramingTech: $300.66 paid; shipping remains provisional. West3D: $17.55 paid per vendor invoice. Domain: $4.19 paid. Owner- or vendor-confirmed payments: $3,408.08, a partial subtotal. Shipped items of a partially shipped order are excluded until their payment can be allocated reliably.
 
 Documentary vendor order totals, including cancelled orders (see the purchase record for status):
-- Bambu Lab: $881.86; Carrier exception.
+- Bambu Lab: $881.86; Shipped.
 - VXB: $65.22; Cancelled.
 - DigiKey: $96.97; Cancelled.
 - BoltDepot: $26.16; Carrier reports delivery.
@@ -103,8 +103,8 @@ Documentary vendor order totals, including cancelled orders (see the purchase re
 
 ## Shipping and Speedy
 
-Tracking assigned: 21 of 21 recorded project shipments. The original DigiKey order remains cancelled, with its documentary amounts retained in the history. The owner and Mouser confirm the replacement order on November 5, 2026. The wire is planned for local purchase on November 6, 2026. Original charges and any refund remain unconfirmed. VXB also confirmed cancellation and reports a $65.22 refund; bank receipt remains unverified. Its historical label is excluded from active shipment counts. The Amazon controller replacement purchase is confirmed; current fulfillment is shown in the shipment record. Tracking assignment alone does not confirm carrier acceptance or Speedy receipt.
+Tracking assigned: 22 of 22 recorded project shipments. The original DigiKey order remains cancelled, with its documentary amounts retained in the history. The owner and Mouser confirm the replacement order on November 5, 2026. The wire is planned for local purchase on November 6, 2026. Original charges and any refund remain unconfirmed. VXB also confirmed cancellation and reports a $65.22 refund; bank receipt remains unverified. Its historical label is excluded from active shipment counts. The Amazon controller replacement purchase is confirmed; current fulfillment is shown in the shipment record. Tracking assignment alone does not confirm carrier acceptance or Speedy receipt.
 
-Project shipment locations checked 2026-11-09: 11 in Costa Rica; 4 received in Miami; 5 awaiting Speedy confirmation; 1 with a carrier return. Carrier delivery does not establish Speedy receipt or delivery to the recipient. A carrier return does not establish a refund or replacement.
+Project shipment locations checked 2026-11-09: 11 in Costa Rica; 4 received in Miami; 6 awaiting Speedy confirmation; 1 with a carrier return. Carrier delivery does not establish Speedy receipt or delivery to the recipient. A carrier return does not establish a refund or replacement.
 
-Speedy - Taxes, tariffs, shipping and others: CRC 430,300 combined amount shown as Total a pagar on 2026-11-07. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.
+Speedy - Taxes, tariffs, shipping and others: CRC 430,300 combined amount shown as Total a pagar on 2026-11-09. Includes all current Speedy packages with no project filter. Further charges are awaiting a quote. Payment and the final consolidated balance are unconfirmed. Kept separate from USD orders.
