@@ -32,7 +32,7 @@ test("private admin protects evidence and persists versioned changes", async (t)
   );
   t.after(() => mf.dispose());
   const db = await mf.getD1Database("DB");
-  const schema = await fs.readFile("backend/migrations/0001_admin.sql", "utf8");
+  const schema = (await Promise.all(["0001_admin.sql", "0002_item_tracking.sql"].map((file) => fs.readFile("backend/migrations/" + file, "utf8")))).join("\n");
   for (const statement of schema
     .split(";")
     .map((x) => x.trim())
@@ -58,6 +58,8 @@ test("private admin protects evidence and persists versioned changes", async (t)
     "/api/snapshot",
     "/api/export",
     "/api/ingest/snapshot",
+    "/api/tracking",
+    "/api/ingest/tracking",
     "/api/documents/" + "a".repeat(64),
   ])
     assert.equal((await request(route)).status, 401, route);
@@ -119,6 +121,37 @@ test("private admin protects evidence and persists versioned changes", async (t)
   });
   assert.equal(login.status, 200);
   const device2 = login.r.headers.get("set-cookie").split(";")[0];
+  const itemImport = { items: [
+    { id: "fixture-project-item", scope: "project", title: "Project fixture item", vendor: "Fixture store", quantity: "1", stages: { shipped: true }, source: "Fixture evidence", sourceCheckedAt: "2026-11-09T00:00:00Z" },
+    { id: "fixture-personal-item", scope: "personal", title: "Private fixture item", vendor: "Fixture store", quantity: "1", stages: { shipped: true, miami: true }, source: "Fixture evidence", sourceCheckedAt: "2026-11-09T00:00:00Z", tracking: "MUST_NOT_APPEAR", document: { url: "MUST_NOT_APPEAR" } },
+    { id: "fixture-local-item", scope: "project", title: "Local fixture item", shippingRequired: false, sourceCheckedAt: "2026-11-09T00:00:00Z" },
+  ] };
+  assert.equal((await request("/api/ingest/tracking", { method: "POST", service: true, payload: itemImport })).status, 200);
+  assert.equal((await request("/api/tracking", { service: true })).status, 401, "ingestion token cannot access owner endpoint");
+  let itemView = await (await request("/api/tracking", { cookie })).json();
+  assert.equal(itemView.items.length, 3);
+  assert.equal(itemView.items.find((x) => x.scope === "personal").title, "Private fixture item");
+  assert.equal(JSON.stringify(itemView).includes("MUST_NOT_APPEAR"), false, "raw tracking and original documents are not part of the item view");
+  const itemPatch = (cookie, phase, value, version, headers = {}) => request("/api/tracking/fixture-project-item", { method: "PATCH", cookie, payload: { phase, value, version }, headers });
+  assert.equal((await itemPatch(cookie, "miami", true, 1, { Origin: "https://hostile.example" })).status, 403);
+  assert.equal((await request("/api/tracking/fixture-project-item", { method: "PATCH", service: true, payload: { version: 1, phase: "miami", value: true } })).status, 401);
+  assert.equal((await itemPatch(cookie, "miami", true, 1)).status, 200);
+  assert.equal((await itemPatch(device2, "delivered", true, 1)).status, 409, "stale second-device edits cannot overwrite a mark");
+  itemView = await (await request("/api/tracking", { cookie: device2 })).json();
+  assert.equal(itemView.items.find((x) => x.id === "fixture-project-item").stages.miami, true, "saved checkbox is visible on another session");
+  assert.equal((await request("/api/ingest/tracking", { method: "POST", service: true, payload: itemImport })).status, 200);
+  assert.equal((await itemPatch(device2, "miami", false, 2)).status, 200, "owner can correct a checkbox without deleting source evidence");
+  const advancedImport = { items: [{ ...itemImport.items[0], stages: { shipped: true, miami: true, costa_rica: true }, sourceCheckedAt: "2026-11-09T02:00:00Z" }] };
+  assert.equal((await request("/api/ingest/tracking", { method: "POST", service: true, payload: advancedImport })).status, 200);
+  itemView = await (await request("/api/tracking", { cookie })).json();
+  const savedItem = itemView.items.find((x) => x.id === "fixture-project-item");
+  assert.equal(savedItem.stages.miami, false, "imports preserve the owner's explicit correction");
+  assert.equal(savedItem.stages.costa_rica, true, "new verified phases are imported independently");
+  assert.equal((await itemPatch(cookie, "arbitrary", true, savedItem.version)).status, 400);
+  assert.equal((await itemPatch(cookie, "shipped", "true", savedItem.version)).status, 400);
+  assert.equal((await request("/api/tracking/fixture-local-item", { method: "PATCH", cookie, payload: { version: 1, phase: "miami", value: true } })).status, 400);
+  assert.equal((await request("/api/tracking/fixture-local-item", { method: "PATCH", cookie, payload: { version: 1, phase: "delivered", value: true } })).status, 200);
+  assert.equal(JSON.stringify(await (await request("/api/export", { cookie })).json()).includes("Private fixture item"), false, "personal inventory is separate from project exports");
   const input = {
     orders: [
       {
@@ -413,6 +446,7 @@ test("private admin protects evidence and persists versioned changes", async (t)
     200,
   );
   assert.equal((await request("/api/snapshot", { cookie })).status, 401);
+  assert.equal((await request("/api/tracking", { cookie })).status, 401);
   assert.equal(
     (await request("/api/snapshot", { cookie: device2 })).status,
     200,
@@ -424,6 +458,7 @@ test("private admin protects evidence and persists versioned changes", async (t)
     (await request("/api/snapshot", { cookie: device2 })).status,
     403,
   );
+  assert.equal((await request("/api/tracking", { cookie: device2 })).status, 403);
 });
 test("room redaction preserves original evidence and operational fields", () => {
   const original = {

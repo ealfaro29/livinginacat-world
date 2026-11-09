@@ -614,6 +614,36 @@ dialog::backdrop {
   margin: 80px 0;
   color: #aaa69e;
 }
+.tracking-legend { color: #bdb6a9; font-size: 12px; max-width: 1000px; }
+.tracking-summary { font: 11px/1.5 ui-monospace, monospace; color: #aaa69e; margin: 22px 0; }
+.tracking-section { margin: 28px 0 44px; }
+.tracking-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.tracking-section-heading h2 { margin-bottom: 14px; }
+.tracking-section-heading > span { color: #aaa69e; font: 11px ui-monospace, monospace; }
+.tracking-scroll { overflow-x: auto; border: 1px solid #414143; }
+.tracking-table { width: 100%; min-width: 1080px; border-collapse: separate; border-spacing: 0; font-size: 12px; }
+.tracking-table th, .tracking-table td { padding: 15px 12px; border-bottom: 1px solid #343436; text-align: left; vertical-align: middle; }
+.tracking-table thead th { background: #252527; color: #eee8db; font-weight: 500; white-space: nowrap; }
+.tracking-table tbody th { font-weight: 500; width: 27%; min-width: 250px; background: #171718; }
+.tracking-table tbody td { background: #171718; }
+.tracking-table tbody tr:nth-child(even) th, .tracking-table tbody tr:nth-child(even) td { background: #1b1b1d; }
+.tracking-table tbody tr:hover th, .tracking-table tbody tr:hover td { background: #232325; }
+.tracking-table th:first-child { position: sticky; left: 0; z-index: 1; box-shadow: 1px 0 #414143; }
+.tracking-table thead th:first-child { z-index: 2; }
+.tracking-table .phase-col, .tracking-table .phase-cell { text-align: center; min-width: 80px; }
+.tracking-table .phase-cell input { display: block; width: 23px; height: 23px; margin: 0 auto; cursor: pointer; accent-color: #a0b891; }
+.tracking-table .phase-confirmed { color: #bed2b1; }
+.tracking-note { min-width: 220px; max-width: 330px; color: #b5b0a7; line-height: 1.5; }
+.tracking-row-status { display: block; color: #bed2b1; font-size: 10px; min-height: 0; }
+.tracking-row-status:not(:empty) { margin-top: 5px; }
+.not-applicable { color: #77746e; }
+.tracking-table .tracking-empty { padding: 28px 15px; color: #aaa69e; }
+@media (max-width: 760px) {
+  .tabs { gap: 16px; overflow-x: auto; }
+  .tabs button { white-space: nowrap; }
+  .tracking-table { min-width: 1040px; }
+  .tracking-table tbody th { min-width: 190px; max-width: 210px; }
+}
 footer {
   border-bottom: 0;
   border-top: 1px solid #343436;

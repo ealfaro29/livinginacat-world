@@ -22,7 +22,17 @@ async function request(route, options = {}) {
     );
   return r.json();
 }
-if (command === "import") {
+if (command === "tracking-import") {
+  const result = await request("/api/ingest/tracking", {
+    method: "POST", body: await fs.readFile(path.resolve(file), "utf8"),
+    headers: { "Content-Type": "application/json" },
+  });
+  console.log(`Synchronized ${result.updated.length} private tracking items.`);
+} else if (command === "tracking-snapshot") {
+  const data = await request("/api/ingest/tracking");
+  await fs.writeFile(path.join(root, "private/item-tracking-snapshot.json"), JSON.stringify(data, null, 2), { mode: 0o600 });
+  console.log(`Saved private tracking snapshot: ${data.items.length} items.`);
+} else if (command === "import") {
   const result = await request("/api/ingest", {
     method: "POST",
     body: await fs.readFile(path.resolve(file), "utf8"),

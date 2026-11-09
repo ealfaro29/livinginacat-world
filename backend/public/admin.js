@@ -1,3 +1,4 @@
+import { initTracking, setTracking, clearTracking } from "./tracking.js";
 const $ = (s) => document.querySelector(s);
 const esc = (s) =>
   String(s ?? "").replace(
@@ -24,9 +25,10 @@ const date = (s) =>
       }).format(new Date(s.length === 10 ? s + "T18:00:00Z" : s))
     : "Not confirmed";
 let data,
+  sessionGeneration = 0,
   editing,
   uploading,
-  tab = "packages",
+  tab = "tracking",
   setupKey = new URLSearchParams(location.hash.slice(1)).get("setup");
 if (setupKey) history.replaceState(null, "", location.pathname);
 async function api(path, options = {}) {
@@ -67,7 +69,9 @@ async function boot() {
       setupKey = null;
       await refresh();
     } else {
+      sessionGeneration += 1;
       data = null;
+      clearTracking();
       for (const section of ["#packages", "#orders", "#history"])
         $(section).replaceChildren();
       const setup = s.setupAvailable && setupKey;
@@ -122,9 +126,11 @@ $("#auth-form").addEventListener("submit", async (e) => {
   }
 });
 $("#logout").addEventListener("click", async () => {
+  sessionGeneration += 1;
   try {
     await api("/api/logout", { method: "POST", body: "{}" });
     data = null;
+    clearTracking();
     $("#packages").replaceChildren();
     $("#orders").replaceChildren();
     $("#history").replaceChildren();
@@ -134,8 +140,12 @@ $("#logout").addEventListener("click", async () => {
   }
 });
 async function refresh() {
+  const generation = sessionGeneration;
   try {
-    data = await api("/api/snapshot");
+    const [snapshot, tracking] = await Promise.all([api("/api/snapshot"), api("/api/tracking")]);
+    if (generation !== sessionGeneration) return;
+    data = snapshot;
+    setTracking(tracking);
     render();
     $("#sync").textContent =
       "● Synced · " +
@@ -144,6 +154,7 @@ async function refresh() {
         minute: "2-digit",
       });
   } catch (e) {
+    if (generation !== sessionGeneration) return;
     $("#sync").textContent = "Sync failed · refresh to retry";
     toast(e.message);
   }
@@ -167,6 +178,8 @@ const activePackages = () => {
   return data.packages.filter((p) => active.has(p.orderId));
 };
 function render() {
+  $("#stats").hidden = tab === "tracking";
+  $("#record-tools").hidden = tab === "tracking";
   const ps = activePackages(),
     counts = [
       ps.length,
@@ -269,9 +282,11 @@ document.querySelectorAll("[data-tab]").forEach((b) =>
     document
       .querySelectorAll("[data-tab]")
       .forEach((x) => x.setAttribute("aria-selected", String(x === b)));
-    ["packages", "orders", "history"].forEach(
+    ["tracking", "packages", "orders", "history"].forEach(
       (x) => ($("#" + x + "-panel").hidden = x !== tab),
     );
+    $("#stats").hidden = tab === "tracking";
+    $("#record-tools").hidden = tab === "tracking";
   }),
 );
 function openEditor(p) {
@@ -427,6 +442,7 @@ $("#pdf-form").addEventListener("submit", async (e) => {
     busy(f, false);
   }
 });
+initTracking({ api, refresh, toast });
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden && data && !$("dialog[open]")) refresh();
 });

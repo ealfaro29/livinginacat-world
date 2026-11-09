@@ -76,9 +76,9 @@
         <div class="page-heading">
           <div>
             <p class="eyebrow">THE BUILD / DISPATCH ROOM</p>
-            <h1>From store<br />to <em>workbench.</em></h1>
+            <h1>Tus compras,<br /><em>paso a paso.</em></h1>
             <p class="muted">
-              Orders, prealerts and arrivals. One shared record.
+              Proyecto y personal. Marca cada fase cuando esté confirmada.
             </p>
           </div>
           <div class="sync-block">
@@ -98,7 +98,8 @@
         <div id="stats" class="stats"></div>
         <div class="toolbar">
           <div class="tabs" role="tablist" aria-label="Records">
-            <button data-tab="packages" role="tab" aria-selected="true">
+            <button data-tab="tracking" role="tab" aria-selected="true">Seguimiento</button>
+            <button data-tab="packages" role="tab" aria-selected="false">
               Packages <span id="package-count"></span></button
             ><button data-tab="orders" role="tab" aria-selected="false">
               Orders</button
@@ -106,14 +107,23 @@
               Activity
             </button>
           </div>
-          <div class="tools">
+          <div class="tools" id="record-tools" hidden>
             <button id="new-package" class="secondary">+ Add package</button
             ><a class="text-button" href="/api/export" download
               >Export JSON ↓</a
             >
           </div>
         </div>
-        <div id="packages-panel">
+        <section id="tracking-panel" aria-label="Seguimiento de artículos">
+          <div class="filters">
+            <label class="search-label"><span class="sr-only">Buscar artículos</span><input id="tracking-search" type="search" placeholder="Buscar artículo o tienda…" /></label>
+            <label><span class="sr-only">Filtrar fase</span><select id="tracking-filter"><option value="pending">Pendientes de entrega</option><option value="all">Todos los artículos</option><option value="miami">En Miami</option><option value="costa_rica">En Costa Rica</option><option value="unshipped">Sin despacho confirmado</option><option value="delivered">Entregados</option></select></label>
+          </div>
+          <p class="tracking-legend">Miami = recibido por Speedy. Costa Rica = llegada confirmada por Speedy. Entregado = recibido por ti. Una casilla vacía significa sin confirmar.</p>
+          <p id="tracking-summary" class="tracking-summary" role="status"></p>
+          <div id="tracking-lists"></div>
+        </section>
+        <div id="packages-panel" hidden>
           <div class="filters">
             <label class="search-label"
               ><span class="sr-only">Search packages</span

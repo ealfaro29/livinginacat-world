@@ -2,7 +2,20 @@
 
 The public journal remains on GitHub Pages. `/admin/` links to a separate HTTPS Cloudflare Worker. D1 stores orders, packages and changes; a private KV namespace stores original PDFs. No private records are committed or built into `dist/`.
 
-Personal purchase details must never appear in messages or in the interactive owner room. Shared-order records use generic titles and omit restricted descriptions, notes, item values and original-document links from owner snapshots and exports. Saved document URLs are also blocked for these records. Stored originals and owner fields are preserved outside the interactive view for authorized ingestion; redaction does not change shipping evidence or readiness. The public site shows only the combined Speedy amount for all current packages, without a project-membership filter or a package-level breakdown. Unquoted charges remain pending.
+## Private item tracker
+
+On November 9 the owner explicitly requested a complete, editable HTML tracker in the private admin, separated into **Proyecto** and **Personal**, with **Shipped**, **Miami**, **Costa Rica** and **Entregado** checkboxes. This is a targeted authorization to display item descriptions to the existing authenticated owner `ealfaro29`. It does not authorize public disclosure, personal details in GitHub or project exports, or exposing the protected originals.
+
+The tracker uses a separate `tracking_items` table and owner-only `/api/tracking` endpoints. Its data never enters public source, static assets, the project snapshot/export or project accounting. Checkbox edits use the existing secure owner session, origin checks and optimistic version checks. Owner corrections are stored separately from imported evidence and survive future synchronization. Signing out clears the item view. A blank checkbox means unconfirmed; Miami means receipt by Speedy, and Entregado means receipt by the owner. Local purchases show no shipping phases.
+
+```sh
+node backend/sync.mjs tracking-import private/item-tracking-import.json
+node backend/sync.mjs tracking-snapshot
+```
+
+Keep the item payload and its protected evidence under ignored `private/`. Only an explicit ingestion import can add factual rows; no item data is embedded in the HTML or JavaScript. Apply `0002_item_tracking.sql` before deploying the tracker.
+
+Outside the explicitly authorized private item tracker, shared-order records use generic titles and omit restricted descriptions, notes, item values and original-document links from owner snapshots and exports. Saved document URLs are also blocked for these records. Stored originals and owner fields are preserved outside the interactive view for authorized ingestion; redaction does not change shipping evidence or readiness. The public site shows only the combined Speedy amount for all current packages, without a project-membership filter or a package-level breakdown. Unquoted charges remain pending.
 
 Empty imported `*-AWAIT` preparation records for fully carrier-delivered orders are excluded from the interactive package view once tracked shipments exist for that order. Manual records and records containing owner notes, documents, prealerts, consolidations or arrivals remain visible. Stored records and the ingestion snapshot are preserved. An untracked portion of a partially fulfilled order stays pending.
 

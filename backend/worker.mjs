@@ -10,6 +10,10 @@ import {
   editPackage,
   hasRestrictedDetails,
   projectRoomSnapshot,
+  trackingPhases,
+  trackingItemFacts,
+  mergeTrackingFacts,
+  trackingItemView,
 } from "./model.mjs";
 const encoder = new TextEncoder();
 const COOKIE = "__Host-lica_session";
@@ -293,6 +297,57 @@ async function handle(request, env) {
   }
   const service = path.startsWith("/api/ingest");
   const actor = await auth(request, env, service);
+  if ((path === "/api/tracking" || path === "/api/ingest/tracking") && method === "GET") {
+    const rows = await env.DB.prepare("SELECT * FROM tracking_items ORDER BY scope DESC,sort_order,id").all();
+    return json({ items: rows.results.map(trackingItemView), syncedAt: now() });
+  }
+  if (path === "/api/ingest/tracking" && method === "POST") {
+    if (actor !== "mail-sync") throw new ApiError(403, "Evidence ingestion only.");
+    const input = await body(request);
+    if (!Array.isArray(input.items) || input.items.length > 500)
+      throw new ApiError(400, "Invalid item import.");
+    // Validate the whole batch before writing any record.
+    const items = input.items.map((item, index) => ({
+      id: id(item.id), scope: item.scope, facts: trackingItemFacts(item),
+      sortOrder: Number.isSafeInteger(item.sortOrder) ? item.sortOrder : index,
+    }));
+    const updated = [];
+    for (const item of items) {
+      const old = await env.DB.prepare("SELECT * FROM tracking_items WHERE id=?").bind(item.id).first();
+      if (old && old.scope !== item.scope) throw new ApiError(409, "Item group cannot be changed by import.");
+      const next = mergeTrackingFacts(old ? JSON.parse(old.data) : null, { ...item.facts, scope: item.scope });
+      const serialized = JSON.stringify(next);
+      if (old?.data === serialized && old.sort_order === item.sortOrder) continue;
+      const result = old
+        ? await env.DB.prepare("UPDATE tracking_items SET data=?,sort_order=?,version=version+1,updated_at=? WHERE id=? AND version=?")
+          .bind(serialized, item.sortOrder, now(), item.id, old.version).run()
+        : await env.DB.prepare("INSERT INTO tracking_items(id,scope,sort_order,data,updated_at) VALUES(?,?,?,?,?)")
+          .bind(item.id, item.scope, item.sortOrder, serialized, now()).run();
+      if (!result.meta.changes) throw new ApiError(409, "Tracking changed during import. Retry after refreshing.");
+      updated.push(item.id);
+    }
+    return json({ ok: true, updated });
+  }
+  const trackingEdit = path.match(/^\/api\/tracking\/([a-zA-Z0-9_-]+)$/);
+  if (trackingEdit && method === "PATCH") {
+    const input = await body(request, 2000);
+    const row = await env.DB.prepare("SELECT * FROM tracking_items WHERE id=?").bind(id(trackingEdit[1])).first();
+    if (!row) throw new ApiError(404, "Item not found.");
+    if (input.version !== row.version) throw new ApiError(409, "This item changed on another device. Refresh and try again.");
+    if (!trackingPhases.includes(input.phase) || typeof input.value !== "boolean")
+      throw new ApiError(400, "Choose a valid phase and checkbox value.");
+    if (!JSON.parse(row.data).shippingRequired && input.phase !== "delivered")
+      throw new ApiError(400, "This local purchase has no shipping phase.");
+    const marks = { ...JSON.parse(row.owner_marks), [input.phase]: input.value };
+    const result = await env.DB.batch([
+      env.DB.prepare("UPDATE tracking_items SET owner_marks=?,version=version+1,updated_at=? WHERE id=? AND version=?")
+        .bind(JSON.stringify(marks), now(), row.id, row.version),
+      env.DB.prepare("INSERT INTO audit(actor,action,entity_id,detail,created_at) SELECT ?,?,?,?,? WHERE changes()=1")
+        .bind(actor, "Item tracking phase updated", row.id, JSON.stringify({ phase: input.phase, value: input.value }), now()),
+    ]);
+    if (!result[0].meta.changes) throw new ApiError(409, "This item changed on another device. Refresh and try again.");
+    return json({ ok: true, version: row.version + 1 });
+  }
   if (path === "/api/logout" && method === "POST") {
     const token = request.headers
       .get("Cookie")

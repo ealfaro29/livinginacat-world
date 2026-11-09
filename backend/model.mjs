@@ -127,6 +127,54 @@ export function editPackage(existing, input) {
   return next;
 }
 
+export const trackingPhases = ["shipped", "miami", "costa_rica", "delivered"];
+export function trackingItemFacts(input) {
+  if (!["project", "personal"].includes(input.scope))
+    throw new ApiError(400, "Choose project or personal.");
+  const title = text(input.title, 240);
+  if (!title) throw new ApiError(400, "An item description is required.");
+  const stages = {};
+  for (const phase of trackingPhases) {
+    const value = input.stages?.[phase] ?? false;
+    if (typeof value !== "boolean") throw new ApiError(400, "Invalid tracking phase.");
+    stages[phase] = value;
+  }
+  return {
+    title,
+    vendor: text(input.vendor, 80),
+    quantity: text(input.quantity, 80),
+    note: text(input.note, 1000),
+    shippingRequired: input.shippingRequired !== false,
+    stages,
+    source: text(input.source, 200),
+    sourceCheckedAt: timestamp(input.sourceCheckedAt),
+  };
+}
+export function mergeTrackingFacts(existing, input) {
+  const next = trackingItemFacts(input);
+  if (existing && Date.parse(existing.sourceCheckedAt || 0) > Date.parse(next.sourceCheckedAt || 0))
+    return existing;
+  // New evidence can advance a phase. Owner marks are stored separately and
+  // never overwritten by ingestion. Keep the original evidence when corrected.
+  for (const phase of trackingPhases)
+    next.stages[phase] ||= existing?.stages?.[phase] === true;
+  return next;
+}
+export function trackingItemView(row) {
+  const facts = JSON.parse(row.data), marks = JSON.parse(row.owner_marks);
+  return {
+    ...facts,
+    id: row.id,
+    scope: row.scope,
+    version: row.version,
+    updatedAt: row.updated_at,
+    stages: Object.fromEntries(trackingPhases.map((phase) => [phase,
+      Object.hasOwn(marks, phase) ? marks[phase] : facts.stages[phase],
+    ])),
+    manuallyMarked: Object.keys(marks),
+  };
+}
+
 // Shared-order originals are evidence for ingestion, not content for the room.
 // Preserve stored evidence and owner fields; redact only the interactive view.
 const restrictedOrders = new Set([
