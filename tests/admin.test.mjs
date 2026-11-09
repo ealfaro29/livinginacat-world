@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { Miniflare, convertV4MiniflareOptions } from "miniflare";
-import { ready, mergeImport, editPackage, projectRoomSnapshot } from "../backend/model.mjs";
+import { ready, mergeImport, editPackage, projectRoomSnapshot, trackingItemFacts, mergeTrackingFacts } from "../backend/model.mjs";
 import worker from "../backend/worker.mjs";
 const hash = (x) => createHash("sha256").update(x).digest("hex");
 test("private admin protects evidence and persists versioned changes", async (t) => {
@@ -122,7 +122,7 @@ test("private admin protects evidence and persists versioned changes", async (t)
   assert.equal(login.status, 200);
   const device2 = login.r.headers.get("set-cookie").split(";")[0];
   const itemImport = { items: [
-    { id: "fixture-project-item", scope: "project", title: "Project fixture item", vendor: "Fixture store", quantity: "1", stages: { shipped: true }, source: "Fixture evidence", sourceCheckedAt: "2026-11-09T00:00:00Z" },
+    { id: "fixture-project-item", scope: "project", title: "Project fixture item", vendor: "Fixture store", quantity: "1", stages: { shipped: true }, source: "Fixture evidence", sourceCheckedAt: "2026-11-09T00:00:00Z", evidence: [{ label: "Carrier confirmation", url: "https://carrier.example/track/fixture", eventLabel: "Carrier delivery", eventDate: "2026-10-31", eventTime: "9:40 AM (Miami)", observedAt: "2026-11-09T00:00:00Z" }] },
     { id: "fixture-personal-item", scope: "personal", title: "Private fixture item", vendor: "Fixture store", quantity: "1", stages: { shipped: true, miami: true }, source: "Fixture evidence", sourceCheckedAt: "2026-11-09T00:00:00Z", tracking: "MUST_NOT_APPEAR", document: { url: "MUST_NOT_APPEAR" } },
     { id: "fixture-local-item", scope: "project", title: "Local fixture item", shippingRequired: false, sourceCheckedAt: "2026-11-09T00:00:00Z" },
   ] };
@@ -130,6 +130,8 @@ test("private admin protects evidence and persists versioned changes", async (t)
   assert.equal((await request("/api/tracking", { service: true })).status, 401, "ingestion token cannot access owner endpoint");
   let itemView = await (await request("/api/tracking", { cookie })).json();
   assert.equal(itemView.items.length, 3);
+  assert.equal(itemView.items.find((x) => x.id === "fixture-project-item").evidence[0].eventDate, "2026-10-31");
+  assert.equal(itemView.items.find((x) => x.id === "fixture-project-item").evidence[0].url, "https://carrier.example/track/fixture");
   assert.equal(itemView.items.find((x) => x.scope === "personal").title, "Private fixture item");
   assert.equal(JSON.stringify(itemView).includes("MUST_NOT_APPEAR"), false, "raw tracking and original documents are not part of the item view");
   const itemPatch = (cookie, phase, value, version, headers = {}) => request("/api/tracking/fixture-project-item", { method: "PATCH", cookie, payload: { phase, value, version }, headers });
@@ -546,4 +548,15 @@ test("prealert readiness requires carrier, tracking and final purchase PDF", () 
     }),
     edited,
   );
+});
+
+test('tracker evidence validates links and dates and survives imports without sources', () => {
+  const input = { scope: 'project', title: 'Fixture', sourceCheckedAt: '2026-11-09T00:00:00Z', evidence: [{ label: 'Original', url: 'https://carrier.example/proof', eventDate: '2026-10-31', observedAt: '2026-11-09T00:00:00Z' }] };
+  const stored = trackingItemFacts(input);
+  const { evidence, ...noLinks } = input;
+  assert.deepEqual(mergeTrackingFacts(stored, noLinks).evidence, stored.evidence);
+  for (const url of ['javascript:alert(1)', 'http://carrier.example/proof', 'https://user:secret@carrier.example/proof'])
+    assert.throws(() => trackingItemFacts({ ...input, evidence: [{ ...evidence[0], url }] }), /HTTPS|link/);
+  assert.throws(() => trackingItemFacts({ ...input, evidence: [{ ...evidence[0], eventDate: '2026-02-30' }] }), /valid date/);
+  assert.throws(() => trackingItemFacts({ ...input, evidence: [{ ...evidence[0], observedAt: null }] }), /verification date/);
 });

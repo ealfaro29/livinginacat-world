@@ -128,6 +128,26 @@ export function editPackage(existing, input) {
 }
 
 export const trackingPhases = ["shipped", "miami", "costa_rica", "delivered"];
+function trackingEvidence(value) {
+  if (value === undefined) return [];
+  if (!Array.isArray(value) || value.length > 8)
+    throw new ApiError(400, "Use up to eight evidence links per item.");
+  return value.map((entry) => {
+    if (!entry || typeof entry !== "object") throw new ApiError(400, "Invalid evidence entry.");
+    let url;
+    try { url = new URL(entry.url); } catch { throw new ApiError(400, "Invalid evidence link."); }
+    if (url.protocol !== "https:" || url.username || url.password || url.href.length > 2500)
+      throw new ApiError(400, "Evidence links must use HTTPS without credentials.");
+    const label = text(entry.label, 120), observedAt = timestamp(entry.observedAt);
+    if (!label || !observedAt) throw new ApiError(400, "Evidence needs a label and verification date.");
+    return {
+      label, url: url.href, observedAt,
+      eventLabel: text(entry.eventLabel, 80) || "Evento",
+      eventDate: day(entry.eventDate), eventTime: text(entry.eventTime, 80),
+      detail: text(entry.detail, 350),
+    };
+  });
+}
 export function trackingItemFacts(input) {
   if (!["project", "personal"].includes(input.scope))
     throw new ApiError(400, "Choose project or personal.");
@@ -144,6 +164,7 @@ export function trackingItemFacts(input) {
     vendor: text(input.vendor, 80),
     quantity: text(input.quantity, 80),
     note: text(input.note, 1000),
+    ...(input.evidence === undefined ? {} : { evidence: trackingEvidence(input.evidence) }),
     shippingRequired: input.shippingRequired !== false,
     stages,
     source: text(input.source, 200),
@@ -154,6 +175,8 @@ export function mergeTrackingFacts(existing, input) {
   const next = trackingItemFacts(input);
   if (existing && Date.parse(existing.sourceCheckedAt || 0) > Date.parse(next.sourceCheckedAt || 0))
     return existing;
+  // A routine import without evidence cannot erase the owner's source links.
+  if (input.evidence === undefined && existing?.evidence) next.evidence = existing.evidence;
   // New evidence can advance a phase. Owner marks are stored separately and
   // never overwritten by ingestion. Keep the original evidence when corrected.
   for (const phase of trackingPhases)

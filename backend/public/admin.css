@@ -636,6 +636,11 @@ dialog::backdrop {
 .tracking-note { min-width: 220px; max-width: 330px; color: #b5b0a7; line-height: 1.5; }
 .tracking-row-status { display: block; color: #bed2b1; font-size: 10px; min-height: 0; }
 .tracking-row-status:not(:empty) { margin-top: 5px; }
+.tracking-evidence { margin-top: 10px; display: grid; gap: 10px; }
+.tracking-proof { padding-left: 10px; border-left: 2px solid #526647; }
+.tracking-proof a { color: #d0e3bf; text-decoration: underline; text-underline-offset: 3px; font-size: 12px; }
+.tracking-proof small, .tracking-verification { display: block; font-size: 11px; line-height: 1.6; color: #a9a69f; }
+.tracking-verification { margin-top: 8px; }
 .not-applicable { color: #77746e; }
 .tracking-table .tracking-empty { padding: 28px 15px; color: #aaa69e; }
 @media (max-width: 760px) {
