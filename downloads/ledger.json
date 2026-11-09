@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-09",
+      "title": "Controller tracking corrected and forwarding preparation completed",
+      "detail": "The complete Amazon fulfillment view identifies the controller with its own assigned tracking and estimated Miami arrival November 10. Its genuine purchase receipt and matching merchant Completed transaction are verified without claiming bank settlement. Speedy prealerting and consolidation are now confirmed for the controller and Mouser shipments. No arrival is inferred and recorded financial totals are unchanged."
+    },
+    {
+      "date": "2026-11-09",
       "title": "Bambu replacement tracking assigned",
       "detail": "Bambu Lab reports a replacement shipped with USPS. The carrier currently shows a label created and awaits the package; no arrival estimate is available. The original return is retained, and the replacement has its own shipment record without duplicating the purchase total. Speedy prealerting awaits a supported arrival date."
     },
@@ -2098,7 +2103,11 @@
       "sourceDate": "2026-11-07",
       "lastChecked": "2026-11-07",
       "invoiceVerified": false,
-      "notes": "Confirmed controller replacement. Amazon confirms dispatch with Amazon as carrier and estimated arrival November 9. The assigned tracking is unchanged. Final invoice/purchase receipt, carrier delivery, Speedy receipt and bank settlement remain unconfirmed. Taxes, tariffs, shipping and others remain grouped at vendor level."
+      "notes": "Confirmed controller replacement. Amazon confirms dispatch with Amazon as carrier and estimated arrival November 9. The assigned tracking is unchanged. Final invoice/purchase receipt, carrier delivery, Speedy receipt and bank settlement remain unconfirmed. Taxes, tariffs, shipping and others remain grouped at vendor level.",
+      "merchantChargeStatus": "completed",
+      "merchantChargeCompletedDate": "2026-11-08",
+      "purchaseReceiptVerified": true,
+      "bankSettlementConfirmed": false
     }
   ],
   "shipments": [
@@ -2516,15 +2525,17 @@
       "expectedDeliveryDate": "2026-11-09",
       "expectedShipDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-11-07",
-      "source": "Authentic Mouser final invoice and shipment confirmation; FedEx exact tracking page",
-      "notes": "FedEx confirms this shipment is on the way, with estimated arrival Monday, November 9. Speedy prealert is confirmed with the authentic final invoice and matching article values; its arrival estimate was updated to November 9. Consolidation awaits a second eligible package because Speedy requires at least two. Carrier delivery and Speedy receipt remain unconfirmed.",
+      "lastChecked": "2026-11-09",
+      "source": "FedEx active Out for delivery progress and authenticated Speedy prealert",
+      "notes": "FedEx shows Out for delivery to Miami on November 9. The authentic final invoice, Speedy prealert and consolidation are confirmed. Carrier delivery, Speedy receipt and recipient delivery remain unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-07",
+      "speedyCheckedAt": "2026-11-09",
       "trackingAssigned": true,
       "invoiceVerified": true,
-      "prealertStatus": "confirmed"
+      "prealertStatus": "confirmed",
+      "consolidationStatus": "confirmed",
+      "consolidationConfirmedAt": "2026-11-09T12:22:16.942Z"
     },
     {
       "id": "AMZ-PKG-11",
@@ -2535,15 +2546,19 @@
       "itemIds": [
         "vxb-044"
       ],
-      "expectedDeliveryDate": "2026-11-09",
+      "expectedDeliveryDate": "2026-11-10",
       "deliveredAt": null,
-      "lastChecked": "2026-11-08",
-      "source": "Authenticated Amazon order and tracking pages",
-      "notes": "Amazon confirms Shipped (step 2 of 4), names Amazon as the carrier and estimates arrival November 9. The existing tracking is unchanged. Carrier delivery and Speedy receipt remain unconfirmed. The available printable document remains an Order Summary, so the prealert awaits a final invoice/purchase receipt. Bank settlement remains independently unverified.",
+      "lastChecked": "2026-11-09",
+      "source": "Authenticated controller-specific Amazon tracking and complete order fulfillment details",
+      "notes": "The controller has its own verified Amazon tracking and estimated Miami arrival November 10. An authentic purchase receipt and matching merchant Completed transaction are preserved; bank settlement is unverified. Its Speedy prealert and consolidation are now confirmed. Carrier delivery and Speedy receipt remain unconfirmed.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-08",
-      "trackingAssigned": true
+      "speedyCheckedAt": "2026-11-09",
+      "trackingAssigned": true,
+      "prealertStatus": "confirmed",
+      "consolidationStatus": "confirmed",
+      "consolidationConfirmedAt": "2026-11-09T12:22:16.942Z",
+      "purchaseReceiptVerified": true
     },
     {
       "id": "BAMBU-REPLACEMENT-01",
