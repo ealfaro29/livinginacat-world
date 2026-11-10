@@ -38,6 +38,20 @@ test("private admin protects evidence and persists versioned changes", async (t)
     .map((x) => x.trim())
     .filter(Boolean))
     await db.prepare(statement).run();
+  const migrationRow = {
+    id: "migration-fixture", scope: "personal", sort_order: 8,
+    data: JSON.stringify({ title: "Retained fixture", stages: { shipped: true } }),
+    owner_marks: JSON.stringify({ miami: false, delivered: true }),
+    version: 7, updated_at: "2026-11-09T00:00:00Z",
+  };
+  await db.prepare("INSERT INTO tracking_items(id,scope,sort_order,data,owner_marks,version,updated_at) VALUES(?,?,?,?,?,?,?)")
+    .bind(...Object.values(migrationRow)).run();
+  const scopeMigration = await fs.readFile("backend/migrations/0003_unassigned_tracking.sql", "utf8");
+  for (const statement of scopeMigration.split(";").map((x) => x.trim()).filter(Boolean))
+    await db.prepare(statement).run();
+  assert.deepEqual(await db.prepare("SELECT * FROM tracking_items WHERE id=?").bind(migrationRow.id).first(), migrationRow,
+    "adding unresolved packages preserves every existing field and owner mark");
+  await db.prepare("DELETE FROM tracking_items WHERE id=?").bind(migrationRow.id).run();
   const request = async (
     route,
     { cookie, service, method = "GET", payload, headers = {}, raw } = {},
@@ -125,11 +139,15 @@ test("private admin protects evidence and persists versioned changes", async (t)
     { id: "fixture-project-item", scope: "project", title: "Project fixture item", vendor: "Fixture store", quantity: "1", stages: { shipped: true }, source: "Fixture evidence", sourceCheckedAt: "2026-11-09T00:00:00Z", evidence: [{ label: "Carrier confirmation", url: "https://carrier.example/track/fixture", eventLabel: "Carrier delivery", eventDate: "2026-10-31", eventTime: "9:40 AM (Miami)", observedAt: "2026-11-09T00:00:00Z" }] },
     { id: "fixture-personal-item", scope: "personal", title: "Private fixture item", vendor: "Fixture store", quantity: "1", stages: { shipped: true, miami: true }, source: "Fixture evidence", sourceCheckedAt: "2026-11-09T00:00:00Z", trackingNumbers: ["TESTPARCEL123456", "TESTSCAN987654"], tracking: "MUST_NOT_APPEAR", document: { url: "MUST_NOT_APPEAR" } },
     { id: "fixture-local-item", scope: "project", title: "Local fixture item", shippingRequired: false, sourceCheckedAt: "2026-11-09T00:00:00Z" },
+    { id: "fixture-unassigned-package", scope: "unassigned", title: "Unresolved fixture package", quantity: "Unconfirmed", stages: { shipped: true, miami: true, costa_rica: true }, trackingNumbers: ["UNASSIGNEDTEST123"], sourceCheckedAt: "2026-11-09T00:00:00Z" },
   ] };
   assert.equal((await request("/api/ingest/tracking", { method: "POST", service: true, payload: itemImport })).status, 200);
   assert.equal((await request("/api/tracking", { service: true })).status, 401, "ingestion token cannot access owner endpoint");
   let itemView = await (await request("/api/tracking", { cookie })).json();
-  assert.equal(itemView.items.length, 3);
+  assert.equal(itemView.items.length, 4);
+  assert.deepEqual(itemView.items.find((x) => x.scope === "unassigned").trackingNumbers, ["UNASSIGNEDTEST123"]);
+  assert.equal(itemView.items.find((x) => x.scope === "unassigned").stages.costa_rica, true);
+  assert.equal(itemView.items.filter((x) => x.scope === "project").length, 2, "unresolved packages do not inflate project counts");
   assert.equal(itemView.items.find((x) => x.id === "fixture-project-item").evidence[0].eventDate, "2026-10-31");
   assert.equal(itemView.items.find((x) => x.id === "fixture-project-item").evidence[0].url, "https://carrier.example/track/fixture");
   assert.equal(itemView.items.find((x) => x.scope === "personal").title, "Private fixture item");
@@ -156,6 +174,7 @@ test("private admin protects evidence and persists versioned changes", async (t)
   assert.equal((await request("/api/tracking/fixture-local-item", { method: "PATCH", cookie, payload: { version: 1, phase: "delivered", value: true } })).status, 200);
   assert.equal(JSON.stringify(await (await request("/api/export", { cookie })).json()).includes("Private fixture item"), false, "personal inventory is separate from project exports");
   assert.equal(JSON.stringify(await (await request("/api/export", { cookie })).json()).includes("TESTPARCEL123456"), false, "private tracking references stay out of project exports");
+  assert.equal(JSON.stringify(await (await request("/api/export", { cookie })).json()).includes("UNASSIGNEDTEST123"), false, "unresolved tracking references stay out of project exports");
   const input = {
     orders: [
       {

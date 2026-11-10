@@ -158,8 +158,8 @@ function trackingEvidence(value) {
   });
 }
 export function trackingItemFacts(input) {
-  if (!["project", "personal"].includes(input.scope))
-    throw new ApiError(400, "Choose project or personal.");
+  if (!["project", "personal", "unassigned"].includes(input.scope))
+    throw new ApiError(400, "Choose project, personal or unassigned.");
   const title = text(input.title, 240);
   if (!title) throw new ApiError(400, "An item description is required.");
   const stages = {};
