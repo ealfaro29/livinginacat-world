@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-09",
+      "title": "Observed combined Speedy amount updated",
+      "detail": "The observed combined Total a pagar is now CRC 442,300 for all current packages, counted once. Remaining quotes, payment and the final consolidated balance are unconfirmed. Speedy charges remain separate from USD purchase totals."
+    },
+    {
+      "date": "2026-11-09",
       "title": "Mouser carrier delivery confirmed in Miami",
       "detail": "FedEx confirms the electronics replacement shipment was delivered in Miami on November 9. This is carrier delivery; Speedy receipt and recipient delivery remain unconfirmed. The existing invoice, prealert, consolidation and recorded purchase totals are preserved."
     },
@@ -2593,14 +2598,14 @@
   ],
   "forwardingCharges": {
     "currency": "CRC",
-    "amountCRC": 430300,
+    "amountCRC": 442300,
     "scope": "all_current_packages",
     "quoteStatus": "awaiting_remaining_quotes",
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Authenticated Speedy quoted package charges and owner-confirmed settlement exclusions",
     "observedAt": "2026-11-09",
-    "verifiedAt": "2026-11-09T09:08:36.919Z",
+    "verifiedAt": "2026-11-10T00:01:33.646Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. Excludes historical packages confirmed paid and delivered by the owner, even when Speedy retains Enviado. Every currently quoted unsettled charge is counted once. Remaining quotes and the final consolidated balance are pending. Kept separate from USD purchase totals; payment of the current charges remains unconfirmed."
   }
 }
