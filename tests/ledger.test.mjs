@@ -63,11 +63,11 @@ test("Amazon invoices reconcile without counting grouped extras twice", () => {
   );
   assert.equal(ledger.amazonOrders.flatMap((x) => x.itemIds).length, 37);
 });
-test("Amazon controller forwarding preserves cancellation, privacy and unverified bank settlement", () => {
+test("Amazon controller carrier delivery keeps Speedy receipt and bank settlement unconfirmed", () => {
   const order = ledger.amazonOrders.find((o) => o.id === "AMZ-07");
   const item = ledger.items.find((i) => i.id === "vxb-044");
   const shipment = ledger.shipments.find((s) => s.orderRef === order.id);
-  assert.equal(order.status, "shipped");
+  assert.equal(order.status, "carrier_delivered");
   assert.equal(order.orderTotalCents, 6366);
   assert.equal(order.actualPaidCents, null);
   assert.equal(order.invoiceVerified, false);
@@ -83,7 +83,8 @@ test("Amazon controller forwarding preserves cancellation, privacy and unverifie
   assert.equal(item.previousProcurement.quotedTotalCents, 6095);
   assert.equal(ledger.orders.find((o) => o.id === "vxb").status, "cancelled");
   assert.equal(ledger.orders.find((o) => o.id === "amazon").paymentPartial, true);
-  assert.equal(shipment.status, "shipped");
+  assert.equal(shipment.status, "carrier_delivered");
+  assert.equal(shipment.carrierDeliveredDate, "2026-11-10");
   assert.equal(shipment.trackingAssigned, true);
   assert.equal(shipment.carrier, "Amazon");
   assert.equal(shipment.expectedDeliveryDate, "2026-11-10");
