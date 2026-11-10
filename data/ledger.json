@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-09",
+  "updatedAt": "2026-11-10",
   "currency": "USD",
   "purchasesPaused": false,
   "equipmentQuotedTotalCents": 286451,
@@ -1546,6 +1546,16 @@
   ],
   "changes": [
     {
+      "date": "2026-11-10",
+      "title": "Observed combined Speedy amount updated",
+      "detail": "The observed combined Total a pagar is now CRC 450,300 for all current packages, counted once. Remaining quotes, payment and the final consolidated balance are unconfirmed. Speedy charges remain separate from USD purchase totals."
+    },
+    {
+      "date": "2026-11-10",
+      "title": "Walmart cable-management shipment received in Miami",
+      "detail": "Speedy confirms receipt in Miami after USPS independently verifies the two complete tracking references against identical full histories. Arrival in Costa Rica and delivery to the recipient remain unconfirmed. Existing prealert and consolidation records are preserved."
+    },
+    {
       "date": "2026-11-09",
       "title": "Observed combined Speedy amount updated",
       "detail": "The observed combined Total a pagar is now CRC 442,300 for all current packages, counted once. Remaining quotes, payment and the final consolidated balance are unconfirmed. Speedy charges remain separate from USD purchase totals."
@@ -2276,14 +2286,15 @@
       "itemIds": [],
       "expectedDeliveryDate": "2026-11-09",
       "deliveredAt": null,
-      "lastChecked": "2026-11-06",
-      "source": "Authenticated Walmart exact-order complete fulfillment and arrival notice, observed November 6",
-      "notes": "Walmart confirms carrier delivery on November 6 for the fulfillment group tied to the existing USPS tracking. The earlier November 9 estimate is superseded. This is delivery to the shipping address; Speedy receipt and delivery to the recipient remain unconfirmed. The existing prealert and consolidation are retained.",
-      "speedyStatus": "unconfirmed",
-      "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-06",
+      "lastChecked": "2026-11-10",
+      "source": "Authenticated Speedy received entry and USPS-verified complete histories for both full identifiers",
+      "notes": "Speedy confirms received in Miami, ready for forwarding to Costa Rica. USPS independently resolves the original tracking and full scanned barcode to identical complete histories, including carrier delivery to an agent on November 6. Arrival in Costa Rica and delivery to the recipient remain unconfirmed. The existing prealert and consolidation are preserved.",
+      "speedyStatus": "received",
+      "speedyLocation": "miami",
+      "speedyCheckedAt": "2026-11-10",
       "trackingAssigned": true,
-      "carrierDeliveredDate": "2026-11-06"
+      "carrierDeliveredDate": "2026-11-06",
+      "speedyConfirmedAt": "2026-11-10T15:06:25.162Z"
     },
     {
       "id": "WMT-PREP-04",
@@ -2598,14 +2609,14 @@
   ],
   "forwardingCharges": {
     "currency": "CRC",
-    "amountCRC": 442300,
+    "amountCRC": 450300,
     "scope": "all_current_packages",
     "quoteStatus": "awaiting_remaining_quotes",
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Authenticated Speedy quoted package charges and owner-confirmed settlement exclusions",
-    "observedAt": "2026-11-09",
-    "verifiedAt": "2026-11-10T00:01:33.646Z",
+    "observedAt": "2026-11-10",
+    "verifiedAt": "2026-11-10T15:01:42.353Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. Excludes historical packages confirmed paid and delivered by the owner, even when Speedy retains Enviado. Every currently quoted unsettled charge is counted once. Remaining quotes and the final consolidated balance are pending. Kept separate from USD purchase totals; payment of the current charges remains unconfirmed."
   }
 }
