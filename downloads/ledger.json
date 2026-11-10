@@ -1548,6 +1548,16 @@
     {
       "date": "2026-11-10",
       "title": "Observed combined Speedy amount updated",
+      "detail": "The observed combined Total a pagar is now CRC 450,300 for all current packages, counted once. Remaining quotes, payment and the final consolidated balance are unconfirmed. Speedy charges remain separate from USD purchase totals."
+    },
+    {
+      "date": "2026-11-10",
+      "title": "Mouser shipment received by Speedy in Miami",
+      "detail": "Speedy confirms receipt in Miami after the full scanned barcode and original FedEx tracking independently resolve to identical complete travel history and shipment facts. Arrival in Costa Rica and recipient delivery remain unconfirmed. The authentic invoice, prealert and purchase amount are preserved."
+    },
+    {
+      "date": "2026-11-10",
+      "title": "Observed combined Speedy amount updated",
       "detail": "The observed combined Total a pagar is now CRC 446,300 for all current packages, counted once. Remaining quotes, payment and the final consolidated balance are unconfirmed. Speedy charges remain separate from USD purchase totals."
     },
     {
@@ -2561,18 +2571,19 @@
       "expectedDeliveryDate": "2026-11-09",
       "expectedShipDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-11-09",
-      "source": "FedEx delivery confirmation observed November 9, 2026",
-      "notes": "FedEx confirms delivery in Miami on November 9. The authentic final invoice, Speedy prealert and existing consolidation remain verified. Receipt by Speedy and delivery to the recipient remain unconfirmed.",
-      "speedyStatus": "unconfirmed",
-      "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-09",
+      "lastChecked": "2026-11-10",
+      "source": "Authenticated Speedy exact barcode and independently verified full FedEx travel history and shipment facts",
+      "notes": "Speedy confirms received in Miami. Both complete FedEx references independently resolve to the same full travel history and shipment facts. The November 9 carrier delivery remains separate. Costa Rica arrival and recipient delivery are unconfirmed. The authentic invoice, original prealert, purchase amount and consolidation assignment are preserved.",
+      "speedyStatus": "received",
+      "speedyLocation": "miami",
+      "speedyCheckedAt": "2026-11-10",
       "trackingAssigned": true,
       "invoiceVerified": true,
       "prealertStatus": "confirmed",
       "consolidationStatus": "confirmed",
       "consolidationConfirmedAt": "2026-11-09T13:10:43.664Z",
-      "carrierDeliveredDate": "2026-11-09"
+      "carrierDeliveredDate": "2026-11-09",
+      "speedyConfirmedAt": "2026-11-10T21:09:47.675Z"
     },
     {
       "id": "AMZ-PKG-11",
@@ -2620,14 +2631,14 @@
   ],
   "forwardingCharges": {
     "currency": "CRC",
-    "amountCRC": 446300,
+    "amountCRC": 450300,
     "scope": "all_current_packages",
     "quoteStatus": "awaiting_remaining_quotes",
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Authenticated Speedy quoted package charges and owner-confirmed settlement exclusions",
     "observedAt": "2026-11-10",
-    "verifiedAt": "2026-11-10T17:58:45.079Z",
+    "verifiedAt": "2026-11-10T21:06:34.347Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. Excludes historical packages confirmed paid and delivered by the owner, even when Speedy retains Enviado. Every currently quoted unsettled charge is counted once. Remaining quotes and the final consolidated balance are pending. Kept separate from USD purchase totals; payment of the current charges remains unconfirmed."
   }
 }
