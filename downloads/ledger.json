@@ -1548,6 +1548,16 @@
     {
       "date": "2026-11-10",
       "title": "Observed combined Speedy amount updated",
+      "detail": "The observed combined Total a pagar is now CRC 446,300 for all current packages, counted once. Remaining quotes, payment and the final consolidated balance are unconfirmed. Speedy charges remain separate from USD purchase totals."
+    },
+    {
+      "date": "2026-11-10",
+      "title": "Amazon controller carrier delivery confirmed",
+      "detail": "Amazon confirms delivery of the controller to the verified Miami shipping address. Speedy receipt, arrival in Costa Rica and delivery to the recipient remain unconfirmed. The original purchase amount, receipt, prealert and consolidation are unchanged."
+    },
+    {
+      "date": "2026-11-10",
+      "title": "Observed combined Speedy amount updated",
       "detail": "The observed combined Total a pagar is now CRC 450,300 for all current packages, counted once. Remaining quotes, payment and the final consolidated balance are unconfirmed. Speedy charges remain separate from USD purchase totals."
     },
     {
@@ -2115,7 +2125,7 @@
     },
     {
       "id": "AMZ-07",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "orderedAt": "2026-11-07",
       "currency": "USD",
       "itemIds": [
@@ -2568,16 +2578,16 @@
       "id": "AMZ-PKG-11",
       "vendor": "Amazon",
       "orderRef": "AMZ-07",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "Amazon",
       "itemIds": [
         "vxb-044"
       ],
       "expectedDeliveryDate": "2026-11-10",
       "deliveredAt": null,
-      "lastChecked": "2026-11-09",
-      "source": "Authenticated controller-specific Amazon tracking and complete order fulfillment details",
-      "notes": "The controller has its own verified Amazon tracking and estimated Miami arrival November 10. An authentic purchase receipt and matching merchant Completed transaction are preserved; bank settlement is unverified. Its Speedy prealert and consolidation are now confirmed. Carrier delivery and Speedy receipt remain unconfirmed. Its prealert was regrouped into the existing open consolidation, preserving the original receipt and declaration.",
+      "lastChecked": "2026-11-10",
+      "source": "Authenticated Amazon exact controller tracking confirms carrier delivery in Miami on November 10",
+      "notes": "Amazon confirms delivery to the verified Miami shipping address on November 10. Speedy receipt, arrival in Costa Rica and delivery to the recipient remain unconfirmed. Existing purchase, prealert and consolidation records are preserved.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-09",
@@ -2585,7 +2595,8 @@
       "prealertStatus": "confirmed",
       "consolidationStatus": "confirmed",
       "consolidationConfirmedAt": "2026-11-09T13:10:43.664Z",
-      "purchaseReceiptVerified": true
+      "purchaseReceiptVerified": true,
+      "carrierDeliveredDate": "2026-11-10"
     },
     {
       "id": "BAMBU-REPLACEMENT-01",
@@ -2609,14 +2620,14 @@
   ],
   "forwardingCharges": {
     "currency": "CRC",
-    "amountCRC": 450300,
+    "amountCRC": 446300,
     "scope": "all_current_packages",
     "quoteStatus": "awaiting_remaining_quotes",
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Authenticated Speedy quoted package charges and owner-confirmed settlement exclusions",
     "observedAt": "2026-11-10",
-    "verifiedAt": "2026-11-10T15:01:42.353Z",
+    "verifiedAt": "2026-11-10T17:58:45.079Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. Excludes historical packages confirmed paid and delivered by the owner, even when Speedy retains Enviado. Every currently quoted unsettled charge is counted once. Remaining quotes and the final consolidated balance are pending. Kept separate from USD purchase totals; payment of the current charges remains unconfirmed."
   }
 }
