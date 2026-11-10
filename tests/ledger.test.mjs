@@ -142,15 +142,20 @@ test("VXB cancellation retains its original amounts and vendor-reported refund o
   assert.equal(ledger.otherExpenses.find((x) => x.vendor === "VXB").status, "cancelled");
   assert.equal(totals(ledger).taxesAndOthers, 126677);
 });
-test("Walmart complete carrier fulfillment does not establish Speedy or recipient delivery", () => {
+test("Walmart receipt advances only the independently verified fulfillment group", () => {
   assert.equal(ledger.orders.find((x) => x.id === "walmart").status, "carrier_delivered");
   for (const id of ["WMT-PKG-02", "WMT-PKG-03"]) {
     const shipment = ledger.shipments.find((x) => x.id === id);
     assert.equal(shipment.status, "carrier_delivered");
-    assert.equal(shipment.speedyStatus, "unconfirmed");
-    assert.equal(shipment.speedyLocation, null);
     assert.equal(shipment.deliveredAt, null);
   }
+  const wrap = ledger.shipments.find((x) => x.id === "WMT-PKG-03");
+  assert.equal(wrap.speedyStatus, "received");
+  assert.equal(wrap.speedyLocation, "miami");
+  assert.match(wrap.speedyConfirmedAt, /^2026-11-10T/);
+  const foam = ledger.shipments.find((x) => x.id === "WMT-PKG-02");
+  assert.equal(foam.speedyStatus, "unconfirmed");
+  assert.equal(foam.speedyLocation, null);
   assert.equal(ledger.shipments.find((x) => x.id === "WMT-PKG-03").carrierDeliveredDate, "2026-11-06");
   assert.equal(ledger.shipments.find((x) => x.id === "WMT-PKG-02").carrierDeliveredDate, undefined);
 });
