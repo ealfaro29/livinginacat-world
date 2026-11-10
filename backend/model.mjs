@@ -128,6 +128,15 @@ export function editPackage(existing, input) {
 }
 
 export const trackingPhases = ["shipped", "miami", "costa_rica", "delivered"];
+function itemTrackingNumbers(value) {
+  if (!Array.isArray(value) || value.length > 40)
+    throw new ApiError(400, "Use up to forty tracking references per item.");
+  return [...new Set(value.map((value) => {
+    if (typeof value !== "string" || !tracking(value))
+      throw new ApiError(400, "Invalid item tracking reference.");
+    return tracking(value);
+  }))];
+}
 function trackingEvidence(value) {
   if (value === undefined) return [];
   if (!Array.isArray(value) || value.length > 8)
@@ -165,6 +174,7 @@ export function trackingItemFacts(input) {
     quantity: text(input.quantity, 80),
     note: text(input.note, 1000),
     ...(input.evidence === undefined ? {} : { evidence: trackingEvidence(input.evidence) }),
+    ...(input.trackingNumbers === undefined ? {} : { trackingNumbers: itemTrackingNumbers(input.trackingNumbers) }),
     shippingRequired: input.shippingRequired !== false,
     stages,
     source: text(input.source, 200),
@@ -177,6 +187,8 @@ export function mergeTrackingFacts(existing, input) {
     return existing;
   // A routine import without evidence cannot erase the owner's source links.
   if (input.evidence === undefined && existing?.evidence) next.evidence = existing.evidence;
+  if (input.trackingNumbers === undefined && existing?.trackingNumbers)
+    next.trackingNumbers = existing.trackingNumbers;
   // New evidence can advance a phase. Owner marks are stored separately and
   // never overwritten by ingestion. Keep the original evidence when corrected.
   for (const phase of trackingPhases)

@@ -123,7 +123,7 @@ test("private admin protects evidence and persists versioned changes", async (t)
   const device2 = login.r.headers.get("set-cookie").split(";")[0];
   const itemImport = { items: [
     { id: "fixture-project-item", scope: "project", title: "Project fixture item", vendor: "Fixture store", quantity: "1", stages: { shipped: true }, source: "Fixture evidence", sourceCheckedAt: "2026-11-09T00:00:00Z", evidence: [{ label: "Carrier confirmation", url: "https://carrier.example/track/fixture", eventLabel: "Carrier delivery", eventDate: "2026-10-31", eventTime: "9:40 AM (Miami)", observedAt: "2026-11-09T00:00:00Z" }] },
-    { id: "fixture-personal-item", scope: "personal", title: "Private fixture item", vendor: "Fixture store", quantity: "1", stages: { shipped: true, miami: true }, source: "Fixture evidence", sourceCheckedAt: "2026-11-09T00:00:00Z", tracking: "MUST_NOT_APPEAR", document: { url: "MUST_NOT_APPEAR" } },
+    { id: "fixture-personal-item", scope: "personal", title: "Private fixture item", vendor: "Fixture store", quantity: "1", stages: { shipped: true, miami: true }, source: "Fixture evidence", sourceCheckedAt: "2026-11-09T00:00:00Z", trackingNumbers: ["TESTPARCEL123456", "TESTSCAN987654"], tracking: "MUST_NOT_APPEAR", document: { url: "MUST_NOT_APPEAR" } },
     { id: "fixture-local-item", scope: "project", title: "Local fixture item", shippingRequired: false, sourceCheckedAt: "2026-11-09T00:00:00Z" },
   ] };
   assert.equal((await request("/api/ingest/tracking", { method: "POST", service: true, payload: itemImport })).status, 200);
@@ -133,7 +133,8 @@ test("private admin protects evidence and persists versioned changes", async (t)
   assert.equal(itemView.items.find((x) => x.id === "fixture-project-item").evidence[0].eventDate, "2026-10-31");
   assert.equal(itemView.items.find((x) => x.id === "fixture-project-item").evidence[0].url, "https://carrier.example/track/fixture");
   assert.equal(itemView.items.find((x) => x.scope === "personal").title, "Private fixture item");
-  assert.equal(JSON.stringify(itemView).includes("MUST_NOT_APPEAR"), false, "raw tracking and original documents are not part of the item view");
+  assert.deepEqual(itemView.items.find((x) => x.scope === "personal").trackingNumbers, ["TESTPARCEL123456", "TESTSCAN987654"]);
+  assert.equal(JSON.stringify(itemView).includes("MUST_NOT_APPEAR"), false, "unselected raw fields and original documents are not part of the item view");
   const itemPatch = (cookie, phase, value, version, headers = {}) => request("/api/tracking/fixture-project-item", { method: "PATCH", cookie, payload: { phase, value, version }, headers });
   assert.equal((await itemPatch(cookie, "miami", true, 1, { Origin: "https://hostile.example" })).status, 403);
   assert.equal((await request("/api/tracking/fixture-project-item", { method: "PATCH", service: true, payload: { version: 1, phase: "miami", value: true } })).status, 401);
@@ -154,6 +155,7 @@ test("private admin protects evidence and persists versioned changes", async (t)
   assert.equal((await request("/api/tracking/fixture-local-item", { method: "PATCH", cookie, payload: { version: 1, phase: "miami", value: true } })).status, 400);
   assert.equal((await request("/api/tracking/fixture-local-item", { method: "PATCH", cookie, payload: { version: 1, phase: "delivered", value: true } })).status, 200);
   assert.equal(JSON.stringify(await (await request("/api/export", { cookie })).json()).includes("Private fixture item"), false, "personal inventory is separate from project exports");
+  assert.equal(JSON.stringify(await (await request("/api/export", { cookie })).json()).includes("TESTPARCEL123456"), false, "private tracking references stay out of project exports");
   const input = {
     orders: [
       {
@@ -550,11 +552,15 @@ test("prealert readiness requires carrier, tracking and final purchase PDF", () 
   );
 });
 
-test('tracker evidence validates links and dates and survives imports without sources', () => {
-  const input = { scope: 'project', title: 'Fixture', sourceCheckedAt: '2026-11-09T00:00:00Z', evidence: [{ label: 'Original', url: 'https://carrier.example/proof', eventDate: '2026-10-31', observedAt: '2026-11-09T00:00:00Z' }] };
+test('tracker evidence validates references and survives imports without sources', () => {
+  const input = { scope: 'project', title: 'Fixture', trackingNumbers: ['test-parcel-123456', 'TESTPARCEL123456'], sourceCheckedAt: '2026-11-09T00:00:00Z', evidence: [{ label: 'Original', url: 'https://carrier.example/proof', eventDate: '2026-10-31', observedAt: '2026-11-09T00:00:00Z' }] };
   const stored = trackingItemFacts(input);
-  const { evidence, ...noLinks } = input;
+  const { evidence, trackingNumbers, ...noLinks } = input;
   assert.deepEqual(mergeTrackingFacts(stored, noLinks).evidence, stored.evidence);
+  assert.deepEqual(stored.trackingNumbers, ['TESTPARCEL123456']);
+  assert.deepEqual(mergeTrackingFacts(stored, noLinks).trackingNumbers, stored.trackingNumbers);
+  assert.throws(() => trackingItemFacts({ ...input, trackingNumbers: ['<script>'] }), /tracking/i);
+  assert.throws(() => trackingItemFacts({ ...input, trackingNumbers: 'TESTPARCEL123456' }), /tracking/i);
   for (const url of ['javascript:alert(1)', 'http://carrier.example/proof', 'https://user:secret@carrier.example/proof'])
     assert.throws(() => trackingItemFacts({ ...input, evidence: [{ ...evidence[0], url }] }), /HTTPS|link/);
   assert.throws(() => trackingItemFacts({ ...input, evidence: [{ ...evidence[0], eventDate: '2026-02-30' }] }), /valid date/);

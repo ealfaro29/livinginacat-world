@@ -4,6 +4,12 @@ const phases = [["shipped", "Shipped"], ["miami", "Miami"], ["costa_rica", "Cost
 let items = [], savePhase, pending = new Set();
 const verificationDate = (value) => value ? new Intl.DateTimeFormat("es-CR", { dateStyle: "medium", timeStyle: "short", timeZone: "America/Costa_Rica" }).format(new Date(value)) + " · CR" : "Sin fecha registrada";
 const eventDate = (value) => new Intl.DateTimeFormat("es-CR", { dateStyle: "medium", timeZone: "UTC" }).format(new Date(value + "T12:00:00Z"));
+const normalizedTracking = (value) => String(value ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+function matchesSearch(item, query) {
+  if ([item.title, item.vendor, item.note].join(" ").toLocaleLowerCase("es").includes(query)) return true;
+  const number = normalizedTracking(query);
+  return !!number && (item.trackingNumbers || []).some((tracking) => normalizedTracking(tracking).includes(number));
+}
 function evidenceLinks(item) {
   const evidence = item.evidence || [];
   if (!evidence.length) return `<small class="tracking-verification">Revisión: ${esc(verificationDate(item.sourceCheckedAt))}. Sin enlace externo registrado.</small>`;
@@ -12,6 +18,7 @@ function evidenceLinks(item) {
 export function clearTracking() {
   items = [];
   pending.clear();
+  $("#tracking-search").value = "";
   $("#tracking-lists").replaceChildren();
   $("#tracking-summary").textContent = "";
 }
@@ -20,9 +27,9 @@ export function setTracking(payload) {
   render();
 }
 function render() {
-  const query = $("#tracking-search").value.toLocaleLowerCase("es"), filter = $("#tracking-filter").value;
+  const query = $("#tracking-search").value.trim().toLocaleLowerCase("es"), filter = $("#tracking-filter").value;
   const visible = items.filter((item) => {
-    if (![item.title, item.vendor, item.note].join(" ").toLocaleLowerCase("es").includes(query)) return false;
+    if (!matchesSearch(item, query)) return false;
     if (filter === "pending") return !item.stages.delivered;
     if (filter === "delivered") return item.stages.delivered;
     if (filter === "costa_rica") return item.stages.costa_rica && !item.stages.delivered;

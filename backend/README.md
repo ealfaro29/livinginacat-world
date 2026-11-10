@@ -6,6 +6,8 @@ The public journal remains on GitHub Pages. `/admin/` links to a separate HTTPS 
 
 On November 9 the owner explicitly requested a complete, editable HTML tracker in the private admin, separated into **Proyecto** and **Personal**, with **Shipped**, **Miami**, **Costa Rica** and **Entregado** checkboxes. This is a targeted authorization to display item descriptions to the existing authenticated owner `ealfaro29`. It does not authorize public disclosure, personal details in GitHub or project exports, or exposing the protected originals.
 
+The tracker search accepts full or partial tracking numbers, including independently verified carrier/Speedy aliases, alongside article and store text. References are imported as `trackingNumbers` in the protected item facts; they are never embedded in static assets or project exports. Searches ignore case, spaces and punctuation. Imports without tracking references retain the saved references.
+
 The tracker uses a separate `tracking_items` table and owner-only `/api/tracking` endpoints. Its data never enters public source, static assets, the project snapshot/export or project accounting. Checkbox edits use the existing secure owner session, origin checks and optimistic version checks. Owner corrections are stored separately from imported evidence and survive future synchronization. Signing out clears the item view. A blank checkbox means unconfirmed; Miami means receipt by Speedy, and Entregado means receipt by the owner. Local purchases show no shipping phases.
 
 ```sh
