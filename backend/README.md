@@ -10,6 +10,8 @@ The tracker search accepts full or partial tracking numbers, including independe
 
 An exact forwarder record whose article or project/personal assignment is unresolved uses `scope: unassigned`. It appears in **Paquetes por identificar**, remains searchable by its own tracking reference and carries only independently verified package phases. It is excluded from project and personal item counts and all project exports. An unresolved record must not be hidden or turned into a verified alias merely because the article is unknown. Apply `0003_unassigned_tracking.sql` to enable this group; the migration preserves existing evidence, owner marks and versions.
 
+Once an unresolved package is identified, import its `supersededBy` link to the existing project or personal item. The owner list shows the identified item once, with all verified search references. The original unresolved row, evidence and owner marks remain in the protected ingestion snapshot. Routine imports preserve that resolution; no original record is deleted.
+
 The tracker uses a separate `tracking_items` table and owner-only `/api/tracking` endpoints. Its data never enters public source, static assets, the project snapshot/export or project accounting. Checkbox edits use the existing secure owner session, origin checks and optimistic version checks. Owner corrections are stored separately from imported evidence and survive future synchronization. Signing out clears the item view. A blank checkbox means unconfirmed; Miami means receipt by Speedy, and Entregado means receipt by the owner. Local purchases show no shipping phases.
 
 ```sh

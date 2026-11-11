@@ -155,8 +155,11 @@ test("Walmart receipt advances only the independently verified fulfillment group
   assert.equal(wrap.speedyLocation, "miami");
   assert.match(wrap.speedyConfirmedAt, /^2026-11-10T/);
   const foam = ledger.shipments.find((x) => x.id === "WMT-PKG-02");
-  assert.equal(foam.speedyStatus, "unconfirmed");
+  assert.equal(foam.speedyStatus, "delivered");
   assert.equal(foam.speedyLocation, null);
+  assert.equal(foam.recipientDeliverySource, "owner_confirmation");
+  assert.equal(foam.recipientDeliveryConfirmedAt, "2026-11-11");
+  assert.match(foam.notes, /date.*not specified/i);
   assert.equal(ledger.shipments.find((x) => x.id === "WMT-PKG-03").carrierDeliveredDate, "2026-11-06");
   assert.equal(ledger.shipments.find((x) => x.id === "WMT-PKG-02").carrierDeliveredDate, undefined);
 });

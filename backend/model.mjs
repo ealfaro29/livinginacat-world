@@ -162,6 +162,8 @@ export function trackingItemFacts(input) {
     throw new ApiError(400, "Choose project, personal or unassigned.");
   const title = text(input.title, 240);
   if (!title) throw new ApiError(400, "An item description is required.");
+  if (input.supersededBy && input.scope !== "unassigned")
+    throw new ApiError(400, "Only an unresolved package can be linked to an existing item.");
   const stages = {};
   for (const phase of trackingPhases) {
     const value = input.stages?.[phase] ?? false;
@@ -175,6 +177,7 @@ export function trackingItemFacts(input) {
     note: text(input.note, 1000),
     ...(input.evidence === undefined ? {} : { evidence: trackingEvidence(input.evidence) }),
     ...(input.trackingNumbers === undefined ? {} : { trackingNumbers: itemTrackingNumbers(input.trackingNumbers) }),
+    ...(input.supersededBy === undefined ? {} : { supersededBy: input.supersededBy ? id(input.supersededBy) : null }),
     shippingRequired: input.shippingRequired !== false,
     stages,
     source: text(input.source, 200),
@@ -189,6 +192,8 @@ export function mergeTrackingFacts(existing, input) {
   if (input.evidence === undefined && existing?.evidence) next.evidence = existing.evidence;
   if (input.trackingNumbers === undefined && existing?.trackingNumbers)
     next.trackingNumbers = existing.trackingNumbers;
+  if (input.supersededBy === undefined && existing?.supersededBy)
+    next.supersededBy = existing.supersededBy;
   // New evidence can advance a phase. Owner marks are stored separately and
   // never overwritten by ingestion. Keep the original evidence when corrected.
   for (const phase of trackingPhases)

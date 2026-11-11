@@ -299,7 +299,8 @@ async function handle(request, env) {
   const actor = await auth(request, env, service);
   if ((path === "/api/tracking" || path === "/api/ingest/tracking") && method === "GET") {
     const rows = await env.DB.prepare("SELECT * FROM tracking_items ORDER BY scope DESC,sort_order,id").all();
-    return json({ items: rows.results.map(trackingItemView), syncedAt: now() });
+    const items = rows.results.map(trackingItemView);
+    return json({ items: service ? items : items.filter((item) => !item.supersededBy), syncedAt: now() });
   }
   if (path === "/api/ingest/tracking" && method === "POST") {
     if (actor !== "mail-sync") throw new ApiError(403, "Evidence ingestion only.");
@@ -311,6 +312,13 @@ async function handle(request, env) {
       id: id(item.id), scope: item.scope, facts: trackingItemFacts(item),
       sortOrder: Number.isSafeInteger(item.sortOrder) ? item.sortOrder : index,
     }));
+    for (const item of items.filter((item) => item.facts.supersededBy)) {
+      const targetId = item.facts.supersededBy;
+      const target = items.find((candidate) => candidate.id === targetId)
+        || await env.DB.prepare("SELECT scope FROM tracking_items WHERE id=?").bind(targetId).first();
+      if (targetId === item.id || !target || target.scope === "unassigned")
+        throw new ApiError(400, "Choose an identified item for the resolved package.");
+    }
     const updated = [];
     for (const item of items) {
       const old = await env.DB.prepare("SELECT * FROM tracking_items WHERE id=?").bind(item.id).first();
