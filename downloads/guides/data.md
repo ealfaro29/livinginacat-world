@@ -43,6 +43,8 @@ Walmart: the authenticated exact-order page showed every fulfillment group deliv
 
 ## Updating
 
+On November 11 the owner identified the previously unresolved Walmart foam package and confirmed physical receipt. The protected original tracking and alternate forwarder code are linked by explicit owner confirmation, separately from carrier-verified aliases. Record the project foam as delivered to the recipient, preserve the existing carrier delivery, purchase, prealert and consolidation, and keep the exact recipient delivery date unknown. The former unresolved tracker row is retained as protected history and linked to the existing foam item rather than displayed twice. This does not advance the separate cable-management or spacer shipments.
+
 1. Read current evidence and retain its original reference privately.
 2. Update only verified fields, preserving uncertainty.
 3. Add a `changes` entry with date, title and detail. Record verified cancellation, refund or return amounts explicitly; retain history rather than silently deleting records.

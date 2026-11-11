@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-10",
+  "updatedAt": "2026-11-11",
   "currency": "USD",
   "purchasesPaused": false,
   "equipmentQuotedTotalCents": 286451,
@@ -1546,6 +1546,11 @@
   ],
   "changes": [
     {
+      "date": "2026-11-11",
+      "title": "Project foam received by the owner",
+      "detail": "The owner identified the previously unresolved forwarder record as the project foam and confirmed receipt. The recipient delivery date is unspecified. The shipment is recorded once; purchase totals, original prealert and consolidation remain unchanged."
+    },
+    {
       "date": "2026-11-10",
       "title": "Observed combined Speedy amount updated",
       "detail": "The observed combined Total a pagar is now CRC 450,300 for all current packages, counted once. Remaining quotes, payment and the final consolidated balance are unconfirmed. Speedy charges remain separate from USD purchase totals."
@@ -2285,16 +2290,21 @@
       "status": "carrier_delivered",
       "carrier": "SF Express",
       "title": "Foam",
-      "itemIds": [],
+      "itemIds": [
+        "walmart-072"
+      ],
       "expectedDeliveryDate": "2026-11-06",
       "deliveredAt": null,
       "lastChecked": "2026-11-06",
-      "source": "Authenticated Walmart exact-order complete fulfillment and arrival notice, observed November 6",
-      "notes": "Walmart now shows every fulfillment group of this exact order delivered. The individual delivery date for this shipment is not assigned. This confirms carrier delivery to the shipping address, while Speedy receipt and delivery to the recipient remain unconfirmed. The existing prealert and consolidation are retained.",
-      "speedyStatus": "unconfirmed",
+      "source": "Owner-confirmed package identity and receipt; independently observed forwarder delivery status. Verified November 11, 2026.",
+      "notes": "The owner identifies this project shipment and confirms it is in their possession. The recipient delivery date was not specified. The existing carrier shipment, purchase, prealert and consolidation are preserved.",
+      "speedyStatus": "delivered",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-06",
-      "trackingAssigned": true
+      "speedyCheckedAt": "2026-11-11",
+      "trackingAssigned": true,
+      "speedyConfirmedAt": "2026-11-11T10:01:19.140221+00:00",
+      "recipientDeliveryConfirmedAt": "2026-11-11",
+      "recipientDeliverySource": "owner_confirmation"
     },
     {
       "id": "WMT-PKG-03",
