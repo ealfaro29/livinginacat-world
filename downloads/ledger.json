@@ -1547,6 +1547,16 @@
   "changes": [
     {
       "date": "2026-11-11",
+      "title": "Amazon controller received by Speedy in Miami",
+      "detail": "Speedy confirms receipt in Miami for the exact project controller shipment. Amazon carrier delivery remains recorded separately on November 10. The actual Speedy receipt date is not shown. Costa Rica arrival and recipient delivery remain unconfirmed; the authentic purchase receipt, prealert and consolidation are preserved."
+    },
+    {
+      "date": "2026-11-11",
+      "title": "Taxes, tariffs, shipping and others updated",
+      "detail": "The observed combined Speedy Total a pagar is CRC 454,300 for all current packages, counted once. Remaining quotes, payment and the final consolidated balance are unconfirmed. The amount stays separate from USD purchase totals, with all package details protected."
+    },
+    {
+      "date": "2026-11-11",
       "title": "Three project prealerts regrouped",
       "detail": "Three project shipments received in Miami were reassigned to the current active forwarding consolidation. Their authentic documents, goods quantities and declared values were preserved. This administrative change does not establish a new arrival or recipient delivery; purchase totals and observed forwarding charges are unchanged."
     },
@@ -2158,7 +2168,7 @@
       "sourceDate": "2026-11-07",
       "lastChecked": "2026-11-07",
       "invoiceVerified": false,
-      "notes": "Confirmed controller replacement. Amazon confirms dispatch with Amazon as carrier and estimated arrival November 9. The assigned tracking is unchanged. Final invoice/purchase receipt, carrier delivery, Speedy receipt and bank settlement remain unconfirmed. Taxes, tariffs, shipping and others remain grouped at vendor level.",
+      "notes": "Confirmed controller replacement. The exact controller fulfillment group confirms Amazon carrier delivery at the verified Miami address on November 10. Speedy receipt in Miami was verified on November 11; the actual Speedy receipt date is not shown. The authentic purchase receipt and merchant charge marked Completed are verified, while bank settlement and a final tax invoice remain unconfirmed. Costa Rica arrival and recipient delivery remain unconfirmed. Taxes, tariffs, shipping and others remain grouped at vendor level.",
       "merchantChargeStatus": "completed",
       "merchantChargeCompletedDate": "2026-11-08",
       "purchaseReceiptVerified": true,
@@ -2612,17 +2622,18 @@
       "expectedDeliveryDate": "2026-11-10",
       "deliveredAt": null,
       "lastChecked": "2026-11-10",
-      "source": "Authenticated Amazon exact controller tracking confirms carrier delivery in Miami on November 10",
-      "notes": "Amazon confirms delivery to the verified Miami shipping address on November 10. Speedy receipt, arrival in Costa Rica and delivery to the recipient remain unconfirmed. Existing purchase, prealert and consolidation records are preserved.",
-      "speedyStatus": "unconfirmed",
-      "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-09",
+      "source": "Authenticated exact Amazon controller fulfillment group and Speedy exact original tracking receipt",
+      "notes": "Amazon confirmed carrier delivery at the verified Miami address on November 10. Speedy now confirms received in Miami for this exact project shipment. The receipt date itself is not shown; November 11 is the verification date. Arrival in Costa Rica and recipient delivery remain unconfirmed. The purchase, authentic receipt, original prealert and current active consolidation are preserved.",
+      "speedyStatus": "received",
+      "speedyLocation": "miami",
+      "speedyCheckedAt": "2026-11-11",
       "trackingAssigned": true,
       "prealertStatus": "confirmed",
       "consolidationStatus": "confirmed",
       "consolidationConfirmedAt": "2026-11-09T13:10:43.664Z",
       "purchaseReceiptVerified": true,
-      "carrierDeliveredDate": "2026-11-10"
+      "carrierDeliveredDate": "2026-11-10",
+      "speedyConfirmedAt": "2026-11-11T15:10:36.576Z"
     },
     {
       "id": "BAMBU-REPLACEMENT-01",
@@ -2646,14 +2657,14 @@
   ],
   "forwardingCharges": {
     "currency": "CRC",
-    "amountCRC": 450300,
+    "amountCRC": 454300,
     "scope": "all_current_packages",
     "quoteStatus": "awaiting_remaining_quotes",
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Authenticated Speedy quoted package charges and owner-confirmed settlement exclusions",
-    "observedAt": "2026-11-10",
-    "verifiedAt": "2026-11-10T21:06:34.347Z",
+    "observedAt": "2026-11-11",
+    "verifiedAt": "2026-11-11T15:10:36.576Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. Excludes historical packages confirmed paid and delivered by the owner, even when Speedy retains Enviado. Every currently quoted unsettled charge is counted once. Remaining quotes and the final consolidated balance are pending. Kept separate from USD purchase totals; payment of the current charges remains unconfirmed."
   }
 }
