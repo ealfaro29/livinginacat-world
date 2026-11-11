@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-11",
+      "title": "Three project prealerts regrouped",
+      "detail": "Three project shipments received in Miami were reassigned to the current active forwarding consolidation. Their authentic documents, goods quantities and declared values were preserved. This administrative change does not establish a new arrival or recipient delivery; purchase totals and observed forwarding charges are unchanged."
+    },
+    {
+      "date": "2026-11-11",
       "title": "Project foam received by the owner",
       "detail": "The owner identified the previously unresolved forwarder record as the project foam and confirmed receipt. The recipient delivery date is unspecified. The shipment is recorded once; purchase totals, original prealert and consolidation remain unchanged."
     },
@@ -2338,7 +2343,7 @@
       "deliveredAt": null,
       "lastChecked": "2026-11-09",
       "source": "Authenticated Speedy received entry and USPS-verified complete tracking history",
-      "notes": "Speedy confirms received in Miami, ready for forwarding to Costa Rica. The full scanned barcode and vendor tracking resolve at USPS to identical complete tracking histories. Arrival in Costa Rica and delivery to the recipient remain unconfirmed.",
+      "notes": "Speedy confirms received in Miami, ready for forwarding to Costa Rica. The full scanned barcode and vendor tracking resolve at USPS to identical complete tracking histories. Arrival in Costa Rica and delivery to the recipient remain unconfirmed. The prealert was reassigned to the current active forwarding consolidation on November 11, preserving its authentic document, quantities and values. Shipping phases are unchanged.",
       "speedyStatus": "received",
       "speedyLocation": "miami",
       "speedyCheckedAt": "2026-11-09",
@@ -2436,7 +2441,7 @@
       "deliveredAt": null,
       "lastChecked": "2026-11-09",
       "source": "Authenticated Speedy received entry, owner confirmation and USPS-verified tracking alias",
-      "notes": "Speedy confirms receipt in Miami, ready for forwarding to Costa Rica. The full Speedy barcode and vendor tracking independently resolve at USPS to identical complete tracking histories. USPS carrier delivery was October 31. Arrival in Costa Rica and delivery to the recipient remain unconfirmed.",
+      "notes": "Speedy confirms receipt in Miami, ready for forwarding to Costa Rica. The full Speedy barcode and vendor tracking independently resolve at USPS to identical complete tracking histories. USPS carrier delivery was October 31. Arrival in Costa Rica and delivery to the recipient remain unconfirmed. The prealert was reassigned to the current active forwarding consolidation on November 11, preserving its authentic document, quantities and values. Shipping phases are unchanged.",
       "speedyStatus": "received",
       "speedyLocation": "miami",
       "speedyCheckedAt": "2026-11-09",
@@ -2455,7 +2460,7 @@
       "deliveredAt": null,
       "lastChecked": "2026-11-09",
       "source": "Authenticated Speedy received entry and USPS-verified complete tracking history",
-      "notes": "Speedy confirms received in Miami, ready for forwarding to Costa Rica. The full scanned barcode and vendor tracking resolve at USPS to identical complete tracking histories. Arrival in Costa Rica and delivery to the recipient remain unconfirmed.",
+      "notes": "Speedy confirms received in Miami, ready for forwarding to Costa Rica. The full scanned barcode and vendor tracking resolve at USPS to identical complete tracking histories. Arrival in Costa Rica and delivery to the recipient remain unconfirmed. The prealert was reassigned to the current active forwarding consolidation on November 11, preserving its authentic document, quantities and values. Shipping phases are unchanged.",
       "speedyStatus": "received",
       "speedyLocation": "miami",
       "speedyCheckedAt": "2026-11-09",
