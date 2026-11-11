@@ -47,6 +47,8 @@ On November 11 the owner identified the previously unresolved Walmart foam packa
 
 On November 11 three project prealerts for shipments already received in Miami were reassigned to the current active forwarding consolidation with owner authorization. Their authentic documents, quantities and declared values were preserved and the three destination entries were verified without duplicates. Keep exact consolidation membership and administrative form dates in protected evidence and the authenticated tracker. Recreating a prealert does not establish an arrival, advance a shipping phase or change the purchase total or observed forwarding charges.
 
+On November 11 Speedy confirms receipt in Miami for the exact project controller tracking. Preserve Amazon's separate November 10 carrier delivery, the authentic purchase receipt, prealert and current consolidation. The observation date is not a verified Speedy receipt event date. Costa Rica arrival, recipient delivery, bank settlement and final tax invoice remain unconfirmed.
+
 1. Read current evidence and retain its original reference privately.
 2. Update only verified fields, preserving uncertainty.
 3. Add a `changes` entry with date, title and detail. Record verified cancellation, refund or return amounts explicitly; retain history rather than silently deleting records.

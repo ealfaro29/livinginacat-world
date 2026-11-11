@@ -63,7 +63,7 @@ test("Amazon invoices reconcile without counting grouped extras twice", () => {
   );
   assert.equal(ledger.amazonOrders.flatMap((x) => x.itemIds).length, 37);
 });
-test("Amazon controller carrier delivery keeps Speedy receipt and bank settlement unconfirmed", () => {
+test("Amazon controller Speedy receipt stays separate from carrier delivery and bank settlement", () => {
   const order = ledger.amazonOrders.find((o) => o.id === "AMZ-07");
   const item = ledger.items.find((i) => i.id === "vxb-044");
   const shipment = ledger.shipments.find((s) => s.orderRef === order.id);
@@ -90,8 +90,9 @@ test("Amazon controller carrier delivery keeps Speedy receipt and bank settlemen
   assert.equal(shipment.expectedDeliveryDate, "2026-11-10");
   assert.equal(shipment.prealertStatus, "confirmed");
   assert.equal(shipment.consolidationStatus, "confirmed");
-  assert.equal(shipment.speedyStatus, "unconfirmed");
-  assert.equal(shipment.speedyLocation, null);
+  assert.equal(shipment.speedyStatus, "received");
+  assert.equal(shipment.speedyLocation, "miami");
+  assert.equal(shipment.speedyCheckedAt, "2026-11-11");
   assert.equal(shipment.deliveredAt, null);
 });
 test("owner-confirmed shipped payments are included without assuming delivery", () => {
