@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-11",
+      "title": "Taxes, tariffs, shipping and others updated",
+      "detail": "The observed combined Speedy Total a pagar is now CRC 446,300 for all current packages, counted once. Remaining quotes, payment and the final consolidated balance are unconfirmed. The amount remains separate from USD purchase totals; all package details stay protected."
+    },
+    {
+      "date": "2026-11-11",
       "title": "Amazon controller received by Speedy in Miami",
       "detail": "Speedy confirms receipt in Miami for the exact project controller shipment. Amazon carrier delivery remains recorded separately on November 10. The actual Speedy receipt date is not shown. Costa Rica arrival and recipient delivery remain unconfirmed; the authentic purchase receipt, prealert and consolidation are preserved."
     },
@@ -2657,14 +2662,14 @@
   ],
   "forwardingCharges": {
     "currency": "CRC",
-    "amountCRC": 454300,
+    "amountCRC": 446300,
     "scope": "all_current_packages",
     "quoteStatus": "awaiting_remaining_quotes",
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Authenticated Speedy quoted package charges and owner-confirmed settlement exclusions",
     "observedAt": "2026-11-11",
-    "verifiedAt": "2026-11-11T15:10:36.576Z",
+    "verifiedAt": "2026-11-11T18:13:05.201Z",
     "notes": "Includes all current Speedy packages with no project-membership filter. Excludes historical packages confirmed paid and delivered by the owner, even when Speedy retains Enviado. Every currently quoted unsettled charge is counted once. Remaining quotes and the final consolidated balance are pending. Kept separate from USD purchase totals; payment of the current charges remains unconfirmed."
   }
 }
