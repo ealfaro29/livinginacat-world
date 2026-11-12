@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-12",
+      "title": "Project shipments received by the owner",
+      "detail": "The owner confirms recipient receipt of existing project shipments, corroborated by their exact forwarding records. The previous delivery forecast is superseded; the exact delivery date and complete physical inventory remain unconfirmed. Purchase totals and carrier evidence are preserved. Taxes, tariffs, shipping and others remains pending reconciliation without a current numeric amount."
+    },
+    {
+      "date": "2026-11-12",
       "title": "Bambu replacement accepted by USPS and prealerted",
       "detail": "USPS confirms acceptance and transit of the existing replacement and estimates Miami delivery November 14. Its unique Speedy prealert is verified with the original purchase document. Consolidation awaits a second eligible package because active groups are full. No carrier delivery, Speedy receipt or new purchase is recorded; forwarding charges remain pending reconciliation."
     },
@@ -2254,13 +2259,15 @@
       "expectedDeliveryDate": "2026-10-30",
       "deliveredAt": null,
       "lastChecked": "2026-10-30",
-      "source": "Vendor evidence and Speedy package listing",
-      "notes": "UPS confirms delivery in Miami on October 30; Speedy lists this shipment in Costa Rica; recipient delivery is unconfirmed.",
-      "speedyStatus": "in_transit",
-      "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-06",
-      "speedyConfirmedAt": "2026-11-04",
-      "trackingAssigned": true
+      "source": "Owner-confirmed recipient receipt, corroborated by the exact Speedy package entry. Verified November 12, 2026.",
+      "notes": "The owner confirms receipt of this existing project shipment, and Speedy now shows its exact package as delivered. The actual delivery date was not specified. Physical contents and quantities are checked separately; the purchase, carrier status, original documents and prealert are preserved.",
+      "speedyStatus": "delivered",
+      "speedyLocation": null,
+      "speedyCheckedAt": "2026-11-12",
+      "speedyConfirmedAt": "2026-11-12T18:27:42.459Z",
+      "trackingAssigned": true,
+      "recipientDeliveryConfirmedAt": "2026-11-12",
+      "recipientDeliverySource": "owner_confirmation_and_exact_forwarder_status"
     },
     {
       "id": "AMZ-PKG-03",
@@ -2451,13 +2458,15 @@
       "expectedDeliveryDate": "2026-10-30",
       "deliveredAt": null,
       "lastChecked": "2026-10-30",
-      "source": "Vendor evidence and Speedy package listing",
-      "notes": "UPS confirmed delivery in Miami on October 30; Speedy lists this shipment in Costa Rica; recipient delivery is unconfirmed.",
-      "speedyStatus": "in_transit",
-      "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-06",
-      "speedyConfirmedAt": "2026-11-04",
-      "trackingAssigned": true
+      "source": "Owner-confirmed recipient receipt, corroborated by the exact Speedy package entry. Verified November 12, 2026.",
+      "notes": "The owner confirms receipt of this existing project shipment, and Speedy now shows its exact package as delivered. The actual delivery date was not specified. Physical contents and quantities are checked separately; the purchase, carrier status, original documents and prealert are preserved.",
+      "speedyStatus": "delivered",
+      "speedyLocation": null,
+      "speedyCheckedAt": "2026-11-12",
+      "speedyConfirmedAt": "2026-11-12T18:27:42.459Z",
+      "trackingAssigned": true,
+      "recipientDeliveryConfirmedAt": "2026-11-12",
+      "recipientDeliverySource": "owner_confirmation_and_exact_forwarder_status"
     },
     {
       "id": "BOLT-PKG-01",
@@ -2510,13 +2519,15 @@
       "expectedDeliveryDate": "2026-10-28",
       "deliveredAt": null,
       "lastChecked": "2026-11-05",
-      "source": "Vendor tracking and Speedy package listing",
-      "notes": "Amazon reports carrier delivery on October 28. Speedy lists this shipment in Costa Rica. Delivery to the recipient is not confirmed.",
-      "speedyStatus": "in_transit",
-      "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-06",
-      "speedyConfirmedAt": "2026-11-03",
-      "trackingAssigned": true
+      "source": "Owner-confirmed recipient receipt, corroborated by the exact Speedy package entry. Verified November 12, 2026.",
+      "notes": "The owner confirms receipt of this existing project shipment, and Speedy now shows its exact package as delivered. The actual delivery date was not specified. Physical contents and quantities are checked separately; the purchase, carrier status, original documents and prealert are preserved.",
+      "speedyStatus": "delivered",
+      "speedyLocation": null,
+      "speedyCheckedAt": "2026-11-12",
+      "speedyConfirmedAt": "2026-11-12T18:27:42.459Z",
+      "trackingAssigned": true,
+      "recipientDeliveryConfirmedAt": "2026-11-12",
+      "recipientDeliverySource": "owner_confirmation_and_exact_forwarder_status"
     },
     {
       "id": "AMZ-PKG-07",
@@ -2529,13 +2540,15 @@
       "expectedDeliveryDate": null,
       "deliveredAt": null,
       "lastChecked": "2026-11-05",
-      "source": "Vendor evidence and Speedy package listing",
-      "notes": "Amazon reports delivery on November 2. This shipment is prealerted and consolidated; Speedy confirms receipt in Miami. Speedy confirms arrival in Costa Rica on 2026-11-05; delivery to the recipient remains unconfirmed.",
-      "speedyStatus": "in_transit",
-      "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-06",
-      "speedyConfirmedAt": "2026-11-05T15:35:13.229Z",
-      "trackingAssigned": true
+      "source": "Owner-confirmed recipient receipt, corroborated by the exact Speedy package entry. Verified November 12, 2026.",
+      "notes": "The owner confirms receipt of this existing project shipment, and Speedy now shows its exact package as delivered. The actual delivery date was not specified. Physical contents and quantities are checked separately; the purchase, carrier status, original documents and prealert are preserved.",
+      "speedyStatus": "delivered",
+      "speedyLocation": null,
+      "speedyCheckedAt": "2026-11-12",
+      "speedyConfirmedAt": "2026-11-12T18:27:42.459Z",
+      "trackingAssigned": true,
+      "recipientDeliveryConfirmedAt": "2026-11-12",
+      "recipientDeliverySource": "owner_confirmation_and_exact_forwarder_status"
     },
     {
       "id": "AMZ-PKG-08",
@@ -2548,13 +2561,15 @@
       "expectedDeliveryDate": null,
       "deliveredAt": null,
       "lastChecked": "2026-11-05",
-      "source": "Vendor evidence and Speedy package listing",
-      "notes": "Amazon reports delivery on November 2. This shipment is prealerted and consolidated; Speedy confirms receipt in Miami. Speedy confirms arrival in Costa Rica on 2026-11-05; delivery to the recipient remains unconfirmed.",
-      "speedyStatus": "in_transit",
-      "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-06",
-      "speedyConfirmedAt": "2026-11-05T15:35:13.229Z",
-      "trackingAssigned": true
+      "source": "Owner-confirmed recipient receipt, corroborated by the exact Speedy package entry. Verified November 12, 2026.",
+      "notes": "The owner confirms receipt of this existing project shipment, and Speedy now shows its exact package as delivered. The actual delivery date was not specified. Physical contents and quantities are checked separately; the purchase, carrier status, original documents and prealert are preserved.",
+      "speedyStatus": "delivered",
+      "speedyLocation": null,
+      "speedyCheckedAt": "2026-11-12",
+      "speedyConfirmedAt": "2026-11-12T18:27:42.459Z",
+      "trackingAssigned": true,
+      "recipientDeliveryConfirmedAt": "2026-11-12",
+      "recipientDeliverySource": "owner_confirmation_and_exact_forwarder_status"
     },
     {
       "id": "AMZ-PKG-09",
@@ -2683,8 +2698,8 @@
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Complete authenticated Speedy account review; consolidated billing relationship pending reconciliation",
-    "observedAt": "2026-11-11",
-    "verifiedAt": "2026-11-12T00:15:09.893Z",
+    "observedAt": "2026-11-12",
+    "verifiedAt": "2026-11-12T18:27:42.459Z",
     "notes": "The combined Total a pagar is currently unconfirmed while consolidated charges are reconciled against original records to avoid counting them twice. All current packages remain within scope, without a project filter. Remaining quotes, payment and the final consolidated balance are pending. No current numeric total is published. Kept separate from USD purchase totals."
   },
   "deliveryOutlook": {
@@ -2692,6 +2707,9 @@
     "expectedRecipientDeliveryDate": "2026-11-13",
     "reportedAt": "2026-11-12",
     "source": "owner_reported",
-    "receiptConfirmed": false
+    "receiptConfirmed": true,
+    "receiptConfirmedAt": "2026-11-12",
+    "recipientDeliveryDate": null,
+    "forecastSupersededByReceipt": true
   }
 }
