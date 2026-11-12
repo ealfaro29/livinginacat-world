@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-11",
+      "title": "Consolidation processing confirmed; forwarding total under reconciliation",
+      "detail": "Speedy confirms processing of an existing consolidation. Original purchases, prealerts and verified item phases are preserved. The current combined Total a pagar is pending reconciliation because consolidated and original charge records coexist; no numeric total is published until their billing relationship is verified. Remaining quotes, payment and the final balance are unconfirmed."
+    },
+    {
+      "date": "2026-11-11",
       "title": "Taxes, tariffs, shipping and others updated",
       "detail": "The observed combined Speedy Total a pagar is now CRC 446,300 for all current packages, counted once. Remaining quotes, payment and the final consolidated balance are unconfirmed. The amount remains separate from USD purchase totals; all package details stay protected."
     },
@@ -2662,14 +2667,14 @@
   ],
   "forwardingCharges": {
     "currency": "CRC",
-    "amountCRC": 446300,
+    "amountCRC": null,
     "scope": "all_current_packages",
-    "quoteStatus": "awaiting_remaining_quotes",
+    "quoteStatus": "reconciliation_pending",
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
-    "source": "Authenticated Speedy quoted package charges and owner-confirmed settlement exclusions",
+    "source": "Complete authenticated Speedy account review; consolidated billing relationship pending reconciliation",
     "observedAt": "2026-11-11",
-    "verifiedAt": "2026-11-11T18:13:05.201Z",
-    "notes": "Includes all current Speedy packages with no project-membership filter. Excludes historical packages confirmed paid and delivered by the owner, even when Speedy retains Enviado. Every currently quoted unsettled charge is counted once. Remaining quotes and the final consolidated balance are pending. Kept separate from USD purchase totals; payment of the current charges remains unconfirmed."
+    "verifiedAt": "2026-11-12T00:15:09.893Z",
+    "notes": "The combined Total a pagar is currently unconfirmed while consolidated charges are reconciled against original records to avoid counting them twice. All current packages remain within scope, without a project filter. Remaining quotes, payment and the final consolidated balance are pending. No current numeric total is published. Kept separate from USD purchase totals."
   }
 }
