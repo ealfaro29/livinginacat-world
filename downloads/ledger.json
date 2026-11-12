@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-11",
+  "updatedAt": "2026-11-12",
   "currency": "USD",
   "purchasesPaused": false,
   "equipmentQuotedTotalCents": 286451,
@@ -1546,6 +1546,11 @@
   ],
   "changes": [
     {
+      "date": "2026-11-12",
+      "title": "Recipient delivery expected; receipt remains unconfirmed",
+      "detail": "The owner reports expected recipient delivery on November 13 for an existing processed consolidation. This is a planned date, not confirmation of receipt. Verified item stages and purchase totals are preserved; the combined forwarding amount remains pending reconciliation."
+    },
+    {
       "date": "2026-11-11",
       "title": "Consolidation processing confirmed; forwarding total under reconciliation",
       "detail": "Speedy confirms processing of an existing consolidation. Original purchases, prealerts and verified item phases are preserved. The current combined Total a pagar is pending reconciliation because consolidated and original charge records coexist; no numeric total is published until their billing relationship is verified. Remaining quotes, payment and the final balance are unconfirmed."
@@ -2676,5 +2681,12 @@
     "observedAt": "2026-11-11",
     "verifiedAt": "2026-11-12T00:15:09.893Z",
     "notes": "The combined Total a pagar is currently unconfirmed while consolidated charges are reconciled against original records to avoid counting them twice. All current packages remain within scope, without a project filter. Remaining quotes, payment and the final consolidated balance are pending. No current numeric total is published. Kept separate from USD purchase totals."
+  },
+  "deliveryOutlook": {
+    "scope": "processed_consolidation",
+    "expectedRecipientDeliveryDate": "2026-11-13",
+    "reportedAt": "2026-11-12",
+    "source": "owner_reported",
+    "receiptConfirmed": false
   }
 }
