@@ -1,6 +1,6 @@
 // Consume the complete current Speedy review. Membership in the project does
 // not affect the amount, and no package-level fields leave this calculation.
-export function aggregateForwardingCharges(packages, { hasUnquotedPackages = false, settledTrackings = [] } = {}) {
+export function aggregateForwardingCharges(packages, { hasUnquotedPackages = false, settledTrackings = [], hasUnresolvedConsolidationCharges = false } = {}) {
   const amounts = new Map();
   const settled = new Set(settledTrackings);
   for (const pkg of packages) {
@@ -18,9 +18,11 @@ export function aggregateForwardingCharges(packages, { hasUnquotedPackages = fal
   }
   return {
     currency: "CRC",
-    amountCRC: [...amounts.values()].reduce((sum, amount) => sum + amount, 0),
+    // A consolidated parcel can coexist with its charged contents. Until their
+    // billing relationship is verified, a numeric sum would imply false precision.
+    amountCRC: hasUnresolvedConsolidationCharges ? null : [...amounts.values()].reduce((sum, amount) => sum + amount, 0),
     scope: "all_current_packages",
-    quoteStatus: hasUnquotedPackages ? "awaiting_remaining_quotes" : "currently_quoted",
+    quoteStatus: hasUnresolvedConsolidationCharges ? "reconciliation_pending" : hasUnquotedPackages ? "awaiting_remaining_quotes" : "currently_quoted",
     payment: "unconfirmed",
     finalConsolidatedChargeConfirmed: false,
   };

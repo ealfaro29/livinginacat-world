@@ -35,3 +35,15 @@ test("confirmed settlements are excluded even when Speedy retains Enviado, witho
   assert.equal(result.quoteStatus, "currently_quoted");
   assert.equal(JSON.stringify(result).includes("FIXTURE"), false);
 });
+
+test("unresolved consolidation billing withholds a potentially duplicated aggregate", () => {
+  const result = aggregateForwardingCharges([
+    { tracking: "FIXTURE-CONTENTS", amountCRC: 4000 },
+    { tracking: "FIXTURE-CONTAINER", amountCRC: 3500 },
+  ], { hasUnresolvedConsolidationCharges: true, hasUnquotedPackages: true });
+  assert.equal(result.amountCRC, null);
+  assert.equal(result.quoteStatus, "reconciliation_pending");
+  assert.equal(result.scope, "all_current_packages");
+  assert.equal(result.payment, "unconfirmed");
+  assert.equal(JSON.stringify(result).includes("FIXTURE"), false);
+});

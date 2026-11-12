@@ -281,14 +281,16 @@ test("published CAD archive matches its manifest hash", async () => {
 test("combined forwarder total stays in colones without exposing package details", () => {
   const f = ledger.forwardingCharges;
   assert.equal(f.currency, "CRC");
-  assert.ok(Number.isInteger(f.amountCRC) && f.amountCRC >= 0);
+  assert.ok(f.quoteStatus === "reconciliation_pending"
+    ? f.amountCRC === null
+    : Number.isInteger(f.amountCRC) && f.amountCRC >= 0);
   assert.equal(f.scope, "all_current_packages");
-  assert.ok(["currently_quoted", "awaiting_remaining_quotes"].includes(f.quoteStatus));
+  assert.ok(["currently_quoted", "awaiting_remaining_quotes", "reconciliation_pending"].includes(f.quoteStatus));
   assert.equal(f.payment, "unconfirmed");
   assert.equal(f.finalConsolidatedChargeConfirmed, false);
   const allowed = new Set(["currency", "amountCRC", "source", "observedAt", "verifiedAt", "scope", "quoteStatus", "payment", "finalConsolidatedChargeConfirmed", "notes"]);
   assert.ok(Object.keys(f).every((key) => allowed.has(key)), "individual forwarding records must stay private");
-  assert.ok(Object.values(f).every((value) => typeof value !== "object"));
+  assert.ok(Object.values(f).every((value) => value === null || typeof value !== "object"));
 });
 
 test("project locations distinguish Speedy progress from carrier delivery", () => {
