@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-12",
+  "updatedAt": "2026-11-13",
   "currency": "USD",
   "purchasesPaused": false,
   "equipmentQuotedTotalCents": 286451,
@@ -52,7 +52,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-and-authenticated-order-summary",
-      "notes": "Documented order totals and the recorded payment are unchanged. The original UPS project shipment is in Costa Rica. The returned shipment remains historical. Bambu Lab offered a replacement at no additional vendor charge, the owner supplied the verified Miami destination, and the vendor now reports dispatch with new USPS tracking. USPS now confirms acceptance and transit, with estimated Miami delivery November 14. The replacement prealert is verified; consolidation awaits another eligible package because active groups are full. Carrier delivery, Speedy receipt and refund remain unconfirmed. Equipment prices remain the original planning quote; bank settlement has not been independently reconciled.",
+      "notes": "Documented order totals and the recorded payment are unchanged. The owner confirms receipt of the original UPS project shipment. The returned shipment remains historical. Bambu Lab offered a replacement at no additional vendor charge, the owner supplied the verified Miami destination, and the vendor reported replacement dispatch with new USPS tracking. USPS now confirms out for delivery in Miami on November 13, with estimated carrier delivery November 13 by 9 PM; delivery remains unconfirmed. The replacement prealert is verified; consolidation awaits another eligible package because active groups are full. Carrier delivery, Speedy receipt and refund remain unconfirmed. Equipment prices remain the original planning quote; bank settlement has not been independently reconciled.",
       "invoiceTotalCents": 88186,
       "invoiceItemsCents": 84718,
       "shippingInvoicedCents": 699,
@@ -1546,6 +1546,11 @@
   ],
   "changes": [
     {
+      "date": "2026-11-13",
+      "title": "Replacement shipment out for delivery in Miami",
+      "detail": "USPS reports the existing replacement out for delivery and updates its Miami delivery estimate to November 13. Carrier delivery, Speedy receipt and recipient delivery remain unconfirmed. The original purchase, return, prealert and pending consolidation are preserved; the combined Speedy amount remains pending reconciliation."
+    },
+    {
       "date": "2026-11-12",
       "title": "Project shipments received by the owner",
       "detail": "The owner confirms recipient receipt of existing project shipments, corroborated by their exact forwarding records. The previous delivery forecast is superseded; the exact delivery date and complete physical inventory remain unconfirmed. Purchase totals and carrier evidence are preserved. Taxes, tariffs, shipping and others remains pending reconciliation without a current numeric amount."
@@ -2435,9 +2440,9 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-11-12",
+      "lastChecked": "2026-11-13",
       "source": "Bambu Lab support and owner reply, November 6; exact original shipment matched",
-      "notes": "The original shipment was returned. The replacement has separate USPS tracking; acceptance and transit are confirmed with estimated Miami delivery November 14. Its Speedy prealert is verified and consolidation remains pending. Carrier delivery and Speedy receipt remain unconfirmed. Original purchase, payment and return evidence are preserved.",
+      "notes": "The original shipment was returned. The replacement has separate USPS tracking; USPS now reports out for delivery in Miami on November 13, with estimated carrier delivery that day. Its Speedy prealert is verified and consolidation remains pending. Carrier delivery and Speedy receipt remain unconfirmed. Original purchase, payment and return evidence are preserved.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-06",
@@ -2678,14 +2683,14 @@
       "carrier": "USPS",
       "title": "Replacement project shipment",
       "itemIds": [],
-      "expectedDeliveryDate": "2026-11-14",
+      "expectedDeliveryDate": "2026-11-13",
       "deliveredAt": null,
-      "lastChecked": "2026-11-12",
-      "source": "Bambu Lab replacement dispatch, USPS acceptance and tracking, verified Speedy prealert",
-      "notes": "USPS confirms acceptance and onward transit on November 12, with estimated Miami delivery November 14. The unique Speedy prealert is verified using the original purchase document. Consolidation awaits another eligible package because the current active groups are full. Carrier delivery, Speedy receipt, Costa Rica arrival and recipient delivery remain unconfirmed. The original purchase, payment and return are preserved without a new order or charge.",
+      "lastChecked": "2026-11-13",
+      "source": "USPS current tracking and full history; original vendor dispatch and verified Speedy prealert",
+      "notes": "USPS confirms out for delivery in Miami on November 13, with estimated carrier delivery November 13 by 9 PM. This estimate concerns the Miami destination. The unique Speedy prealert and original purchase document are preserved; consolidation still awaits a second eligible package because active groups are full. Carrier delivery, Speedy receipt, Costa Rica arrival and recipient delivery remain unconfirmed. The original purchase, payment and return are unchanged.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-12",
+      "speedyCheckedAt": "2026-11-13",
       "trackingAssigned": true,
       "replacesShipmentId": "BAMBU-PKG-01"
     }
