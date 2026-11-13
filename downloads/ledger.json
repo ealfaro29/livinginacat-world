@@ -138,7 +138,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-shipping-email-and-usps-tracking",
-      "notes": "The vendor order and receipt totals are unchanged. USPS confirms carrier delivery on October 31. The shipment is prealerted and consolidated; Speedy receipt remains unconfirmed.",
+      "notes": "The vendor order and receipt totals are unchanged. USPS confirms carrier delivery on October 31. Speedy now confirms this exact shipment in Costa Rica. The original prealert, consolidation and documents are preserved; recipient delivery remains unconfirmed.",
       "invoiceTotalCents": 2616,
       "shippingInvoicedCents": 841,
       "taxInvoicedCents": 171,
@@ -158,7 +158,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-email-and-authenticated-order-page",
-      "notes": "The authenticated exact-order page shows all fulfillment groups delivered, observed November 6. The cable-management group arrived November 6; the foam delivery is confirmed by complete order fulfillment without assigning an individual delivery date. Monetary amounts and payment uncertainty are unchanged. Carrier delivery to the shipping address does not establish Speedy receipt or delivery to the recipient.",
+      "notes": "The authenticated exact-order page showed all fulfillment groups carrier-delivered on November 6. Project groups remain separate: the owner confirms receipt of the foam, Speedy confirms the cable-management shipment in Miami and the spacers shipment in Costa Rica. These individual observations do not establish recipient delivery for the remaining groups. Monetary amounts and payment uncertainty are unchanged.",
       "invoiceItemsCents": 4982,
       "invoiceTotalCents": 5331,
       "shippingInvoicedCents": 0,
@@ -178,7 +178,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-shipping-email",
-      "notes": "The vendor delivery confirmation as of November 2 has been reviewed. The shipment is prealerted and consolidated; Speedy receipt remains unconfirmed. The documented order and payment records are unchanged.",
+      "notes": "The vendor delivery confirmation as of November 2 is preserved. Speedy now confirms this exact shipment in Costa Rica. The original prealert, consolidation, documented order and payment records are unchanged; recipient delivery remains unconfirmed.",
       "invoiceTotalCents": 1894,
       "shippingInvoicedCents": 895,
       "taxInvoicedCents": 0,
@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-13",
+      "title": "Three project shipments confirmed in Costa Rica",
+      "detail": "Speedy confirms the existing BoltDepot, Walmart spacers and PhotonLight shipments in Costa Rica through exact, independently verified carrier aliases. Recipient delivery is still unconfirmed. Original purchases, documents, prealerts and consolidation assignments are preserved. The combined forwarding amount remains pending reconciliation."
+    },
+    {
+      "date": "2026-11-13",
       "title": "Replacement shipment out for delivery in Miami",
       "detail": "USPS reports the existing replacement out for delivery and updates its Miami delivery estimate to November 13. Carrier delivery, Speedy receipt and recipient delivery remain unconfirmed. The original purchase, return, prealert and pending consolidation are preserved; the combined Speedy amount remains pending reconciliation."
     },
@@ -2383,14 +2388,14 @@
       "itemIds": [],
       "expectedDeliveryDate": "2026-11-09",
       "deliveredAt": null,
-      "lastChecked": "2026-11-09",
-      "source": "Authenticated Speedy received entry and USPS-verified complete tracking history",
-      "notes": "Speedy confirms received in Miami, ready for forwarding to Costa Rica. The full scanned barcode and vendor tracking resolve at USPS to identical complete tracking histories. Arrival in Costa Rica and delivery to the recipient remain unconfirmed. The prealert was reassigned to the current active forwarding consolidation on November 11, preserving its authentic document, quantities and values. Shipping phases are unchanged.",
-      "speedyStatus": "received",
-      "speedyLocation": "miami",
-      "speedyCheckedAt": "2026-11-09",
+      "lastChecked": "2026-11-13",
+      "source": "Authenticated Speedy exact package status and previously verified complete carrier alias; original carrier delivery preserved",
+      "notes": "Speedy confirms this existing project shipment in Costa Rica. Delivery to the recipient remains unconfirmed, and the actual arrival date was not specified. The original purchase, carrier delivery, document, prealert and verified consolidation assignment are preserved.",
+      "speedyStatus": "in_transit",
+      "speedyLocation": "costa_rica",
+      "speedyCheckedAt": "2026-11-13",
       "trackingAssigned": true,
-      "speedyConfirmedAt": "2026-11-09T06:52:07.403Z"
+      "speedyConfirmedAt": "2026-11-13T15:34:10.886Z"
     },
     {
       "id": "VXB-PKG-01",
@@ -2483,14 +2488,14 @@
       "itemIds": [],
       "expectedDeliveryDate": null,
       "deliveredAt": null,
-      "lastChecked": "2026-11-09",
-      "source": "Authenticated Speedy received entry, owner confirmation and USPS-verified tracking alias",
-      "notes": "Speedy confirms receipt in Miami, ready for forwarding to Costa Rica. The full Speedy barcode and vendor tracking independently resolve at USPS to identical complete tracking histories. USPS carrier delivery was October 31. Arrival in Costa Rica and delivery to the recipient remain unconfirmed. The prealert was reassigned to the current active forwarding consolidation on November 11, preserving its authentic document, quantities and values. Shipping phases are unchanged.",
-      "speedyStatus": "received",
-      "speedyLocation": "miami",
-      "speedyCheckedAt": "2026-11-09",
+      "lastChecked": "2026-11-13",
+      "source": "Authenticated Speedy exact package status and previously verified complete carrier alias; original carrier delivery preserved",
+      "notes": "Speedy confirms this existing project shipment in Costa Rica. Delivery to the recipient remains unconfirmed, and the actual arrival date was not specified. The original purchase, carrier delivery, document, prealert and verified consolidation assignment are preserved.",
+      "speedyStatus": "in_transit",
+      "speedyLocation": "costa_rica",
+      "speedyCheckedAt": "2026-11-13",
       "trackingAssigned": true,
-      "speedyConfirmedAt": "2026-11-09T06:49:04.225Z"
+      "speedyConfirmedAt": "2026-11-13T15:34:10.886Z"
     },
     {
       "id": "PHOTON-PKG-01",
@@ -2502,14 +2507,14 @@
       "itemIds": [],
       "expectedDeliveryDate": "2026-11-02",
       "deliveredAt": null,
-      "lastChecked": "2026-11-09",
-      "source": "Authenticated Speedy received entry and USPS-verified complete tracking history",
-      "notes": "Speedy confirms received in Miami, ready for forwarding to Costa Rica. The full scanned barcode and vendor tracking resolve at USPS to identical complete tracking histories. Arrival in Costa Rica and delivery to the recipient remain unconfirmed. The prealert was reassigned to the current active forwarding consolidation on November 11, preserving its authentic document, quantities and values. Shipping phases are unchanged.",
-      "speedyStatus": "received",
-      "speedyLocation": "miami",
-      "speedyCheckedAt": "2026-11-09",
+      "lastChecked": "2026-11-13",
+      "source": "Authenticated Speedy exact package status and previously verified complete carrier alias; original carrier delivery preserved",
+      "notes": "Speedy confirms this existing project shipment in Costa Rica. Delivery to the recipient remains unconfirmed, and the actual arrival date was not specified. The original purchase, carrier delivery, document, prealert and verified consolidation assignment are preserved.",
+      "speedyStatus": "in_transit",
+      "speedyLocation": "costa_rica",
+      "speedyCheckedAt": "2026-11-13",
       "trackingAssigned": true,
-      "speedyConfirmedAt": "2026-11-09T06:52:07.403Z"
+      "speedyConfirmedAt": "2026-11-13T15:34:10.886Z"
     },
     {
       "id": "AMZ-PKG-06",
