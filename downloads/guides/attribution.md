@@ -8,6 +8,6 @@ Earlier planning reference photographs and manufacturers’ STEP files are not r
 
 Complete regeneration scripts will be documented in a later release. STEP files allow geometry editing, but this initial repository does not promise one-command parametric regeneration of the full assembly.
 
-The prototype has not been printed, assembled or physically tested. Validation of our modifications is not attributed to the original project.
+The first test batch is complete. The owner reports M3 and M5 checks passed in PLA Silk; individual feature measurements were not supplied. M4, coupler fit, PETG and full assembly acceptance remain unvalidated. These limited observations about our modifications are not attributed to the original project. The published v0.1 CAD archive remains its original dated snapshot.
 
 The visual identity includes an original AI-generated robot cat mark and conceptual hardware illustration. The self-hosted Space Grotesk font is licensed under SIL OFL 1.1; its notice is retained in `public/assets/fonts/OFL-SpaceGrotesk.txt`.

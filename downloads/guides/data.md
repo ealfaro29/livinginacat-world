@@ -1,6 +1,8 @@
 # Ledger maintenance
 
-Public source: `data/ledger.json`. USD amounts are integer cents. `null` means unknown. Dates use YYYY-MM-DD. `updatedAt` is the review date, not a live query timestamp.
+Public source: `data/ledger.json`. USD amounts are integer cents. `null` means unknown. Dates use YYYY-MM-DD. `updatedAt` retains the UTC review date; `reviewedAt` is the completed source-review timestamp and `reviewTimeZone` controls its display in Costa Rica. Neither is a delivery event. A shipment's `speedyReviewedAt` records the latest full-account check without replacing its carrier or recipient event date. Confirmed carrier deliveries display `carrierDeliveredDate`, or explicitly leave the date unknown, rather than reusing an earlier estimate.
+
+`data/build-progress.json` contains selected, anonymized current build observations, separate from the immutable v0.1 CAD archive metadata. The November 13 owner report confirms M3 and M5 checks in PLA Silk, without itemized hole, pocket or seat measurements. Keep M4, coupler fit, PETG and full assembly acceptance unconfirmed. These coupon observations do not validate the complete robot or change the archive's checksum.
 
 ## Overlapping records: do not add together
 

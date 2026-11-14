@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "reportedAt": "2026-11-13",
+  "source": "Direct owner report, with completion of the initial test batch separately observed",
+  "stage": "Initial fit checks reported",
+  "firstTestBatchCompleted": true,
+  "secondBatchCompletionConfirmed": false,
+  "material": "PLA Silk",
+  "nozzleDiameterMM": 0.4,
+  "fitChecks": {
+    "passedSizes": [
+      "M3",
+      "M5"
+    ],
+    "pendingChecks": [
+      "M4",
+      "coupler"
+    ],
+    "basis": "owner_report",
+    "individualHolePocketAndSeatResultsItemized": false,
+    "measuredClearanceDiametersMM": null
+  },
+  "petgFitValidated": false,
+  "fullAssemblyAccepted": false,
+  "touchMotionAndThermalPerformanceValidated": false,
+  "cadReleaseChanged": false
+}
