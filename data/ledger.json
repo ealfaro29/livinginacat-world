@@ -1546,6 +1546,11 @@
   ],
   "changes": [
     {
+      "date": "2026-11-14",
+      "title": "Project prealert reassignment verified",
+      "detail": "An existing project prealert was moved to the current forwarding group with its original document and declaration preserved. Purchase amounts, carrier progress, Speedy location and recipient-delivery status are unchanged. Administrative form dates do not establish arrivals."
+    },
+    {
       "date": "2026-11-13",
       "title": "Current records and initial fit checks synchronized",
       "detail": "The owner reports M3 and M5 checks passed in PLA Silk. M4, coupler fit, PETG and complete assembly acceptance remain unconfirmed. The current shipment review preserves every verified phase and purchase amount; actual carrier delivery dates are shown separately from estimates. Forwarding charges remain pending reconciliation without a numeric total."
@@ -2447,13 +2452,14 @@
       "deliveredAt": null,
       "lastChecked": "2026-11-09",
       "source": "Authenticated Speedy received entry and USPS-verified complete tracking history",
-      "notes": "Speedy confirms received in Miami, ready for forwarding to Costa Rica. The full scanned barcode and vendor tracking resolve at USPS to identical complete tracking histories. Arrival in Costa Rica and delivery to the recipient remain unconfirmed.",
+      "notes": "Speedy confirms received in Miami, ready for forwarding to Costa Rica. The full scanned barcode and vendor tracking resolve at USPS to identical complete tracking histories. Arrival in Costa Rica and delivery to the recipient remain unconfirmed. Its existing prealert was reassigned to the current forwarding group with the original document and declared contents preserved. This administrative change does not confirm a new arrival or recipient delivery.",
       "speedyStatus": "received",
       "speedyLocation": "miami",
       "speedyCheckedAt": "2026-11-09",
       "trackingAssigned": true,
       "speedyConfirmedAt": "2026-11-09T06:52:07.403Z",
-      "speedyReviewedAt": "2026-11-14T05:03:52.409Z"
+      "speedyReviewedAt": "2026-11-14T05:03:52.409Z",
+      "consolidationAdministrativeUpdateAt": "2026-11-14T14:44:27.568Z"
     },
     {
       "id": "BAMBU-PKG-01",
@@ -2756,5 +2762,6 @@
     "forecastSupersededByReceipt": true
   },
   "reviewedAt": "2026-11-14T05:03:52.409Z",
-  "reviewTimeZone": "America/Costa_Rica"
+  "reviewTimeZone": "America/Costa_Rica",
+  "lastAdministrativeUpdateAt": "2026-11-14T14:44:27.568Z"
 }
