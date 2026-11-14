@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-13",
+  "updatedAt": "2026-11-14",
   "currency": "USD",
   "purchasesPaused": false,
   "equipmentQuotedTotalCents": 286451,
@@ -52,7 +52,7 @@
       "receivedAt": null,
       "publicReceiptUrl": null,
       "evidenceLevel": "vendor-order-confirmation-and-authenticated-order-summary",
-      "notes": "Documented order totals and the recorded payment are unchanged. The owner confirms receipt of the original UPS project shipment. The returned shipment remains historical. Bambu Lab offered a replacement at no additional vendor charge, the owner supplied the verified Miami destination, and the vendor reported replacement dispatch with new USPS tracking. USPS now confirms out for delivery in Miami on November 13, with estimated carrier delivery November 13 by 9 PM; delivery remains unconfirmed. The replacement prealert is verified; consolidation awaits another eligible package because active groups are full. Carrier delivery, Speedy receipt and refund remain unconfirmed. Equipment prices remain the original planning quote; bank settlement has not been independently reconciled.",
+      "notes": "Documented order totals and the recorded payment are unchanged. The owner confirms receipt of the original project shipment. The returned shipment remains historical. The replacement has separate USPS tracking, and USPS confirms carrier delivery in Miami November 13. Its original prealert is preserved and now linked to a newly created forwarding group, without confirmed Speedy receipt or recipient delivery. No refund or bank settlement is independently confirmed. Equipment prices remain the original planning quote.",
       "invoiceTotalCents": 88186,
       "invoiceItemsCents": 84718,
       "shippingInvoicedCents": 699,
@@ -1546,6 +1546,11 @@
   ],
   "changes": [
     {
+      "date": "2026-11-14",
+      "title": "Carrier delivery in Miami and forwarding progress confirmed",
+      "detail": "USPS confirms carrier delivery of the existing replacement to Miami on November 13. Speedy confirms the Walmart cable-management shipment in Costa Rica through its independently verified full carrier alias. Recipient delivery remains unconfirmed. The replacement prealert is preserved and now consolidated; no early shipment was requested. The combined Speedy amount remains pending reconciliation without a numeric total."
+    },
+    {
       "date": "2026-11-13",
       "title": "Three project shipments confirmed in Costa Rica",
       "detail": "Speedy confirms the existing BoltDepot, Walmart spacers and PhotonLight shipments in Costa Rica through exact, independently verified carrier aliases. Recipient delivery is still unconfirmed. Original purchases, documents, prealerts and consolidation assignments are preserved. The combined forwarding amount remains pending reconciliation."
@@ -2368,15 +2373,15 @@
       "itemIds": [],
       "expectedDeliveryDate": "2026-11-09",
       "deliveredAt": null,
-      "lastChecked": "2026-11-10",
-      "source": "Authenticated Speedy received entry and USPS-verified complete histories for both full identifiers",
-      "notes": "Speedy confirms received in Miami, ready for forwarding to Costa Rica. USPS independently resolves the original tracking and full scanned barcode to identical complete histories, including carrier delivery to an agent on November 6. Arrival in Costa Rica and delivery to the recipient remain unconfirmed. The existing prealert and consolidation are preserved.",
-      "speedyStatus": "received",
-      "speedyLocation": "miami",
-      "speedyCheckedAt": "2026-11-10",
+      "lastChecked": "2026-11-14",
+      "source": "Authenticated Speedy exact Costa Rica entry with previously independently verified complete USPS alias",
+      "notes": "Speedy confirms the exact cable-management shipment in Costa Rica. The full scanned barcode matches its independently verified USPS alias and is explicitly linked in the original consolidation. The actual arrival date was not provided. Delivery to the recipient remains unconfirmed; the original purchase, carrier delivery, prealert and consolidation are preserved.",
+      "speedyStatus": "in_transit",
+      "speedyLocation": "costa_rica",
+      "speedyCheckedAt": "2026-11-14",
       "trackingAssigned": true,
       "carrierDeliveredDate": "2026-11-06",
-      "speedyConfirmedAt": "2026-11-10T15:06:25.162Z"
+      "speedyConfirmedAt": "2026-11-14T00:36:34.722Z"
     },
     {
       "id": "WMT-PREP-04",
@@ -2447,7 +2452,7 @@
       "deliveredAt": null,
       "lastChecked": "2026-11-13",
       "source": "Bambu Lab support and owner reply, November 6; exact original shipment matched",
-      "notes": "The original shipment was returned. The replacement has separate USPS tracking; USPS now reports out for delivery in Miami on November 13, with estimated carrier delivery that day. Its Speedy prealert is verified and consolidation remains pending. Carrier delivery and Speedy receipt remain unconfirmed. Original purchase, payment and return evidence are preserved.",
+      "notes": "The original shipment was returned. The replacement has separate USPS tracking and carrier delivery in Miami confirmed November 13. Its original prealert is preserved and now consolidated. Speedy receipt and recipient delivery remain unconfirmed. Original purchase, payment and return evidence are preserved.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
       "speedyCheckedAt": "2026-11-06",
@@ -2684,20 +2689,21 @@
       "id": "BAMBU-REPLACEMENT-01",
       "vendor": "Bambu Lab",
       "orderRef": "bambu-lab",
-      "status": "shipped",
+      "status": "carrier_delivered",
       "carrier": "USPS",
       "title": "Replacement project shipment",
       "itemIds": [],
       "expectedDeliveryDate": "2026-11-13",
       "deliveredAt": null,
-      "lastChecked": "2026-11-13",
-      "source": "USPS current tracking and full history; original vendor dispatch and verified Speedy prealert",
-      "notes": "USPS confirms out for delivery in Miami on November 13, with estimated carrier delivery November 13 by 9 PM. This estimate concerns the Miami destination. The unique Speedy prealert and original purchase document are preserved; consolidation still awaits a second eligible package because active groups are full. Carrier delivery, Speedy receipt, Costa Rica arrival and recipient delivery remain unconfirmed. The original purchase, payment and return are unchanged.",
+      "lastChecked": "2026-11-14",
+      "source": "USPS current summary and full tracking history; verified original Speedy prealert and consolidation",
+      "notes": "USPS confirms delivery to the Miami destination on November 13 at 4:50 PM, in or at the mailbox; the source timezone is unspecified. This is carrier delivery. Speedy receipt, Costa Rica arrival and delivery to the recipient remain unconfirmed. The unique existing prealert is now verified in a newly created forwarding group without recreating it or requesting early shipment. The group has no receipts linked. The original purchase, payment, return and document remain unchanged.",
       "speedyStatus": "unconfirmed",
       "speedyLocation": null,
-      "speedyCheckedAt": "2026-11-13",
+      "speedyCheckedAt": "2026-11-14",
       "trackingAssigned": true,
-      "replacesShipmentId": "BAMBU-PKG-01"
+      "replacesShipmentId": "BAMBU-PKG-01",
+      "carrierDeliveredDate": "2026-11-13"
     }
   ],
   "forwardingCharges": {

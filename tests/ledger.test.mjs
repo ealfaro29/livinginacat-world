@@ -152,9 +152,9 @@ test("Walmart receipt advances only the independently verified fulfillment group
     assert.equal(shipment.deliveredAt, null);
   }
   const wrap = ledger.shipments.find((x) => x.id === "WMT-PKG-03");
-  assert.equal(wrap.speedyStatus, "received");
-  assert.equal(wrap.speedyLocation, "miami");
-  assert.match(wrap.speedyConfirmedAt, /^2026-11-10T/);
+  assert.equal(wrap.speedyStatus, "in_transit");
+  assert.equal(wrap.speedyLocation, "costa_rica");
+  assert.match(wrap.speedyConfirmedAt, /^2026-11-14T/);
   const foam = ledger.shipments.find((x) => x.id === "WMT-PKG-02");
   assert.equal(foam.speedyStatus, "delivered");
   assert.equal(foam.speedyLocation, null);
