@@ -222,7 +222,7 @@
       "paymentEvidence": "Authentic vendor final invoice explicitly states paid in full. Bank settlement is not independently verified.",
       "replacesOrderId": "digikey",
       "lastChecked": "2026-11-07",
-      "notes": "All ten component references shipped; FedEx now confirms the shipment is on the way, with estimated arrival Monday, November 9. The final invoice totals $87.22 and reports paid in full; bank settlement is unverified. Speedy prealert is confirmed. Carrier delivery and receipt by Speedy remain unconfirmed.",
+      "notes": "All ten component references shipped. FedEx carrier delivery in Miami on November 9 and Speedy receipt were previously verified; Speedy now confirms the exact shipment in Costa Rica. Actual Costa Rica arrival date and recipient delivery remain unconfirmed. The final invoice totals $87.22 and reports paid in full; bank settlement remains unverified. The original invoice, prealert, consolidation and purchase amount are preserved.",
       "shippingChargeFinal": true,
       "orderConfirmationTotalCents": 8207,
       "invoiceTotalFinal": true,
@@ -940,7 +940,7 @@
       "quotedTotalCents": 1336,
       "actualPaidCents": null,
       "url": "https://www.mouser.com/en/ProductDetail/Littelfuse/FHAS101?qs=BJlw7L4Cy790Sq9g31NH4g%3D%3D",
-      "notes": "Inline ATO fuse holder. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "notes": "Inline ATO fuse holder. Confirmed in the Mouser replacement order on November 5. Speedy confirms the shipment in Costa Rica; recipient delivery and bank settlement remain unconfirmed.",
       "previousProcurement": {
         "vendor": "DigiKey",
         "orderId": "digikey",
@@ -963,7 +963,7 @@
       "quotedTotalCents": 50,
       "actualPaidCents": null,
       "url": "https://www.mouser.com/en/ProductDetail/Littelfuse/0287003.U?qs=TVaBpCI%2FeOjpzUEhB65zGA%3D%3D",
-      "notes": "One installed fuse; do not add another fuse kit. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "notes": "One installed fuse; do not add another fuse kit. Confirmed in the Mouser replacement order on November 5. Speedy confirms the shipment in Costa Rica; recipient delivery and bank settlement remain unconfirmed.",
       "previousProcurement": {
         "vendor": "DigiKey",
         "orderId": "digikey",
@@ -1010,7 +1010,7 @@
       "quotedTotalCents": 809,
       "actualPaidCents": null,
       "url": "https://www.mouser.com/en/ProductDetail/Desco/09838?qs=MA90IRdNH%2FGdWlNa38pjQQ%3D%3D",
-      "notes": "Capacitive reference through verified protective earth; does not provide power. Electrical connection remains subject to commissioning checks. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "notes": "Capacitive reference through verified protective earth; does not provide power. Electrical connection remains subject to commissioning checks. Confirmed in the Mouser replacement order on November 5. Speedy confirms the shipment in Costa Rica; recipient delivery and bank settlement remain unconfirmed.",
       "previousProcurement": {
         "vendor": "DigiKey",
         "orderId": "digikey",
@@ -1033,7 +1033,7 @@
       "quotedTotalCents": 998,
       "actualPaidCents": null,
       "url": "https://www.mouser.com/en/ProductDetail/Pomona-Electronics/1166-36-0?qs=nZsw%2FpC7E%252Bt3JqAYAu1yfQ%3D%3D",
-      "notes": "Clip connects to a flexible lead ending at the metal tip. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "notes": "Clip connects to a flexible lead ending at the metal tip. Confirmed in the Mouser replacement order on November 5. Speedy confirms the shipment in Costa Rica; recipient delivery and bank settlement remain unconfirmed.",
       "previousProcurement": {
         "vendor": "DigiKey",
         "orderId": "digikey",
@@ -1056,7 +1056,7 @@
       "quotedTotalCents": 750,
       "actualPaidCents": null,
       "url": "https://www.mouser.com/en/ProductDetail/Adafruit/412?qs=GURawfaeGuBVsKnEJX3AiQ%3D%3D",
-      "notes": "1528-1551-ND. Same Adafruit 412 solenoid; retains the FT412 cradle and design. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "notes": "1528-1551-ND. Same Adafruit 412 solenoid; retains the FT412 cradle and design. Confirmed in the Mouser replacement order on November 5. Speedy confirms the shipment in Costa Rica; recipient delivery and bank settlement remain unconfirmed.",
       "previousProcurement": {
         "vendor": "DigiKey",
         "orderId": "digikey",
@@ -1079,7 +1079,7 @@
       "quotedTotalCents": 395,
       "actualPaidCents": null,
       "url": "https://www.mouser.com/en/ProductDetail/Adafruit/5648?qs=mELouGlnn3cY6k7nhOkonA%3D%3D",
-      "notes": "1528-5648-ND. Same module; retains the mount and planned connections. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "notes": "1528-5648-ND. Same module; retains the mount and planned connections. Confirmed in the Mouser replacement order on November 5. Speedy confirms the shipment in Costa Rica; recipient delivery and bank settlement remain unconfirmed.",
       "previousProcurement": {
         "vendor": "DigiKey",
         "orderId": "digikey",
@@ -1102,7 +1102,7 @@
       "quotedTotalCents": 125,
       "actualPaidCents": null,
       "url": "https://www.mouser.com/en/ProductDetail/Adafruit/3893?qs=qSfuJ%252Bfl%2Fd7tNPgahO%2Fnaw%3D%3D",
-      "notes": "1528-2696-ND. Input harness for module 5648. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "notes": "1528-2696-ND. Input harness for module 5648. Confirmed in the Mouser replacement order on November 5. Speedy confirms the shipment in Costa Rica; recipient delivery and bank settlement remain unconfirmed.",
       "previousProcurement": {
         "vendor": "DigiKey",
         "orderId": "digikey",
@@ -1125,7 +1125,7 @@
       "quotedTotalCents": 95,
       "actualPaidCents": null,
       "url": "https://www.mouser.com/en/ProductDetail/Adafruit/4873?qs=pBJMDPsKWf0WVFcnNr1Piw%3D%3D",
-      "notes": "1528-4873-ND. Same cable pack; use the end compatible with J18 TTL after pinout verification. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "notes": "1528-4873-ND. Same cable pack; use the end compatible with J18 TTL after pinout verification. Confirmed in the Mouser replacement order on November 5. Speedy confirms the shipment in Costa Rica; recipient delivery and bank settlement remain unconfirmed.",
       "previousProcurement": {
         "vendor": "DigiKey",
         "orderId": "digikey",
@@ -1148,7 +1148,7 @@
       "quotedTotalCents": 308,
       "actualPaidCents": null,
       "url": "https://www.mouser.com/en/ProductDetail/Qualtek/3021001-03?qs=yhNIDeTE%252BcZAqmE%2FaZRG%2Fg%3D%3D",
-      "notes": "Q361-ND. Shielded USB 2.0 data cable, A male to B male, 914.4 mm. Replaces Adafruit 62 for Pi-to-DLC32. Confirmed in the Mouser replacement order on November 5; dispatch and payment settlement remain unconfirmed.",
+      "notes": "Q361-ND. Shielded USB 2.0 data cable, A male to B male, 914.4 mm. Replaces Adafruit 62 for Pi-to-DLC32. Confirmed in the Mouser replacement order on November 5. Speedy confirms the shipment in Costa Rica; recipient delivery and bank settlement remain unconfirmed.",
       "previousProcurement": {
         "vendor": "DigiKey",
         "orderId": "digikey",
@@ -1545,6 +1545,11 @@
     }
   ],
   "changes": [
+    {
+      "date": "2026-11-14",
+      "title": "Mouser shipment confirmed in Costa Rica",
+      "detail": "Speedy confirms the exact electronics shipment in Costa Rica through its previously verified complete carrier alias. Actual arrival date and recipient delivery remain unconfirmed. Original documents, prealert, consolidation and purchase amounts are preserved; forwarding charges remain pending reconciliation without a numeric total."
+    },
     {
       "date": "2026-11-14",
       "title": "Project prealert reassignment verified",
@@ -2677,19 +2682,19 @@
       "expectedShipDate": null,
       "deliveredAt": null,
       "lastChecked": "2026-11-10",
-      "source": "Authenticated Speedy exact barcode and independently verified full FedEx travel history and shipment facts",
-      "notes": "Speedy confirms received in Miami. Both complete FedEx references independently resolve to the same full travel history and shipment facts. The November 9 carrier delivery remains separate. Costa Rica arrival and recipient delivery are unconfirmed. The authentic invoice, original prealert, purchase amount and consolidation assignment are preserved.",
-      "speedyStatus": "received",
-      "speedyLocation": "miami",
-      "speedyCheckedAt": "2026-11-10",
+      "source": "Authenticated Speedy current active queue and previously verified complete FedEx barcode alias",
+      "notes": "Speedy confirms this exact shipment in Costa Rica. The previously verified complete FedEx reference establishes its identity. The November 9 carrier delivery remains separate. Actual Costa Rica arrival date and recipient delivery remain unconfirmed. The authentic invoice, original prealert, purchase amount and consolidation assignment are preserved.",
+      "speedyStatus": "in_transit",
+      "speedyLocation": "costa_rica",
+      "speedyCheckedAt": "2026-11-14",
       "trackingAssigned": true,
       "invoiceVerified": true,
       "prealertStatus": "confirmed",
       "consolidationStatus": "confirmed",
       "consolidationConfirmedAt": "2026-11-09T13:10:43.664Z",
       "carrierDeliveredDate": "2026-11-09",
-      "speedyConfirmedAt": "2026-11-10T21:09:47.675Z",
-      "speedyReviewedAt": "2026-11-14T05:03:52.409Z"
+      "speedyConfirmedAt": "2026-11-14T15:40:10.299Z",
+      "speedyReviewedAt": "2026-11-14T15:40:10.299Z"
     },
     {
       "id": "AMZ-PKG-11",
@@ -2761,7 +2766,7 @@
     "recipientDeliveryDate": null,
     "forecastSupersededByReceipt": true
   },
-  "reviewedAt": "2026-11-14T05:03:52.409Z",
+  "reviewedAt": "2026-11-14T15:40:10.299Z",
   "reviewTimeZone": "America/Costa_Rica",
   "lastAdministrativeUpdateAt": "2026-11-14T14:44:27.568Z"
 }
