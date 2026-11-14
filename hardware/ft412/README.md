@@ -4,6 +4,8 @@ FDM prototype derived from PhysiClaw hardware v0.51, commit `8f610d48642aef7d974
 
 Read `PUBLIC-RELEASE.md` first. Print only final files in `stl/` with quantities from `qa/print-manifest.json`. `qa/base-generation.json` describes an intermediate PCB holder superseded by the electronics holder. The public release excludes commercial/reference folders and regeneration scripts. Do not mix this variant with the earlier MISUMI/ELECALL design.
 
+**Current build choice, November 14:** the owner selected PLA Silk for final parts and confirmed the phone bed and four feet finished with a good print outcome. The next two-motor-mount/belt-clamp plate is prepared with the main 0.4 mm nozzle, six walls and 80% gyroid, without starting a print. Fit, loaded behavior and heat resistance remain build checks. The PETG parameters below describe the original design preparation; the dated v0.1 archive and its geometry remain unchanged.
+
 ## Selected configuration
 
 | Component | Quantity and specification |

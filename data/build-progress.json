@@ -1,21 +1,64 @@
 {
   "schemaVersion": 1,
-  "reportedAt": "2026-11-13",
-  "source": "Direct owner report, with completion of the initial test batch separately observed",
-  "stage": "Initial fit checks reported",
+  "reportedAt": "2026-11-14",
+  "source": "Direct owner reports of initial fit checks, second-batch completion and final material choice; next-plate preparation verified in Bambu Studio",
+  "stage": "Second batch complete; next print plate prepared",
   "firstTestBatchCompleted": true,
-  "secondBatchCompletionConfirmed": false,
+  "secondBatchCompletionConfirmed": true,
   "material": "PLA Silk",
   "nozzleDiameterMM": 0.4,
   "fitChecks": {
-    "passedSizes": ["M3", "M5"],
-    "pendingChecks": ["M4", "coupler"],
+    "passedSizes": [
+      "M3",
+      "M5"
+    ],
+    "pendingChecks": [
+      "M4",
+      "coupler"
+    ],
     "basis": "owner_report",
     "individualHolePocketAndSeatResultsItemized": false,
-    "measuredClearanceDiametersMM": null
+    "measuredClearanceDiametersMM": null,
+    "reportedAt": "2026-11-13"
   },
   "petgFitValidated": false,
   "fullAssemblyAccepted": false,
   "touchMotionAndThermalPerformanceValidated": false,
-  "cadReleaseChanged": false
+  "cadReleaseChanged": false,
+  "finalMaterialSelected": "PLA Silk",
+  "finalMaterialSelectionBasis": "owner_instruction",
+  "silkFunctionalPerformanceValidated": false,
+  "secondBatch": {
+    "parts": {
+      "phoneBed": 1,
+      "feet": 4
+    },
+    "completionBasis": "owner_report",
+    "reportedAt": "2026-11-14",
+    "goodPrintOutcomeReported": true,
+    "exactCompletionDate": null,
+    "measuredFitConfirmed": false
+  },
+  "nextPrintBatch": {
+    "prepared": true,
+    "sliced": true,
+    "printStarted": false,
+    "parts": {
+      "motorMountA": 1,
+      "motorMountB": 1,
+      "beltClamp": 1
+    },
+    "material": "PLA Silk",
+    "nozzle": "main",
+    "nozzleDiameterMM": 0.4,
+    "layerHeightMM": 0.2,
+    "wallLoops": 6,
+    "topShellLayers": 6,
+    "bottomShellLayers": 6,
+    "infillPercent": 80,
+    "infillPattern": "gyroid",
+    "estimatedDurationSeconds": 10238,
+    "estimatedMassG": 47.48,
+    "estimatesAreNotActualPrintResults": true
+  }
 }

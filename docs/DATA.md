@@ -4,6 +4,8 @@ Public source: `data/ledger.json`. USD amounts are integer cents. `null` means u
 
 `data/build-progress.json` contains selected, anonymized current build observations, separate from the immutable v0.1 CAD archive metadata. The November 13 owner report confirms M3 and M5 checks in PLA Silk, without itemized hole, pocket or seat measurements. Keep M4, coupler fit, PETG and full assembly acceptance unconfirmed. These coupon observations do not validate the complete robot or change the archive's checksum.
 
+The November 14 owner report confirms completion and a good print outcome for the phone bed and four feet, without measured-fit results or an exact completion event date. PLA Silk is now the owner's selected final material. A third motor-mount/belt-clamp plate is prepared and sliced, not started. Preserve this distinction and leave functional heat/load behavior unvalidated; the original CAD geometry, quantities and archive hash are unchanged.
+
 ## Overlapping records: do not add together
 
 - `items`: original equipment list and quotes. Quantity means purchase units, not always individual parts. Quoted total = quantity × quoted unit price.

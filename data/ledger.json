@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-14",
+      "title": "Next print plate prepared in owner-selected PLA Silk",
+      "detail": "The owner confirms the phone bed and four feet finished with a good print outcome and selects PLA Silk for final parts. The next plate contains the two motor mounts and belt clamp, sliced with the main 0.4 mm nozzle, six walls and 80% gyroid infill. It has not been sent to print. M4, coupler fit, complete assembly and functional heat/load performance remain unconfirmed; CAD geometry and purchase records are unchanged."
+    },
+    {
+      "date": "2026-11-14",
       "title": "Forwarding consolidation processed",
       "detail": "Speedy confirms processing of an existing forwarding consolidation. Original shipment locations, quantities and purchase amounts are preserved; this administrative status does not establish recipient delivery. The combined forwarding amount remains pending reconciliation without a numeric total."
     },
@@ -2788,5 +2793,6 @@
   },
   "reviewedAt": "2026-11-14T21:34:29.791Z",
   "reviewTimeZone": "America/Costa_Rica",
-  "lastAdministrativeUpdateAt": "2026-11-14T21:36:22.898Z"
+  "lastAdministrativeUpdateAt": "2026-11-14T21:36:22.898Z",
+  "lastBuildUpdateAt": "2026-11-14T23:35:17.311747+00:00"
 }
