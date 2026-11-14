@@ -45,6 +45,8 @@ Walmart: the authenticated exact-order page showed every fulfillment group deliv
 
 ## Updating
 
+On November 14 Speedy's current active queue also confirms the exact Amazon controller shipment in Costa Rica. Its previously verified fulfillment tracking matches directly; the separate carrier delivery on November 10 is preserved. Actual Costa Rica arrival date and recipient delivery remain unconfirmed. Only the controller article advances; other split fulfillment groups, purchase amounts, receipt category, prealert and consolidation assignment are preserved. Forwarding charges remain pending reconciliation without a numeric total.
+
 On November 14 Speedy's current active queue confirms the exact Mouser shipment in Costa Rica through its previously verified complete FedEx barcode alias. Only that project shipment and its ten linked articles advance. Actual arrival date and recipient delivery remain unconfirmed. The existing invoice, prealert, consolidation, purchase amount and carrier-delivery evidence are preserved. Closed carrier pages and completed consolidation details were not reopened. Forwarding-charge reconciliation remains pending without a numeric total.
 
 In the November 14 UTC review (November 13 in Costa Rica), Speedy confirms the exact Walmart cable-management shipment in Costa Rica through its previously independently verified full USPS alias. The same exact scanned reference is now listed among receipts in its original consolidation. Actual arrival date and recipient delivery remain unconfirmed. Preserve the original carrier delivery, purchase, prealert and assignment. USPS separately confirms carrier delivery of the replacement to Miami on November 13; do not mark Miami in the item tracker until Speedy confirms receipt.

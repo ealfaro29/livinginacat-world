@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-14",
+      "title": "Controller shipment confirmed in Costa Rica",
+      "detail": "Speedy confirms the exact project controller shipment in Costa Rica. Its actual arrival date and recipient delivery remain unconfirmed. Original carrier-delivery evidence, purchase receipt, prealert, consolidation assignment and purchase amounts are preserved. Forwarding charges remain pending reconciliation without a numeric total."
+    },
+    {
+      "date": "2026-11-14",
       "title": "Mouser shipment confirmed in Costa Rica",
       "detail": "Speedy confirms the exact electronics shipment in Costa Rica through its previously verified complete carrier alias. Actual arrival date and recipient delivery remain unconfirmed. Original documents, prealert, consolidation and purchase amounts are preserved; forwarding charges remain pending reconciliation without a numeric total."
     },
@@ -2223,7 +2228,7 @@
       "sourceDate": "2026-11-07",
       "lastChecked": "2026-11-07",
       "invoiceVerified": false,
-      "notes": "Confirmed controller replacement. The exact controller fulfillment group confirms Amazon carrier delivery at the verified Miami address on November 10. Speedy receipt in Miami was verified on November 11; the actual Speedy receipt date is not shown. The authentic purchase receipt and merchant charge marked Completed are verified, while bank settlement and a final tax invoice remain unconfirmed. Costa Rica arrival and recipient delivery remain unconfirmed. Taxes, tariffs, shipping and others remain grouped at vendor level.",
+      "notes": "Confirmed controller replacement. The exact controller fulfillment group confirms Amazon carrier delivery at the verified Miami address on November 10. Speedy receipt in Miami was verified on November 11; the actual Speedy receipt date is not shown. The authentic purchase receipt and merchant charge marked Completed are verified, while bank settlement and a final tax invoice remain unconfirmed. Speedy now confirms the exact shipment in Costa Rica; its actual arrival date and recipient delivery remain unconfirmed. Taxes, tariffs, shipping and others remain grouped at vendor level.",
       "merchantChargeStatus": "completed",
       "merchantChargeCompletedDate": "2026-11-08",
       "purchaseReceiptVerified": true,
@@ -2708,19 +2713,19 @@
       "expectedDeliveryDate": "2026-11-10",
       "deliveredAt": null,
       "lastChecked": "2026-11-10",
-      "source": "Authenticated exact Amazon controller fulfillment group and Speedy exact original tracking receipt",
-      "notes": "Amazon confirmed carrier delivery at the verified Miami address on November 10. Speedy now confirms received in Miami for this exact project shipment. The receipt date itself is not shown; November 11 is the verification date. Arrival in Costa Rica and recipient delivery remain unconfirmed. The purchase, authentic receipt, original prealert and current active consolidation are preserved.",
-      "speedyStatus": "received",
-      "speedyLocation": "miami",
-      "speedyCheckedAt": "2026-11-11",
+      "source": "Authenticated Speedy exact current tracking entry for the verified controller fulfillment group",
+      "notes": "Amazon carrier delivery in Miami remains confirmed on November 10. Speedy now confirms this exact controller shipment in Costa Rica. The actual Costa Rica arrival date and recipient delivery remain unconfirmed. The purchase, authentic receipt, original prealert and consolidation assignment are preserved.",
+      "speedyStatus": "in_transit",
+      "speedyLocation": "costa_rica",
+      "speedyCheckedAt": "2026-11-14",
       "trackingAssigned": true,
       "prealertStatus": "confirmed",
       "consolidationStatus": "confirmed",
       "consolidationConfirmedAt": "2026-11-09T13:10:43.664Z",
       "purchaseReceiptVerified": true,
       "carrierDeliveredDate": "2026-11-10",
-      "speedyConfirmedAt": "2026-11-11T15:10:36.576Z",
-      "speedyReviewedAt": "2026-11-14T05:03:52.409Z"
+      "speedyConfirmedAt": "2026-11-14T18:35:45.918Z",
+      "speedyReviewedAt": "2026-11-14T18:35:45.918Z"
     },
     {
       "id": "BAMBU-REPLACEMENT-01",
@@ -2766,7 +2771,7 @@
     "recipientDeliveryDate": null,
     "forecastSupersededByReceipt": true
   },
-  "reviewedAt": "2026-11-14T15:40:10.299Z",
+  "reviewedAt": "2026-11-14T18:35:45.918Z",
   "reviewTimeZone": "America/Costa_Rica",
   "lastAdministrativeUpdateAt": "2026-11-14T14:44:27.568Z"
 }
