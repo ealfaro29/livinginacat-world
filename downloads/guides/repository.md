@@ -2,7 +2,7 @@
 
 An open build journal about creating an AI that can perceive and act in the real world. The first project is a robot that physically uses an iPhone. Plans, decisions, purchases, shipments and hardware files are documented openly.
 
-**Website:** https://livinginacat.world · **Current stage:** first test batch complete; owner-reported M3 and M5 checks passed in PLA Silk. M4, coupler fit, PETG and complete assembly acceptance remain unvalidated. Purchases in progress, one store at a time. See the [dated fit-check report](docs/FIT-CHECKS.md) and current shipment record.
+**Website:** https://livinginacat.world · **Current stage:** first test batch and second bed/feet batch complete; next motor-mount/belt-clamp plate prepared. The owner selected PLA Silk for final parts and reports M3/M5 checks passed. M4, coupler fit, complete assembly and functional heat/load performance remain unvalidated. Purchases in progress, one store at a time. See the [dated fit-check report](docs/FIT-CHECKS.md) and current shipment record.
 
 ## Contents
 
