@@ -29,6 +29,24 @@ export const date = (value) =>
         timeZone: "UTC",
       }).format(new Date(value + "T12:00:00Z"))
     : "Unconfirmed";
+export const dateTime = (value, timeZone = "America/Costa_Rica") =>
+  value
+    ? new Intl.DateTimeFormat("en-US", {
+        dateStyle: "long",
+        timeStyle: "short",
+        timeZone,
+      }).format(new Date(value)) +
+      ` (${timeZone === "America/Costa_Rica" ? "Costa Rica" : timeZone})`
+    : "Unconfirmed";
+export function shipmentCarrierDate(shipment) {
+  if (shipment.status === "carrier_delivered")
+    return { label: "Carrier delivery", value: shipment.carrierDeliveredDate ?? null, confirmed: true };
+  if (shipment.status === "returned")
+    return { label: "Carrier return", value: shipment.carrierReturnedDate ?? null, confirmed: true };
+  if (shipment.expectedDeliveryDate)
+    return { label: "Estimated carrier arrival", value: shipment.expectedDeliveryDate, confirmed: false };
+  return { label: "Planned dispatch", value: shipment.expectedShipDate ?? null, confirmed: false };
+}
 export const labels = {
   pending: "Not ordered",
   deferred: "Deferred",

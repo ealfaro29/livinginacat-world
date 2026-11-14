@@ -63,6 +63,13 @@ export const guides = [
       "The DLC32, MOSFET driver and cutoff-switch holder, with installation and insulation notes.",
   },
   {
+    slug: "fit-checks",
+    source: "docs/FIT-CHECKS.md",
+    group: "build",
+    title: "Initial fit checks",
+    description: "Owner-reported M3 and M5 checks in PLA Silk, with remaining tests and limits.",
+  },
+  {
     slug: "release-scope",
     source: "hardware/ft412/PUBLIC-RELEASE.md",
     group: "build",

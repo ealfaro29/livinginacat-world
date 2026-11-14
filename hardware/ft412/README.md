@@ -1,6 +1,6 @@
 # DIY iPhone robot · FramingTech 355/250 + Adafruit 412
 
-FDM prototype derived from PhysiClaw hardware v0.51, commit `8f610d48642aef7d974d3ce09d28e14a4a99bbae`. This variant uses cut profiles without machining, printed motor mounts and a modified touch head. **CAD and meshes have been checked digitally; nothing has been printed, assembled or physically tested.** Files are a prototype starting point, not certification of strength, fit or touch performance.
+FDM prototype derived from PhysiClaw hardware v0.51, commit `8f610d48642aef7d974d3ce09d28e14a4a99bbae`. This variant uses cut profiles without machining, printed motor mounts and a modified touch head. **CAD and meshes have been checked digitally. The first test batch is complete; the owner reports M3 and M5 checks passed in PLA Silk. M4, coupler fit, PETG and full assembly acceptance remain unvalidated.** Individual feature results were not itemized. Files are a prototype starting point, not certification of strength or touch performance. The v0.1 archive remains its original dated CAD snapshot; see the [fit-check report](/documentation/fit-checks/) for current observations.
 
 Read `PUBLIC-RELEASE.md` first. Print only final files in `stl/` with quantities from `qa/print-manifest.json`. `qa/base-generation.json` describes an intermediate PCB holder superseded by the electronics holder. The public release excludes commercial/reference folders and regeneration scripts. Do not mix this variant with the earlier MISUMI/ELECALL design.
 
@@ -113,7 +113,7 @@ The 250 mm Y rail fits a 251 mm opening with nominal 0.5 mm end clearance. Initi
 
 Digital checks cover 18 head poses (three X, three Y, two stroke states) against profiles, gusset envelopes, motor mounts and XY joints; six 412 height/stroke combinations; and ten idler axles. This is not a continuous sweep of belts, wiring, tools or all electronics. Manually check the full travel unpowered before installing a phone.
 
-Acceptance sequence: coupons and small parts; squared frame; rail alignment; free idlers; motors/belts at low tension; free head return; wiring and cutoff; slow motion without phone; sacrificial-surface contact; thermal test; camera calibration; then brief phone taps. Confirm timeout and failure-release behavior before AI control. No physical acceptance test is completed in this release.
+Acceptance sequence: coupons and small parts; squared frame; rail alignment; free idlers; motors/belts at low tension; free head return; wiring and cutoff; slow motion without phone; sacrificial-surface contact; thermal test; camera calibration; then brief phone taps. Confirm timeout and failure-release behavior before AI control. The reported PLA Silk checks do not complete full assembly acceptance or validate the intended final material.
 
 ## Sources and reproduction scope
 
