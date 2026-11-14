@@ -203,7 +203,7 @@ test("Bambu order and grouped costs reconcile without double counting", () => {
   assert.equal(totals(ledger).confirmedOrderTotal, confirmedOrders + 419 + 53700 - ledger.orders.find((x) => x.id === "digikey").invoiceTotalCents - ledger.orders.find((x) => x.id === "vxb").invoiceTotalCents);
   assert.equal(order.actualPaidCents, 88186);
 });
-test("Mouser Speedy receipt preserves invoice, cancellation and unconfirmed recipient delivery", () => {
+test("Mouser Costa Rica progress preserves invoice, cancellation and unconfirmed recipient delivery", () => {
   const order = ledger.orders.find((x) => x.id === "mouser");
   const replaced = ledger.orders.find((x) => x.id === order.replacesOrderId);
   const items = ledger.items.filter((x) => x.orderId === order.id);
@@ -233,9 +233,11 @@ test("Mouser Speedy receipt preserves invoice, cancellation and unconfirmed reci
   assert.equal(shipment.carrier, "FedEx");
   assert.equal(shipment.trackingAssigned, true);
   assert.equal(shipment.invoiceVerified, true);
-  assert.equal(shipment.speedyLocation, "miami");
-  assert.equal(shipment.speedyStatus, "received");
-  assert.match(shipment.speedyConfirmedAt, /^2026-11-10T/);
+  assert.equal(shipment.speedyLocation, "costa_rica");
+  assert.equal(shipment.speedyStatus, "in_transit");
+  assert.match(shipment.speedyConfirmedAt, /^2026-11-14T/);
+  assert.equal(shipment.prealertStatus, "confirmed");
+  assert.equal(shipment.consolidationStatus, "confirmed");
   assert.equal(shipment.deliveredAt, null);
 });
 test("planned local wire purchase remains unquoted, unbought and outside the import queue", () => {
