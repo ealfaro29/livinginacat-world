@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-15",
+      "title": "Electronics support printing in owner-selected PLA",
+      "detail": "The owner reports the electronics support is printing and states a preference for PLA. The matching device job uses A2 yellow PLA; the preserved active session uses Generic PLA High Speed, while the earlier PETG preparation remains unchanged. The job was observed at 8%, layer 1/258, with a device estimate of 3 h 47 min 26 s and 60.00 g. Native saved history separately reports Success for the solenoid cradle and two bars, without measured fit or quality confirmation. All 22 installed pieces have prepared files: 13 have recorded print completion, eight from the earlier PETG batch await physical inventory, and one is printing. Frame and rail dry assembly can begin while the support finishes. No print was sent, cancelled, paused or altered by this review."
+    },
+    {
+      "date": "2026-11-15",
       "title": "PETG electronics support prepared for first fit",
       "detail": "The next plate contains one original electronics support, prepared and sliced in Generic PETG for the main 0.4 mm nozzle, with six walls, 60% gyroid, an 8 mm brim and removable supports. Estimates are 4 h 1 min 53 s and 59.57 g. This plate has not been sent to print. Switch-terminal clearance will be assessed with the first printed support; it is not a confirmed fit. The earlier eight-piece PETG job was observed printing at 90%, 315/442 layers, without a completion result. Previous print records and the original CAD archive are preserved."
     },
@@ -2884,5 +2889,5 @@
   "reviewedAt": "2026-11-15T18:36:22.373Z",
   "reviewTimeZone": "America/Costa_Rica",
   "lastAdministrativeUpdateAt": "2026-11-15T00:43:19.735Z",
-  "lastBuildUpdateAt": "2026-11-15T21:09:02.342485+00:00"
+  "lastBuildUpdateAt": "2026-11-15T22:35:23.397190+00:00"
 }
