@@ -26,6 +26,8 @@ Planned FramingTech slot-5 profile cuts: two 20×40 at 355 mm, two 20×40 at 190
 
 The public archive includes 16 final STL and 16 STEP files, three fit coupons and CAD review records. The manifest specifies 22 installed printed parts. Initial M3 and M5 checks were reported passed in PLA Silk with a 0.4 mm nozzle; M4 screw/nut fit was also reported passed on November 15; coupler fit remains pending. Hole, pocket and seat results were not individually itemized. Follow the original quantities and verify the remaining interfaces, motor heating and loaded behavior in the current PETG build before accepting the assembly; the prior Silk fit results do not validate PETG. The archive's PETG preparation remains a historical design reference, with its original checksum and geometry unchanged. Commercial reference CAD, full reference assemblies and self-contained regeneration scripts are excluded. Read the [release scope](../hardware/ft412/PUBLIC-RELEASE.md), [hardware guide](../hardware/ft412/README.md), [motor mounts](../hardware/ft412/MOTOR-MOUNTS.md) and [electronics mount](../hardware/ft412/ELECTRONICS.md) together.
 
+The next electronics-support plate is prepared and sliced in PETG: one original part, main 0.4 mm, six walls, 60% gyroid and removable supports. It estimates 4 h 1 min 53 s and 59.57 g and has not been sent to print. Switch-terminal clearance will be checked on the first printed support before final assembly. The earlier eight-piece PETG job was observed at 90%, 315/442 layers, with completion unconfirmed.
+
 ## Build and verification order
 
 1. Receive and measure components; record any model or quantity differences.

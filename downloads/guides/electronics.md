@@ -2,6 +2,8 @@
 
 CAD prototype, not printed or physically tested. Replace the previous PCB holder with `fdm_pcb_holder_electronics_x1` and add one `fdm_5648_retainer_x1`. Do not print both PCB holders.
 
+**Preparation, November 15, 2026:** one original electronics support is now saved and sliced in Generic PETG, main 0.4 mm, 0.20 mm nominal layers, six walls, six top/bottom layers, 60% gyroid, 8 mm outer brim and removable tree supports from the bed. First-layer, base/posts, guard layers and complete preview were reviewed. Estimates: 4 h 1 min 53 s, 59.57 g and 19.50 m. No print has been started for this plate. The retainer is already included in the preceding eight-piece batch and is not duplicated here. The switch-terminal clearance remains a first-printed-support check before final assembly. The CAD geometry and v0.1 archive remain unchanged.
+
 The wing faces outside the frame. It carries Adafruit 5648 and NKK S301 with an open-top side/rear low-voltage terminal guard. This is not a closed enclosure or a mains enclosure. Reuse the four DLC32 M3×10 and two frame FHCS M5×12 already counted. Retainer and strain relief use four 4-inch Fermerry ties, with no additional screws.
 
 Procurement update, November 5, 2026: the confirmed Mouser replacement order uses **NKK S301T**, with screw terminals, instead of the S301 solder-lug variant used for the CAD checks below. The electrical function and M12 mounting family are retained, but the purchased terminal envelope and guard clearance have not been validated. Compare the received switch and adjust the guard if needed; insulate both terminals. The existing CAD archive and intersection checks still describe S301.

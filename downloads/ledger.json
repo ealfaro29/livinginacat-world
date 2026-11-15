@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-15",
+      "title": "PETG electronics support prepared for first fit",
+      "detail": "The next plate contains one original electronics support, prepared and sliced in Generic PETG for the main 0.4 mm nozzle, with six walls, 60% gyroid, an 8 mm brim and removable supports. Estimates are 4 h 1 min 53 s and 59.57 g. This plate has not been sent to print. Switch-terminal clearance will be assessed with the first printed support; it is not a confirmed fit. The earlier eight-piece PETG job was observed printing at 90%, 315/442 layers, without a completion result. Previous print records and the original CAD archive are preserved."
+    },
+    {
+      "date": "2026-11-15",
       "title": "Owner confirms receipt of existing project shipments",
       "detail": "The owner confirms physical receipt of existing project shipments and separately confirms the controller. Only exact previously verified shipment associations are advanced. Actual delivery dates remain unspecified; quantities, purchases, carrier facts and originals are preserved. Receipt does not establish payment or resolve consolidated billing. The forwarding aggregate remains pending reconciliation without a numeric total."
     },
@@ -2879,5 +2884,5 @@
   "reviewedAt": "2026-11-15T18:36:22.373Z",
   "reviewTimeZone": "America/Costa_Rica",
   "lastAdministrativeUpdateAt": "2026-11-15T00:43:19.735Z",
-  "lastBuildUpdateAt": "2026-11-15T18:09:16.409444+00:00"
+  "lastBuildUpdateAt": "2026-11-15T21:09:02.342485+00:00"
 }
