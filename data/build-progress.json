@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "reportedAt": "2026-11-14",
-  "source": "Direct owner reports of initial fit checks, second-batch completion and final material choice; next-plate preparation verified in Bambu Studio",
-  "stage": "Second batch complete; next print plate prepared",
+  "source": "Owner completion reports, observed third-batch device completion and fourth-batch homing in Bambu Studio",
+  "stage": "Third batch complete; fourth batch started",
   "firstTestBatchCompleted": true,
   "secondBatchCompletionConfirmed": true,
   "material": "PLA Silk",
@@ -39,14 +39,35 @@
     "exactCompletionDate": null,
     "measuredFitConfirmed": false
   },
-  "nextPrintBatch": {
-    "prepared": true,
-    "sliced": true,
-    "printStarted": false,
+  "nextPrintBatch": null,
+  "thirdBatchCompletionConfirmed": true,
+  "thirdBatch": {
     "parts": {
       "motorMountA": 1,
       "motorMountB": 1,
       "beltClamp": 1
+    },
+    "completionBasis": "owner_report_and_observed_device_finished",
+    "reportedAt": "2026-11-14",
+    "exactCompletionDate": null,
+    "goodPrintOutcomeExplicitlyReported": null,
+    "measuredFitConfirmed": false,
+    "finishedLayers": 299,
+    "earlierPreparedLayers": 90,
+    "earlierPreparationIsNotTheActualFinishedJob": true
+  },
+  "currentPrintBatch": {
+    "prepared": true,
+    "sliced": true,
+    "printStarted": true,
+    "printCompleted": false,
+    "observedPhase": "Homing toolhead",
+    "observedProgressPercent": 0,
+    "observedLayer": 0,
+    "layersTotal": 145,
+    "parts": {
+      "solenoidCradle": 1,
+      "clampBars": 2
     },
     "material": "PLA Silk",
     "nozzle": "main",
@@ -57,8 +78,8 @@
     "bottomShellLayers": 6,
     "infillPercent": 80,
     "infillPattern": "gyroid",
-    "estimatedDurationSeconds": 10238,
-    "estimatedMassG": 47.48,
+    "estimatedDurationSeconds": 4178,
+    "estimatedMassG": 16.35,
     "estimatesAreNotActualPrintResults": true
   }
 }

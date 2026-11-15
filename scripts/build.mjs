@@ -24,7 +24,7 @@ const site = await readJSON("data/site.json"),
   hardware = await readJSON("data/hardware-release.json"),
   buildProgress = await readJSON("data/build-progress.json");
 const reviewedLabel = ledger.reviewedAt ? dateTime(ledger.reviewedAt, ledger.reviewTimeZone) : date(ledger.updatedAt);
-const fitSummary = `The owner reports ${buildProgress.fitChecks.passedSizes.join(" and ")} checks passed in ${buildProgress.material} with a ${buildProgress.nozzleDiameterMM} mm nozzle. ${buildProgress.secondBatchCompletionConfirmed ? "The bed and four feet are also complete according to the owner. " : ""}${buildProgress.finalMaterialSelected ? `${buildProgress.finalMaterialSelected} is the owner's selected final material. ` : ""}M4 and coupler checks, full assembly acceptance and functional heat/load performance remain unconfirmed.`;
+const fitSummary = `The owner reports ${buildProgress.fitChecks.passedSizes.join(" and ")} checks passed in ${buildProgress.material} with a ${buildProgress.nozzleDiameterMM} mm nozzle. ${buildProgress.secondBatchCompletionConfirmed ? "The bed and four feet are also complete according to the owner. " : ""}${buildProgress.thirdBatchCompletionConfirmed ? "The motor mounts and belt clamp are printed; the solenoid cradle and two clamp bars were observed starting, with completion unconfirmed. " : ""}${buildProgress.finalMaterialSelected ? `${buildProgress.finalMaterialSelected} is the owner's selected final material. ` : ""}M4 and coupler checks, full assembly acceptance and functional heat/load performance remain unconfirmed.`;
 const projectShipments = activeShipments(ledger);
 const groupedExpenses = ledger.otherExpenses.filter(
   (x) => x.name === "Taxes, tariffs, shipping and others" && !["cancelled", "canceled"].includes(x.status),
