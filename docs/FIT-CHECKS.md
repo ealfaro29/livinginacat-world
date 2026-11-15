@@ -17,6 +17,8 @@ On November 14 (Costa Rica), the owner confirms the motor-mount A, motor-mount B
 
 The fourth plate contains one solenoid cradle and two clamp bars, in PLA Silk with the main 0.4 mm nozzle, 0.20 mm layers, six walls, six top/bottom layers and 80% gyroid. It was observed starting with Homing toolhead at 0/145 layers. Slicer estimates are 1 h 10 min and 16.35 g; completion and actual consumption remain unconfirmed. Its complete plate overview was reviewed; an individual first-layer/cavity-roof inspection was not completed before the observed send.
 
+On November 15 (Costa Rica), a fifth plate is prepared and sliced: one original tube holder and one Adafruit 5648 retainer. It uses PLA Silk, the main 0.4 mm nozzle, 0.20 mm layers, six walls, six top/bottom layers, 80% gyroid and an 8 mm outer brim. Removable supports are enabled and present in the slice. The final estimates are 52 min 53 s and 6.32 g, not measured duration or consumption. The files have not been sent to the printer. The fourth batch still has no confirmed completion or measured-fit result.
+
 M4 and coupler fit, complete assembly acceptance, motion, touch accuracy and thermal/load performance remain unvalidated. The earlier PETG settings remain historical reference material; PETG itself has not been tested here. The choice of PLA Silk does not change the CAD geometry or complete functional acceptance.
 
 The published CAD archive remains the original v0.1 snapshot; its files, quantities and checksum have not changed. Current observations are also available as [build-progress JSON](/downloads/build-progress.json). See the [project guide](/documentation/project-guide/) for the verification sequence and the [shipment record](/shipments/) for current verified logistics.
