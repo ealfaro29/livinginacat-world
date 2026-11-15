@@ -92,7 +92,10 @@ test("Amazon controller Costa Rica progress stays separate from carrier delivery
   assert.equal(shipment.consolidationStatus, "confirmed");
   assert.equal(shipment.speedyStatus, "in_transit");
   assert.equal(shipment.speedyLocation, "costa_rica");
-  assert.equal(shipment.speedyCheckedAt, "2026-11-14");
+  assert.equal(shipment.speedyCheckedAt, "2026-11-15");
+  assert.equal(shipment.speedyObservedStatus, "Enviado");
+  assert.equal(shipment.speedyDispatchObservedAt, shipment.speedyReviewedAt);
+  assert.ok(shipment.speedyDispatchObservedAt > shipment.speedyConfirmedAt);
   assert.equal(shipment.deliveredAt, null);
 });
 test("owner-confirmed shipped payments are included without assuming delivery", () => {
