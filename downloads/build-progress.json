@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "reportedAt": "2026-11-15",
-  "source": "Observed fifth PETG job in progress; next original electronics support prepared and sliced in Bambu Studio",
-  "stage": "Eight-piece PETG job in progress; electronics support prepared for first physical fit",
+  "source": "Owner confirms current electronics support print and PLA preference; matching active device and native history observed",
+  "stage": "Electronics support printing in PLA; dry mechanical assembly can begin",
   "firstTestBatchCompleted": true,
   "secondBatchCompletionConfirmed": true,
   "material": "PLA Silk",
@@ -44,8 +44,8 @@
   "fullAssemblyAccepted": false,
   "touchMotionAndThermalPerformanceValidated": false,
   "cadReleaseChanged": false,
-  "finalMaterialSelected": "PETG",
-  "finalMaterialSelectionBasis": "owner_instruction",
+  "finalMaterialSelected": "PLA",
+  "finalMaterialSelectionBasis": "owner_preference_after_observed_PLA_was_explained",
   "silkFunctionalPerformanceValidated": false,
   "secondBatch": {
     "parts": {
@@ -58,37 +58,7 @@
     "exactCompletionDate": null,
     "measuredFitConfirmed": false
   },
-  "nextPrintBatch": {
-    "batch": "FT412_06",
-    "prepared": true,
-    "sliced": true,
-    "printStarted": false,
-    "printCompleted": false,
-    "parts": {
-      "electronicsHolder": 1
-    },
-    "material": "PETG",
-    "slicerMaterialProfile": "Generic PETG",
-    "nozzle": "main",
-    "nozzleDiameterMM": 0.4,
-    "layerHeightMM": 0.2,
-    "wallLoops": 6,
-    "topShellLayers": 6,
-    "bottomShellLayers": 6,
-    "infillPercent": 60,
-    "infillPattern": "gyroid",
-    "brimWidthMM": 8,
-    "supportsEnabled": true,
-    "supportType": "tree(auto)",
-    "supportOnBuildPlateOnly": true,
-    "layersTotal": 258,
-    "estimatedDurationSeconds": 14513,
-    "estimatedMassG": 59.57,
-    "estimatesAreNotActualPrintResults": true,
-    "preparedForFirstPhysicalFit": true,
-    "switchTerminalClearanceValidated": false,
-    "fullAssemblyAccepted": false
-  },
+  "nextPrintBatch": null,
   "thirdBatchCompletionConfirmed": true,
   "thirdBatch": {
     "parts": {
@@ -106,40 +76,38 @@
     "earlierPreparationIsNotTheActualFinishedJob": true
   },
   "currentPrintBatch": {
-    "batch": "FT412_05",
-    "revision": 3,
+    "batch": "FT412_06",
+    "revision": 2,
     "prepared": true,
     "sliced": true,
     "printStarted": true,
     "printCompleted": false,
-    "observedPhase": "Printing",
-    "observedProgressPercent": 90,
-    "observedLayer": 315,
-    "layersTotal": 442,
     "parts": {
-      "tubeHolder": 1,
-      "driver5648Retainer": 1,
-      "frontIdlerMounts": 2,
-      "motorSideIdlerMounts": 2,
-      "xyJointLeft": 1,
-      "xyJointRight": 1
+      "electronicsHolder": 1
     },
-    "material": "PETG",
-    "slicerMaterialProfile": "Generic PETG",
+    "material": "PLA",
+    "slicerMaterialProfile": "Generic PLA High Speed",
+    "observedAMSSlot": "A2",
     "nozzle": "main",
     "nozzleDiameterMM": 0.4,
     "layerHeightMM": 0.2,
     "wallLoops": 6,
     "topShellLayers": 6,
     "bottomShellLayers": 6,
-    "infillPercent": 80,
+    "infillPercent": 60,
     "infillPattern": "gyroid",
     "brimWidthMM": 8,
     "supportsEnabled": true,
-    "estimatedDurationSeconds": 15968,
-    "estimatedMassG": 63.71,
+    "layersTotal": 258,
+    "observedPhase": "Printing",
+    "observedProgressPercent": 8,
+    "observedLayer": 1,
+    "estimatedDurationSeconds": 13646,
+    "estimatedMassG": 60,
     "estimatesAreNotActualPrintResults": true,
-    "lastProgressObservationRecordedAt": "2026-11-15T20:57:32.357793+00:00"
+    "preparedForFirstPhysicalFit": true,
+    "switchTerminalClearanceValidated": false,
+    "fullAssemblyAccepted": false
   },
   "historicalCurrentPrintBatches": [
     {
@@ -147,7 +115,7 @@
       "prepared": true,
       "sliced": true,
       "printStarted": true,
-      "printCompleted": false,
+      "printCompleted": true,
       "observedPhase": "Homing toolhead",
       "observedProgressPercent": 0,
       "observedLayer": 0,
@@ -167,7 +135,46 @@
       "infillPattern": "gyroid",
       "estimatedDurationSeconds": 4178,
       "estimatedMassG": 16.35,
-      "estimatesAreNotActualPrintResults": true
+      "estimatesAreNotActualPrintResults": true,
+      "completionBasis": "observed_saved_native_history_success",
+      "exactCompletionDate": null,
+      "measuredFitConfirmed": false
+    },
+    {
+      "batch": "FT412_05",
+      "revision": 3,
+      "prepared": true,
+      "sliced": true,
+      "printStarted": true,
+      "printCompleted": false,
+      "observedPhase": "Printing",
+      "observedProgressPercent": 90,
+      "observedLayer": 315,
+      "layersTotal": 442,
+      "parts": {
+        "tubeHolder": 1,
+        "driver5648Retainer": 1,
+        "frontIdlerMounts": 2,
+        "motorSideIdlerMounts": 2,
+        "xyJointLeft": 1,
+        "xyJointRight": 1
+      },
+      "material": "PETG",
+      "slicerMaterialProfile": "Generic PETG",
+      "nozzle": "main",
+      "nozzleDiameterMM": 0.4,
+      "layerHeightMM": 0.2,
+      "wallLoops": 6,
+      "topShellLayers": 6,
+      "bottomShellLayers": 6,
+      "infillPercent": 80,
+      "infillPattern": "gyroid",
+      "brimWidthMM": 8,
+      "supportsEnabled": true,
+      "estimatedDurationSeconds": 15968,
+      "estimatedMassG": 63.71,
+      "estimatesAreNotActualPrintResults": true,
+      "lastProgressObservationRecordedAt": "2026-11-15T20:57:32.357793+00:00"
     }
   ],
   "previousPrintPreparations": [
@@ -200,5 +207,28 @@
       "estimatedMassG": 64.17,
       "estimatesAreNotActualPrintResults": true
     }
-  ]
+  ],
+  "finalMaterialSelectionScope": "Current electronics support and current owner preference",
+  "fourthBatchCompletionConfirmed": true,
+  "fourthBatch": {
+    "batch": "FT412_04",
+    "parts": {
+      "solenoidCradle": 1,
+      "clampBars": 2
+    },
+    "printCompleted": true,
+    "completionBasis": "observed_saved_native_history_success",
+    "exactCompletionDate": null,
+    "measuredFitConfirmed": false,
+    "goodPrintOutcomeExplicitlyReported": null
+  },
+  "plaFunctionalPerformanceValidated": false,
+  "printInventorySummary": {
+    "installedPieces": 22,
+    "printCompletionRecordedPieces": 13,
+    "printingPieces": 1,
+    "awaitingPhysicalInventoryPieces": 8,
+    "additionalUnpreparedPieces": 0
+  },
+  "nextAssemblyStep": "Present and square the frame, mount feet and align rails; inventory existing prints before transmission assembly"
 }
