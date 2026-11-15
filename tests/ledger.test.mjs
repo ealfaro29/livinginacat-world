@@ -63,7 +63,7 @@ test("Amazon invoices reconcile without counting grouped extras twice", () => {
   );
   assert.equal(ledger.amazonOrders.flatMap((x) => x.itemIds).length, 37);
 });
-test("Amazon controller Costa Rica progress stays separate from carrier delivery and bank settlement", () => {
+test("Owner controller receipt stays separate from carrier delivery, event dates and bank settlement", () => {
   const order = ledger.amazonOrders.find((o) => o.id === "AMZ-07");
   const item = ledger.items.find((i) => i.id === "vxb-044");
   const shipment = ledger.shipments.find((s) => s.orderRef === order.id);
@@ -90,8 +90,10 @@ test("Amazon controller Costa Rica progress stays separate from carrier delivery
   assert.equal(shipment.expectedDeliveryDate, "2026-11-10");
   assert.equal(shipment.prealertStatus, "confirmed");
   assert.equal(shipment.consolidationStatus, "confirmed");
-  assert.equal(shipment.speedyStatus, "in_transit");
-  assert.equal(shipment.speedyLocation, "costa_rica");
+  assert.equal(shipment.speedyStatus, "delivered");
+  assert.equal(shipment.speedyLocation, null);
+  assert.equal(shipment.recipientDeliverySource, "owner_confirmation");
+  assert.equal(shipment.recipientDeliveryConfirmedAt, "2026-11-15");
   assert.equal(shipment.speedyCheckedAt, "2026-11-15");
   assert.equal(shipment.speedyObservedStatus, "Enviado");
   assert.equal(shipment.speedyDispatchObservedAt, shipment.speedyReviewedAt);
@@ -155,8 +157,9 @@ test("Walmart receipt advances only the independently verified fulfillment group
     assert.equal(shipment.deliveredAt, null);
   }
   const wrap = ledger.shipments.find((x) => x.id === "WMT-PKG-03");
-  assert.equal(wrap.speedyStatus, "in_transit");
-  assert.equal(wrap.speedyLocation, "costa_rica");
+  assert.equal(wrap.speedyStatus, "delivered");
+  assert.equal(wrap.speedyLocation, null);
+  assert.equal(wrap.recipientDeliverySource, "owner_confirmation");
   assert.match(wrap.speedyConfirmedAt, /^2026-11-14T/);
   const foam = ledger.shipments.find((x) => x.id === "WMT-PKG-02");
   assert.equal(foam.speedyStatus, "delivered");
@@ -206,7 +209,7 @@ test("Bambu order and grouped costs reconcile without double counting", () => {
   assert.equal(totals(ledger).confirmedOrderTotal, confirmedOrders + 419 + 53700 - ledger.orders.find((x) => x.id === "digikey").invoiceTotalCents - ledger.orders.find((x) => x.id === "vxb").invoiceTotalCents);
   assert.equal(order.actualPaidCents, 88186);
 });
-test("Mouser Costa Rica progress preserves invoice, cancellation and unconfirmed recipient delivery", () => {
+test("Owner Mouser receipt preserves invoice, cancellation and unknown delivery date", () => {
   const order = ledger.orders.find((x) => x.id === "mouser");
   const replaced = ledger.orders.find((x) => x.id === order.replacesOrderId);
   const items = ledger.items.filter((x) => x.orderId === order.id);
@@ -236,8 +239,10 @@ test("Mouser Costa Rica progress preserves invoice, cancellation and unconfirmed
   assert.equal(shipment.carrier, "FedEx");
   assert.equal(shipment.trackingAssigned, true);
   assert.equal(shipment.invoiceVerified, true);
-  assert.equal(shipment.speedyLocation, "costa_rica");
-  assert.equal(shipment.speedyStatus, "in_transit");
+  assert.equal(shipment.speedyLocation, null);
+  assert.equal(shipment.speedyStatus, "delivered");
+  assert.equal(shipment.recipientDeliverySource, "owner_confirmation");
+  assert.equal(shipment.recipientDeliveryConfirmedAt, "2026-11-15");
   assert.match(shipment.speedyConfirmedAt, /^2026-11-14T/);
   assert.equal(shipment.prealertStatus, "confirmed");
   assert.equal(shipment.consolidationStatus, "confirmed");
