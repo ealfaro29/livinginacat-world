@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "reportedAt": "2026-11-14",
-  "source": "Owner completion reports, observed third-batch device completion and fourth-batch homing in Bambu Studio",
-  "stage": "Third batch complete; fourth batch started",
+  "reportedAt": "2026-11-15",
+  "source": "Owner reports and earlier device observations; fifth print plate preparation verified in Bambu Studio",
+  "stage": "Fifth batch prepared; fourth-batch completion unconfirmed",
   "firstTestBatchCompleted": true,
   "secondBatchCompletionConfirmed": true,
   "material": "PLA Silk",
@@ -39,7 +39,30 @@
     "exactCompletionDate": null,
     "measuredFitConfirmed": false
   },
-  "nextPrintBatch": null,
+  "nextPrintBatch": {
+    "batch": "FT412_05",
+    "prepared": true,
+    "sliced": true,
+    "printStarted": false,
+    "parts": {
+      "tubeHolder": 1,
+      "driver5648Retainer": 1
+    },
+    "material": "PLA Silk",
+    "nozzle": "main",
+    "nozzleDiameterMM": 0.4,
+    "layerHeightMM": 0.2,
+    "wallLoops": 6,
+    "topShellLayers": 6,
+    "bottomShellLayers": 6,
+    "infillPercent": 80,
+    "infillPattern": "gyroid",
+    "brimWidthMM": 8,
+    "supportsEnabled": true,
+    "estimatedDurationSeconds": 3173,
+    "estimatedMassG": 6.32,
+    "estimatesAreNotActualPrintResults": true
+  },
   "thirdBatchCompletionConfirmed": true,
   "thirdBatch": {
     "parts": {

@@ -1546,6 +1546,11 @@
   ],
   "changes": [
     {
+      "date": "2026-11-15",
+      "title": "Tube-holder and driver-retainer print plate prepared",
+      "detail": "The next plate contains one original tube holder and one Adafruit 5648 retainer, prepared and sliced in owner-selected PLA Silk with the main 0.4 mm nozzle. Six walls, 80% gyroid and an 8 mm brim are verified in the final files. It has not been sent to print. Previous batch completion, physical fit and functional acceptance are not inferred; purchase and shipping records remain unchanged."
+    },
+    {
       "date": "2026-11-14",
       "title": "Motor mounts complete; solenoid cradle batch started",
       "detail": "The owner confirms the motor mounts and belt clamp are printed; Bambu Studio also shows that job finished at 299/299 layers. A separate next plate of one solenoid cradle and two clamp bars is prepared in PLA Silk and observed homing at 0/145 layers. Completion and measured fit of the new batch remain unconfirmed. CAD geometry, purchase records and shipment stages are unchanged."
@@ -2816,5 +2821,5 @@
   "reviewedAt": "2026-11-15T00:43:19.735Z",
   "reviewTimeZone": "America/Costa_Rica",
   "lastAdministrativeUpdateAt": "2026-11-15T00:43:19.735Z",
-  "lastBuildUpdateAt": "2026-11-15T04:42:09.407629+00:00"
+  "lastBuildUpdateAt": "2026-11-15T15:10:55.484439+00:00"
 }
