@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-15",
+      "title": "Owner confirms the eight-piece print batch",
+      "detail": "The owner reports eight finished pieces: one tiny part, three pairs and one long part. This count and shape grouping matches the prepared eight-piece plate. Completion and physical count are recorded from the owner report; individual visual identification, quality and measured fit are not inferred. The installed-piece inventory now has 21 recorded print completions and the electronics support still in progress. No additional part files remain unprepared. The current PLA preference and support job, earlier material records, CAD and logistics are preserved."
+    },
+    {
+      "date": "2026-11-15",
       "title": "Electronics support printing in owner-selected PLA",
       "detail": "The owner reports the electronics support is printing and states a preference for PLA. The matching device job uses A2 yellow PLA; the preserved active session uses Generic PLA High Speed, while the earlier PETG preparation remains unchanged. The job was observed at 8%, layer 1/258, with a device estimate of 3 h 47 min 26 s and 60.00 g. Native saved history separately reports Success for the solenoid cradle and two bars, without measured fit or quality confirmation. All 22 installed pieces have prepared files: 13 have recorded print completion, eight from the earlier PETG batch await physical inventory, and one is printing. Frame and rail dry assembly can begin while the support finishes. No print was sent, cancelled, paused or altered by this review."
     },
@@ -2889,5 +2894,5 @@
   "reviewedAt": "2026-11-15T18:36:22.373Z",
   "reviewTimeZone": "America/Costa_Rica",
   "lastAdministrativeUpdateAt": "2026-11-15T00:43:19.735Z",
-  "lastBuildUpdateAt": "2026-11-15T22:35:23.397190+00:00"
+  "lastBuildUpdateAt": "2026-11-15T22:46:41.446092+00:00"
 }

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "reportedAt": "2026-11-15",
-  "source": "Owner confirms current electronics support print and PLA preference; matching active device and native history observed",
-  "stage": "Electronics support printing in PLA; dry mechanical assembly can begin",
+  "source": "Owner confirms eight completed pieces by count and shape groups; current PLA support print state reused from its separate observation",
+  "stage": "21 installed pieces have recorded print completion; electronics support remains in progress",
   "firstTestBatchCompleted": true,
   "secondBatchCompletionConfirmed": true,
   "material": "PLA Silk",
@@ -107,7 +107,8 @@
     "estimatesAreNotActualPrintResults": true,
     "preparedForFirstPhysicalFit": true,
     "switchTerminalClearanceValidated": false,
-    "fullAssemblyAccepted": false
+    "fullAssemblyAccepted": false,
+    "lastProgressObservationRecordedAt": "2026-11-15T22:26:53.503562+00:00"
   },
   "historicalCurrentPrintBatches": [
     {
@@ -146,7 +147,7 @@
       "prepared": true,
       "sliced": true,
       "printStarted": true,
-      "printCompleted": false,
+      "printCompleted": true,
       "observedPhase": "Printing",
       "observedProgressPercent": 90,
       "observedLayer": 315,
@@ -174,7 +175,12 @@
       "estimatedDurationSeconds": 15968,
       "estimatedMassG": 63.71,
       "estimatesAreNotActualPrintResults": true,
-      "lastProgressObservationRecordedAt": "2026-11-15T20:57:32.357793+00:00"
+      "lastProgressObservationRecordedAt": "2026-11-15T20:57:32.357793+00:00",
+      "completionBasis": "owner_report_of_count_and_shape_groups",
+      "reportedAt": "2026-11-15",
+      "physicalCountConfirmed": true,
+      "exactCompletionDate": null,
+      "measuredFitConfirmed": false
     }
   ],
   "previousPrintPreparations": [
@@ -225,10 +231,38 @@
   "plaFunctionalPerformanceValidated": false,
   "printInventorySummary": {
     "installedPieces": 22,
-    "printCompletionRecordedPieces": 13,
+    "printCompletionRecordedPieces": 21,
     "printingPieces": 1,
-    "awaitingPhysicalInventoryPieces": 8,
+    "awaitingPhysicalInventoryPieces": 0,
     "additionalUnpreparedPieces": 0
   },
-  "nextAssemblyStep": "Present and square the frame, mount feet and align rails; inventory existing prints before transmission assembly"
+  "nextAssemblyStep": "Present and square the frame, mount feet and align rails; inventory existing prints before transmission assembly",
+  "fifthBatchCompletionConfirmed": true,
+  "fifthBatch": {
+    "batch": "FT412_05",
+    "parts": {
+      "tubeHolder": 1,
+      "driver5648Retainer": 1,
+      "frontIdlerMounts": 2,
+      "motorSideIdlerMounts": 2,
+      "xyJointLeft": 1,
+      "xyJointRight": 1
+    },
+    "printCompleted": true,
+    "completionBasis": "owner_report_of_count_and_shape_groups",
+    "reportedAt": "2026-11-15",
+    "physicalCountConfirmed": true,
+    "physicalPieces": 8,
+    "ownerReportedShapeGroups": {
+      "tinyPieces": 1,
+      "pairs": 3,
+      "longPieces": 1
+    },
+    "exactCompletionDate": null,
+    "goodPrintOutcomeExplicitlyReported": null,
+    "measuredFitConfirmed": false,
+    "individualPartIdentificationIndependentlyVisuallyVerified": false,
+    "material": "PETG",
+    "materialBasis": "earlier_recorded_job_profile_and_device_observation"
+  }
 }
