@@ -2,7 +2,7 @@
 
 An open build journal about creating an AI that can perceive and act in the real world. The first project is a robot that physically uses an iPhone. Plans, decisions, purchases, shipments and hardware files are documented openly.
 
-**Website:** https://livinginacat.world · **Current stage:** first test batch and second bed/feet batch complete; next motor-mount/belt-clamp plate prepared. The owner selected PLA Silk for final parts and reports M3/M5 checks passed. M4, coupler fit, complete assembly and functional heat/load performance remain unvalidated. Purchases in progress, one store at a time. See the [dated fit-check report](docs/FIT-CHECKS.md) and current shipment record.
+**Website:** https://livinginacat.world · **Current stage, November 15:** 21 of 22 installed printed pieces have recorded completion; the electronics support is printing in PLA at the latest observation. The owner reports M3/M4/M5 checks passed in PLA Silk. Coupler fit, complete assembly and functional heat/load performance remain unvalidated. Start with the dry frame, feet and rail alignment using the [illustrated Spanish assembly guide](docs/ASSEMBLY-ES.md), also available as a [printable PDF](https://livinginacat.world/downloads/guia-ensamblaje-ft412-es.pdf). Current PLA preference does not reclassify the materials of earlier batches. See the [dated fit-check report](docs/FIT-CHECKS.md).
 
 ## Contents
 
@@ -11,6 +11,7 @@ An open build journal about creating an AI that can perceive and act in the real
 - `data/hardware-release.json`: public CAD version and archive hash.
 - `hardware/ft412/`: STL, STEP, coupons and CAD records; read the [release scope](hardware/ft412/PUBLIC-RELEASE.md) first.
 - `docs/PROJECT.md`: architecture, planned assembly and acceptance tests.
+- `docs/ASSEMBLY-ES.md`: Spanish assembly sequence, part identification, measured checks and printable field guide.
 - `public/`: original visuals, styles and CAD download.
 - `scripts/`: static generator, checks and publication.
 - `backend/`: authenticated, synchronized dispatch room; private PDFs and records stay outside Git.

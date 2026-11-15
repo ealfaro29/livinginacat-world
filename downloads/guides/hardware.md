@@ -2,6 +2,8 @@
 
 FDM prototype derived from PhysiClaw hardware v0.51, commit `8f610d48642aef7d974d3ce09d28e14a4a99bbae`. This variant uses cut profiles without machining, printed motor mounts and a modified touch head. **CAD and meshes have been checked digitally. The first test batch is complete; the owner reports M3/M5 checks passed in PLA Silk and, on November 15, that actual M4 screws and nuts fit. Coupler fit, PETG and full assembly acceptance remain unvalidated.** Individual feature results were not itemized. Files are a prototype starting point, not certification of strength or touch performance. The v0.1 archive remains its original dated CAD snapshot; see the [fit-check report](/documentation/fit-checks/) for current observations.
 
+For hands-on assembly, use the [illustrated Spanish assembly guide](/documentation/assembly/).
+
 Read `PUBLIC-RELEASE.md` first. Print only final files in `stl/` with quantities from `qa/print-manifest.json`. `qa/base-generation.json` describes an intermediate PCB holder superseded by the electronics holder. The public release excludes commercial/reference folders and regeneration scripts. Do not mix this variant with the earlier MISUMI/ELECALL design.
 
 **Current build choice, November 15:** the owner now prefers PLA, and the electronics support is printing from A2 yellow PLA under the preserved Generic PLA High Speed profile. The earlier PETG preparation remains unchanged. Native saved history marks the cradle and two bars Success. The owner now confirms the preceding eight-piece batch by count and shape groups. All 22 installed parts have prepared files: 21 have recorded print completion and the electronics support remains printing. No duplicate or additional print has been scheduled. Begin with dry frame squareness, feet and rail alignment. The current material choice does not establish physical fit or thermal/load performance, and the original v0.1 archive and geometry remain unchanged.
@@ -105,7 +107,7 @@ Received rails may have fewer holes than the maximum 13+13+8 envelope. Use all a
 
 ## Printed electronics
 
-Print only `fdm_pcb_holder_electronics_x1`, replacing the simple PCB holder, plus `fdm_5648_retainer_x1`. The wing mounts Adafruit 5648 and the NKK S301 panel/guard. Four ties from the Fermerry kit pass through 6×3 mm slots; no new screws. Insulate both switch tabs individually. The open guard is low-voltage only, not a mains enclosure. See `ELECTRONICS.md`.
+Print only `fdm_pcb_holder_electronics_x1`, replacing the simple PCB holder, plus `fdm_5648_retainer_x1`. The wing mounts Adafruit 5648 and the NKK S301 panel/guard. Four ties from the Fermerry kit pass through 6×3 mm slots; no new screws. Insulate both switch terminals individually. The open guard is low-voltage only, not a mains enclosure. See `ELECTRONICS.md`.
 
 The Mouser order confirmed November 5 substitutes **S301T screw terminals** for the S301 solder lugs used in this CAD release. Verify the received terminal geometry, connections and guard clearance before installation. The solenoid and MOSFET board remain Adafruit 412 and 5648; the alternate Amazon actuator/driver redesign is not being adopted. The 18 AWG wire is planned for local purchase on November 6, with supplier, length and price pending.
 

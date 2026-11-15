@@ -1,5 +1,7 @@
 # living in a cat world · Project guide
 
+Start assembling with the [illustrated Spanish assembly guide](ASSEMBLY-ES.md), including a printable PDF, exact fasteners, frame orientation and checks for each stage.
+
 Updated: November 15, 2026 (Costa Rica). The owner now prefers PLA and the electronics support is printing in yellow PLA, confirmed by the active device and preserved Generic PLA High Speed session. The original PETG preparation stays unchanged. Saved native history reports the solenoid cradle and two bars as Success. The first coupons/coupler, bed/four feet and motor-mount/belt-clamp batches retain their completion evidence. The owner now confirms eight finished pieces by count and shape groups, matching the preceding PETG plate. All 22 installed pieces have prepared files: 21 have recorded print completion and the electronics support remains printing. No additional plate is scheduled. We can begin dry frame and rail assembly now. Fit of the complete assembly, the switch and coupler, motion, touch and heat/load behavior remain unvalidated.
 
 On November 15 the owner confirmed physical receipt of the existing project shipments matched to the received consolidations, and separately confirmed the controller. Actual delivery dates were not specified. Purchase quantities, original documents, forwarding assignments and earlier carrier evidence are preserved. The combined forwarding amount remains pending reconciliation without a numeric total; recipient receipt does not itself establish payment or a container billing relationship.
