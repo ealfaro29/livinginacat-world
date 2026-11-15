@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "reportedAt": "2026-11-15",
-  "source": "Owner-reported M4 fit and expanded fifth plate preparation verified in Bambu Studio",
-  "stage": "Expanded fifth batch prepared; fourth-batch completion unconfirmed",
+  "source": "Owner-selected PETG and reported print start; matching active device job and Generic PETG profile observed",
+  "stage": "Eight-piece PETG batch started; completion unconfirmed",
   "firstTestBatchCompleted": true,
   "secondBatchCompletionConfirmed": true,
   "material": "PLA Silk",
@@ -37,13 +37,14 @@
         "basis": "owner_report",
         "actualScrewsAndNutsFitReported": true
       }
-    ]
+    ],
+    "material": "PLA Silk"
   },
   "petgFitValidated": false,
   "fullAssemblyAccepted": false,
   "touchMotionAndThermalPerformanceValidated": false,
   "cadReleaseChanged": false,
-  "finalMaterialSelected": "PLA Silk",
+  "finalMaterialSelected": "PETG",
   "finalMaterialSelectionBasis": "owner_instruction",
   "silkFunctionalPerformanceValidated": false,
   "secondBatch": {
@@ -57,35 +58,7 @@
     "exactCompletionDate": null,
     "measuredFitConfirmed": false
   },
-  "nextPrintBatch": {
-    "batch": "FT412_05",
-    "revision": 2,
-    "prepared": true,
-    "sliced": true,
-    "printStarted": false,
-    "parts": {
-      "tubeHolder": 1,
-      "driver5648Retainer": 1,
-      "frontIdlerMounts": 2,
-      "motorSideIdlerMounts": 2,
-      "xyJointLeft": 1,
-      "xyJointRight": 1
-    },
-    "material": "PLA Silk",
-    "nozzle": "main",
-    "nozzleDiameterMM": 0.4,
-    "layerHeightMM": 0.2,
-    "wallLoops": 6,
-    "topShellLayers": 6,
-    "bottomShellLayers": 6,
-    "infillPercent": 80,
-    "infillPattern": "gyroid",
-    "brimWidthMM": 8,
-    "supportsEnabled": true,
-    "estimatedDurationSeconds": 14900,
-    "estimatedMassG": 64.17,
-    "estimatesAreNotActualPrintResults": true
-  },
+  "nextPrintBatch": null,
   "thirdBatchCompletionConfirmed": true,
   "thirdBatch": {
     "parts": {
@@ -103,19 +76,26 @@
     "earlierPreparationIsNotTheActualFinishedJob": true
   },
   "currentPrintBatch": {
+    "batch": "FT412_05",
+    "revision": 3,
     "prepared": true,
     "sliced": true,
     "printStarted": true,
     "printCompleted": false,
-    "observedPhase": "Homing toolhead",
+    "observedPhase": "Changing filament",
     "observedProgressPercent": 0,
     "observedLayer": 0,
-    "layersTotal": 145,
+    "layersTotal": 442,
     "parts": {
-      "solenoidCradle": 1,
-      "clampBars": 2
+      "tubeHolder": 1,
+      "driver5648Retainer": 1,
+      "frontIdlerMounts": 2,
+      "motorSideIdlerMounts": 2,
+      "xyJointLeft": 1,
+      "xyJointRight": 1
     },
-    "material": "PLA Silk",
+    "material": "PETG",
+    "slicerMaterialProfile": "Generic PETG",
     "nozzle": "main",
     "nozzleDiameterMM": 0.4,
     "layerHeightMM": 0.2,
@@ -124,8 +104,70 @@
     "bottomShellLayers": 6,
     "infillPercent": 80,
     "infillPattern": "gyroid",
-    "estimatedDurationSeconds": 4178,
-    "estimatedMassG": 16.35,
+    "brimWidthMM": 8,
+    "supportsEnabled": true,
+    "estimatedDurationSeconds": 15968,
+    "estimatedMassG": 63.71,
     "estimatesAreNotActualPrintResults": true
-  }
+  },
+  "historicalCurrentPrintBatches": [
+    {
+      "batch": "FT412_04",
+      "prepared": true,
+      "sliced": true,
+      "printStarted": true,
+      "printCompleted": false,
+      "observedPhase": "Homing toolhead",
+      "observedProgressPercent": 0,
+      "observedLayer": 0,
+      "layersTotal": 145,
+      "parts": {
+        "solenoidCradle": 1,
+        "clampBars": 2
+      },
+      "material": "PLA Silk",
+      "nozzle": "main",
+      "nozzleDiameterMM": 0.4,
+      "layerHeightMM": 0.2,
+      "wallLoops": 6,
+      "topShellLayers": 6,
+      "bottomShellLayers": 6,
+      "infillPercent": 80,
+      "infillPattern": "gyroid",
+      "estimatedDurationSeconds": 4178,
+      "estimatedMassG": 16.35,
+      "estimatesAreNotActualPrintResults": true
+    }
+  ],
+  "previousPrintPreparations": [
+    {
+      "batch": "FT412_05",
+      "revision": 2,
+      "prepared": true,
+      "sliced": true,
+      "printStarted": false,
+      "parts": {
+        "tubeHolder": 1,
+        "driver5648Retainer": 1,
+        "frontIdlerMounts": 2,
+        "motorSideIdlerMounts": 2,
+        "xyJointLeft": 1,
+        "xyJointRight": 1
+      },
+      "material": "PLA Silk",
+      "nozzle": "main",
+      "nozzleDiameterMM": 0.4,
+      "layerHeightMM": 0.2,
+      "wallLoops": 6,
+      "topShellLayers": 6,
+      "bottomShellLayers": 6,
+      "infillPercent": 80,
+      "infillPattern": "gyroid",
+      "brimWidthMM": 8,
+      "supportsEnabled": true,
+      "estimatedDurationSeconds": 14900,
+      "estimatedMassG": 64.17,
+      "estimatesAreNotActualPrintResults": true
+    }
+  ]
 }
