@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-14",
+      "title": "Motor mounts complete; solenoid cradle batch started",
+      "detail": "The owner confirms the motor mounts and belt clamp are printed; Bambu Studio also shows that job finished at 299/299 layers. A separate next plate of one solenoid cradle and two clamp bars is prepared in PLA Silk and observed homing at 0/145 layers. Completion and measured fit of the new batch remain unconfirmed. CAD geometry, purchase records and shipment stages are unchanged."
+    },
+    {
+      "date": "2026-11-14",
       "title": "Another existing forwarding consolidation processed",
       "detail": "Speedy confirms processing of another existing forwarding consolidation. Exact original shipment associations, physical stages, quantities and purchase totals are preserved. Processing does not confirm recipient delivery or establish which original charges are replaced. The combined forwarding amount remains pending reconciliation without a numeric total."
     },
@@ -2811,5 +2816,5 @@
   "reviewedAt": "2026-11-15T00:43:19.735Z",
   "reviewTimeZone": "America/Costa_Rica",
   "lastAdministrativeUpdateAt": "2026-11-15T00:43:19.735Z",
-  "lastBuildUpdateAt": "2026-11-14T23:35:17.311747+00:00"
+  "lastBuildUpdateAt": "2026-11-15T04:42:09.407629+00:00"
 }
