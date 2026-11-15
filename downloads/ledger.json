@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-15",
+      "title": "Controller shipment marked dispatched by Speedy",
+      "detail": "The existing controller shipment is now marked Enviado in the current Speedy account. Previously confirmed Costa Rica arrival is preserved. Recipient delivery and the real dispatch date remain unconfirmed. Purchase quantities, totals and original forwarding assignment are unchanged; forwarding charges remain pending reconciliation without a numeric total."
+    },
+    {
+      "date": "2026-11-15",
       "title": "Tube-holder and driver-retainer print plate prepared",
       "detail": "The next plate contains one original tube holder and one Adafruit 5648 retainer, prepared and sliced in owner-selected PLA Silk with the main 0.4 mm nozzle. Six walls, 80% gyroid and an 8 mm brim are verified in the final files. It has not been sent to print. Previous batch completion, physical fit and functional acceptance are not inferred; purchase and shipping records remain unchanged."
     },
@@ -2760,11 +2765,11 @@
       "expectedDeliveryDate": "2026-11-10",
       "deliveredAt": null,
       "lastChecked": "2026-11-10",
-      "source": "Authenticated Speedy exact current tracking entry for the verified controller fulfillment group",
-      "notes": "Amazon carrier delivery in Miami remains confirmed on November 10. Speedy now confirms this exact controller shipment in Costa Rica. The actual Costa Rica arrival date and recipient delivery remain unconfirmed. The purchase, authentic receipt, original prealert and consolidation assignment are preserved.",
+      "source": "Authenticated Speedy current queue entry for the exact previously verified controller shipment",
+      "notes": "Speedy now shows Enviado for this exact controller shipment. Its prior Costa Rica arrival confirmation remains valid. The actual dispatch date and recipient delivery remain unconfirmed. The original purchase, prealert, consolidation assignment and documents are preserved.",
       "speedyStatus": "in_transit",
       "speedyLocation": "costa_rica",
-      "speedyCheckedAt": "2026-11-14",
+      "speedyCheckedAt": "2026-11-15",
       "trackingAssigned": true,
       "prealertStatus": "confirmed",
       "consolidationStatus": "confirmed",
@@ -2772,7 +2777,9 @@
       "purchaseReceiptVerified": true,
       "carrierDeliveredDate": "2026-11-10",
       "speedyConfirmedAt": "2026-11-14T18:35:45.918Z",
-      "speedyReviewedAt": "2026-11-14T18:35:45.918Z"
+      "speedyReviewedAt": "2026-11-15T15:50:35.622Z",
+      "speedyObservedStatus": "Enviado",
+      "speedyDispatchObservedAt": "2026-11-15T15:50:35.622Z"
     },
     {
       "id": "BAMBU-REPLACEMENT-01",
@@ -2804,8 +2811,8 @@
     "payment": "unconfirmed",
     "finalConsolidatedChargeConfirmed": false,
     "source": "Authenticated current Speedy account queues; consolidated billing relationships pending reconciliation",
-    "observedAt": "2026-11-14",
-    "verifiedAt": "2026-11-15T00:42:25.409Z",
+    "observedAt": "2026-11-15",
+    "verifiedAt": "2026-11-15T15:50:35.631Z",
     "notes": "The combined Total a pagar is currently unconfirmed while consolidated charges are reconciled against original records to avoid counting them twice. All current packages remain within scope, without a project filter. Remaining quotes, payment and the final consolidated balance are pending. No current numeric total is published. Kept separate from USD purchase totals."
   },
   "deliveryOutlook": {
@@ -2818,7 +2825,7 @@
     "recipientDeliveryDate": null,
     "forecastSupersededByReceipt": true
   },
-  "reviewedAt": "2026-11-15T00:43:19.735Z",
+  "reviewedAt": "2026-11-15T15:50:35.631Z",
   "reviewTimeZone": "America/Costa_Rica",
   "lastAdministrativeUpdateAt": "2026-11-15T00:43:19.735Z",
   "lastBuildUpdateAt": "2026-11-15T15:10:55.484439+00:00"
