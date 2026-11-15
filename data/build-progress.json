@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "reportedAt": "2026-11-15",
-  "source": "Owner reports and earlier device observations; fifth print plate preparation verified in Bambu Studio",
-  "stage": "Fifth batch prepared; fourth-batch completion unconfirmed",
+  "source": "Owner-reported M4 fit and expanded fifth plate preparation verified in Bambu Studio",
+  "stage": "Expanded fifth batch prepared; fourth-batch completion unconfirmed",
   "firstTestBatchCompleted": true,
   "secondBatchCompletionConfirmed": true,
   "material": "PLA Silk",
@@ -10,16 +10,34 @@
   "fitChecks": {
     "passedSizes": [
       "M3",
+      "M4",
       "M5"
     ],
     "pendingChecks": [
-      "M4",
       "coupler"
     ],
     "basis": "owner_report",
     "individualHolePocketAndSeatResultsItemized": false,
     "measuredClearanceDiametersMM": null,
-    "reportedAt": "2026-11-13"
+    "reportedAt": "2026-11-15",
+    "reports": [
+      {
+        "reportedAt": "2026-11-13",
+        "passedSizes": [
+          "M3",
+          "M5"
+        ],
+        "basis": "owner_report"
+      },
+      {
+        "reportedAt": "2026-11-15",
+        "passedSizes": [
+          "M4"
+        ],
+        "basis": "owner_report",
+        "actualScrewsAndNutsFitReported": true
+      }
+    ]
   },
   "petgFitValidated": false,
   "fullAssemblyAccepted": false,
@@ -41,12 +59,17 @@
   },
   "nextPrintBatch": {
     "batch": "FT412_05",
+    "revision": 2,
     "prepared": true,
     "sliced": true,
     "printStarted": false,
     "parts": {
       "tubeHolder": 1,
-      "driver5648Retainer": 1
+      "driver5648Retainer": 1,
+      "frontIdlerMounts": 2,
+      "motorSideIdlerMounts": 2,
+      "xyJointLeft": 1,
+      "xyJointRight": 1
     },
     "material": "PLA Silk",
     "nozzle": "main",
@@ -59,8 +82,8 @@
     "infillPattern": "gyroid",
     "brimWidthMM": 8,
     "supportsEnabled": true,
-    "estimatedDurationSeconds": 3173,
-    "estimatedMassG": 6.32,
+    "estimatedDurationSeconds": 14900,
+    "estimatedMassG": 64.17,
     "estimatesAreNotActualPrintResults": true
   },
   "thirdBatchCompletionConfirmed": true,
