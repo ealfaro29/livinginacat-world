@@ -1547,6 +1547,11 @@
   "changes": [
     {
       "date": "2026-11-15",
+      "title": "Print plate expanded to eight original project pieces",
+      "detail": "Following the owner's report that the actual M4 screws and nuts fit, the prepared plate now includes the tube holder, driver retainer, four idler mounts and two XY joints. All eight original geometries and quantities are verified. The PLA Silk plate is saved and sliced for the main 0.4 mm nozzle, with estimated time 4 h 8 min and mass 64.17 g. It has not been sent to print. Coupler fit, full assembly and heat/load behavior remain unvalidated; the fourth batch still has no completion confirmation."
+    },
+    {
+      "date": "2026-11-15",
       "title": "Controller shipment marked dispatched by Speedy",
       "detail": "The existing controller shipment is now marked Enviado in the current Speedy account. Previously confirmed Costa Rica arrival is preserved. Recipient delivery and the real dispatch date remain unconfirmed. Purchase quantities, totals and original forwarding assignment are unchanged; forwarding charges remain pending reconciliation without a numeric total."
     },
@@ -2828,5 +2833,5 @@
   "reviewedAt": "2026-11-15T15:50:35.631Z",
   "reviewTimeZone": "America/Costa_Rica",
   "lastAdministrativeUpdateAt": "2026-11-15T00:43:19.735Z",
-  "lastBuildUpdateAt": "2026-11-15T15:10:55.484439+00:00"
+  "lastBuildUpdateAt": "2026-11-15T16:18:39.312354+00:00"
 }
