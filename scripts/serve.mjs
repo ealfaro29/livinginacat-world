@@ -12,6 +12,7 @@ const types = {
   ".svg": "image/svg+xml",
   ".png": "image/png",
   ".zip": "application/zip",
+  ".pdf": "application/pdf",
   ".xml": "application/xml; charset=utf-8",
   ".md": "text/markdown; charset=utf-8",
   ".csv": "text/csv; charset=utf-8",

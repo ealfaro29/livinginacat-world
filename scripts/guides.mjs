@@ -23,6 +23,15 @@ export const guideGroups = [
 
 export const guides = [
   {
+    slug: "assembly",
+    source: "docs/ASSEMBLY-ES.md",
+    group: "build",
+    lang: "es",
+    title: "Guía de ensamblaje",
+    description:
+      "Paso a paso del montaje FT412: piezas, medidas, tornillería, correas y comprobaciones. Incluye PDF ilustrado.",
+  },
+  {
     slug: "project-guide",
     source: "docs/PROJECT.md",
     group: "build",
@@ -67,7 +76,7 @@ export const guides = [
     source: "docs/FIT-CHECKS.md",
     group: "build",
     title: "Initial fit checks",
-    description: "Owner-reported M3 and M5 checks in PLA Silk, with remaining tests and limits.",
+    description: "Owner-reported M3, M4 and M5 checks in PLA Silk, current print progress and remaining tests.",
   },
   {
     slug: "release-scope",
@@ -274,7 +283,7 @@ export function renderGuidePage(guide, markdown, context) {
   const sourceLabel = guide.source.startsWith("@")
     ? "View source data ↗"
     : "View Markdown on GitHub ↗";
-  return `<article class="guide-page wrap">
+  return `<article class="guide-page wrap"${guide.lang ? ` lang="${esc(guide.lang)}"` : ""}>
     <header class="guide-header"><a class="back" href="/documentation/#guides">← All documentation</a><p class="eyebrow">GUIDE ${String(guides.indexOf(guide) + 1).padStart(2, "0")} / ${esc(group.title)}</p><h1>${esc(guide.title)}</h1><p class="lead">${esc(guide.description)}</p><div class="guide-actions"><a href="/downloads/guides/${guide.slug}.md" download>Download Markdown ↓</a><a href="${sourceHref}">${sourceLabel}</a></div></header>
     ${headings.length ? `<details class="guide-toc-mobile"><summary>In this guide <span>+</span></summary><nav aria-label="In this guide">${toc}</nav></details>` : ""}
     <div class="guide-layout"><aside class="guide-sidebar">${headings.length ? `<nav class="guide-toc" aria-label="On this page"><p class="eyebrow">ON THIS PAGE</p>${toc}</nav>` : ""}<nav class="guide-related" aria-label="${esc(group.title)}"><p class="eyebrow">${esc(group.title)}</p>${peers.map((g) => `<a href="${guideUrl(g)}"${g === guide ? ' aria-current="page"' : ""}>${esc(g.title)}</a>`).join("")}</nav></aside><div class="guide-content"><div class="prose guide-prose">${html}</div><nav class="guide-pagination" aria-label="Guide navigation">${index > 0 ? `<a href="${guideUrl(peers[index - 1])}"><small>← PREVIOUS GUIDE</small>${esc(peers[index - 1].title)}</a>` : `<a href="/documentation/#guides"><small>← DOCUMENTATION</small>All guides</a>`}${index < peers.length - 1 ? `<a href="${guideUrl(peers[index + 1])}"><small>NEXT GUIDE →</small>${esc(peers[index + 1].title)}</a>` : `<a href="/documentation/#guides"><small>DOCUMENTATION →</small>All guides</a>`}</nav></div></div>

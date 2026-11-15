@@ -1,6 +1,6 @@
 # Printed motor mounts A and B
 
-Proposed PhysiClaw v0.51 variant, October 26, 2026. **Digitally checked; not printed or physically tested.** PETG is not assumed to have aluminum’s strength or thermal stability.
+PhysiClaw v0.51 variant, CAD snapshot October 26, 2026. **The two mounts now have recorded print completion; assembled fit, strength and thermal performance remain unvalidated.** The geometric checks below describe the original design, not physical acceptance. Follow the current [assembly guide](/documentation/assembly/) and [fit-check record](/documentation/fit-checks/).
 
 Print one of each final STL, millimeters, 100% scale. Outside plate faces are already on the bed at minimum Z=0. A and B have different legs and are not interchangeable.
 
