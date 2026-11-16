@@ -1,6 +1,6 @@
 # Guía de ensamblaje · robot FT412
 
-**Edición visual 2 · 15 de noviembre de 2026.** Para el montaje FramingTech 355/250 con actuador Adafruit 412. Esta guía corresponde a las piezas preparadas para este proyecto.
+**Edición visual 2 · actualizada el 16 de noviembre de 2026.** Para el montaje FramingTech 355/250 con actuador Adafruit 412. Esta guía corresponde a las piezas preparadas para este proyecto.
 
 [Descargar el PDF para la mesa de trabajo](/downloads/guia-ensamblaje-ft412-es.pdf). La secuencia incorpora **16 láminas nuevas de montaje**, además de las vistas de piezas, el marco y las correas. Tocá cualquier ilustración para abrirla a tamaño completo. Verde: piezas impresas; gris: estructura y herrajes; naranja: movimiento, separadores o detalle destacado. Las piezas se dibujan desde los STL publicados; los herrajes simplificados y las separaciones de las vistas explotadas no son plantillas de perforación.
 
@@ -8,9 +8,9 @@
 
 ## Antes de empezar
 
-**Podemos empezar hoy por el marco, las patas y la presentación de los rieles.** No hace falta esperar a que termine el soporte de electrónica. Trabajaremos primero con la fuente y el USB desconectados y sin teléfono en la máquina.
+**Podemos empezar hoy por el marco, las patas y la presentación de los rieles.** El dueño confirmó que ya tiene todas las piezas del proyecto impresas, incluido el soporte de electrónica. Trabajaremos primero con la fuente y el USB desconectados y sin teléfono en la máquina.
 
-Al cierre de esta edición hay **21 de las 22 piezas de instalación con impresión terminada registrada**. El soporte de electrónica está en impresión según el último reporte y observación; no se da por terminado por el tiempo transcurrido. La quinta tanda de ocho piezas está confirmada por el dueño: una pequeña, tres pares y una larga. No hay piezas adicionales por preparar ni motivo para repetir esas impresiones.
+El dueño confirmó el 16 de noviembre que ya tiene todo impreso: hay **22 de las 22 piezas de instalación con impresión terminada registrada**. Es confirmación del dueño; no una nueva observación de la impresora ni una comprobación de calidad o encaje. No indicó la fecha exacta de finalización. La quinta tanda de ocho piezas está confirmada por el dueño: una pequeña, tres pares y una larga. No hay piezas adicionales por preparar ni motivo para repetir esas impresiones.
 
 La preferencia actual es PLA. Las tandas anteriores conservan sus materiales reales: PLA Silk y PETG. Las pruebas M3, M4 y M5 fueron satisfactorias según el dueño en Silk; esto no certifica el montaje completo ni su comportamiento bajo calor o tensión.
 
@@ -45,7 +45,7 @@ Las siguientes láminas muestran la geometría real de los archivos. Cada pieza 
 
 Retirá brim y soportes de las superficies de contacto, alojamientos de tuercas y agujeros. Revisá que no haya grietas ni capas separadas. Una tuerca debe asentarse en su alojamiento sin abrir el plástico. No uses un tornillo largo para empujarla a la fuerza y no escales ni vuelvas a imprimir todas las piezas por un ajuste local.
 
-**Comprobación:** las piezas se reconocen por forma y están limpias. El soporte electrónico puede seguir pendiente de terminar; eso no frena el marco.
+**Comprobación:** las piezas se reconocen por forma y están limpias. El soporte electrónico también tiene finalización confirmada; su encaje se comprobará al llegar a esa etapa.
 
 ![Ocho diseños de estructura y transmisión, con cantidad y nombre sencillo](/assets/assembly/piezas-estructura.png)
 
@@ -226,7 +226,7 @@ La ranura de la cuna permite ajustar la altura ±3 mm. La geometría nominal con
 
 ![15 / Dejá holgura para los cables](/assets/assembly/paso-15-tubo.svg)
 
-Este paso espera a que **termine, se enfríe y se retire** la impresión del soporte electrónico. El retén pequeño y el soporte largo del tubo ya pertenecen a la tanda de ocho piezas terminada; no hay que repetirlos.
+Usá el soporte electrónico terminado, ya frío y con los soportes de impresión retirados de las zonas de montaje. El retén pequeño y el soporte largo del tubo pertenecen a la tanda de ocho piezas terminada; no hay que repetirlos.
 
 1. Presentá el soporte en el perfil trasero, con el ala y el protector del interruptor **hacia fuera del marco**. Usá dos FHCS M5×12 y dos RN05BM5. Mantené libres las correas, motores y conectores.
 2. Presentá la DLC32 sobre sus apoyos con los cuatro BHCS M3×10 previstos. Verificá que apoye sin doblarse y que nada metálico toque pistas de su cara inferior. La orientación de los TMC2209 se verificará contra la serigrafía real y el esquema de la placa antes de conectarlos.

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "reportedAt": "2026-11-15",
-  "source": "Owner confirms eight completed pieces by count and shape groups; current PLA support print state reused from its separate observation",
-  "stage": "21 installed pieces have recorded print completion; electronics support remains in progress",
+  "reportedAt": "2026-11-16",
+  "source": "Owner reports that all project parts are printed and requests assembly; no new printer observation",
+  "stage": "All 22 installed printed pieces have recorded completion; ready for frame assembly",
   "firstTestBatchCompleted": true,
   "secondBatchCompletionConfirmed": true,
   "material": "PLA Silk",
@@ -81,7 +81,7 @@
     "prepared": true,
     "sliced": true,
     "printStarted": true,
-    "printCompleted": false,
+    "printCompleted": true,
     "parts": {
       "electronicsHolder": 1
     },
@@ -108,7 +108,12 @@
     "preparedForFirstPhysicalFit": true,
     "switchTerminalClearanceValidated": false,
     "fullAssemblyAccepted": false,
-    "lastProgressObservationRecordedAt": "2026-11-15T22:26:53.503562+00:00"
+    "lastProgressObservationRecordedAt": "2026-11-15T22:26:53.503562+00:00",
+    "completionBasis": "owner_report",
+    "reportedAt": "2026-11-16",
+    "exactCompletionDate": null,
+    "goodPrintOutcomeExplicitlyReported": null,
+    "measuredFitConfirmed": false
   },
   "historicalCurrentPrintBatches": [
     {
@@ -231,12 +236,12 @@
   "plaFunctionalPerformanceValidated": false,
   "printInventorySummary": {
     "installedPieces": 22,
-    "printCompletionRecordedPieces": 21,
-    "printingPieces": 1,
+    "printCompletionRecordedPieces": 22,
+    "printingPieces": 0,
     "awaitingPhysicalInventoryPieces": 0,
     "additionalUnpreparedPieces": 0
   },
-  "nextAssemblyStep": "Present and square the frame, mount feet and align rails; inventory existing prints before transmission assembly",
+  "nextAssemblyStep": "Identify the four thick profiles, present and square the frame; confirm physical assembly before proceeding to feet",
   "fifthBatchCompletionConfirmed": true,
   "fifthBatch": {
     "batch": "FT412_05",
@@ -264,5 +269,26 @@
     "individualPartIdentificationIndependentlyVisuallyVerified": false,
     "material": "PETG",
     "materialBasis": "earlier_recorded_job_profile_and_device_observation"
+  },
+  "sixthBatchCompletionConfirmed": true,
+  "sixthBatch": {
+    "batch": "FT412_06",
+    "parts": {
+      "electronicsHolder": 1
+    },
+    "printCompleted": true,
+    "completionBasis": "owner_report",
+    "reportedAt": "2026-11-16",
+    "exactCompletionDate": null,
+    "measuredFitConfirmed": false,
+    "goodPrintOutcomeExplicitlyReported": null,
+    "material": "PLA",
+    "materialBasis": "previous recorded active device and session; not reclassified by completion report"
+  },
+  "assemblyProgress": {
+    "assemblyRequestedAt": "2026-11-16",
+    "activeGuideStep": "frame",
+    "frameAssemblyConfirmed": false,
+    "poweredCommissioningConfirmed": false
   }
 }
