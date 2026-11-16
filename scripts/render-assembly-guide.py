@@ -9,6 +9,7 @@ import html
 import json
 import subprocess
 import re
+import unicodedata
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
@@ -141,7 +142,7 @@ fontdir=Path(matplotlib.get_data_path())/'fonts/ttf'
 for face,file in [('Guide','DejaVuSans.ttf'),('Guide-Bold','DejaVuSans-Bold.ttf'),('Guide-Oblique','DejaVuSans-Oblique.ttf')]:pdfmetrics.registerFont(TTFont(face,str(fontdir/file)))
 pdfmetrics.registerFontFamily('Guide',normal='Guide',bold='Guide-Bold',italic='Guide-Oblique',boldItalic='Guide-Bold')
 S={
- 'body':ParagraphStyle('body',fontName='Guide',fontSize=9.4,leading=14,textColor=colors.HexColor(INK),spaceAfter=8),
+ 'body':ParagraphStyle('body',fontName='Guide',fontSize=9.4,leading=14,textColor=colors.HexColor(INK),spaceAfter=8,allowWidows=0,allowOrphans=0),
  'small':ParagraphStyle('small',fontName='Guide',fontSize=7.7,leading=10.4,textColor=colors.HexColor(INK),spaceAfter=0),
  'h1':ParagraphStyle('h1',fontName='Guide-Bold',fontSize=29,leading=34,textColor=colors.HexColor(INK),spaceAfter=16),
  'h2':ParagraphStyle('h2',fontName='Guide-Bold',fontSize=21,leading=26,textColor=colors.HexColor(INK),spaceAfter=15,keepWithNext=True),
@@ -149,6 +150,12 @@ S={
  'list':ParagraphStyle('list',fontName='Guide',fontSize=9.4,leading=14,textColor=colors.HexColor(INK),leftIndent=17,firstLineIndent=-15,spaceAfter=8),
 }
 def safe(s):return html.escape(s).replace('–','-').replace('—','-').replace('→',' > ')
+heading_links={}
+for t in tokens:
+    if t['type']=='heading' and t['depth']<=2:
+        normalized=unicodedata.normalize('NFKD',t['text']).encode('ascii','ignore').decode().lower()
+        slug=re.sub('[^a-z0-9]+','-',normalized).strip('-')
+        heading_links['#'+slug]='#'+hashlib.sha256(t['text'].encode()).hexdigest()[:16]
 def inline(ts):
     out=''
     for t in ts:
@@ -159,6 +166,7 @@ def inline(ts):
         elif kind=='codespan':out+='<font size="8.3">'+safe(val)+'</font>'
         elif kind=='link':
             href=t['href']
+            href=heading_links.get(href,href)
             if href.startswith('/'):href='https://livinginacat.world'+href
             elif not href.startswith(('http:','https:','#')):
                 from posixpath import normpath
@@ -221,10 +229,10 @@ class GuideDoc(SimpleDocTemplate):
 def furniture(c,doc):
     c.setFillColor(colors.HexColor(INK));c.setFont('Guide-Bold',8)
     c.drawString(46,PAGE_H-29,'LIVING IN A CAT WORLD  /  FT412')
-    c.setFont('Guide',7.5);c.drawRightString(PAGE_W-46,PAGE_H-29,'GUÍA DE ENSAMBLAJE · EDICIÓN 1')
+    c.setFont('Guide',7.5);c.drawRightString(PAGE_W-46,PAGE_H-29,'GUÍA VISUAL DE ENSAMBLAJE · EDICIÓN 2')
     c.setStrokeColor(colors.HexColor('#c7d8d1'));c.setLineWidth(.5);c.line(46,40,PAGE_W-46,40)
     c.setFont('Guide',7.3);c.drawString(46,27,'15 NOV 2026 · Medidas nominales; comprobar el montaje físico')
     c.drawRightString(PAGE_W-46,27,str(doc.page))
-doc=GuideDoc(str(OUT),pagesize=(PAGE_W,PAGE_H),leftMargin=46,rightMargin=46,topMargin=57,bottomMargin=57,title='Guía de ensamblaje FT412',author='Living in a Cat World',subject='Montaje FramingTech 355/250 y Adafruit 412; edición 1',pageCompression=1)
+doc=GuideDoc(str(OUT),pagesize=(PAGE_W,PAGE_H),leftMargin=46,rightMargin=46,topMargin=57,bottomMargin=57,title='Guía visual de ensamblaje FT412',author='Living in a Cat World',subject='Montaje FramingTech 355/250 y Adafruit 412; edición visual 2',pageCompression=1)
 doc.build(story,onFirstPage=furniture,onLaterPages=furniture)
 print(json.dumps({'pdf':str(OUT.relative_to(ROOT)),'bytes':OUT.stat().st_size,'figures':len(list(ASSETS.iterdir())),'stlHashesVerified':len(parts),'installedPieces':sum(p['quantity'] for p in parts.values())}))

@@ -2392,3 +2392,9 @@ footer .red-period {
     font-size: 9px;
   }
 }
+
+/* Assembly instruction plates open at their full resolution on touch or click. */
+.assembly-figure { display:block; margin:1.8rem 0; text-decoration:none !important; }
+.assembly-figure img { display:block; width:100%; height:auto; border-radius:8px; }
+.assembly-figure span { display:block; padding:.55rem 0; font-size:.8rem; text-align:right; }
+.assembly-figure:focus-visible { outline:2px solid currentColor; outline-offset:5px; }

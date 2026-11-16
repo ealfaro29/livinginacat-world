@@ -3,3 +3,5 @@ numpy>=1.26
 trimesh>=4.0
 reportlab>=4.0
 pillow>=10.0
+
+# SVG rasterization: Node + Playwright (bundled runtime), Chrome installed.

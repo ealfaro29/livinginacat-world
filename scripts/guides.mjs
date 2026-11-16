@@ -29,7 +29,7 @@ export const guides = [
     lang: "es",
     title: "Guía de ensamblaje",
     description:
-      "Paso a paso del montaje FT412: piezas, medidas, tornillería, correas y comprobaciones. Incluye PDF ilustrado.",
+      "Montaje FT412 con 20 ilustraciones: vistas explotadas, flechas, orientación de piezas y detalles de tornillos. PDF para la mesa de trabajo.",
   },
   {
     slug: "project-guide",
@@ -245,7 +245,10 @@ export function renderGuideMarkdown(markdown, guide, context) {
         `${context.repo}/blob/main/`,
         `${context.repo}/raw/refs/heads/main/`,
       );
-      return `<img src="${esc(target)}" alt="${esc(text)}"${title ? ` title="${esc(title)}"` : ""} loading="lazy">`;
+      const img = `<img src="${esc(target)}" alt="${esc(text)}"${title ? ` title="${esc(title)}"` : ""} loading="lazy">`;
+      return guide.slug === "assembly"
+        ? `<a class="assembly-figure" href="${esc(target)}" aria-label="Ampliar: ${esc(text)}">${img}<span>Ampliar ilustración ↗</span></a>`
+        : img;
     },
   };
   const html = new Marked({ renderer, gfm: true }).parse(markdown);
