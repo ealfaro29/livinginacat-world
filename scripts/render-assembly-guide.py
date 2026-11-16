@@ -87,7 +87,7 @@ fig,ax=plt.subplots(figsize=(9,8.4),facecolor=PAPER);ax.set_facecolor(PAPER)
 for x in (-115,95):ax.add_patch(Rectangle((x,0),20,355,facecolor=MINT,edgecolor=INK,lw=1.5))
 for z in (0,335):ax.add_patch(Rectangle((-95,z),190,20,facecolor=MINT,edgecolor=INK,lw=1.5))
 for z in (107.5,207.5):
-    ax.add_patch(Rectangle((-95,z-5),190,10,fill=False,edgecolor=ORANGE,lw=1.8,ls='--'))
+    ax.add_patch(Rectangle((-95,z-10),190,20,fill=False,edgecolor=ORANGE,lw=1.8,ls='--'))
     ax.annotate(f'Travesaño bajo la cama\ncentro a {str(z).replace(".",",")} mm',xy=(70,z),xytext=(155,z),ha='left',va='center',fontsize=9,arrowprops={'arrowstyle':'-','color':ORANGE},color=ORANGE)
 for x in (-105,105):
     ax.add_patch(Rectangle((x-4.5,41.5),9,250,facecolor=TEAL,edgecolor=INK,lw=.6))

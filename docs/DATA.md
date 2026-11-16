@@ -14,6 +14,8 @@ The November 15 direct owner confirmations establish physical receipt of existin
 
 The November 16 direct owner report confirms all project prints complete, including the previously active electronics support. The installed-piece inventory now records 22 completions and zero printing pieces. This is owner evidence, with the actual completion event date left unknown; it does not establish print quality, measured fit or physical assembly. Preserve the earlier material/profile observations and printer estimates as history. Assembly is requested, starting with the frame; no assembly checkpoint, shipment or owner checkbox is marked complete by that request.
 
+A subsequent November 16 owner report confirms the frame with four corner brackets and its feet assembled, with two loose nuts reserved in each long side’s inner lower slot. This is owner evidence, without supplied diagonal measurements or independent visual inspection. Bed crossmembers, rails and full assembly remain unconfirmed. With the bed crossmembers’ slot facing up, their section is 10 mm high and 20 mm wide; the guide’s earlier reversed orientation has been corrected.
+
 ## Overlapping records: do not add together
 
 - `items`: original equipment list and quotes. Quantity means purchase units, not always individual parts. Quoted total = quantity × quoted unit price.

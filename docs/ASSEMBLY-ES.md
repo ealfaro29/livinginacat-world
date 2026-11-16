@@ -162,7 +162,7 @@ Las 22 piezas impresas están terminadas según el dueño. Sus encajes todavía 
 ![Fijar los dos travesaños con escuadras: posición de piezas y orden de montaje](/assets/assembly/inicio-04-travesanos.svg)
 
 1. Marcá en ambos costados los centros a 107,5 y 207,5 mm desde el borde exterior del frente.
-2. Presentá un travesaño en cada marca: sección con 20 mm en vertical y 10 mm en el sentido del largo de la máquina. La ranura precargada mira hacia arriba.
+2. Presentá un travesaño en cada marca con su única ranura mirando hacia arriba: queda con **10 mm de alto y 20 mm de ancho en el sentido del largo de la máquina**. Las dos tuercas cuadradas quedan dentro de esa ranura.
 3. En cada extremo poné una escuadra: un ala contra la cara interior del costado y la otra sobre la cara superior del travesaño. Esa cara superior queda al nivel de la cara inferior del marco.
 4. Un M4×8 une cada ala con su SQN05M4: cuatro tornillos por travesaño. Presentá ambos, verificá alturas y paralelismo, y apretá gradualmente.
 

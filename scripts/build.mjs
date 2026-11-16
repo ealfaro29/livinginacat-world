@@ -26,7 +26,7 @@ const site = await readJSON("data/site.json"),
 const reviewedLabel = ledger.reviewedAt ? dateTime(ledger.reviewedAt, ledger.reviewTimeZone) : date(ledger.updatedAt);
 const pendingFitLabels = buildProgress.fitChecks.pendingChecks.map((check) => check === "coupler" ? "Coupler fit" : `${check} fit`).join(" and ");
 const activePrintSummary = buildProgress.currentPrintBatch?.batch === "FT412_06" && buildProgress.currentPrintBatch.printCompleted
-  ? "The owner confirms all 22 installed printed pieces complete, including the electronics support. Begin with dry frame assembly; measured fit and physical assembly checks remain separate. "
+  ? `The owner confirms all 22 installed printed pieces complete, including the electronics support. ${buildProgress.assemblyProgress?.frameAssemblyConfirmed && buildProgress.assemblyProgress?.feetInstalledConfirmed ? "The frame, four corner brackets and feet are assembled by owner report; the bed crossmembers are next. " : "Begin with dry frame assembly; measured fit and physical assembly checks remain separate. "}`
   : buildProgress.currentPrintBatch?.batch === "FT412_06" && buildProgress.currentPrintBatch.printStarted
   ? "The electronics support is printing in PLA. The owner confirms all eight pieces of the preceding batch; 21 of the 22 installed pieces have recorded print completion. Dry frame and rail assembly can begin. "
   : buildProgress.currentPrintBatch?.batch === "FT412_05" && buildProgress.currentPrintBatch.printStarted

@@ -146,7 +146,7 @@ p.note('Centros a 10 mm de los extremos largos. Las cuatro patas deben apoyar.')
 
 p=Plate('paso-04-cama','04 / Bajá la cama sobre sus travesaños','Los dos perfiles delgados de 190 mm quedan por debajo del marco.')
 a=frame()
-for y in (107.5,207.5):a.append((box([190,10,20],[0,y,-10]),ORANGE))
+for y in (107.5,207.5):a.append((box([190,20,10],[0,y,-5]),ORANGE))
 # Phone bed print Z is installation up. Center top envelope at nominal location.
 bed=mesh('fdm_phone_bed_x1',center=[0,157.5,85])
 q=render(p,a+[(bed,TEAL)],(55,215,725,600))
@@ -154,7 +154,7 @@ p.arrow(q([-45,157.5,70]),q([-45,157.5,10]))
 p.text(810,285,'CAMA FIJA',26,TEAL,True)
 p.text(810,332,'4 avellanados\nM3×8\n+ 4 RN05BM3',25)
 p.text(810,495,'TRAVESAÑOS',26,ORANGE,True)
-p.text(810,540,'2 × 190 mm\nSección 10×20\n20 mm vertical',25)
+p.text(810,540,'2 × 190 mm\nRanura arriba\n10 mm de alto',25)
 p.text(75,830,'Centros desde el frente: 107,5 y 207,5 mm. Cuatro escuadras adicionales.',23)
 p.note('La cama queda fija y sin torsión; las cuatro cabezas quedan al ras.');p.save()
 
