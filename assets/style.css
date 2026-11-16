@@ -2398,3 +2398,15 @@ footer .red-period {
 .assembly-figure img { display:block; width:100%; height:auto; border-radius:8px; }
 .assembly-figure span { display:block; padding:.55rem 0; font-size:.8rem; text-align:right; }
 .assembly-figure:focus-visible { outline:2px solid currentColor; outline-offset:5px; }
+
+/* Workbench guide: a readable materials list before every operation. */
+.assembly-guide .guide-prose table { width:100%; display:table; table-layout:fixed; font-size:14px; line-height:1.55; }
+.assembly-guide .guide-prose th, .assembly-guide .guide-prose td { padding:10px; vertical-align:top; overflow-wrap:anywhere; white-space:normal; }
+.assembly-guide .guide-prose table:has(th:nth-child(3):last-child) th:first-child { width:42%; }
+.assembly-guide .guide-prose table:has(th:nth-child(3):last-child) th:nth-child(2) { width:15%; }
+.assembly-guide .guide-prose h2[id^="paso-"] { border-top:2px solid var(--line); padding-top:30px; margin-top:65px; }
+@media(max-width:600px) {
+ .assembly-guide .guide-prose table { font-size:12px; }
+ .assembly-guide .guide-prose th, .assembly-guide .guide-prose td { padding:7px 5px; }
+ .assembly-guide .guide-prose h2 { font-size:27px; }
+}
