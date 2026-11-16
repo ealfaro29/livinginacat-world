@@ -49,7 +49,7 @@ labels = {
  'ft412_clamp_bar_x2':('Barra de sujeción','Presiona los bordes metálicos'),
  'ft412_coupler_rear':('Acoplador · mitad trasera','Retiene el capuchón y el collar'),
  'ft412_coupler_front':('Acoplador · mitad delantera','Incluye el contacto del conductor'),
- 'fdm_pcb_holder_electronics_x1':('Soporte de electrónica','En impresión al cierre de esta edición'),
+ 'fdm_pcb_holder_electronics_x1':('Soporte de electrónica','Impresión terminada según el dueño'),
  'fdm_5648_retainer_x1':('Retén del módulo 5648','La pieza pequeña de la tanda de ocho'),
 }
 groups = [list(labels)[:8], list(labels)[8:]]
@@ -231,7 +231,7 @@ def furniture(c,doc):
     c.drawString(46,PAGE_H-29,'LIVING IN A CAT WORLD  /  FT412')
     c.setFont('Guide',7.5);c.drawRightString(PAGE_W-46,PAGE_H-29,'GUÍA VISUAL DE ENSAMBLAJE · EDICIÓN 2')
     c.setStrokeColor(colors.HexColor('#c7d8d1'));c.setLineWidth(.5);c.line(46,40,PAGE_W-46,40)
-    c.setFont('Guide',7.3);c.drawString(46,27,'15 NOV 2026 · Medidas nominales; comprobar el montaje físico')
+    c.setFont('Guide',7.3);c.drawString(46,27,'16 NOV 2026 · Medidas nominales; comprobar el montaje físico')
     c.drawRightString(PAGE_W-46,27,str(doc.page))
 doc=GuideDoc(str(OUT),pagesize=(PAGE_W,PAGE_H),leftMargin=46,rightMargin=46,topMargin=57,bottomMargin=57,title='Guía visual de ensamblaje FT412',author='Living in a Cat World',subject='Montaje FramingTech 355/250 y Adafruit 412; edición visual 2',pageCompression=1)
 doc.build(story,onFirstPage=furniture,onLaterPages=furniture)

@@ -12,6 +12,8 @@ The later November 15 manual review records FT412_06 actively printing in PLA, w
 
 The November 15 direct owner confirmations establish physical receipt of existing project shipments by exact saved received-package membership, plus a separate confirmation for the controller. Actual recipient delivery dates are unspecified. Source-review timestamps are not event dates: keep the last actual Speedy review separately from the owner report. Preserve original quantities, classifications, documents, prealerts, transfers and manual marks. Exclude owner-confirmed recipient-delivered references from current forwarding charges without inventing payment, a container-content alias or a billing replacement relationship. The combined amount remains pending reconciliation without a number.
 
+The November 16 direct owner report confirms all project prints complete, including the previously active electronics support. The installed-piece inventory now records 22 completions and zero printing pieces. This is owner evidence, with the actual completion event date left unknown; it does not establish print quality, measured fit or physical assembly. Preserve the earlier material/profile observations and printer estimates as history. Assembly is requested, starting with the frame; no assembly checkpoint, shipment or owner checkbox is marked complete by that request.
+
 ## Overlapping records: do not add together
 
 - `items`: original equipment list and quotes. Quantity means purchase units, not always individual parts. Quoted total = quantity × quoted unit price.

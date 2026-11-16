@@ -284,7 +284,7 @@ p.text(830,630,'M3×6 LATERAL',25,bold=True);p.text(830,676,'Sujeta el conductor
 p.text(70,819,'Dejá la separación entre mitades; no las juntés apretando de más.',24)
 p.note('Capuchón y collar quedan sujetos; el vástago vuelve completo y sin carga lateral.');p.save()
 
-p=Plate('paso-13-electronica','13 / Presentá la electrónica sin conectar','Primero esperá a que termine y se enfríe esta impresión.')
+p=Plate('paso-13-electronica','13 / Presentá la electrónica sin conectar','Usá el soporte terminado, frío y limpio en las zonas de montaje.')
 q=render(p,[(mesh('fdm_pcb_holder_electronics_x1'),TEAL)],(65,250,760,530),'top')
 p.text(70,240,'VISTA SUPERIOR DE LA PIEZA',22,TEAL,True)
 render(p,[(mesh('fdm_5648_retainer_x1'),ORANGE)],(825,600,250,170),'iso')
