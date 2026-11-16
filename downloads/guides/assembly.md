@@ -1,8 +1,10 @@
 # Guía de ensamblaje · robot FT412
 
-**Edición 1 · 15 de noviembre de 2026.** Para el montaje FramingTech 355/250 con actuador Adafruit 412. Esta guía corresponde a las piezas preparadas para este proyecto.
+**Edición visual 2 · 15 de noviembre de 2026.** Para el montaje FramingTech 355/250 con actuador Adafruit 412. Esta guía corresponde a las piezas preparadas para este proyecto.
 
-[Descargar el PDF para la mesa de trabajo](/downloads/guia-ensamblaje-ft412-es.pdf). Las ilustraciones de piezas se generan desde los STL publicados; los esquemas explican posiciones y no son plantillas de perforación.
+[Descargar el PDF para la mesa de trabajo](/downloads/guia-ensamblaje-ft412-es.pdf). La secuencia incorpora **16 láminas nuevas de montaje**, además de las vistas de piezas, el marco y las correas. Tocá cualquier ilustración para abrirla a tamaño completo. Verde: piezas impresas; gris: estructura y herrajes; naranja: movimiento, separadores o detalle destacado. Las piezas se dibujan desde los STL publicados; los herrajes simplificados y las separaciones de las vistas explotadas no son plantillas de perforación.
+
+**[Ir a la primera lámina: armar el marco](#3-armar-y-escuadrar-el-marco)** · [Ver el cabezal y su acoplador](#9-cuna-actuador-y-punta-tactil)
 
 ## Antes de empezar
 
@@ -51,6 +53,10 @@ Retirá brim y soportes de las superficies de contacto, alojamientos de tuercas 
 
 ## 3. Armar y escuadrar el marco
 
+![01 / Cerrá el rectángulo](/assets/assembly/paso-01-marco.svg)
+
+![02 / Sujetá las cuatro esquinas](/assets/assembly/paso-02-esquinas.svg)
+
 | Separá | Cantidad |
 |---|---:|
 | Perfil grueso 20×40, largo nominal 355 mm | 2 |
@@ -71,6 +77,10 @@ Esta variante usa escuadras para evitar mecanizar los perfiles: **no hay que tal
 
 ## 4. Patas, travesaños y cama del teléfono
 
+![03 / Montá las cuatro patas](/assets/assembly/paso-03-patas.svg)
+
+![04 / Bajá la cama sobre sus travesaños](/assets/assembly/paso-04-cama.svg)
+
 **Patas:** cuatro piezas cilíndricas, cuatro BHCS M5×16, cuatro RN05BM5 y las almohadillas de EVA de 1 mm previstas.
 
 1. Con el marco apoyado sin cargar las piezas impresas, colocá una pata bajo cada extremo de los costados largos. Sus centros quedan nominalmente a **10 mm de cada extremo** del perfil largo.
@@ -86,6 +96,10 @@ Esta variante usa escuadras para evitar mecanizar los perfiles: **no hay que tal
 **Comprobación:** cama fija, sin torsión, tornillos al ras y escuadras sin tocarla. Todavía no coloqués el teléfono.
 
 ## 5. Rieles y puente móvil
+
+![05 / Alineá los rieles largos](/assets/assembly/paso-05-rieles.svg)
+
+![06 / Uní los dos carros con el puente](/assets/assembly/paso-06-puente.svg)
 
 **Separá:** dos rieles MGN9 de 250 mm con sus carros, un riel de 150 mm con carro, el perfil delgado de 185 mm, las dos uniones impresas, ocho FHCS M3×10, dos FHCS M5×12 y dos RN05BM5. Para los rieles: BHCS M3×8 y RN05BM3 según los agujeros reales, hasta 34 pares en total.
 
@@ -103,6 +117,8 @@ Esta variante usa escuadras para evitar mecanizar los perfiles: **no hay que tal
 
 ## 6. Montar los motores
 
+![07 / Armá A y B por separado](/assets/assembly/paso-07-motores.svg)
+
 | Lado mirando desde el frente | Soporte | Tornillos al motor | Tornillos al marco |
 |---|---|---|---|
 | Izquierdo: motor A | Patas integradas de 8 mm; altura total 14 mm | 4 BHCS M3×6 | 2 BHCS M5×16 + 2 RN05BM5 |
@@ -117,6 +133,10 @@ Esta variante usa escuadras para evitar mecanizar los perfiles: **no hay que tal
 **Comprobación:** soportes planos, sin grietas ni deformación; poleas libres y firmes sobre sus ejes. No se añaden los separadores de motor del diseño metálico anterior: las patas impresas ya cumplen esa función.
 
 ## 7. Preparar los ejes y poleas libres
+
+![08 / Ubicá los diez ejes](/assets/assembly/paso-08-mapa-poleas.svg)
+
+![09 / Armá cada columna en este orden](/assets/assembly/paso-09-arandelas.svg)
 
 Los cuatro bloques fijos van dos al frente y dos junto a los motores. Se fijan al perfil con **cuatro BHCS M5×10 y cuatro RN05BM5**. Los largos traseros tienen dos ejes; los cortos delanteros, uno. Cada unión móvil lleva otros dos: **diez ejes en total**, con diez tuercas cuadradas M4.
 
@@ -140,6 +160,8 @@ En la tabla, **exterior trasero** significa la columna más cercana al extremo d
 Se usan diez poleas lisas, dos dentadas libres y cuatro separadores lisos de 9 mm. Los dos grupos traseros dobles tienen una polea en cada altura.
 
 ### Cuatro puntas roscadas requieren ajuste
+
+![10 / Separá los cuatro ejes móviles](/assets/assembly/paso-10-ejes.svg)
 
 Los tornillos previstos tienen hombro Ø5 y rosca M4 de 8 mm. **Solo los cuatro que van en las uniones móviles** necesitan que la punta roscada quede entre **7,2 y 7,5 mm**, medidos desde el final del hombro liso. Los seis de los bloques fijos conservan sus 8 mm. No acortés el hombro liso ni todos los tornillos del paquete.
 
@@ -179,6 +201,10 @@ El dibujo es una guía de secuencia, no una plantilla de tangencias, envolturas 
 
 ## 9. Cuna, actuador y punta táctil
 
+![11 / Sujetá el actuador en la cuna](/assets/assembly/paso-11-cuna.svg)
+
+![12 / Cerrá el acoplador alrededor de la punta](/assets/assembly/paso-12-acoplador.svg)
+
 **Separá:** la cuna, dos barras, las dos mitades del acoplador, Adafruit 412 y la punta de malla. Tornillos: cuatro BHCS M3×8, dos FHCS M3×10, cuatro BHCS M3×25, dos BHCS M3×16 y un BHCS M3×6. Reservá las tuercas cuadradas M3 de estos alojamientos antes de cerrar el conjunto.
 
 1. En la abrazadera de correa colocá las tuercas M3 que reciben la base y la pared de la cuna, mientras sus entradas siguen accesibles. La cuna se fija con los cuatro M3×8 de la base y los dos avellanados M3×10 de la pared. Confirmá que los tornillos asientan sin bloquear los canales de correa.
@@ -193,6 +219,12 @@ La ranura de la cuna permite ajustar la altura ±3 mm. La geometría nominal con
 **Comprobación:** retorno libre, punta retenida, malla sin comprimir, cable con holgura y ninguna barra tocando la bobina. El encaje del acoplador se valida aquí por primera vez; no está dado por aprobado.
 
 ## 10. Soporte electrónico y guía de cables
+
+![13 / Presentá la electrónica sin conectar](/assets/assembly/paso-13-electronica.svg)
+
+![14 / Revisá el interruptor en la pieza](/assets/assembly/paso-14-interruptor.svg)
+
+![15 / Dejá holgura para los cables](/assets/assembly/paso-15-tubo.svg)
 
 Este paso espera a que **termine, se enfríe y se retire** la impresión del soporte electrónico. El retén pequeño y el soporte largo del tubo ya pertenecen a la tanda de ocho piezas terminada; no hay que repetirlos.
 
@@ -236,6 +268,8 @@ Estas pruebas quedan pendientes hasta completar la mecánica y la revisión elé
 **Criterio para avanzar:** cada etapa funciona por sí misma antes de sumar la siguiente. La primera sesión puede terminar con un marco firme y escuadrado; no necesita terminar con la máquina encendida.
 
 ## 13. Tornillería para separar en bandejas
+
+![16 / No confundás las cabezas](/assets/assembly/paso-16-tornillos.svg)
 
 BHCS es cabeza redondeada con hexágono interior; FHCS es cabeza avellanada. La longitud del BHCS se mide bajo la cabeza; la del FHCS incluye la cabeza. Los tornillos con hombro se identifican por el tramo liso, no por su longitud total.
 
@@ -293,4 +327,4 @@ Esta guía adapta la documentación del proyecto al montaje real. No cambia arqu
 - PhysiClaw hardware v0.51, commit `8f610d48642aef7d974d3ce09d28e14a4a99bbae`: [orientación de uniones](https://github.com/physiclaw/PhysiClaw/blob/8f610d48642aef7d974d3ce09d28e14a4a99bbae/hardware/assembly/procedures/linear_20_joint.py), [correa A](https://github.com/physiclaw/PhysiClaw/blob/8f610d48642aef7d974d3ce09d28e14a4a99bbae/hardware/assembly/procedures/belt_10_motor_a.py), [correa B](https://github.com/physiclaw/PhysiClaw/blob/8f610d48642aef7d974d3ce09d28e14a4a99bbae/hardware/assembly/procedures/belt_30_motor_b.py) y [criterios de montaje originales](https://github.com/physiclaw/PhysiClaw/blob/8f610d48642aef7d974d3ce09d28e14a4a99bbae/docs/hardware/assembly.mdx). Las dimensiones originales y las piezas MISUMI/ELECALL no se trasladan a este montaje.
 - [Adafruit 412](https://www.adafruit.com/product/412), [plano del actuador](https://cdn-shop.adafruit.com/product-files/412/412_C514-B_diagram.PDF), [conexiones del driver 5648](https://learn.adafruit.com/adafruit-mosfet-driver/pinouts) y [NKK S301T, terminales con tornillo](https://www.nkkswitches.com/wp-content/themes/impress-blank/search/inc/part.php?part_no=S301T).
 
-Mecánica derivada de PhysiClaw por Qiao Qian, licencia MIT. Se conserva el [aviso de licencia](../hardware/ft412/LICENSE) y la [atribución del proyecto](ATTRIBUTION.md). Las nuevas ilustraciones son esquemas del montaje y vistas de sus STL, no fotografías de una máquina ya armada.
+Mecánica derivada de PhysiClaw por Qiao Qian, licencia MIT. Se conserva el [aviso de licencia](../hardware/ft412/LICENSE) y la [atribución del proyecto](ATTRIBUTION.md). Las ilustraciones de esta edición combinan vistas de los STL con herrajes esquemáticos y flechas de colocación. No son fotografías de una máquina ya armada ni validación de encajes. Las láminas numeradas 01–16 son acciones visuales; las secciones de texto conservan su numeración propia para consultar el detalle.
