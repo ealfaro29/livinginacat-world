@@ -1,0 +1,123 @@
+"""Operation-first assembly diagrams. Hardware is schematic; no CAD changes."""
+from pathlib import Path
+import html, json
+R=Path(__file__).resolve().parents[1]; O=R/'public/assets/assembly'; O.mkdir(exist_ok=True)
+INK='#173d39'; TEAL='#087f79'; GRAY='#d6dfdf'; ORANGE='#cf5b27'; BG='#faf8f2'; MUTED='#526b73'
+class Fig:
+ def __init__(self,name,title,sub):
+  self.name=name;self.s=[f'<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img"><title>{html.escape(title)}</title><desc>{html.escape(sub)}</desc><defs><marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6" fill="{ORANGE}"/></marker></defs><rect width="1200" height="760" fill="{BG}"/>'];self.t(40,50,title,32,b=True);self.t(40,89,sub,21);self.line(40,110,1160,110,'#d0ddd6',1)
+ def t(self,x,y,text,size=24,col=INK,b=False,anchor='start'):
+  for i,l in enumerate(text.split('\n')):self.s.append(f'<text x="{x}" y="{y+i*size*1.3}" font-family="DejaVu Sans,Arial" font-size="{size}" fill="{col}" font-weight="{700 if b else 400}" text-anchor="{anchor}">{html.escape(l)}</text>')
+ def rect(self,x,y,w,h,fill=GRAY,stroke=INK,r=0):self.s.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{r}" fill="{fill}" stroke="{stroke}" stroke-width="2"/>')
+ def line(self,x,y,x2,y2,col=INK,w=2,arrow=False,dash=False):self.s.append(f'<line x1="{x}" y1="{y}" x2="{x2}" y2="{y2}" stroke="{col}" stroke-width="{w}"'+(' marker-end="url(#a)"' if arrow else '')+(' stroke-dasharray="7 6"' if dash else '')+'/>')
+ def circle(self,x,y,r,fill=BG):self.s.append(f'<circle cx="{x}" cy="{y}" r="{r}" fill="{fill}" stroke="{INK}" stroke-width="2"/>')
+ def poly(self,ps,c=ORANGE):self.s.append('<polygon points="'+' '.join(f'{x},{y}' for x,y in ps)+f'" fill="{c}" stroke="{INK}" stroke-width="2"/>')
+ def nut(self,x,y,s=32,c=ORANGE):self.rect(x-s/2,y-s/2,s,s,c);self.circle(x,y,s*.19)
+ def bolt(self,x,y,l=65):
+  self.rect(x-6,y,12,l,MUTED);self.rect(x-19,y-12,38,12,MUTED,r=3)
+  for yy in range(int(y+8),int(y+l),9):self.line(x-5,yy,x+5,yy-4,BG,1)
+ def note(self,text):self.rect(40,684,1120,48,'#e4f1ec','none',6);self.t(58,715,text,23,b=True)
+ def save(self):self.t(40,752,'Herrajes esquemáticos · no usar como plantilla de perforación · FT412 / edición 3',14,MUTED);(O/(self.name+'.svg')).write_text(''.join(self.s)+'</svg>')
+# 1 real kit families: conspicuous gusset, both bolts, both nuts.
+f=Fig('inicio-01-kit','Reconocé el kit de una escuadra','Cada GS20-05W aporta una escuadra, dos M4×8 y dos SQN05M4.')
+f.t(65,165,'1 ESCUADRA',25,col=TEAL,b=True)
+f.poly([(80,355),(80,240),(230,180),(230,295)],'#afbdc0');f.poly([(80,355),(230,295),(350,350),(200,410)],GRAY)
+f.poly([(90,340),(90,259),(203,390)],'#93a5aa');f.poly([(215,285),(215,205),(330,345)],'#93a5aa')
+f.circle(155,270,17);f.circle(242,350,17)
+f.t(65,457,'Dos alas a 90°',24,b=True);f.t(65,493,'Un agujero por ala.\nUne dos perfiles.',22)
+f.t(455,165,'2 TORNILLOS',25,col=TEAL,b=True)
+f.bolt(505,270,95);f.bolt(625,270,95);f.t(455,457,'M4×8 del kit',24,b=True);f.t(455,493,'Rosca de 4 mm.\nLargo bajo cabeza: 8 mm.',22)
+f.t(830,165,'2 TUERCAS',25,col=TEAL,b=True)
+f.nut(890,302,80);f.nut(1030,302,80);f.t(830,457,'SQN05M4',24,b=True);f.t(830,493,'Cuadradas: 9×9×3 mm.\nEntran por el extremo.',22)
+f.rect(65,583,1070,62,'#e4f1ec','none',8);f.t(85,622,'8 kits en total: 4 para las esquinas + 4 para los travesaños de cama.',23,b=True)
+f.note('No confundás estas tuercas con las M4 pequeñas de las piezas impresas.');f.save()
+# 2 preload by profile group, orange mouths, logical ordering.
+f=Fig('inicio-02-tuercas','Cargá las 16 SQN05M4 antes de cerrar','El tornillo queda hacia la boca de la ranura; la tuerca se desliza desde el extremo.')
+for y,label,count,positions,caption in [(190,'CADA COSTADO · 355 mm',4,[335,505,675,845],'2 costados × 4 = 8'),(350,'CADA EXTREMO GRUESO · 190 mm',2,[380,800],'2 perfiles × 2 = 4'),(510,'CADA TRAVESAÑO DELGADO · 190 mm',2,[380,800],'2 perfiles × 2 = 4')]:
+ f.t(65,y-33,label,23,b=True);f.rect(275,y,650,65);f.rect(275,y+20,650,25,'#889da3');f.line(155,y+32,260,y+32,ORANGE,4,True)
+ for x in positions:f.nut(x,y+32,29)
+ f.t(960,y+26,caption,21,b=True);f.t(65,y+103,'Ranura superior' if y==510 else 'Ranura interior inferior',22,col=TEAL)
+f.t(322,295,'esquina',18);f.t(474,295,'cama',18);f.t(646,295,'cama',18);f.t(810,295,'esquina',18)
+f.t(65,649,'En los gruesos: 40 mm vertical. En los travesaños: la ranura cargada mira arriba.',21)
+f.note('Comprobación: 8 + 4 + 4 = 16. Reservá las tuercas de cama entre las de esquina.');f.save()
+# 3 corner map with accurate contact relation, not an arbitrary decorative rectangle.
+f=Fig('inicio-03-esquinas','Cómo se sujeta una esquina','Una escuadra por esquina interior, dos tornillos y dos tuercas ya dentro de los perfiles.')
+f.t(60,160,'VISTA DESDE ARRIBA',23,col=TEAL,b=True)
+f.rect(75,205,90,370);f.rect(165,485,370,90)
+f.line(121,214,121,567,MUTED,8);f.line(172,529,522,529,MUTED,8)
+# Wings hug two interior faces, triangular web; nuts in profiles and horizontal axes.
+f.poly([(168,481),(168,315),(190,315),(190,459),(345,459),(345,481)],ORANGE)
+f.poly([(190,325),(190,459),(333,459)],'#eba680')
+f.nut(121,369,32);f.nut(285,529,32)
+f.line(121,369,215,369,INK,9);f.line(214,354,214,384,INK,9)
+f.line(285,529,285,431,INK,9);f.line(270,431,300,431,INK,9)
+f.t(220,237,'Interior del marco',23,b=True);f.line(330,251,245,339,ORANGE,3,True)
+f.t(70,625,'Un tornillo hacia cada perfil.',23,b=True)
+# cross section of one inside face with upper and lower cells, step hardware exposed to inside.
+f.t(650,160,'CORTE DE LA CARA INTERIOR',23,col=TEAL,b=True)
+f.rect(650,220,150,350);f.line(650,395,800,395,MUTED,3)
+for yy in (308,483):
+ f.rect(736,yy-35,38,70,BG,BG);f.rect(774,yy-14,29,28,BG,BG)
+f.rect(751,461,14,44,ORANGE);f.rect(813,410,22,150,ORANGE)
+f.line(758,483,887,483,INK,10);f.line(887,461,887,505,INK,14)
+f.t(850,268,'Arriba libre',24,b=True);f.t(850,304,'Rieles y poleas',21)
+f.t(850,403,'Escuadra abajo',24,col=ORANGE,b=True);f.t(850,546,'M4×8 → ala → tuerca',21)
+f.t(650,625,'La tuerca queda detrás de los labios.',22)
+f.note('Usá 8 tuercas para las esquinas. Dejá las otras 8 reservadas para la cama.');f.save()
+# 4 actual flat frame WITH four corner gussets and reserved middle nuts, diagonal lines.
+f=Fig('inicio-07-marco','El marco debe quedar así antes de apretar','Cuatro escuadras interiores visibles y cuatro tuercas reservadas para los travesaños.')
+f.rect(170,170,55,440);f.rect(575,170,55,440);f.rect(225,170,350,55);f.rect(225,555,350,55)
+for x,y,sx,sy in [(225,225,1,1),(575,225,-1,1),(225,555,1,-1),(575,555,-1,-1)]:
+ f.poly([(x,y),(x+sx*58,y),(x,y+sy*58)],ORANGE)
+for x in (205,595):
+ for y in (355,445):f.nut(x,y,20,TEAL)
+f.line(170,170,630,610,TEAL,3,dash=True);f.line(630,170,170,610,ORANGE,3,dash=True)
+f.t(400,151,'FONDO · motores después',22,b=True,anchor='middle');f.t(400,656,'FRENTE',22,b=True,anchor='middle')
+f.t(745,222,'4 ESCUADRAS',27,col=ORANGE,b=True);f.t(745,265,'Una en cada esquina.\nDos tornillos por escuadra.',22)
+f.t(745,377,'4 TUERCAS LIBRES',27,col=TEAL,b=True);f.t(745,420,'Dos por costado.\nSe usan para la cama.',22)
+f.t(745,532,'DIAGONALES IGUALES',23,b=True);f.t(745,571,'Medí antes y después\ndel apriete.',22)
+f.note('Las escuadras están en la mitad inferior: arriba queda sitio para el movimiento.');f.save()
+# 5 bed attachment: map + side cut shows cross top equal frame bottom and perpendicular legs.
+f=Fig('inicio-04-travesanos','La cama también necesita cuatro escuadras','Dos por travesaño. Cada una usa una tuerca del costado y otra del travesaño.')
+f.t(55,160,'UBICACIÓN DESDE ARRIBA',23,col=TEAL,b=True)
+f.rect(85,200,45,400);f.rect(485,200,45,400);f.rect(130,200,355,40);f.rect(130,560,355,40)
+for y in (350,450):
+ f.rect(130,y-12,355,24,'#b8d7d1')
+ for x,s in [(130,1),(485,-1)]:f.rect(x if s==1 else x-36,y-20,36,40,ORANGE)
+f.t(307,185,'FONDO',21,b=True,anchor='middle');f.t(307,642,'FRENTE',21,b=True,anchor='middle')
+f.t(170,315,'207,5 mm desde frente',20);f.t(170,495,'107,5 mm desde frente',20)
+f.t(650,160,'UN EXTREMO · VISTA DE LADO',23,col=TEAL,b=True)
+f.rect(665,215,135,300);f.line(665,365,800,365,MUTED,2)
+f.rect(800,515,320,105);f.rect(850,515,80,25,BG,BG);f.nut(890,548,28)
+f.poly([(802,509),(802,407),(817,407),(817,494),(930,494),(930,509)],ORANGE)
+f.poly([(817,415),(817,494),(922,494)],'#eba680')
+f.nut(767,450,30);f.line(767,450,845,450,INK,7);f.line(844,435,844,465,INK,10)
+f.line(890,548,890,469,INK,7);f.line(875,469,905,469,INK,10)
+f.t(650,202,'Costado grueso',21);f.t(890,657,'Travesaño debajo',22,b=True,anchor='middle')
+f.note('La cara superior del travesaño coincide con la cara inferior del marco.');f.save()
+# 6 brace exploded order from manufacturer/project verified split.
+f=Fig('inicio-05-riostras','Dos tornillos diferentes en cada riostra','La placa plana une un bloque trasero de poleas con su perfil de aluminio.')
+f.rect(120,490,400,110);f.rect(620,455,400,145,'#b8d7d1');f.nut(320,535,40);f.nut(810,500,40)
+f.rect(250,350,630,34);f.circle(320,367,13);f.circle(810,367,13)
+f.bolt(320,205,115);f.bolt(810,205,135)
+f.s.append(f'<ellipse cx="320" cy="330" rx="35" ry="10" fill="{ORANGE}" stroke="{INK}" stroke-width="2"/>');f.circle(320,330,8)
+f.line(320,389,320,485,ORANGE,3,True);f.line(810,389,810,451,ORANGE,3,True)
+f.t(80,157,'AL PERFIL',25,col=TEAL,b=True);f.t(80,203,'M5×10 + arandela 1 mm',23);f.t(640,157,'AL BLOQUE',25,col=TEAL,b=True);f.t(640,203,'M5×12, sin esa arandela',23)
+f.t(145,643,'RN05BM5 dentro del perfil',23,b=True);f.t(625,643,'Tuerca M5 dentro del plástico',23,b=True)
+f.note('Antes de apretar: ambas tuercas puestas, roscas alineadas y placa asentada.');f.save()
+# 7 concealed fasteners, clear ordered sequence before any closing.
+f=Fig('inicio-06-cautivas','Primero las seis tuercas de la abrazadera','Después: correa A en el canal inferior; después: fijar la abrazadera al carro.')
+f.t(70,165,'1 · CARGAR TUERCAS',24,col=TEAL,b=True)
+f.rect(110,350,420,90,'#b8d7d1');f.rect(110,240,55,110,'#b8d7d1')
+for x in [225,315,405,495]:
+ f.nut(x,300,32);f.line(x,322,x,347,ORANGE,3,True)
+for y in [265,320]:f.nut(65,y,29);f.line(85,y,108,y,ORANGE,3,True)
+f.t(180,485,'4 reciben la base de la cuna.',22);f.t(70,530,'2 reciben la pared de la cuna.',22)
+f.t(650,165,'2 · CORREA INFERIOR',24,col=TEAL,b=True)
+f.rect(680,230,420,105,'#b8d7d1');f.circle(780,282,20)
+f.s.append(f'<path d="M1110 265 H780 A17 17 0 0 0 780 299 H1020" fill="none" stroke="{ORANGE}" stroke-width="10"/>')
+f.t(650,380,'Rodeá el poste y doblá la cola.\nLos dientes se traban entre sí.',22)
+f.t(650,485,'3 · FIJAR AL CARRO',24,col=TEAL,b=True);f.t(650,535,'4 M3×8 van al metal del carro.\nNo gastan las 6 tuercas de la cuna.',22)
+f.t(70,625,'Esquema funcional de fijaciones: identificá los seis bolsillos en la pieza real.',21,MUTED)
+f.note('No cierres el acceso inferior antes de pasar la correa A.');f.save()
+print(json.dumps({'newFigures':7,'geometryChanged':False}))

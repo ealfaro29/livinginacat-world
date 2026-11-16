@@ -4,7 +4,7 @@ Run in the assembly-guide Python environment, then rasterize SVGs for the PDF.
 This renderer never regenerates CAD or reads printer/commerce state.
 """
 from pathlib import Path
-import base64, hashlib, html, io, json
+import base64, hashlib, html, io, json, re
 import numpy as np
 import trimesh
 import matplotlib
@@ -38,6 +38,7 @@ def shifted(m,c):
 class Plate:
     def __init__(self,num,title,subtitle):
         self.name=num
+        title=re.sub(r"^\d+ / ", "", title)
         self.s=[f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="1000" viewBox="0 0 1200 1000" role="img"><title>{html.escape(title)}</title><desc>{html.escape(subtitle)}</desc><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="{ORANGE}"/></marker></defs><rect width="1200" height="1000" fill="{PAPER}"/>']
         self.text(50,50,'FT412  /  MONTAJE VISUAL',19,TEAL,bold=True)
         self.text(50,100,title,37,bold=True)
