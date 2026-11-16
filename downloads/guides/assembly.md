@@ -4,7 +4,7 @@
 
 [Descargar el PDF para la mesa de trabajo](/downloads/guia-ensamblaje-ft412-es.pdf). La secuencia incorpora **16 láminas nuevas de montaje**, además de las vistas de piezas, el marco y las correas. Tocá cualquier ilustración para abrirla a tamaño completo. Verde: piezas impresas; gris: estructura y herrajes; naranja: movimiento, separadores o detalle destacado. Las piezas se dibujan desde los STL publicados; los herrajes simplificados y las separaciones de las vistas explotadas no son plantillas de perforación.
 
-**[Ir a la primera lámina: armar el marco](#3-armar-y-escuadrar-el-marco)** · [Ver el cabezal y su acoplador](#9-cuna-actuador-y-punta-tactil)
+**[Ir a la primera lámina: armar el marco](#3-armar-y-escuadrar-el-marco)** · [Video por etapas](#video-de-apoyo-para-este-montaje) · [Ver el cabezal y su acoplador](#9-cuna-actuador-y-punta-tactil)
 
 ## Antes de empezar
 
@@ -17,6 +17,33 @@ La preferencia actual es PLA. Las tandas anteriores conservan sus materiales rea
 **Para la primera sesión, separá:** los siete perfiles, ocho escuadras con sus tornillos, cuatro patas, cuatro M5×16 y cuatro tuercas de perfil M5. Tené a mano una superficie plana, regla o calibre, escuadra, llaves Allen y recipientes para separar tornillos. Usá herramienta manual para sentir cuándo asienta cada tornillo.
 
 Cada etapa termina con una comprobación. Marcala solamente cuando la hayas hecho físicamente. Tener una pieza impresa o un paquete recibido no significa que esa comprobación ya pasó.
+
+## Video de apoyo para este montaje
+
+El [tutorial de PhysiClaw](https://www.youtube.com/watch?v=Acmta1kzEko) dura 3 h 31 min y tiene capítulos. El [manual oficial también está en inglés](https://docs.physiclaw.ai/en/hardware/manual/), con ilustraciones y tornillería; consultamos la versión del 11 de noviembre de 2026. El autor da prioridad al manual sobre el video. Para FT412, conservamos las adaptaciones de esta guía.
+
+**Cómo usarlo:** mirá el capítulo, pausá y seguí la tornillería y comprobación FT412. Mantenemos el orden de esta guía: que el video monte la cama más tarde no obliga a desarmarla.
+
+| Parte del tutorial | Inicio | Aplicación al FT412 |
+|---|---|---|
+| Materiales y herramientas | [00:00](https://www.youtube.com/watch?v=Acmta1kzEko&t=0s) | Reconocimiento de formas; nuestras 22 piezas están en la etapa 2. |
+| Marco | [16:53](https://www.youtube.com/watch?v=Acmta1kzEko&t=1013s) | Etapa 3: 355 mm y escuadras GS20. No copiar agujeros ni M6 del original. |
+| Poleas libres | [27:23](https://www.youtube.com/watch?v=Acmta1kzEko&t=1643s) | Etapa 7: mantener nuestras arandelas y el ajuste de los cuatro ejes móviles. |
+| Motores | [45:14](https://www.youtube.com/watch?v=Acmta1kzEko&t=2714s) | Etapa 6: A izquierdo, B derecho. Patas de 8/12 mm ya integradas en los soportes. |
+| Rieles y puente | [56:26](https://www.youtube.com/watch?v=Acmta1kzEko&t=3386s) | Etapa 5: observar carros y alineación. Rieles Y de 250 mm y tornillería FT412. |
+| Correas | [1:25:50](https://www.youtube.com/watch?v=Acmta1kzEko&t=5150s) | Etapa 8: observar el retorno en la abrazadera, A abajo y B arriba. Presentar el recorrido real antes de cortar. |
+| Cabezal | [1:57:56](https://www.youtube.com/watch?v=Acmta1kzEko&t=7076s) | Etapa 9: Adafruit 412, barras y acoplador. No enroscar la punta al vástago. |
+| Cama del teléfono | [2:28:30](https://www.youtube.com/watch?v=Acmta1kzEko&t=8910s) | Etapa 4: travesaños de 190 mm con escuadras; no los de 230 mm perforados. |
+| Placa y cables | [2:40:17](https://www.youtube.com/watch?v=Acmta1kzEko&t=9617s) | Etapas 10–11: 5648, S301T y protección propios. No conectar el 412 directo a Spindle. |
+| Cámara y pruebas | [3:15:03](https://www.youtube.com/watch?v=Acmta1kzEko&t=11703s) | Etapa 12: brazo externo; encendido y calibración tras verificar esta unidad. |
+
+### Detalles del video que requieren adaptación
+
+- **Rieles:** a 58:19 se mencionan M3×10 avellanados. Aquí usamos M3×8 BHCS y RN05BM3: comprobá su asiento en el riel real, según la etapa 5.
+- **Correas:** los 75 Hz del manual corresponden a un tramo de 220 mm del original. No son una calibración de nuestro marco y soportes FDM. Seguí el ajuste progresivo de la etapa 8.
+- **Cableado:** nuestro 412 usa el 5648. Referencia de la punta, corte y protecciones requieren el esquema FT412 antes de energizar. Orientá los drivers por sus pines y serigrafía, no solo por colores.
+
+**Empezá en 16:53 y seguí la etapa 3:** marco plano, diagonales iguales y uniones aún ajustables.
 
 ## 1. Cómo orientarnos
 
