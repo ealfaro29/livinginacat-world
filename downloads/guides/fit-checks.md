@@ -31,4 +31,6 @@ On November 16, the owner confirms all project prints complete and asks to begin
 
 Coupler fit, complete assembly acceptance, motion, touch accuracy and thermal/load performance remain unvalidated. The original PETG design settings and all earlier Silk observations remain dated evidence. The PETG job has started, but no finished PETG fit result is confirmed. Changing material does not change the CAD geometry or complete functional acceptance.
 
+A subsequent November 16 owner report confirms the frame with four corner brackets and its feet assembled, with two loose nuts reserved in each long side’s inner lower slot. This is owner evidence, without supplied diagonal measurements or independent visual inspection. Bed crossmembers, rails and full assembly remain unconfirmed. With the bed crossmembers’ slot facing up, their section is 10 mm high and 20 mm wide; the guide’s earlier reversed orientation has been corrected.
+
 The published CAD archive remains the original v0.1 snapshot; its files, quantities and checksum have not changed. Current observations are also available as [build-progress JSON](/downloads/build-progress.json). See the [project guide](/documentation/project-guide/) for the verification sequence and the [shipment record](/shipments/) for current verified logistics.

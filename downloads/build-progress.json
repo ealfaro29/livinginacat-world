@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "reportedAt": "2026-11-16",
-  "source": "Owner reports that all project parts are printed and requests assembly; no new printer observation",
-  "stage": "All 22 installed printed pieces have recorded completion; ready for frame assembly",
+  "source": "Owner reports all project prints complete and subsequently confirms the frame, four corner brackets, feet and two reserved nuts per side assembled; no new printer observation",
+  "stage": "All 22 installed printed pieces have recorded completion; frame and feet assembled by owner report, bed crossmembers next",
   "firstTestBatchCompleted": true,
   "secondBatchCompletionConfirmed": true,
   "material": "PLA Silk",
@@ -241,7 +241,7 @@
     "awaitingPhysicalInventoryPieces": 0,
     "additionalUnpreparedPieces": 0
   },
-  "nextAssemblyStep": "Identify the four thick profiles, present and square the frame; confirm physical assembly before proceeding to feet",
+  "nextAssemblyStep": "Prepare the two 190 mm bed crossmembers with the slot facing up, 10 mm high and 20 mm wide; preload two SQN05M4 nuts in each before installation",
   "fifthBatchCompletionConfirmed": true,
   "fifthBatch": {
     "batch": "FT412_05",
@@ -287,8 +287,17 @@
   },
   "assemblyProgress": {
     "assemblyRequestedAt": "2026-11-16",
-    "activeGuideStep": "frame",
-    "frameAssemblyConfirmed": false,
-    "poweredCommissioningConfirmed": false
+    "activeGuideStep": "bed_crossmembers_preparation",
+    "frameAssemblyConfirmed": true,
+    "poweredCommissioningConfirmed": false,
+    "feetInstalledConfirmed": true,
+    "cornerBracketsInstalled": 4,
+    "reservedBedNutsPerLongSide": 2,
+    "confirmationBasis": "owner_report",
+    "reportedAt": "2026-11-16",
+    "exactAssemblyEventDate": null,
+    "diagonalMeasurementsMM": null,
+    "independentVisualVerification": false,
+    "bedCrossmembersInstalledConfirmed": false
   }
 }
