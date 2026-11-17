@@ -11,7 +11,7 @@ The board envelopes, major components and connector paths are schematic. The scr
 - Drag components in plan, front, side or 3D views. Drag empty 3D space to orbit and use the wheel to zoom.
 - Edit dimensions, position, mounting face, grouping, rotation and the fan/display aperture in the inspector.
 - Pi movement carries its cooler and lid fan in XY; changing the Pi's height retains the fan at the lid. MKS rotation carries its two drivers.
-- Collision checks use 3D oriented bounding boxes. Components in one declared assembly family are intentionally excluded from mutual collision checks; the editor does not validate PCB sockets, mounting engagement, connector internals or thermal behavior.
+- Collision checks use 3D oriented bounding boxes. Only the expected Pi/cooler and MKS/driver parent-to-child envelope overlaps are excluded; fan-to-heatsink and driver-to-driver clashes remain detectable even in linked groups. The editor does not validate PCB sockets, mounting engagement, connector internals or thermal behavior.
 - Undo/redo covers layout edits. The browser stores the local design; Export JSON and Save HTML preserve a portable copy.
 - Import JSON validates the schema, bounded numeric values, unique part IDs and non-cyclic grouping. It does not execute imported content.
 

@@ -29,6 +29,9 @@ test('moving MOSFET into MKS reports a collision without flagging intended drive
   assert.ok(validate(s).some(i=>i.severity==='error'&&i.ids.includes('mosfet')&&i.ids.includes('mks')));
   assert.ok(!validate(initialState()).some(i=>i.severity==='error'&&i.ids.includes('driver-x')));
 });
+test('lowering the lid detects fan-to-heatsink collisions inside the linked Pi assembly',()=>{
+  const s=initialState();setBox(s,'height',35);assert.ok(validate(s).some(i=>i.severity==='error'&&i.ids.includes('fan')&&i.ids.includes('cooler')));
+});
 test('long sections and out-of-profile anchors are reported before export',()=>{
   const s=initialState();s.box.split=270;s.box.anchors[1]=370;const issues=validate(s);assert.ok(issues.some(i=>i.text.includes('demasiado larga')));assert.ok(issues.some(i=>i.text.includes('apoyo')));
 });

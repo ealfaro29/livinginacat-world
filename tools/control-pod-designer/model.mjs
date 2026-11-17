@@ -64,6 +64,10 @@ export function initialState(){return {schema:'ft412-control-layout',version:VER
   part('mosfet','mosfet',211,88,8),part('fuse','fuse',237,30,8)
 ],ui:{selected:'pi',view:'top',grid:true,snap:1,ports:true,lid:false,robot:true},cutouts:[]};}
 export function familyRoot(state,p){let n=p;const seen=new Set();while(n.parent&&!seen.has(n.id)){seen.add(n.id);const v=state.parts.find(x=>x.id===n.parent);if(!v)break;n=v;}return n.id;}
+function intendedAssemblyOverlap(a,b){
+  const pairs=[[a,b],[b,a]];
+  return pairs.some(([board,child])=>child.parent===board.id&&((board.type==='pi'&&child.type==='cooler')||(board.type==='mks'&&child.type==='driver')));
+}
 export function descendants(state,id){const ids=new Set([id]);for(let i=0;i<state.parts.length;i++)for(const p of state.parts)if(ids.has(p.parent))ids.add(p.id);return state.parts.filter(p=>ids.has(p.id));}
 export function movePart(state,id,delta,group=true){const p=state.parts.find(p=>p.id===id);if(!p||p.locked)return;for(const q of (group?descendants(state,id):[p])){q.x=round(q.x+delta[0]);q.y=round(q.y+delta[1]);if(q===p||q.face!=='lid')q.z=round(q.z+delta[2]);}}
 export function rotatePart(state,id,deg){const p=state.parts.find(p=>p.id===id);if(!p||p.locked)return;const a=axes(p),normal=a[2],r=rad(deg);for(const q of descendants(state,id).filter(q=>q!==p)){
@@ -96,7 +100,7 @@ export function validate(state){const b=state.box,issues=[];const ps=state.parts
     if(p.type==='fan'&&(p.aperture||32)>=Math.min(p.size[0],p.size[1])-1)issues.push({severity:'error',ids:[p.id],text:'La abertura del ventilador no deja margen dentro de su marco.'});
     if(p.type==='lcd'&&(p.aperture||LIBRARY.lcd.aperture).some((n,i)=>n>=p.size[i]))issues.push({severity:'error',ids:[p.id],text:'La ventana de la pantalla supera su placa.'});
   }
-  for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.length;j++)if(familyRoot(state,ps[i])!==familyRoot(state,ps[j])&&intersects(ps[i],ps[j]))issues.push({severity:'error',ids:[ps[i].id,ps[j].id],text:`Choque: ${ps[i].name} / ${ps[j].name}.`});
+  for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.length;j++)if(!intendedAssemblyOverlap(ps[i],ps[j])&&intersects(ps[i],ps[j]))issues.push({severity:'error',ids:[ps[i].id,ps[j].id],text:`Choque: ${ps[i].name} / ${ps[j].name}.`});
   if(b.length>b.bed-10){const a=b.split,c=b.length-a;if(Math.max(a,c)>b.bed-10||Math.min(a,c)<30)issues.push({severity:'error',ids:[],text:'La división deja una sección demasiado larga para la cama, incluyendo 10 mm de margen.'});
     for(const p of ps.filter(p=>!p.parent)){const bb=bounds(p);if(bb.min[0]<a-2&&bb.max[0]>a+2)issues.push({severity:'info',ids:[p.id],text:`${p.name}: cruza la unión entre secciones; revisar al diseñar la base.`});}}
   if(b.width>b.bed-10)issues.push({severity:'error',ids:[],text:'El ancho supera el espacio de impresión reservado.'});
