@@ -1,6 +1,6 @@
 # Guía de ensamblaje · robot FT412
 
-**Edición 3.1 · instrucciones de mesa · 17 de noviembre de 2026.** Montaje FramingTech 355/250 con Adafruit 412.
+**Edición 3.2 · instrucciones de mesa · 17 de noviembre de 2026.** Montaje FramingTech 355/250 con Adafruit 412.
 
 [Descargar el manual ilustrado en PDF](/downloads/guia-ensamblaje-ft412-es.pdf) · [Empezar: piezas del marco](#paso-01-separar-los-perfiles-y-las-escuadras) · [Cargar las tuercas antes de cerrar](#paso-02-cargar-las-tuercas-de-entrada-por-el-extremo)
 
@@ -12,7 +12,9 @@ Miramos desde el frente, por donde se coloca el teléfono: los motores quedan al
 
 Las 22 piezas impresas están terminadas según el dueño. Sus encajes todavía se comprueban al montar. Trabajá con fuente y USB desconectados y sin teléfono. Las medidas son nominales del proyecto: cotejalas con tus piezas. El cableado y el encendido están separados del armado mecánico al final de esta guía.
 
-**Corrección del paso 23:** los refuerzos de la cuna original chocan con la abrazadera. No forcés ese montaje. La [cuna REV01 en STL](/downloads/ft412-cradle-rev01/FT412_Cuna_Adafruit412_REV01_Refuerzos_Corregidos.stl) corrige esa interferencia en CAD; falta imprimirla y probar el encaje. [Ver la explicación ilustrada](#correccion-de-la-cuna-rev01).
+**Corrección del paso 23:** los refuerzos de la cuna original chocan con la abrazadera. No forcés ese montaje. La [cuna REV01 en STL](/downloads/ft412-cradle-rev01/FT412_Cuna_Adafruit412_REV01_Refuerzos_Corregidos.stl) corrige esa interferencia en CAD; la comprobación digital no certifica su encaje físico. [Ver la explicación ilustrada](#correccion-de-la-cuna-rev01).
+
+**Paso 25, acoplador:** el dueño reporta ajuste incómodo y apariencia oval de las mitades anteriores. La [pareja REV01](/documentation/coupler-rev01/) incorpora las medidas de su punta y ya inició su impresión a **0,16 mm**, sin finalización ni encaje nuevos confirmados.
 
 
 ## Paso 01. Separar los perfiles y las escuadras
@@ -643,22 +645,22 @@ Todas las cifras de arandelas están en mm. La cabeza del eje cierra la columna 
 
 | Pieza o herraje | Cant. | Uso en este paso |
 |---|---:|---|
-| Mitades impresas del acoplador | 1 delantera + 1 trasera | Rodean capuchón y collar |
+| Mitades del acoplador REV01 | 2 | Una delantera y una trasera; reemplazan el par anterior |
 | Punta de malla | 1 | Collar metálico retenido |
-| BHCS M3×16 | 2 | Cierre de las mitades |
-| BHCS M3×6 | 1 | Contacto lateral de referencia |
+| BHCS M3×16 · #7222 | 2 | Cierre de las mitades |
+| BHCS M3×6 · #7218 | 1 | Contacto lateral de referencia |
 | Tuerca cuadrada M3 | 3 | 2 cierre + 1 contacto |
-| Conductor flexible de referencia | Según recorrido real | Preparación de referencia; conexión eléctrica pendiente |
+| Conductor flexible de referencia | A medir | Según recorrido real; conexión eléctrica pendiente |
 
 **Herramientas:** Allen M3 y multímetro para continuidad, sin alimentar.
 
-**Antes de montar:** Insertá las tres tuercas en sus bolsillos ANTES de juntar las mitades. Si aún no tenés el conductor adecuado, dejá la tuerca y su M3×6 preparados; no declares la referencia terminada.
+**Antes de montar:** Esperá a que termine el par REV01 y probá aro y malla sin tornillos. Cargá las tres tuercas antes de cerrar: dos en la mitad con dos bolsillos y una en la otra. La conexión eléctrica se completa después.
 
 ![Cerrar el acoplador y retener la punta: posición de piezas y orden de montaje](/assets/assembly/paso-12-acoplador.svg)
 
-1. Apoyá capuchón del actuador y collar de la punta en sus alojamientos. El vástago no se dobla; la malla queda fuera y libre.
+1. Apoyá el extremo del palito del solenoide en el hueco superior y el aro metálico de la punta en el rebaje inferior. La malla sale hacia la cama y queda libre.
 2. Juntá las mitades con los dos M3×16. La rosca de la punta entra en una cavidad lisa: no se atornilla al vástago ni al plástico.
-3. Dejá la separación prevista entre mitades; no la elimines apretando de más. Comprobá retención del collar y retorno del actuador.
+3. La separación de diseño es 0,50 mm sin apretar. Ajustá solo hasta retener, sin juntar completamente las caras. Comprobá retención del aro y retorno del solenoide.
 4. Cuando esté disponible el conductor, su M3×6 lateral lo sujeta contra el metal de la punta. Dejá holgura y comprobá continuidad hasta la malla; la conexión de referencia se revisa después.
 
 **Comprobá antes de seguir:** punta retenida, malla sin aplastar y retorno completo. La primera prueba de contacto será sobre una superficie de ensayo, sin teléfono.
@@ -953,10 +955,25 @@ REV01 mueve cada refuerzo 3 mm hacia el centro, conservando su espesor y secció
 
 Reutilizá la abrazadera instalada, ambas correas, las dos barras y sus herrajes. La cuna nueva sustituye una pieza de las 22 del manifiesto; no añade una pieza instalada. Antes de fijarla, cargá las cuatro tuercas para las barras como muestra el paso 23. Presentá sin apretar y verificá asiento, alineación y libertad de correas. No se ha enviado ni iniciado su impresión.
 
+## Corrección del acoplador REV01
+
+El dueño midió el aro metálico en **8,83 mm de diámetro y 4,55 mm de alto**, y la malla en **7,90 mm**, sin comprimirla. También informó que el círculo impreso parecía oval y el encaje resultaba incómodo; no hay una medición independiente de esa ovalidad.
+
+![Alojamientos nominales del acoplador REV01 comparados con las medidas reales de la punta](/assets/assembly/acoplador-rev01-ajuste.svg)
+
+La salida original de 7,40 mm es menor que la malla reportada. REV01 usa una salida de **8,30 mm** y un alojamiento del aro de **9,30 mm de diámetro por 4,95 mm de alto**. Conserva el escalón inferior que retiene el aro, los alojamientos del palito y las tres tuercas, los tornillos y el canal del conductor. No cambia la escala ni la altura nominal de contacto. La holgura elegida es una preparación para ensayo, no un encaje físico ya aceptado.
+
+La placa contiene exactamente dos piezas a escala 100 %, con sus cavidades hacia arriba: PLA, principal de 0,4 mm, capas inicial y nominal de **0,16 mm**, seis paredes, seis capas superiores/inferiores, 80 % gyroid, brim de 3 mm y sin soportes o torre de purga. Las paredes exteriores/interiores van a 25/45 mm/s. El proyecto y el laminado nativo se verificaron antes de enviar el trabajo por solicitud expresa del dueño. Se observó el trabajo exacto activo en preparación inicial, **0/48 capas**. Estimaciones: **1 h 15 min 24 s, 6,28 g y 2,104 m**, no duración ni consumo reales. La finalización, redondez impresa y retención física siguen pendientes.
+
+- [STL delantero REV01](/downloads/ft412-coupler-rev01/FT412_Acoplador_Delantero_REV01.stl) y [STL trasero REV01](/downloads/ft412-coupler-rev01/FT412_Acoplador_Trasero_REV01.stl): una unidad de cada uno.
+- [Paquete con STL, STEP, perfil y verificación digital](/downloads/ft412-coupler-rev01.zip) y [detalle de esta revisión](/documentation/coupler-rev01/).
+
+Las superficies del CAD son circulares y los archivos conservan escala uniforme. Al juntar completamente unas caras separadas por 0,50 mm, el hueco se estrecha en la dirección de cierre y puede parecer oval. No se atribuye el reporte del dueño a una causa física única sin medir la impresión. Probá primero la punta sin tornillos; luego verificá retención y retorno sin corriente sobre una superficie de ensayo. Estas dos piezas sustituyen el par anterior: el total instalado sigue siendo 22.
+
 ## Fuentes y límites de esta edición
 
 
-Esta guía adapta la documentación del proyecto al montaje real. REV01 corrige por separado la posición de los refuerzos de una cuna. La arquitectura, cantidad de piezas instaladas y el archivo histórico v0.1 permanecen iguales; los STL y STEP originales conservan sus hashes. La finalización de impresiones y los ensayos físicos siguen registrados por separado.
+Esta guía adapta la documentación del proyecto al montaje real. Las revisiones separadas corrigen los refuerzos de una cuna y los alojamientos de las dos mitades del acoplador. La arquitectura, cantidad de piezas instaladas y el archivo histórico v0.1 permanecen iguales; los STL y STEP originales conservan sus hashes. La finalización de impresiones y los ensayos físicos siguen registrados por separado.
 
 - [Configuración y tornillería FT412](../hardware/ft412/README.md), [soportes de motor](../hardware/ft412/MOTOR-MOUNTS.md), [electrónica](../hardware/ft412/ELECTRONICS.md) y [pruebas de encaje](FIT-CHECKS.md).
 - Registros CAD: [marco](../hardware/ft412/qa/framingtech-frame.json), [patas](../hardware/ft412/qa/feet.json), [ejes y arandelas](../hardware/ft412/qa/shoulder-axles.json), [integración](../hardware/ft412/qa/integration.json), [manifiesto de piezas](../hardware/ft412/qa/print-manifest.json). Son comprobaciones nominales; no certifican un ensamblaje físico.
