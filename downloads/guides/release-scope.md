@@ -2,7 +2,7 @@
 
 16 final STL designs and their 16 STEP files; 22 installed printed parts plus three fit coupons. The v0.1 archive remains the original digital-review snapshot, with its checksum unchanged. Use `qa/print-manifest.json` for quantities and `README.md` for planned assembly.
 
-**Coupler fit correction, November 17, 2026:** the separate [coupler REV01 pair](/documentation/coupler-rev01/) incorporates the owner's tip measurements and replaces the two original halves. The requested 0.16 mm print has started; completion, printed roundness and physical fit are unconfirmed. Solenoid-cap and fastener features are preserved. This does not alter the original archive or add installed parts.
+**Coupler fit correction, November 17, 2026:** the separate [coupler REV01 pair](/documentation/coupler-rev01/) incorporates the owner's tip measurements and replaces the two original halves. The owner subsequently confirms both replacement halves printed and installed, and reports completing the unpowered retention/return check before requesting continuation. Actual event dates, measured printed roundness and powered or thermal performance were not supplied. Solenoid-cap and fastener features are preserved. This does not alter the original archive or add installed parts.
 
 **Cradle fit correction, November 17, 2026:** the original L-shaped cradle has rib interference with the belt clamp. Use the separate [cradle REV01 replacement](/documentation/cradle-rev01/) for its next physical fit trial. The six mounting holes and four captive-nut cavities are unchanged. Digital collision checks pass; the corrected part has not yet been printed or physically tested. This replaces one cradle and does not add an installed piece or modify the original v0.1 archive.
 

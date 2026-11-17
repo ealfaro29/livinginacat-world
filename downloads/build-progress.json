@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "reportedAt": "2026-11-16",
-  "source": "Owner-reported solenoid installation and tip measurements; native saved/sliced replacement pair and matching active printer job observed",
-  "stage": "Solenoid installed by owner report; corrected coupler pair print started at 0.16 mm, with printed roundness and fit pending",
+  "reportedAt": "2026-11-17",
+  "source": "Direct owner reports: corrected coupler pair printed and installed; unpowered check completed and continuation requested",
+  "stage": "Corrected coupler pair printed and installed; owner completed the unpowered check; electronics support mounting is next",
   "firstTestBatchCompleted": true,
   "secondBatchCompletionConfirmed": true,
   "material": "PLA Silk",
@@ -14,7 +14,7 @@
       "M5"
     ],
     "pendingChecks": [
-      "coupler"
+      "switch_clearance"
     ],
     "basis": "owner_report",
     "individualHolePocketAndSeatResultsItemized": false,
@@ -81,7 +81,7 @@
     "prepared": true,
     "sliced": true,
     "printStarted": true,
-    "printCompleted": false,
+    "printCompleted": true,
     "parts": {
       "couplerRearREV01": 1,
       "couplerFrontREV01": 1
@@ -108,7 +108,15 @@
     "estimatedMassG": 6.28,
     "estimatesAreNotActualPrintResults": true,
     "measuredFitConfirmed": false,
-    "goodPrintOutcomeExplicitlyReported": null
+    "goodPrintOutcomeExplicitlyReported": null,
+    "installed": true,
+    "completionBasis": "direct_owner_report",
+    "reportedAt": "2026-11-17",
+    "exactCompletionDate": null,
+    "exactInstallationDate": null,
+    "unpoweredCheckCompletedByOwner": true,
+    "unpoweredCheckOutcome": "completed_and_continuation_requested_no_problem_reported",
+    "priorObservedProgressIsHistorical": true
   },
   "historicalCurrentPrintBatches": [
     {
@@ -272,13 +280,15 @@
   "printInventorySummary": {
     "installedPieces": 22,
     "printCompletionRecordedPieces": 22,
-    "printingPieces": 2,
+    "printingPieces": 0,
     "awaitingPhysicalInventoryPieces": 0,
     "additionalUnpreparedPieces": 0,
     "replacementPiecesInCurrentBatch": 2,
-    "original22PiecePrintCompletionPreserved": true
+    "original22PiecePrintCompletionPreserved": true,
+    "replacementPrintCompletionRecordedPieces": 2,
+    "replacementPiecesInstalledByOwnerReport": 2
   },
-  "nextAssemblyStep": "After the corrected pair finishes, inspect it and trial-fit the tip without force; preload three M3 nuts and retain the metal collar with the original fasteners. Preserve the split gap and verify unpowered return before phone contact.",
+  "nextAssemblyStep": "Preload four small square M3 nuts in the printed electronics support. Mount it outside the rear profile using two #6674 M5x12 countersunk screws and two RN05BM5 roll-in nuts, one in each rear groove; keep power and USB disconnected.",
   "fifthBatchCompletionConfirmed": true,
   "fifthBatch": {
     "batch": "FT412_05",
@@ -324,7 +334,7 @@
   },
   "assemblyProgress": {
     "assemblyRequestedAt": "2026-11-16",
-    "activeGuideStep": "25_corrected_coupler_printing",
+    "activeGuideStep": "26_electronics_support_preload_and_mount",
     "frameAssemblyConfirmed": true,
     "poweredCommissioningConfirmed": false,
     "feetInstalledConfirmed": true,
@@ -353,8 +363,12 @@
     "solenoidRetainingBarsInstalled": 2,
     "solenoidRetainingScrewsInstalled": 4,
     "solenoidConfirmationBasis": "direct_owner_report",
-    "couplerInstalledConfirmed": false,
-    "couplerPhysicalFitAccepted": false
+    "couplerInstalledConfirmed": true,
+    "couplerPhysicalFitAccepted": false,
+    "couplerInstallationBasis": "direct_owner_report",
+    "couplerUnpoweredCheckCompleted": true,
+    "couplerCheckBasis": "owner reports check completed and requests continuation; no problem reported",
+    "electronicsSupportInstalledConfirmed": false
   },
   "reviewedOn": "2026-11-17",
   "correctiveRevision": {
@@ -391,7 +405,13 @@
     "originalPrintedRoundnessIndependentlyMeasured": false,
     "physicalFitConfirmed": false,
     "printStarted": true,
-    "printCompleted": false,
-    "originalV01Preserved": true
+    "printCompleted": true,
+    "originalV01Preserved": true,
+    "installedByOwnerReport": true,
+    "completionBasis": "direct_owner_report",
+    "reportedAt": "2026-11-17",
+    "exactCompletionDate": null,
+    "unpoweredCheckCompletedByOwner": true,
+    "printedRoundnessMeasured": false
   }
 }
