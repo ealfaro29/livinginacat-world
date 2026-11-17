@@ -1,5 +1,7 @@
 # living in a cat world · Project guide
 
+**Side control module, November 17:** the owner selected a new enclosure fixed outside the right-hand aluminium profile, with the TS24-R V2.1 display facing forward and an initial length of 355 mm. It will integrate the existing Raspberry Pi 5, DLC32, two TMC2209 drivers, MOSFET and cutoff switch, retaining the CanaKit cooling hardware and separate external supplies. The [visual layout editor](/tools/control-module/) supports component placement, box sizing, connector reservations and JSON/HTML export. The existing rear installation remains in place while physical dimensions, mounting, wiring access and cooling are checked. No enclosure CAD, fabrication, relocation or electrical validation is implied by the editable layout.
+
 **Current assembly, November 17:** the owner confirms the electronics support mounted and reports an uneven underside. A separate optional 75 × 75 mm cosmetic plate and raised symbol are prepared as two separate parts, without clips or holes. The logo uses nominal Color Mix 90% yellow and 10% black and its matching job was observed starting at 0/12 layers, without completion confirmed. The black plate remains separate without a confirmed print; preserve the honeycomb openings when fitting the plate. The original 22-part manifest and archived CAD remain unchanged.
 
 Start assembling with the [illustrated Spanish assembly guide](ASSEMBLY-ES.md), including a printable PDF, exact fasteners, frame orientation and checks for each stage.
