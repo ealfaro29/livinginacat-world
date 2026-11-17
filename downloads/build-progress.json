@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "reportedAt": "2026-11-16",
-  "source": "Owner reports all project prints complete and subsequently confirms the frame, four corner brackets, feet and two reserved nuts per side assembled; no new printer observation",
-  "stage": "All 22 installed printed pieces have recorded completion; frame and feet assembled by owner report, bed crossmembers next",
+  "source": "Owner-reported print completion and subsequent passive assembly checkpoints; original cradle seating interference reproduced in CAD",
+  "stage": "Frame, phone bed, rails, motors, idlers and both belts assembled by owner report; original cradle fit blocked, REV01 awaits physical testing",
   "firstTestBatchCompleted": true,
   "secondBatchCompletionConfirmed": true,
   "material": "PLA Silk",
@@ -241,7 +241,7 @@
     "awaitingPhysicalInventoryPieces": 0,
     "additionalUnpreparedPieces": 0
   },
-  "nextAssemblyStep": "Prepare the two 190 mm bed crossmembers with the slot facing up, 10 mm high and 20 mm wide; preload two SQN05M4 nuts in each before installation",
+  "nextAssemblyStep": "Print one replacement cradle REV01 and check seating without force; preload four bar nuts before fastening the cradle. Original cradle interference blocks this step.",
   "fifthBatchCompletionConfirmed": true,
   "fifthBatch": {
     "batch": "FT412_05",
@@ -287,7 +287,7 @@
   },
   "assemblyProgress": {
     "assemblyRequestedAt": "2026-11-16",
-    "activeGuideStep": "bed_crossmembers_preparation",
+    "activeGuideStep": "23_cradle_fit_blocked_original_interference",
     "frameAssemblyConfirmed": true,
     "poweredCommissioningConfirmed": false,
     "feetInstalledConfirmed": true,
@@ -298,6 +298,36 @@
     "exactAssemblyEventDate": null,
     "diagonalMeasurementsMM": null,
     "independentVisualVerification": false,
-    "bedCrossmembersInstalledConfirmed": false
+    "bedCrossmembersInstalledConfirmed": true,
+    "phoneBedInstalledConfirmed": true,
+    "motorMountsAndDrivePulleysInstalledConfirmed": true,
+    "fixedAndMovingIdlersInstalledConfirmed": true,
+    "longRailsAndBridgeInstalledConfirmed": true,
+    "shortRailAndCarriageInstalledConfirmed": true,
+    "rightRailFinalTighteningConfirmed": true,
+    "bothBeltsInstalledAndTensionedConfirmed": true,
+    "manualTravelSmoothReported": true,
+    "cradleInstalledConfirmed": false,
+    "updatedOn": "2026-11-17",
+    "actualBeltTensionMeasured": null,
+    "motorPulleyHeightMeasured": null,
+    "threadlockerApplicationConfirmed": null
+  },
+  "reviewedOn": "2026-11-17",
+  "correctiveRevision": {
+    "part": "solenoid_cradle",
+    "revision": "REV01",
+    "quantity": 1,
+    "replacesOriginalPart": true,
+    "originalInterferenceConfirmedInCAD": true,
+    "status": "CAD_checked_physical_fit_pending",
+    "fileGeometryPrepared": true,
+    "sliced": false,
+    "printStarted": false,
+    "printCompleted": false,
+    "physicalFitConfirmed": false,
+    "originalV01Preserved": true,
+    "stlSHA256": "52affa591686cde38ce6b39c37fff8ce13d93eee2adc9985c76fce9212ad1780",
+    "stepSHA256": "7eb13f8321685770e35af102bbf2b172980c471af6ceaeb0ff62735851d119be"
   }
 }
