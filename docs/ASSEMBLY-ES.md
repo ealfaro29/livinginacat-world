@@ -1,6 +1,6 @@
 # Guía de ensamblaje · robot FT412
 
-**Edición 3 · instrucciones de mesa · 16 de noviembre de 2026.** Montaje FramingTech 355/250 con Adafruit 412.
+**Edición 3.1 · instrucciones de mesa · 17 de noviembre de 2026.** Montaje FramingTech 355/250 con Adafruit 412.
 
 [Descargar el manual ilustrado en PDF](/downloads/guia-ensamblaje-ft412-es.pdf) · [Empezar: piezas del marco](#paso-01-separar-los-perfiles-y-las-escuadras) · [Cargar las tuercas antes de cerrar](#paso-02-cargar-las-tuercas-de-entrada-por-el-extremo)
 
@@ -11,6 +11,8 @@ Cada paso empieza con **lo que necesitás**, seguido de la preparación previa, 
 Miramos desde el frente, por donde se coloca el teléfono: los motores quedan al fondo. Izquierda y derecha mantienen esa orientación en todo el manual. En los dibujos: gris es aluminio o herraje, verde es pieza impresa y naranja destaca la pieza que se coloca. Los dibujos de herrajes son esquemas, no plantillas para fabricar o perforar.
 
 Las 22 piezas impresas están terminadas según el dueño. Sus encajes todavía se comprueban al montar. Trabajá con fuente y USB desconectados y sin teléfono. Las medidas son nominales del proyecto: cotejalas con tus piezas. El cableado y el encendido están separados del armado mecánico al final de esta guía.
+
+**Corrección del paso 23:** los refuerzos de la cuna original chocan con la abrazadera. No forcés ese montaje. La [cuna REV01 en STL](/downloads/ft412-cradle-rev01/FT412_Cuna_Adafruit412_REV01_Refuerzos_Corregidos.stl) corrige esa interferencia en CAD; falta imprimirla y probar el encaje. [Ver la explicación ilustrada](#correccion-de-la-cuna-rev01).
 
 
 ## Paso 01. Separar los perfiles y las escuadras
@@ -590,22 +592,24 @@ Todas las cifras de arandelas están en mm. La cabeza del eje cierra la columna 
 
 | Pieza o herraje | Cant. | Uso en este paso |
 |---|---:|---|
-| Cuna impresa del Adafruit 412 | 1 | Base y pared sobre la abrazadera |
-| BHCS M3×8 | 4 | Base de la cuna |
-| FHCS M3×10 | 2 | Pared de la cuna |
+| Cuna Adafruit 412 REV01 | 1 | Sustituye la original que presenta interferencia |
+| BHCS M3×8 · Bolt Depot #7219 | 4 | Base de la cuna |
+| FHCS M3×10 · Bolt Depot #7214 | 2 | Pared de la cuna |
 | Tuercas M3 cargadas en el paso 20 | 6 | Reutilizadas; ya deben estar dentro |
+| Tuerca cuadrada M3 pequeña | 4 | Cargar ahora; se usarán con las barras |
 
-**Herramientas:** Allen M3.
+**Herramientas:** Allen M3 y pinza fina; cinta opcional para retener tuercas.
 
-**Antes de montar:** Verificá las seis tuercas antes de apoyar la cuna. No son los cuatro agujeros roscados del carro metálico.
+**Antes de montar:** Usá REV01: la original choca aunque se oriente bien. Su corrección está comprobada solo en CAD. Verificá las seis tuercas existentes en la abrazadera y cargá las cuatro nuevas antes de tapar sus bolsillos.
 
-![Atornillar la cuna al carro: posición de piezas y orden de montaje](/assets/assembly/paso-11-cuna.svg)
+![Cuna REV01: cuatro tuercas previas, plataforma sobre la abrazadera, pared hacia abajo y seis fijaciones](/assets/assembly/cuna-rev01-montaje.svg)
 
-1. Presentá la base de la cuna sobre la abrazadera y alineá los cuatro agujeros inferiores y los dos de la pared.
-2. Enroscá los cuatro M3×8 en las tuercas de la base y los dos M3×10 avellanados en las de la pared. Empezá todos antes de apretar.
-3. Asentá progresivamente, sin cerrar los canales ni desplazar las correas. Mové el carro a mano para comprobar que nada nuevo roza.
+1. Poné una M3 nueva en cada uno de los cuatro bolsillos de la cara posterior de la cuna. Son para las dos barras del paso 24; retenelas con cinta si se salen.
+2. Presentá la plataforma corta sobre la abrazadera, con la pared grande hacia abajo por el lado del teléfono. Debe asentar a mano, sin usar tornillos para vencer un choque.
+3. Alineá los seis agujeros. Empezá los cuatro #7219 M3×8 desde arriba y los dos #7214 M3×10 avellanados desde el frente, en las seis tuercas existentes de la abrazadera.
+4. Ajustá progresivamente. Si los refuerzos, cabezas o correas impiden asentar, detenete. Comprobá a mano el recorrido del carro y ambas correas.
 
-**Comprobá antes de seguir:** cuna firme con 6 fijaciones; ambas correas conservan su recorrido.
+**Comprobá antes de seguir:** plataforma asentada sin forzar, seis fijaciones y correas libres. El encaje físico de REV01 sigue pendiente hasta hacer esta comprobación.
 
 
 ## Paso 24. Sujetar el actuador con las dos barras
@@ -617,15 +621,15 @@ Todas las cifras de arandelas están en mm. La cabeza del eje cierra la columna 
 | Adafruit 412 | 1 | Cuerpo metálico dentro de la cuna |
 | Barra impresa | 2 | Apoyo sobre bordes del cuerpo metálico |
 | BHCS M3×25 | 4 | Dos por barra |
-| Tuerca cuadrada M3 | 4 | Canales posteriores de la cuna |
+| Tuerca cuadrada M3 ya cargada en el paso 23 | 4 | Reutilizar; no sacar otras cuatro |
 
 **Herramientas:** Allen M3 y pinza fina.
 
-**Antes de montar:** Cargá las cuatro tuercas en los canales posteriores ANTES de introducir el actuador y cerrar las barras.
+**Antes de montar:** La cuna REV01 debe haber pasado la comprobación del paso 23. Sus cuatro tuercas para las barras ya se cargaron antes de fijarla a la abrazadera.
 
-![Sujetar el actuador con las dos barras: posición de piezas y orden de montaje](/assets/assembly/paso-11-cuna.svg)
+![Actuador delante de la cuna REV01, dos barras originales y dirección de los cuatro tornillos M3 por 25](/assets/assembly/cuna-rev01-barras.svg)
 
-1. Insertá las cuatro tuercas y comprobá que coinciden con las ranuras de ajuste de la cuna.
+1. Comprobá que las cuatro tuercas ya cargadas siguen en sus bolsillos y alinean con las ranuras. No son las seis tuercas de la abrazadera.
 2. Presentá el actuador con vástago hacia la futura punta. Conservá libres cables, resorte, bobina y movimiento del vástago.
 3. Apoyá las dos barras en los bordes del marco metálico. Poné sus cuatro M3×25 hacia las tuercas posteriores; apretá alternando y sin aplastar la bobina.
 4. Probá manualmente el movimiento y retorno completo. La regulación de altura de ±3 mm queda para la prueba sobre una superficie de ensayo.
@@ -880,7 +884,7 @@ Estas cantidades describen el montaje, no una nueva orden de compra ni un conteo
 | SQN05M4, 9×9×3 mm | 16 | Paso 02: 4 por costado largo, 2 por extremo grueso, 2 por travesaño de cama. Todas por el extremo. |
 | RN05BM3, entrada lateral | Hasta 38 | 4 cama; hasta 26 rieles largos y 8 riel corto. Entrar antes de cubrir cada ranura con su pieza. |
 | RN05BM5, entrada lateral | 20 | 4 patas + 4 motores + 4 bloques + 2 riostras + 2 puente + 2 electrónica + 2 tubo. |
-| Cuadrada pequeña M3, para plástico | 17 | 6 abrazadera antes de cerrarla; 4 cuna antes del actuador; 3 acoplador antes de juntar mitades; 4 electrónica antes de poner la placa. |
+| Cuadrada pequeña M3, para plástico | 17 | 6 abrazadera antes de cerrarla; 4 cuna antes de fijarla a la abrazadera; 3 acoplador antes de juntar mitades; 4 electrónica antes de poner la placa. |
 | Cuadrada pequeña M4, para plástico | 10 | 6 bloques antes de las poleas; 4 uniones móviles antes de fijarlas a sus carros. |
 | Cuadrada M5, para plástico | 2 | Una en cada bloque trasero antes de añadir las poleas. |
 
@@ -936,10 +940,23 @@ El [tutorial de PhysiClaw](https://www.youtube.com/watch?v=Acmta1kzEko) dura 3 h
 
 
 
+## Corrección de la cuna REV01
+
+El 17 de noviembre de 2026 se comprobó en CAD el choque descrito al presentar la pieza en L. Los dos refuerzos triangulares de la cuna original ocupan material sólido de la abrazadera, incluso en la orientación de sus seis fijaciones. La ilustración anterior no mostraba esa interferencia. No hay que resolverla forzando los tornillos ni recortando la pieza a ojo.
+
+![Cuna original con interferencia y REV01 con sus refuerzos en los huecos existentes de la abrazadera](/assets/assembly/cuna-rev01-interferencia.svg)
+
+REV01 mueve cada refuerzo 3 mm hacia el centro, conservando su espesor y sección. Los seis agujeros de montaje, cuatro bolsillos de tuercas, escala y dimensiones exteriores se mantienen. La comparación con el STEP de la abrazadera da cero intersección en CAD; también se comprobaron envolventes de las cuatro cabezas del carro y de los canales de correa. El STL es una malla cerrada de un solo cuerpo. Esto no confirma todavía encaje impreso, resistencia ni comportamiento con calor o carga.
+
+- [STL de la única cuna de sustitución REV01](/downloads/ft412-cradle-rev01/FT412_Cuna_Adafruit412_REV01_Refuerzos_Corregidos.stl). Cantidad: una; escala 100 %. Es geometría, todavía sin laminado ni impresión.
+- [STEP editable de REV01](/downloads/ft412-cradle-rev01/FT412_Cuna_Adafruit412_REV01_Refuerzos_Corregidos.step) y [paquete REV01 con explicación y verificación](/downloads/ft412-cradle-rev01.zip).
+
+Reutilizá la abrazadera instalada, ambas correas, las dos barras y sus herrajes. La cuna nueva sustituye una pieza de las 22 del manifiesto; no añade una pieza instalada. Antes de fijarla, cargá las cuatro tuercas para las barras como muestra el paso 23. Presentá sin apretar y verificá asiento, alineación y libertad de correas. No se ha enviado ni iniciado su impresión.
+
 ## Fuentes y límites de esta edición
 
 
-Esta guía adapta la documentación del proyecto al montaje real. No cambia arquitectura, geometrías, cantidades del CAD ni el archivo histórico v0.1. El archivo original conserva su checksum. La finalización de impresiones y los ensayos físicos siguen registrados por separado.
+Esta guía adapta la documentación del proyecto al montaje real. REV01 corrige por separado la posición de los refuerzos de una cuna. La arquitectura, cantidad de piezas instaladas y el archivo histórico v0.1 permanecen iguales; los STL y STEP originales conservan sus hashes. La finalización de impresiones y los ensayos físicos siguen registrados por separado.
 
 - [Configuración y tornillería FT412](../hardware/ft412/README.md), [soportes de motor](../hardware/ft412/MOTOR-MOUNTS.md), [electrónica](../hardware/ft412/ELECTRONICS.md) y [pruebas de encaje](FIT-CHECKS.md).
 - Registros CAD: [marco](../hardware/ft412/qa/framingtech-frame.json), [patas](../hardware/ft412/qa/feet.json), [ejes y arandelas](../hardware/ft412/qa/shoulder-axles.json), [integración](../hardware/ft412/qa/integration.json), [manifiesto de piezas](../hardware/ft412/qa/print-manifest.json). Son comprobaciones nominales; no certifican un ensamblaje físico.

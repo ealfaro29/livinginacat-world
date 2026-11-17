@@ -32,6 +32,14 @@ export const guides = [
       "30 pasos de montaje: materiales al inicio, carga previa de tuercas, escuadras, ilustraciones y comprobación de cada operación. PDF para la mesa de trabajo.",
   },
   {
+    slug: "cradle-rev01",
+    source: "hardware/ft412-cradle-rev01/README.md",
+    group: "build",
+    title: "Cradle REV01 correction",
+    description:
+      "Replacement cradle for the original rib interference: STL, STEP and CAD checks. Physical fit testing remains pending.",
+  },
+  {
     slug: "project-guide",
     source: "docs/PROJECT.md",
     group: "build",

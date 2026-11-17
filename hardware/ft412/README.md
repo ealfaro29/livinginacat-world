@@ -4,7 +4,9 @@ FDM prototype derived from PhysiClaw hardware v0.51, commit `8f610d48642aef7d974
 
 For hands-on assembly, use the [illustrated Spanish assembly guide](/documentation/assembly/).
 
-Read `PUBLIC-RELEASE.md` first. Print only final files in `stl/` with quantities from `qa/print-manifest.json`. `qa/base-generation.json` describes an intermediate PCB holder superseded by the electronics holder. The public release excludes commercial/reference folders and regeneration scripts. Do not mix this variant with the earlier MISUMI/ELECALL design.
+**Cradle correction, November 17:** the original cradle's ribs collide with the belt clamp. Use the separate [REV01 replacement](/documentation/cradle-rev01/) for the next fit trial; its CAD checks pass, but it has not yet been printed or physically tested. The owner reports the frame, bed, rails, motors, idlers and both belts assembled with smooth manual travel. Installation is blocked at the original cradle, not at the earlier completed operations.
+
+Read `PUBLIC-RELEASE.md` first. Use final files in `stl/` with quantities from `qa/print-manifest.json`, replacing only the cradle with REV01. `qa/base-generation.json` describes an intermediate PCB holder superseded by the electronics holder. The public release excludes commercial/reference folders and regeneration scripts. Do not mix this variant with the earlier MISUMI/ELECALL design.
 
 **Current build state, November 16:** the owner confirms all project prints complete. The electronics support retains the earlier A2 yellow PLA / Generic PLA High Speed observation and current PLA preference; completion is reported by the owner, not a new device observation. The earlier PETG preparation remains unchanged. Native saved history marks the cradle and two bars Success. The owner now confirms the preceding eight-piece batch by count and shape groups. All 22 installed parts have prepared files and recorded print completion. The exact completion date, quality and measured fit are unconfirmed. No duplicate or additional print has been scheduled. Begin with dry frame squareness, feet and rail alignment. The current material choice does not establish physical fit or thermal/load performance, and the original v0.1 archive and geometry remain unchanged.
 
@@ -69,9 +71,9 @@ Each rear-idler brace needs one 1 mm M5 DIN125 washer under its extrusion-side M
 
 ## 412 head and tip
 
-The modified cradle retains 4 M3×8 base and 2 FHCS M3×10 wall fasteners. Its 56 mm wall shifts the tip axis by 1 mm from the reference: recalibrate camera and coordinates.
+Use cradle REV01 to avoid the original rib interference. It retains 4 M3×8 base and 2 FHCS M3×10 wall fasteners. Its 56 mm wall shifts the tip axis by 1 mm from the reference: recalibrate camera and coordinates.
 
-Insert four M3 square nuts in rear cradle channels. Secure the 412 body with two bars and four M3×25. Bars bear on metal-frame edges: **do not clamp the coil, wire, spring or moving rod**. Slots allow ±3 mm vertical adjustment. Commercial mounting ears remain unused and clear; no M2 fasteners are required. Compare the received body against its drawing.
+Insert four M3 square nuts in rear cradle channels before fastening the cradle to the belt clamp. Secure the 412 body with two bars and four M3×25. Bars bear on metal-frame edges: **do not clamp the coil, wire, spring or moving rod**. Slots allow ±3 mm vertical adjustment. Commercial mounting ears remain unused and clear; no M2 fasteners are required. Compare the received body against its drawing.
 
 The coupler has two halves, two M3×16 screws and two M3 square nuts. It grips 6 mm of the 412’s Ø5×10 mm cap and retains the tip’s Ø8.9 mm collar. A 5.3 mm cavity allows nominal 0.4 mm clearance for the stated 4.9 mm stem. The threaded stem enters a smooth Ø6.2 cavity: **M5 pitch is not assumed and the thread is not the attachment**. Leave a small gap between halves; do not crush the cap or side-load the rod. Retain the collar while leaving the mesh free.
 

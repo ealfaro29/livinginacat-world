@@ -1,0 +1,118 @@
+{
+  "revision": "REV01",
+  "reviewedOn": "2026-11-17",
+  "status": "CAD_AND_MESH_QA_PASS_PHYSICAL_FIT_NOT_YET_TESTED",
+  "replacementQuantity": 1,
+  "originalCradleSTLSHA256": "cb1406bcf7ca3b6ed2de4c615c78496d12367aeecf2ff0eb4a245d3bf3b69d27",
+  "change": {
+    "original_rib_centres_native_x_mm": [
+      -11,
+      11
+    ],
+    "revised_rib_centres_native_x_mm": [
+      -8,
+      8
+    ],
+    "rib_thickness_mm": 2,
+    "each_rib_moved_toward_centre_mm": 3,
+    "rib_cross_section_unchanged": true,
+    "six_mounting_holes_and_four_nut_channels_unchanged": true,
+    "external_envelope_unchanged": true,
+    "scale_percent": 100
+  },
+  "geometryChecks": {
+    "original_cradle_volume_mm3": 11594.81926100751,
+    "revised_cradle_volume_mm3": 11594.81926100758,
+    "old_intersection_with_authentic_belt_clamp_mm3": 60.690336977426256,
+    "new_intersection_with_authentic_belt_clamp_mm3": 0.0,
+    "carriage_head_envelope_checks": [
+      {
+        "head_centre_xy_mm": [
+          -8,
+          -5.5
+        ],
+        "overlap_mm3": 0.0
+      },
+      {
+        "head_centre_xy_mm": [
+          -8,
+          9.5
+        ],
+        "overlap_mm3": 0.0
+      },
+      {
+        "head_centre_xy_mm": [
+          8,
+          -5.5
+        ],
+        "overlap_mm3": 0.0
+      },
+      {
+        "head_centre_xy_mm": [
+          8,
+          9.5
+        ],
+        "overlap_mm3": 0.0
+      }
+    ],
+    "belt_channel_envelope_checks": [
+      {
+        "overlap_mm3": 0.0,
+        "nominal_distance_to_channel_envelope_mm": 2.8000000000000003
+      },
+      {
+        "overlap_mm3": 0.0,
+        "nominal_distance_to_channel_envelope_mm": 2.8000000000000003
+      }
+    ],
+    "material_repositioned_mm3": 127.99999999999996,
+    "native_bounds_mm": [
+      [
+        -28.0,
+        -14.5,
+        -1.0
+      ],
+      [
+        28.0,
+        14.5,
+        47.0
+      ]
+    ]
+  },
+  "meshChecks": {
+    "watertight": true,
+    "consistent_winding": true,
+    "connected_meshes": 1,
+    "print_bounds_mm": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        56.0,
+        48.0,
+        29.0
+      ]
+    ],
+    "mesh_vs_CAD_relative_volume_error": 1.5977290597363382e-05
+  },
+  "files": {
+    "stl": {
+      "filename": "FT412_Cuna_Adafruit412_REV01_Refuerzos_Corregidos.stl",
+      "sha256": "52affa591686cde38ce6b39c37fff8ce13d93eee2adc9985c76fce9212ad1780",
+      "bytes": 351084
+    },
+    "step": {
+      "filename": "FT412_Cuna_Adafruit412_REV01_Refuerzos_Corregidos.step",
+      "sha256": "7eb13f8321685770e35af102bbf2b172980c471af6ceaeb0ff62735851d119be",
+      "bytes": 232249
+    }
+  },
+  "sliced": false,
+  "printStarted": false,
+  "physicalFitConfirmed": false,
+  "strengthAndThermalValidationConfirmed": false,
+  "originalV01ArchiveSHA256": "2bb9d0a16be5155c1b3aeea75666b2387c16dc5fe18cab75c04b73e39a8045eb",
+  "scope": "Replacement cradle only. Original release and all original part files are preserved; no other geometry changes."
+}
