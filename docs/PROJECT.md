@@ -1,6 +1,6 @@
 # living in a cat world · Project guide
 
-**Current assembly, November 17:** the owner confirms the electronics support mounted and reports an uneven underside. A separate optional 75 × 75 mm cosmetic plate and raised symbol are prepared and natively sliced as two single-colour parts, without clips or holes. They have not been printed or installed; preserve the honeycomb openings when fitting the plate. The original 22-part manifest and archived CAD remain unchanged.
+**Current assembly, November 17:** the owner confirms the electronics support mounted and reports an uneven underside. A separate optional 75 × 75 mm cosmetic plate and raised symbol are prepared as two separate parts, without clips or holes. The logo uses nominal Color Mix 90% yellow and 10% black and its matching job was observed starting at 0/12 layers, without completion confirmed. The black plate remains separate without a confirmed print; preserve the honeycomb openings when fitting the plate. The original 22-part manifest and archived CAD remain unchanged.
 
 Start assembling with the [illustrated Spanish assembly guide](ASSEMBLY-ES.md), including a printable PDF, exact fasteners, frame orientation and checks for each stage.
 
