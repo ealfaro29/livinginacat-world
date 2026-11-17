@@ -2,7 +2,7 @@
   "revision": "REV01",
   "part": "two_piece_tip_coupler",
   "reviewedOn": "2026-11-17",
-  "status": "PRINT_STARTED_PHYSICAL_FIT_AND_PRINTED_ROUNDNESS_PENDING",
+  "status": "OWNER_REPORT_PRINTED_INSTALLED_UNPOWERED_CHECK_COMPLETED",
   "parameters": {
     "measured_collar_diameter_mm": 8.83,
     "measured_collar_height_mm": 4.55,
@@ -94,5 +94,11 @@
   "totalInstalledPrintedPiecesUnchanged": 22,
   "physicalFitValidated": false,
   "printedRoundnessMeasured": false,
-  "printCompleted": false
+  "printCompleted": true,
+  "installedByOwnerReport": true,
+  "completionBasis": "direct_owner_report",
+  "reportedOn": "2026-11-17",
+  "exactCompletionEventDate": null,
+  "unpoweredCheckCompletedByOwner": true,
+  "checkOutcome": "completed_and_continuation_requested_no_problem_reported"
 }

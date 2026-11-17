@@ -14,7 +14,7 @@ Las 22 piezas impresas están terminadas según el dueño. Sus encajes todavía 
 
 **Corrección del paso 23:** los refuerzos de la cuna original chocan con la abrazadera. No forcés ese montaje. La [cuna REV01 en STL](/downloads/ft412-cradle-rev01/FT412_Cuna_Adafruit412_REV01_Refuerzos_Corregidos.stl) corrige esa interferencia en CAD; la comprobación digital no certifica su encaje físico. [Ver la explicación ilustrada](#correccion-de-la-cuna-rev01).
 
-**Paso 25, acoplador:** el dueño reporta ajuste incómodo y apariencia oval de las mitades anteriores. La [pareja REV01](/documentation/coupler-rev01/) incorpora las medidas de su punta y ya inició su impresión a **0,16 mm**, sin finalización ni encaje nuevos confirmados.
+**Paso 25, acoplador:** el dueño reporta ajuste incómodo y apariencia oval de las mitades anteriores. La [pareja REV01](/documentation/coupler-rev01/) incorpora las medidas de su punta y se imprimió a **0,16 mm**. El dueño confirma las dos mitades impresas y colocadas, y después informa que completó la comprobación sin corriente y pide continuar. La fecha real de los eventos, la redondez medida y el comportamiento con corriente o calor siguen sin determinar.
 
 
 ## Paso 01. Separar los perfiles y las escuadras
@@ -654,7 +654,7 @@ Todas las cifras de arandelas están en mm. La cabeza del eje cierra la columna 
 
 **Herramientas:** Allen M3 y multímetro para continuidad, sin alimentar.
 
-**Antes de montar:** Esperá a que termine el par REV01 y probá aro y malla sin tornillos. Cargá las tres tuercas antes de cerrar: dos en la mitad con dos bolsillos y una en la otra. La conexión eléctrica se completa después.
+**Antes de montar:** Usá el par REV01 terminado y limpio; antes del primer cierre, probá aro y malla sin tornillos. Cargá las tres tuercas antes de cerrar: dos en la mitad con dos bolsillos y una en la otra. La conexión eléctrica se completa después.
 
 ![Cerrar el acoplador y retener la punta: posición de piezas y orden de montaje](/assets/assembly/paso-12-acoplador.svg)
 
@@ -674,18 +674,18 @@ Todas las cifras de arandelas están en mm. La cabeza del eje cierra la columna 
 |---|---:|---|
 | Soporte electrónico impreso | 1 | Ala y protector hacia fuera del marco |
 | Tuerca cuadrada M3 | 4 | Futuras fijaciones de la DLC32 |
-| FHCS M5×12 | 2 | Soporte al perfil trasero |
-| RN05BM5 | 2 | Ranura exterior del perfil trasero |
+| FHCS M5×12 · #6674 | 2 | Uno arriba y otro abajo, al perfil trasero |
+| RN05BM5 | 2 | Una por cada ranura exterior trasera; entrada lateral |
 
 **Herramientas:** Allen M5 y pinza fina.
 
 **Antes de montar:** Colocá las cuatro tuercas M3 con el soporte aún en la mano. Revisá también las dos entradas inferiores: después serán más difíciles de alcanzar.
 
-![Preparar y fijar el soporte electrónico: posición de piezas y orden de montaje](/assets/assembly/paso-13-electronica.svg)
+![Preparar y fijar el soporte electrónico: posición de piezas y orden de montaje](/assets/assembly/soporte-electronica-montaje.svg)
 
 1. Limpiá los cuatro alojamientos M3 del soporte y cargá una tuerca por fijación de la placa. Probá cada rosca a mano.
-2. Introducí las dos RN05BM5 en la ranura exterior trasera. Presentá el soporte con el ala del 5648 y protector del interruptor hacia afuera.
-3. Pasá los dos M5×12 avellanados y asentalos en sus tuercas de perfil. No torzás el soporte.
+2. Trabajá por detrás de los motores, mirando la cara exterior del perfil trasero. Colocá una RN05BM5 en cada una de sus dos ranuras horizontales mediante entrada lateral; no hace falta abrir el marco. El soporte queda vertical por fuera, con los cuatro apoyos de la placa mirando hacia vos y el ala del interruptor arriba.
+3. Alineá los dos agujeros M5 del soporte uno arriba del otro, separados 20 mm entre centros. Pasá los dos #6674 M5×12 avellanados, uno a cada ranura. Ajustá alternando ambos, sin torcer el soporte ni hacer fondo con la punta del tornillo.
 4. Confirmá que motor, correas, USB y otros conectores tienen acceso antes de instalar las placas.
 
 **Comprobá antes de seguir:** 4 tuercas M3 cautivas presentes y 2 anclajes M5 firmes; soporte sin deformación.
@@ -708,7 +708,7 @@ Todas las cifras de arandelas están en mm. La cabeza del eje cierra la columna 
 
 **Antes de montar:** Fuente y USB desconectados. No coloqués los drivers a ciegas: su orientación se verifica por pines y serigrafía antes del cableado.
 
-![Instalar la DLC32 y el módulo 5648: posición de piezas y orden de montaje](/assets/assembly/paso-13-electronica.svg)
+![Instalar la DLC32 y el módulo 5648: posición de piezas y orden de montaje](/assets/assembly/soporte-electronica-montaje.svg)
 
 1. Apoyá la DLC32 en los cuatro postes. Poné cuatro M3×10 en sus tuercas; ajustá apenas hasta retener la placa sin doblarla.
 2. Asentá el 5648 en sus cuatro apoyos y dos tetones. Su cara inferior queda separada de la plataforma.
@@ -963,12 +963,12 @@ El dueño midió el aro metálico en **8,83 mm de diámetro y 4,55 mm de alto**,
 
 La salida original de 7,40 mm es menor que la malla reportada. REV01 usa una salida de **8,30 mm** y un alojamiento del aro de **9,30 mm de diámetro por 4,95 mm de alto**. Conserva el escalón inferior que retiene el aro, los alojamientos del palito y las tres tuercas, los tornillos y el canal del conductor. No cambia la escala ni la altura nominal de contacto. La holgura elegida es una preparación para ensayo, no un encaje físico ya aceptado.
 
-La placa contiene exactamente dos piezas a escala 100 %, con sus cavidades hacia arriba: PLA, principal de 0,4 mm, capas inicial y nominal de **0,16 mm**, seis paredes, seis capas superiores/inferiores, 80 % gyroid, brim de 3 mm y sin soportes o torre de purga. Las paredes exteriores/interiores van a 25/45 mm/s. El proyecto y el laminado nativo se verificaron antes de enviar el trabajo por solicitud expresa del dueño. Se observó el trabajo exacto activo en preparación inicial, **0/48 capas**. Estimaciones: **1 h 15 min 24 s, 6,28 g y 2,104 m**, no duración ni consumo reales. La finalización, redondez impresa y retención física siguen pendientes.
+La placa contiene exactamente dos piezas a escala 100 %, con sus cavidades hacia arriba: PLA, principal de 0,4 mm, capas inicial y nominal de **0,16 mm**, seis paredes, seis capas superiores/inferiores, 80 % gyroid, brim de 3 mm y sin soportes o torre de purga. Las paredes exteriores/interiores van a 25/45 mm/s. El proyecto y el laminado nativo se verificaron antes de enviar el trabajo por solicitud expresa del dueño. Se observó el trabajo exacto activo en preparación inicial, **0/48 capas**. Estimaciones: **1 h 15 min 24 s, 6,28 g y 2,104 m**, no duración ni consumo reales. El dueño confirma las dos mitades impresas y colocadas, y después informa que completó la comprobación sin corriente y pide continuar. La fecha real de los eventos, la redondez medida y el comportamiento con corriente o calor siguen sin determinar.
 
 - [STL delantero REV01](/downloads/ft412-coupler-rev01/FT412_Acoplador_Delantero_REV01.stl) y [STL trasero REV01](/downloads/ft412-coupler-rev01/FT412_Acoplador_Trasero_REV01.stl): una unidad de cada uno.
 - [Paquete con STL, STEP, perfil y verificación digital](/downloads/ft412-coupler-rev01.zip) y [detalle de esta revisión](/documentation/coupler-rev01/).
 
-Las superficies del CAD son circulares y los archivos conservan escala uniforme. Al juntar completamente unas caras separadas por 0,50 mm, el hueco se estrecha en la dirección de cierre y puede parecer oval. No se atribuye el reporte del dueño a una causa física única sin medir la impresión. Probá primero la punta sin tornillos; luego verificá retención y retorno sin corriente sobre una superficie de ensayo. Estas dos piezas sustituyen el par anterior: el total instalado sigue siendo 22.
+El CAD es circular y la escala es uniforme; juntar por completo las caras estrecha el hueco. Esto no demuestra la causa del problema anterior. El dueño ya reportó colocación y comprobación sin corriente: continuá por el paso 26 sin desmontar. El total instalado sigue siendo 22 piezas.
 
 ## Fuentes y límites de esta edición
 

@@ -24,8 +24,10 @@ const site = await readJSON("data/site.json"),
   hardware = await readJSON("data/hardware-release.json"),
   buildProgress = await readJSON("data/build-progress.json");
 const reviewedLabel = ledger.reviewedAt ? dateTime(ledger.reviewedAt, ledger.reviewTimeZone) : date(ledger.updatedAt);
-const pendingFitLabels = buildProgress.fitChecks.pendingChecks.map((check) => check === "coupler" ? "Coupler fit" : `${check} fit`).join(" and ");
-const activePrintSummary = buildProgress.currentPrintBatch?.batch === "FT412_07" && buildProgress.currentPrintBatch.printStarted
+const pendingFitLabels = buildProgress.fitChecks.pendingChecks.map((check) => check === "coupler" ? "Coupler fit" : check === "switch_clearance" ? "Switch-terminal clearance" : `${check} fit`).join(" and ");
+const activePrintSummary = buildProgress.currentPrintBatch?.batch === "FT412_07" && buildProgress.currentPrintBatch.printCompleted
+  ? "The owner confirms all 22 original installed pieces printed and the replacement two-part coupler printed and installed. The owner reports completing the unpowered retention/return check and requests continuation. Preload the electronics support's four M3 nuts before mounting it behind the frame. Measured printed roundness and powered performance remain unconfirmed. "
+  : buildProgress.currentPrintBatch?.batch === "FT412_07" && buildProgress.currentPrintBatch.printStarted
   ? "The owner confirms all 22 original installed pieces printed and the solenoid retained with both bars and four screws. The replacement two-part tip coupler job has started in PLA with 0.16 mm layers and the main 0.4 mm nozzle; it was last observed in initial preparation at 0/48 layers. Printed roundness, completion and fit remain unconfirmed. "
   : buildProgress.currentPrintBatch?.batch === "FT412_06" && buildProgress.currentPrintBatch.printCompleted
   ? `The owner confirms all 22 original installed printed pieces complete, including the electronics support. ${buildProgress.assemblyProgress?.bothBeltsInstalledAndTensionedConfirmed ? "The owner reports the frame, bed, rails, motors, idlers and both belts assembled, with smooth manual travel. Cradle installation is blocked by the original rib interference. " : buildProgress.assemblyProgress?.frameAssemblyConfirmed && buildProgress.assemblyProgress?.feetInstalledConfirmed ? "The frame, four corner brackets and feet are assembled by owner report; the bed crossmembers are next. " : "Begin with dry frame assembly; measured fit and physical assembly checks remain separate. "}`
