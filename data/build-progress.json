@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "reportedAt": "2026-11-17",
-  "source": "Direct owner reports: corrected coupler pair printed and installed; unpowered check completed and continuation requested",
-  "stage": "Corrected coupler pair printed and installed; owner completed the unpowered check; electronics support mounting is next",
+  "source": "Direct owner report of electronics support mounting and cosmetic underside issue; separately prepared optional plate",
+  "stage": "Electronics support mounted by owner report; optional two-piece cosmetic plate prepared and sliced, without starting a print",
   "firstTestBatchCompleted": true,
   "secondBatchCompletionConfirmed": true,
   "material": "PLA Silk",
@@ -288,7 +288,7 @@
     "replacementPrintCompletionRecordedPieces": 2,
     "replacementPiecesInstalledByOwnerReport": 2
   },
-  "nextAssemblyStep": "Preload four small square M3 nuts in the printed electronics support. Mount it outside the rear profile using two #6674 M5x12 countersunk screws and two RN05BM5 roll-in nuts, one in each rear groove; keep power and USB disconnected.",
+  "nextAssemblyStep": "Optional: print the 75 mm black cosmetic plate and separate yellow symbol, trial-fit without covering honeycomb, then continue DLC32 and driver mounting in guide step 27 with power disconnected.",
   "fifthBatchCompletionConfirmed": true,
   "fifthBatch": {
     "batch": "FT412_05",
@@ -334,7 +334,7 @@
   },
   "assemblyProgress": {
     "assemblyRequestedAt": "2026-11-16",
-    "activeGuideStep": "26_electronics_support_preload_and_mount",
+    "activeGuideStep": "optional_cosmetic_plate_before_step_27",
     "frameAssemblyConfirmed": true,
     "poweredCommissioningConfirmed": false,
     "feetInstalledConfirmed": true,
@@ -368,7 +368,9 @@
     "couplerInstallationBasis": "direct_owner_report",
     "couplerUnpoweredCheckCompleted": true,
     "couplerCheckBasis": "owner reports check completed and requests continuation; no problem reported",
-    "electronicsSupportInstalledConfirmed": false
+    "electronicsSupportInstalledConfirmed": true,
+    "electronicsSupportInstallationBasis": "direct_owner_report",
+    "electronicsSupportActualInstallationDate": null
   },
   "reviewedOn": "2026-11-17",
   "correctiveRevision": {
@@ -413,5 +415,28 @@
     "exactCompletionDate": null,
     "unpoweredCheckCompletedByOwner": true,
     "printedRoundnessMeasured": false
+  },
+  "optionalCosmeticAccessory": {
+    "parts": 2,
+    "prepared": true,
+    "sliced": true,
+    "printStarted": false,
+    "printCompleted": false,
+    "originalInstalledPartCountUnchanged": 22,
+    "plateDimensionsMM": [
+      75,
+      75,
+      1.6
+    ],
+    "logoThicknessMM": 2.4,
+    "recessDepthMM": 0.8,
+    "logoReliefMM": 1.6,
+    "layerHeightMM": 0.2,
+    "nozzleDiameterMM": 0.4,
+    "clips": 0,
+    "mountingHoles": 0,
+    "physicalFitValidated": false,
+    "estimatedDurationSeconds": 2392,
+    "estimatesAreNotActualPrintResults": true
   }
 }
