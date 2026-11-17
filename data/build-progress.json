@@ -401,7 +401,10 @@
     "couplerCheckBasis": "owner reports check completed and requests continuation; no problem reported",
     "electronicsSupportInstalledConfirmed": true,
     "electronicsSupportInstallationBasis": "direct_owner_report",
-    "electronicsSupportActualInstallationDate": null
+    "electronicsSupportActualInstallationDate": null,
+    "DLC32InstalledConfirmed": true,
+    "DLC32InstallationBasis": "direct_owner_report_following_mounting_and_orientation_instructions",
+    "DLC32ActualInstallationDate": null
   },
   "reviewedOn": "2026-11-17",
   "correctiveRevision": {
@@ -478,5 +481,34 @@
     "blackPlatePrintCompletionConfirmed": false,
     "latestDeviceLogoEstimatedDurationSeconds": 772,
     "printedColourConfirmed": false
+  },
+  "controlModuleDesign": {
+    "status": "visual_layout_editor_available_final_enclosure_CAD_pending",
+    "ownerRequested": true,
+    "mountingLocation": "outside_right_longitudinal_profile",
+    "initialLengthMM": 355,
+    "screenModelObserved": "MKS TS24-R V2.1",
+    "screenFacing": "front",
+    "newCustomCase": true,
+    "reuseCanaKitFanAndHeatsink": true,
+    "reuseCanaKitCase": false,
+    "contents": [
+      "Raspberry Pi 5",
+      "MKS DLC32",
+      "two TMC2209 drivers",
+      "TS24-R V2.1",
+      "NKK S301T",
+      "Adafruit 5648",
+      "ATO fuse holder"
+    ],
+    "separateExternalSuppliesRetained": true,
+    "editorUrl": "/tools/control-module/",
+    "offlineEditorUrl": "/downloads/ft412-control-module-designer.html",
+    "physicalDimensionsFullyConfirmed": false,
+    "finalEnclosureCADPrepared": false,
+    "newEnclosurePrinted": false,
+    "electronicsRelocated": false,
+    "electricalValidationCompleted": false,
+    "originalV01AndPrintedPartHistoryPreserved": true
   }
 }

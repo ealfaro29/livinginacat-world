@@ -29,7 +29,7 @@ for (const file of all) {
   )
     errors.push(`Private data marker: ${path.relative(base, file)}`);
   if (file.endsWith(".html")) {
-    if (!text.includes('<html lang="en">'))
+    if (!/<html\s+lang="(?:en|es)"/.test(text))
       errors.push(`Missing language: ${file}`);
     for (const m of text.matchAll(/(?:href|src)="(\/[^"#]*)(?:#[^"]*)?"/g)) {
       const target = m[1].split("?")[0];

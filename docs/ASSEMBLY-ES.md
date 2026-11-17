@@ -16,6 +16,16 @@ Las 22 piezas impresas están terminadas según el dueño. Sus encajes todavía 
 
 **Paso 25, acoplador:** el dueño reporta ajuste incómodo y apariencia oval de las mitades anteriores. La [pareja REV01](/documentation/coupler-rev01/) incorpora las medidas de su punta y se imprimió a **0,16 mm**. El dueño confirma las dos mitades impresas y colocadas, y después informa que completó la comprobación sin corriente y pide continuar. La fecha real de los eventos, la redondez medida y el comportamiento con corriente o calor siguen sin determinar.
 
+## Módulo de control lateral: diseño en curso
+
+El dueño confirmó la MKS fijada y decidió reunir la Raspberry Pi 5, MKS, dos TMC2209, pantalla **TS24-R V2.1**, interruptor S301T, MOSFET 5648 y portafusible en una carcasa nueva por fuera del perfil derecho. La pantalla queda al frente y el largo inicial de diseño ocupa los **355 mm del costado**. Se reutilizan el ventilador y disipador del CanaKit; la carcasa de ese kit no se instala dentro de la nueva. Las dos fuentes de alimentación siguen externas y separadas.
+
+[Abrir el editor visual del módulo](/tools/control-module/) · [Descargar el editor HTML completo](/downloads/ft412-control-module-designer.html).
+
+El editor permite mover piezas en planta y 3D, girarlas, editar sus medidas, ajustar la caja, revisar interferencias entre envolventes, reservar aberturas y guardar el diseño como HTML o JSON. Una caja de 355 mm necesita al menos dos secciones con la cama actual; la unión se puede mover. Las formas de conectores, alturas del kit, ventana de pantalla y ventilador son reservas editables, no plantillas de mecanizado. Los tamaños físicos, fijaciones, holguras de enchufes, refrigeración y resistencia del anclaje deben comprobarse antes de generar el CAD final o imprimir.
+
+Los pasos 26–29 de abajo conservan el montaje trasero original como referencia histórica. Durante el diseño del módulo lateral, conservá la instalación actual hasta tener preparada y verificada la nueva fijación. El módulo nuevo todavía no se ha fabricado, instalado, conectado ni probado.
+
 
 ## Paso 01. Separar los perfiles y las escuadras
 
