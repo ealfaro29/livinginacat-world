@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reportedAt": "2026-11-17",
   "source": "Direct owner report of electronics support mounting and cosmetic underside issue; separately prepared optional plate",
-  "stage": "Electronics support mounted by owner report; optional two-piece cosmetic plate prepared and sliced, without starting a print",
+  "stage": "Electronics support installed by owner report; optional cosmetic logo Color Mix 90% yellow and 10% black observed starting; black plate completion unconfirmed",
   "firstTestBatchCompleted": true,
   "secondBatchCompletionConfirmed": true,
   "material": "PLA Silk",
@@ -76,47 +76,34 @@
     "earlierPreparationIsNotTheActualFinishedJob": true
   },
   "currentPrintBatch": {
-    "batch": "FT412_07",
-    "revision": "coupler_REV01",
+    "batch": "FT412_08",
+    "part": "optional_cosmetic_logo",
     "prepared": true,
     "sliced": true,
     "printStarted": true,
-    "printCompleted": true,
+    "printStartBasis": "observed_exact_matching_native_device_job",
+    "printCompleted": false,
     "parts": {
-      "couplerRearREV01": 1,
-      "couplerFrontREV01": 1
+      "cosmeticLogo": 1
     },
+    "originalInstalledPieceCountUnchanged": 22,
     "material": "PLA",
-    "slicerMaterialProfile": "Generic PLA High Speed",
-    "observedAMSSlot": "A2",
-    "nozzle": "main",
-    "nozzleDiameterMM": 0.4,
-    "layerHeightMM": 0.16,
-    "wallLoops": 6,
-    "topShellLayers": 6,
-    "bottomShellLayers": 6,
-    "infillPercent": 80,
-    "infillPattern": "gyroid",
-    "brimWidthMM": 3,
-    "supportsEnabled": false,
-    "layersTotal": 48,
+    "nominalColourMix": {
+      "yellow": 0.9,
+      "black": 0.1
+    },
+    "colourResultConfirmed": false,
+    "layerHeightMM": 0.2,
+    "layersTotal": 12,
     "observedProgressPercent": 0,
     "observedLayer": 0,
-    "observedPhase": "initial preparation",
-    "observedAt": "2026-11-17T12:57:21.144395+00:00",
-    "estimatedDurationSeconds": 4524,
-    "estimatedMassG": 6.28,
+    "observedPhase": "Heatbed surface foreign object detection",
+    "exactStartEventDate": null,
+    "estimatedDurationSeconds": 772,
+    "estimatedMassG": 2.13,
     "estimatesAreNotActualPrintResults": true,
-    "measuredFitConfirmed": false,
-    "goodPrintOutcomeExplicitlyReported": null,
-    "installed": true,
-    "completionBasis": "direct_owner_report",
-    "reportedAt": "2026-11-17",
-    "exactCompletionDate": null,
-    "exactInstallationDate": null,
-    "unpoweredCheckCompletedByOwner": true,
-    "unpoweredCheckOutcome": "completed_and_continuation_requested_no_problem_reported",
-    "priorObservedProgressIsHistorical": true
+    "actorAttributed": false,
+    "agentInitiatedPrint": false
   },
   "historicalCurrentPrintBatches": [
     {
@@ -229,6 +216,49 @@
       "exactCompletionDate": null,
       "goodPrintOutcomeExplicitlyReported": null,
       "measuredFitConfirmed": false
+    },
+    {
+      "batch": "FT412_07",
+      "revision": "coupler_REV01",
+      "prepared": true,
+      "sliced": true,
+      "printStarted": true,
+      "printCompleted": true,
+      "parts": {
+        "couplerRearREV01": 1,
+        "couplerFrontREV01": 1
+      },
+      "material": "PLA",
+      "slicerMaterialProfile": "Generic PLA High Speed",
+      "observedAMSSlot": "A2",
+      "nozzle": "main",
+      "nozzleDiameterMM": 0.4,
+      "layerHeightMM": 0.16,
+      "wallLoops": 6,
+      "topShellLayers": 6,
+      "bottomShellLayers": 6,
+      "infillPercent": 80,
+      "infillPattern": "gyroid",
+      "brimWidthMM": 3,
+      "supportsEnabled": false,
+      "layersTotal": 48,
+      "observedProgressPercent": 0,
+      "observedLayer": 0,
+      "observedPhase": "initial preparation",
+      "observedAt": "2026-11-17T12:57:21.144395+00:00",
+      "estimatedDurationSeconds": 4524,
+      "estimatedMassG": 6.28,
+      "estimatesAreNotActualPrintResults": true,
+      "measuredFitConfirmed": false,
+      "goodPrintOutcomeExplicitlyReported": null,
+      "installed": true,
+      "completionBasis": "direct_owner_report",
+      "reportedAt": "2026-11-17",
+      "exactCompletionDate": null,
+      "exactInstallationDate": null,
+      "unpoweredCheckCompletedByOwner": true,
+      "unpoweredCheckOutcome": "completed_and_continuation_requested_no_problem_reported",
+      "priorObservedProgressIsHistorical": true
     }
   ],
   "previousPrintPreparations": [
@@ -280,15 +310,16 @@
   "printInventorySummary": {
     "installedPieces": 22,
     "printCompletionRecordedPieces": 22,
-    "printingPieces": 0,
+    "printingPieces": 1,
     "awaitingPhysicalInventoryPieces": 0,
     "additionalUnpreparedPieces": 0,
-    "replacementPiecesInCurrentBatch": 2,
+    "replacementPiecesInCurrentBatch": 0,
     "original22PiecePrintCompletionPreserved": true,
     "replacementPrintCompletionRecordedPieces": 2,
-    "replacementPiecesInstalledByOwnerReport": 2
+    "replacementPiecesInstalledByOwnerReport": 2,
+    "optionalCosmeticPiecesPrinting": 1
   },
-  "nextAssemblyStep": "Optional: print the 75 mm black cosmetic plate and separate yellow symbol, trial-fit without covering honeycomb, then continue DLC32 and driver mounting in guide step 27 with power disconnected.",
+  "nextAssemblyStep": "Let the observed logo print continue. The black 75 mm plate remains a separate prepared file without confirmed completion. Trial-fit cosmetic parts above the honeycomb, then continue guide step 27 with power disconnected.",
   "fifthBatchCompletionConfirmed": true,
   "fifthBatch": {
     "batch": "FT412_05",
@@ -420,7 +451,7 @@
     "parts": 2,
     "prepared": true,
     "sliced": true,
-    "printStarted": false,
+    "printStarted": true,
     "printCompleted": false,
     "originalInstalledPartCountUnchanged": 22,
     "plateDimensionsMM": [
@@ -436,7 +467,16 @@
     "clips": 0,
     "mountingHoles": 0,
     "physicalFitValidated": false,
-    "estimatedDurationSeconds": 2392,
-    "estimatesAreNotActualPrintResults": true
+    "estimatedDurationSeconds": null,
+    "estimatesAreNotActualPrintResults": true,
+    "activePart": "logo_only",
+    "nominalLogoMix": {
+      "yellow": 0.9,
+      "black": 0.1
+    },
+    "blackPlatePrintStartObserved": false,
+    "blackPlatePrintCompletionConfirmed": false,
+    "latestDeviceLogoEstimatedDurationSeconds": 772,
+    "printedColourConfirmed": false
   }
 }
