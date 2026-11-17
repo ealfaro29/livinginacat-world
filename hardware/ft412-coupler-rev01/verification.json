@@ -1,0 +1,98 @@
+{
+  "revision": "REV01",
+  "part": "two_piece_tip_coupler",
+  "reviewedOn": "2026-11-17",
+  "status": "PRINT_STARTED_PHYSICAL_FIT_AND_PRINTED_ROUNDNESS_PENDING",
+  "parameters": {
+    "measured_collar_diameter_mm": 8.83,
+    "measured_collar_height_mm": 4.55,
+    "measured_mesh_diameter_mm": 7.9,
+    "collar_recess_diameter_mm": 9.3,
+    "collar_recess_height_mm": 4.95,
+    "mesh_exit_diameter_mm": 8.3,
+    "collar_retaining_plane_native_z_mm": 17.9,
+    "retaining_lip_axial_thickness_mm": 0.9,
+    "solenoid_cap_socket_diameter_mm": 5.15,
+    "closure_gap_mm": 0.5,
+    "stl_linear_tolerance_mm": 0.005,
+    "stl_angular_tolerance_rad": 0.025,
+    "requested_layer_height_mm": 0.16,
+    "nozzle_diameter_mm": 0.4,
+    "scale_percent": 100
+  },
+  "nominalClearancesMM": {
+    "collar_diametral": 0.47000000000000064,
+    "collar_axial": 0.40000000000000036,
+    "mesh_diametral": 0.40000000000000036,
+    "minimum_collar_radial_capture": 0.2649999999999997
+  },
+  "circularityMeshChecks": {
+    "rear": {
+      "sampled_collar_cylinder_vertices": 488,
+      "radius_min_mm": 4.649999770369428,
+      "radius_max_mm": 4.6500002467296415,
+      "maximum_radial_error_mm": 2.467296411623465e-07
+    },
+    "front": {
+      "sampled_collar_cylinder_vertices": 488,
+      "radius_min_mm": 4.649999770369428,
+      "radius_max_mm": 4.6500002467296415,
+      "maximum_radial_error_mm": 2.467296411623465e-07
+    }
+  },
+  "featuresPreserved": {
+    "rear": {
+      "original_rebuild_difference_mm3": 0.0,
+      "material_added_mm3": 0.0,
+      "removed_outside_tip_cavity_mm3": 0.0,
+      "mounting_holes_nut_pockets_wire_channel_cap_socket_unchanged": true
+    },
+    "front": {
+      "original_rebuild_difference_mm3": 0.0,
+      "material_added_mm3": 0.0,
+      "removed_outside_tip_cavity_mm3": 0.0,
+      "mounting_holes_nut_pockets_wire_channel_cap_socket_unchanged": true
+    }
+  },
+  "tipEnvelopeIntersectionMM3": {
+    "collar": {
+      "rear": 0.0,
+      "front": 0.0
+    },
+    "mesh": {
+      "rear": 0.0,
+      "front": 0.0
+    }
+  },
+  "files": {
+    "rear": {
+      "stl": {
+        "filename": "FT412_Acoplador_Trasero_REV01.stl",
+        "sha256": "1ece6e8aeed8a88a2c3c674653007254c0a1b03fa0b682a5f7a2f7f514ad6e36"
+      },
+      "step": {
+        "filename": "FT412_Acoplador_Trasero_REV01.step",
+        "sha256": "822d3b965c450ae687f42da85392aa7502095afbd24edc72c2ea28a1ebd333ce"
+      }
+    },
+    "front": {
+      "stl": {
+        "filename": "FT412_Acoplador_Delantero_REV01.stl",
+        "sha256": "026c19d6332cce1737e4afd6c7fd42fde8c52d7650edc2fcc43242894b0974e0"
+      },
+      "step": {
+        "filename": "FT412_Acoplador_Delantero_REV01.step",
+        "sha256": "98c5e30384c9267b36001af472841dd198fc6da24e8e32981f0567a8fd941f8e"
+      }
+    }
+  },
+  "nativeProjectAndSliceVerified": true,
+  "nozzleDiameterMM": 0.4,
+  "nominalLayerHeightMM": 0.16,
+  "originalArchiveUnchanged": true,
+  "replacementInstalledQuantity": 2,
+  "totalInstalledPrintedPiecesUnchanged": 22,
+  "physicalFitValidated": false,
+  "printedRoundnessMeasured": false,
+  "printCompleted": false
+}

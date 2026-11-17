@@ -1,0 +1,24 @@
+{
+  "material": "PLA",
+  "material_profile": "Generic PLA High Speed @BBL X2D 0.4 nozzle",
+  "main_nozzle_diameter_mm": 0.4,
+  "only_main_nozzle_used": true,
+  "wall_loops": 6,
+  "top_bottom_shell_layers": [
+    6,
+    6
+  ],
+  "infill_percent": 80,
+  "brim_width_mm": 3.0,
+  "supports_used": false,
+  "all_layer_heights_mm": 0.16,
+  "outer_wall_speed_mm_s": 25,
+  "inner_wall_speed_mm_s": 45,
+  "layers": 48,
+  "estimated_duration_seconds": 4524,
+  "estimated_mass_g": 6.28,
+  "estimated_filament_length_mm": 2104.29,
+  "estimates_are_not_actual_print_results": true,
+  "scale_percent": 100,
+  "cavities_face_up": true
+}

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "reportedAt": "2026-11-16",
-  "source": "Owner-reported print completion and subsequent passive assembly checkpoints; original cradle seating interference reproduced in CAD",
-  "stage": "Frame, phone bed, rails, motors, idlers and both belts assembled by owner report; original cradle fit blocked, REV01 awaits physical testing",
+  "source": "Owner-reported solenoid installation and tip measurements; native saved/sliced replacement pair and matching active printer job observed",
+  "stage": "Solenoid installed by owner report; corrected coupler pair print started at 0.16 mm, with printed roundness and fit pending",
   "firstTestBatchCompleted": true,
   "secondBatchCompletionConfirmed": true,
   "material": "PLA Silk",
@@ -76,44 +76,39 @@
     "earlierPreparationIsNotTheActualFinishedJob": true
   },
   "currentPrintBatch": {
-    "batch": "FT412_06",
-    "revision": 2,
+    "batch": "FT412_07",
+    "revision": "coupler_REV01",
     "prepared": true,
     "sliced": true,
     "printStarted": true,
-    "printCompleted": true,
+    "printCompleted": false,
     "parts": {
-      "electronicsHolder": 1
+      "couplerRearREV01": 1,
+      "couplerFrontREV01": 1
     },
     "material": "PLA",
     "slicerMaterialProfile": "Generic PLA High Speed",
     "observedAMSSlot": "A2",
     "nozzle": "main",
     "nozzleDiameterMM": 0.4,
-    "layerHeightMM": 0.2,
+    "layerHeightMM": 0.16,
     "wallLoops": 6,
     "topShellLayers": 6,
     "bottomShellLayers": 6,
-    "infillPercent": 60,
+    "infillPercent": 80,
     "infillPattern": "gyroid",
-    "brimWidthMM": 8,
-    "supportsEnabled": true,
-    "layersTotal": 258,
-    "observedPhase": "Printing",
-    "observedProgressPercent": 8,
-    "observedLayer": 1,
-    "estimatedDurationSeconds": 13646,
-    "estimatedMassG": 60,
+    "brimWidthMM": 3,
+    "supportsEnabled": false,
+    "layersTotal": 48,
+    "observedProgressPercent": 0,
+    "observedLayer": 0,
+    "observedPhase": "initial preparation",
+    "observedAt": "2026-11-17T12:57:21.144395+00:00",
+    "estimatedDurationSeconds": 4524,
+    "estimatedMassG": 6.28,
     "estimatesAreNotActualPrintResults": true,
-    "preparedForFirstPhysicalFit": true,
-    "switchTerminalClearanceValidated": false,
-    "fullAssemblyAccepted": false,
-    "lastProgressObservationRecordedAt": "2026-11-15T22:26:53.503562+00:00",
-    "completionBasis": "owner_report",
-    "reportedAt": "2026-11-16",
-    "exactCompletionDate": null,
-    "goodPrintOutcomeExplicitlyReported": null,
-    "measuredFitConfirmed": false
+    "measuredFitConfirmed": false,
+    "goodPrintOutcomeExplicitlyReported": null
   },
   "historicalCurrentPrintBatches": [
     {
@@ -186,6 +181,46 @@
       "physicalCountConfirmed": true,
       "exactCompletionDate": null,
       "measuredFitConfirmed": false
+    },
+    {
+      "batch": "FT412_06",
+      "revision": 2,
+      "prepared": true,
+      "sliced": true,
+      "printStarted": true,
+      "printCompleted": true,
+      "parts": {
+        "electronicsHolder": 1
+      },
+      "material": "PLA",
+      "slicerMaterialProfile": "Generic PLA High Speed",
+      "observedAMSSlot": "A2",
+      "nozzle": "main",
+      "nozzleDiameterMM": 0.4,
+      "layerHeightMM": 0.2,
+      "wallLoops": 6,
+      "topShellLayers": 6,
+      "bottomShellLayers": 6,
+      "infillPercent": 60,
+      "infillPattern": "gyroid",
+      "brimWidthMM": 8,
+      "supportsEnabled": true,
+      "layersTotal": 258,
+      "observedPhase": "Printing",
+      "observedProgressPercent": 8,
+      "observedLayer": 1,
+      "estimatedDurationSeconds": 13646,
+      "estimatedMassG": 60,
+      "estimatesAreNotActualPrintResults": true,
+      "preparedForFirstPhysicalFit": true,
+      "switchTerminalClearanceValidated": false,
+      "fullAssemblyAccepted": false,
+      "lastProgressObservationRecordedAt": "2026-11-15T22:26:53.503562+00:00",
+      "completionBasis": "owner_report",
+      "reportedAt": "2026-11-16",
+      "exactCompletionDate": null,
+      "goodPrintOutcomeExplicitlyReported": null,
+      "measuredFitConfirmed": false
     }
   ],
   "previousPrintPreparations": [
@@ -237,11 +272,13 @@
   "printInventorySummary": {
     "installedPieces": 22,
     "printCompletionRecordedPieces": 22,
-    "printingPieces": 0,
+    "printingPieces": 2,
     "awaitingPhysicalInventoryPieces": 0,
-    "additionalUnpreparedPieces": 0
+    "additionalUnpreparedPieces": 0,
+    "replacementPiecesInCurrentBatch": 2,
+    "original22PiecePrintCompletionPreserved": true
   },
-  "nextAssemblyStep": "Print one replacement cradle REV01 and check seating without force; preload four bar nuts before fastening the cradle. Original cradle interference blocks this step.",
+  "nextAssemblyStep": "After the corrected pair finishes, inspect it and trial-fit the tip without force; preload three M3 nuts and retain the metal collar with the original fasteners. Preserve the split gap and verify unpowered return before phone contact.",
   "fifthBatchCompletionConfirmed": true,
   "fifthBatch": {
     "batch": "FT412_05",
@@ -287,7 +324,7 @@
   },
   "assemblyProgress": {
     "assemblyRequestedAt": "2026-11-16",
-    "activeGuideStep": "23_cradle_fit_blocked_original_interference",
+    "activeGuideStep": "25_corrected_coupler_printing",
     "frameAssemblyConfirmed": true,
     "poweredCommissioningConfirmed": false,
     "feetInstalledConfirmed": true,
@@ -311,7 +348,13 @@
     "updatedOn": "2026-11-17",
     "actualBeltTensionMeasured": null,
     "motorPulleyHeightMeasured": null,
-    "threadlockerApplicationConfirmed": null
+    "threadlockerApplicationConfirmed": null,
+    "solenoidInstalledConfirmed": true,
+    "solenoidRetainingBarsInstalled": 2,
+    "solenoidRetainingScrewsInstalled": 4,
+    "solenoidConfirmationBasis": "direct_owner_report",
+    "couplerInstalledConfirmed": false,
+    "couplerPhysicalFitAccepted": false
   },
   "reviewedOn": "2026-11-17",
   "correctiveRevision": {
@@ -328,6 +371,27 @@
     "physicalFitConfirmed": false,
     "originalV01Preserved": true,
     "stlSHA256": "52affa591686cde38ce6b39c37fff8ce13d93eee2adc9985c76fce9212ad1780",
-    "stepSHA256": "7eb13f8321685770e35af102bbf2b172980c471af6ceaeb0ff62735851d119be"
+    "stepSHA256": "7eb13f8321685770e35af102bbf2b172980c471af6ceaeb0ff62735851d119be",
+    "subsequentSolenoidInstallationReported": true,
+    "printedRevisionIdentityConfirmed": false
+  },
+  "couplerCorrectiveRevision": {
+    "revision": "REV01",
+    "measuredTipMM": {
+      "collarDiameter": 8.83,
+      "collarHeight": 4.55,
+      "meshDiameter": 7.9
+    },
+    "cavityMM": {
+      "collarDiameter": 9.3,
+      "collarHeight": 4.95,
+      "meshExitDiameter": 8.3
+    },
+    "originalFitAndOvalAppearanceReported": true,
+    "originalPrintedRoundnessIndependentlyMeasured": false,
+    "physicalFitConfirmed": false,
+    "printStarted": true,
+    "printCompleted": false,
+    "originalV01Preserved": true
   }
 }

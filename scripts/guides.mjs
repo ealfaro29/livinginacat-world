@@ -40,6 +40,14 @@ export const guides = [
       "Replacement cradle for the original rib interference: STL, STEP and CAD checks. Physical fit testing remains pending.",
   },
   {
+    slug: "coupler-rev01",
+    source: "hardware/ft412-coupler-rev01/README.md",
+    group: "build",
+    title: "Tip coupler REV01",
+    description:
+      "Measured tip fit, circular CAD and a 0.16 mm replacement print. Printed roundness and physical acceptance remain pending.",
+  },
+  {
     slug: "project-guide",
     source: "docs/PROJECT.md",
     group: "build",
