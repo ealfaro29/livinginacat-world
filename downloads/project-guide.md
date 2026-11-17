@@ -1,5 +1,7 @@
 # living in a cat world · Project guide
 
+**Current assembly, November 17:** the owner confirms the electronics support mounted and reports an uneven underside. A separate optional 75 × 75 mm cosmetic plate and raised symbol are prepared and natively sliced as two single-colour parts, without clips or holes. They have not been printed or installed; preserve the honeycomb openings when fitting the plate. The original 22-part manifest and archived CAD remain unchanged.
+
 Start assembling with the [illustrated Spanish assembly guide](ASSEMBLY-ES.md), including a printable PDF, exact fasteners, frame orientation and checks for each stage.
 
 **Later November 17 update:** the owner reports the solenoid installed with two bars and four screws. The original tip-coupler pair was reported awkward and apparently oval; the tip was measured and [coupler REV01](/documentation/coupler-rev01/) was prepared, saved and natively sliced. At the owner's explicit instruction the two replacement halves were sent to print in PLA with 0.16 mm layers and the main 0.4 mm nozzle. The matching job was observed active at 0/48 layers in initial preparation. The owner subsequently confirms both replacement halves printed and installed, and reports completing the unpowered retention/return check before requesting continuation. Actual event dates, measured printed roundness and powered or thermal performance were not supplied. The original 22-part print completion and historical CAD archive remain preserved.
