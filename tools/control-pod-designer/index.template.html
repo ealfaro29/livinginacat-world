@@ -8,35 +8,43 @@
 </head>
 <body>
 <header class="topbar">
-  <div class="identity"><span class="brandmark">F</span><div><strong>FT412 <span>/ Control Studio</span></strong><small>Módulo lateral derecho</small></div><span class="tag">Diseño editable</span></div>
+  <div class="identity"><span class="brandmark">F</span><div><strong>FT412 <span>/ Control Studio</span></strong><small id="mount-side-label">Módulo a la izquierda del robot</small></div></div>
   <div class="file-actions"><button id="undo" title="Deshacer (⌘/Ctrl Z)">↶</button><button id="redo" title="Rehacer">↷</button><span class="separator"></span><button id="import">Abrir diseño</button><button id="download-json">Exportar JSON</button><button id="download-html" class="primary">Guardar HTML</button><input type="file" id="import-file" accept=".json,application/json" hidden></div>
 </header>
 <main class="shell">
   <aside class="left-panel">
-    <div class="panel-heading"><span class="eyebrow">01 / CAJA</span><button id="fit-view" class="text-button">Encuadrar</button></div>
+    <div class="panel-heading"><span class="eyebrow">CAJA</span><button id="fit-view" class="text-button">Encuadrar</button></div>
     <div class="dimension-grid"><label>Largo <span>mm</span><input id="box-length" type="number" min="80" max="600" step="1"></label><label>Ancho <span>mm</span><input id="box-width" type="number" min="60" max="300" step="1"></label><label>Alto <span>mm</span><input id="box-height" type="number" min="30" max="250" step="1"></label><label>Pared <span>mm</span><input id="box-wall" type="number" min="1.2" max="10" step="0.2"></label></div>
+    <div class="front-controls">
+      <div class="dimension-grid"><label>Tramo inclinado <span>mm</span><input id="box-frontRun" type="number" min="0" max="300" step="1"></label><label>Ángulo <span>°</span><input id="box-frontAngle" type="number" min="0" max="70" step="1"></label></div>
+      <p id="front-summary" class="help"></p>
+      <label class="check-row"><input id="inner-vent" type="checkbox">Panal en el lado del perfil</label>
+    </div>
     <label class="field">Separación del perfil <span>mm</span><input id="box-offset" type="number" min="0" max="60" step="1"></label>
     <div class="section-line"></div>
-    <div class="panel-heading"><span class="eyebrow">02 / PIEZAS</span><select id="add-part" aria-label="Añadir una pieza"><option value="">+ Añadir</option></select></div>
+    <div class="panel-heading"><span class="eyebrow">PIEZAS</span><select id="add-part" aria-label="Añadir una pieza"><option value="">+ Añadir</option></select></div>
     <div id="parts-list" class="parts-list"></div>
     <div class="section-line"></div>
-    <details id="print-details" open><summary>División para imprimir</summary><p class="help">Una caja de 355 mm se imprime por secciones. La línea indica la unión propuesta.</p><label class="field">Unión desde el frente <span>mm</span><input id="box-split" type="number" step="1" min="20" max="580"></label><div id="print-summary" class="print-summary"></div><label class="field">Cama disponible <span>mm</span><input id="box-bed" type="number" min="100" max="500" step="1"></label></details>
+    <details id="print-details" open><summary>División para imprimir</summary><label class="field">Unión desde el frente <span>mm</span><input id="box-split" type="number" step="1" min="20" max="580"></label><div id="print-summary" class="print-summary"></div><label class="field">Cama disponible <span>mm</span><input id="box-bed" type="number" min="100" max="500" step="1"></label></details>
     <details><summary>Anclaje al aluminio</summary><p class="help">Dos apoyos y cuatro RN05BM5 en la cara exterior. Las ranuras están a 20 mm. Fijaciones por revisar antes de fabricar.</p><div class="dimension-grid"><label>Apoyo 1 · X<input id="anchor-0" type="number" min="0" max="600"></label><label>Apoyo 2 · X<input id="anchor-1" type="number" min="0" max="600"></label></div><label class="field">Base del perfil · Z <span>mm</span><input id="box-profileBase" type="number" min="-80" max="120"></label></details>
   </aside>
   <section class="workspace" aria-label="Área de diseño">
-    <div class="viewbar"><div class="view-tabs" role="group" aria-label="Vista"><button data-view="top" class="active">Planta</button><button data-view="front">Frente</button><button data-view="side">Lado exterior</button><button data-view="3d">3D</button></div><div class="view-toggles"><label><input id="show-ports" type="checkbox" checked> Conectores</label><label><input id="show-lid" type="checkbox"> Tapa</label><button id="snapshot" title="Guardar imagen de la vista">↓ PNG</button></div></div>
+    <div class="viewbar">
+      <div class="view-tabs" role="group" aria-label="Vista"><button data-view="3d">3D</button><button data-view="top">Planta</button><button data-view="front">Frente</button><button data-view="back">Atrás</button><button data-view="side">Exterior</button><button data-view="inner">Lado del perfil</button></div>
+      <div class="view-toggles"><label><input id="show-ports" type="checkbox"> Guías de conectores</label><label><input id="show-lid" type="checkbox"> Tapa</label><label><input id="show-electronics" type="checkbox" checked> Electrónica</label><button id="snapshot" title="Guardar imagen de la vista">↓ PNG</button></div>
+    </div>
     <div id="viewport" class="viewport"><canvas id="scene" aria-label="Módulo tridimensional editable"></canvas><div id="diagram"></div><div id="scene-labels" aria-hidden="true"></div><div id="loading">Preparando el editor…</div><div id="empty-view" hidden>3D no disponible en este navegador. Las vistas de planta y de paneles siguen funcionando.</div></div>
     <div class="workspace-footer"><div id="dimensions-label" class="tabular"></div><span id="view-hint">Arrastrá las piezas · R para girar · flechas para ajustar</span><label class="snap-label">Ajuste <select id="snap"><option value="0">Libre</option><option value="1">1 mm</option><option value="5">5 mm</option></select></label></div>
     <div class="checks"><div class="checks-header"><div><span class="eyebrow">REVISIÓN DE DISTRIBUCIÓN</span><span id="checks-count"></span></div><button id="toggle-checks" class="text-button">Ver detalles</button></div><div id="checks-list" hidden></div></div>
   </section>
   <aside class="right-panel">
-    <div class="panel-heading"><span class="eyebrow">03 / PIEZA SELECCIONADA</span><span id="selected-badge" class="status-dot"></span></div>
+    <div class="panel-heading"><span class="eyebrow">PIEZA SELECCIONADA</span><span id="selected-badge" class="status-dot"></span></div>
     <div id="inspector-empty" hidden>Elegí una pieza para editarla.</div>
     <div id="inspector">
       <h1 id="part-title"></h1><p id="part-dimensions" class="part-dimensions tabular"></p>
       <div class="section-line"></div>
       <label class="field">Nombre<input id="part-name" maxlength="100"></label>
-      <label class="field">Montaje<select id="part-face"><option value="floor">Base horizontal</option><option value="front">Frente</option><option value="back">Panel trasero</option><option value="outer">Lado exterior</option><option value="inner">Lado del perfil</option><option value="lid">Tapa · hacia dentro</option></select></label>
+      <label class="field">Montaje<select id="part-face"><option value="floor">Base horizontal</option><option value="ramp">Frente inclinado</option><option value="front">Labio frontal</option><option value="back">Panel trasero</option><option value="outer">Lado exterior</option><option value="inner">Lado del perfil</option><option value="lid">Tapa · hacia dentro</option></select></label>
       <div class="coordinate-grid"><label>X <small>desde frente</small><input id="part-x" type="number" step="0.5"></label><label>Y <small>hacia fuera</small><input id="part-y" type="number" step="0.5"></label><label>Z <small>altura</small><input id="part-z" type="number" step="0.5"></label></div>
       <div class="rotate-row"><label>Giro<input id="part-rotation" type="number" step="15"></label><button id="rotate-left">−90°</button><button id="rotate-right">+90°</button></div>
       <label class="check-row"><input id="move-group" type="checkbox" checked>Mover también las piezas vinculadas</label>
@@ -51,7 +59,7 @@
     <p class="scope-note">Editor de distribución. Las formas y aberturas son aproximadas; la fabricación requiere comprobar encajes, cables, fijaciones y ventilación.</p>
   </aside>
 </main>
-<footer class="app-footer"><span id="save-status">Guardado en este navegador</span><span>Unidades en mm · cajas y medidas editables · fuentes de alimentación externas</span><button id="reset-design" class="text-button">Restablecer distribución</button></footer>
+<footer class="app-footer"><span id="save-status">Guardado en este navegador</span><span>Dimensiones en mm</span><button id="reset-design" class="text-button">Cargar boceto 280 × 120</button></footer>
 <div id="toast" role="status" hidden></div>
 <dialog id="cutout-dialog"><form id="cutout-form"><h2>Abertura adicional</h2><label class="field">Nombre<input name="name" value="Paso de cables" required maxlength="70"></label><label class="field">Panel<select name="face"><option value="outer">Lado exterior</option><option value="inner">Lado del perfil</option><option value="front">Frente</option><option value="back">Atrás</option><option value="lid">Tapa</option></select></label><div class="dimension-grid"><label>Centro horizontal · mm<input name="u" type="number" value="50" required></label><label>Centro vertical · mm<input name="v" type="number" value="35" required></label><label>Ancho · mm<input name="w" type="number" value="20" min="1" max="300" required></label><label>Alto · mm<input name="h" type="number" value="10" min="1" max="200" required></label></div><div class="dialog-actions"><button type="button" id="cancel-cutout">Cancelar</button><button type="submit" class="primary">Crear abertura</button></div></form></dialog>
 <script type="application/json" id="saved-layout">null</script>

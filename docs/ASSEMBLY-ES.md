@@ -18,11 +18,13 @@ Las 22 piezas impresas están terminadas según el dueño. Sus encajes todavía 
 
 ## Módulo de control lateral: diseño en curso
 
-El dueño confirmó la MKS fijada y decidió reunir la Raspberry Pi 5, MKS, dos TMC2209, pantalla **TS24-R V2.1**, interruptor S301T, MOSFET 5648 y portafusible en una carcasa nueva por fuera del perfil derecho. La pantalla queda al frente y el largo inicial de diseño ocupa los **355 mm del costado**. Se reutilizan el ventilador y disipador del CanaKit; la carcasa de ese kit no se instala dentro de la nueva. Las dos fuentes de alimentación siguen externas y separadas.
+El boceto del dueño reúne la Raspberry Pi 5 con la refrigeración CanaKit, una **MKS DLC32 V2.2** identificada en la foto, dos TMC2209, pantalla TS24-R V2.1, interruptor S301T, MOSFET 5648 y portafusible. La caja mide **280 × 120 × 90 mm** y va por fuera del **perfil izquierdo, mirando desde el frente**. El frente tiene un labio vertical de **30 mm**. El panel de la pantalla sube a **45°** durante **60 mm en planta** para llegar a la tapa. Los primeros 55 mm corresponden a la zona de la pantalla.
+
+El interruptor y el paso de corriente quedan en el panel trasero. El ventilador tiene una abertura encima y el panal queda en la pared que mira hacia el perfil. Hay dos clips de cable en cada pared interna y dos bajo la tapa. El piso tiene bases con alojamientos para tornillos para la Pi, la MKS y el MOSFET, y una cuna atornillada para el portafusible. Quedan por definir la ruta de alimentación, el paso del mazo de la máquina y las medidas exactas de los alojamientos.
 
 [Abrir el editor visual del módulo](/tools/control-module/) · [Descargar el editor HTML completo](/downloads/ft412-control-module-designer.html).
 
-El editor permite mover piezas en planta y 3D, girarlas, editar sus medidas, ajustar la caja, revisar interferencias entre envolventes, reservar aberturas y guardar el diseño como HTML o JSON. Una caja de 355 mm necesita al menos dos secciones con la cama actual; la unión se puede mover. Las formas de conectores, alturas del kit, ventana de pantalla y ventilador son reservas editables, no plantillas de mecanizado. Los tamaños físicos, fijaciones, holguras de enchufes, refrigeración y resistencia del anclaje deben comprobarse antes de generar el CAD final o imprimir.
+Mové las piezas en planta o en 3D y revisá el panel trasero y el panal en sus vistas. Desmarcá **Electrónica** para ver las bases y clips en la caja. El editor arranca con una división entre la Raspberry y la MKS, a 135 mm del frente, y la podés ajustar. Guardá la distribución como HTML o JSON. Las aberturas, alturas de las piezas, fijaciones y holguras de los cables se comprueban antes de generar el CAD final.
 
 Los pasos 26–29 de abajo conservan el montaje trasero original como referencia histórica. Durante el diseño del módulo lateral, conservá la instalación actual hasta tener preparada y verificada la nueva fijación. El módulo nuevo todavía no se ha fabricado, instalado, conectado ni probado.
 
