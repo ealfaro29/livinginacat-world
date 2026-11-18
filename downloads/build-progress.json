@@ -485,10 +485,45 @@
   "controlModuleDesign": {
     "status": "visual_layout_editor_available_final_enclosure_CAD_pending",
     "ownerRequested": true,
-    "mountingLocation": "outside_right_longitudinal_profile",
-    "initialLengthMM": 355,
+    "mountingLocation": "outside_left_longitudinal_profile_viewed_from_front",
+    "initialLengthMM": 280,
+    "enclosureMM": [
+      280,
+      120,
+      90
+    ],
+    "frontPanel": {
+      "verticalLipMM": 30,
+      "angleDegrees": 45,
+      "inclineProjectedRunMM": 60,
+      "screenZoneProjectedRunMM": 55
+    },
+    "rearOpenings": [
+      "power cable pass-through",
+      "cutoff switch"
+    ],
+    "ventilation": [
+      "fan opening in roof",
+      "honeycomb toward the profile"
+    ],
+    "cableClipPlan": {
+      "profileWall": 2,
+      "outerWall": 2,
+      "lid": 2
+    },
+    "floorMountsPlanned": [
+      "Raspberry Pi 5",
+      "MKS DLC32",
+      "Adafruit 5648",
+      "fuse holder cradle"
+    ],
+    "printSectionLengthsMM": [
+      135,
+      145
+    ],
     "screenModelObserved": "MKS TS24-R V2.1",
-    "screenFacing": "front",
+    "controllerRevisionObserved": "MKS DLC32 V2.2",
+    "screenFacing": "front_upward_incline",
     "newCustomCase": true,
     "reuseCanaKitFanAndHeatsink": true,
     "reuseCanaKitCase": false,
