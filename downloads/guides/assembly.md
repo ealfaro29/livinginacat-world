@@ -22,7 +22,9 @@ Las 22 piezas impresas están terminadas según el dueño. Sus encajes todavía 
 
 El boceto del editor reúne la Raspberry Pi 5 con la refrigeración CanaKit, la **MKS DLC32 V2.2**, dos TMC2209, la pantalla TS24-R V2.1, el interruptor S301T, el MOSFET 5648 y el portafusible. El editor parte del boceto de **280 × 120 × 90 mm**, con labio de 30 mm, inclinación de 45° y una división a 135 mm del frente. El módulo va por fuera del **perfil izquierdo mirando desde el frente**.
 
-El interruptor y el paso de corriente quedan en el panel trasero. El ventilador tiene una abertura encima y el panal queda en la pared que mira hacia el perfil. Hay dos clips de cable en cada pared interna y dos bajo la tapa. El piso tiene bases con alojamientos para tornillos para la Pi, la MKS y el MOSFET, y una cuna atornillada para el portafusible. Quedan por definir la ruta de alimentación, el paso del mazo de la máquina y las medidas exactas de los alojamientos.
+**Panel trasero de la caja armada.** El dueño intercambió el uso de las aberturas para acomodar el cuerpo del interruptor. El **S301T queda abajo, en Ø16 mm nominal**, y los **cables pasan arriba, por Ø12,7 mm nominal**. Antes de cablear, comprobá que el interruptor siga firme al mover la palanca y protegé el borde del paso de cables.
+
+El ventilador tiene una abertura encima y el panal queda en la pared que mira hacia el perfil. Hay dos clips de cable en cada pared interna y dos bajo la tapa. El piso tiene bases para la Pi, la MKS y el MOSFET y puntos para fijar la cuna del portafusible. Quedan por comprobar el paso del mazo de la máquina y la holgura de los cables.
 
 [Abrir el editor visual del módulo](/tools/control-module/) · [Descargar el editor HTML completo](/downloads/ft412-control-module-designer.html).
 

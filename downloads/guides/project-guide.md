@@ -1,6 +1,6 @@
 # living in a cat world · Project guide
 
-**Side control module, November 19.** The owner reports assembling the REV02 enclosure and mounting all cable clips and the display. The fabricated revision uses a nominal 280 × 130 × 85 mm enclosure with a 65 × 48 mm display opening and a separate 5 mm-deep bezel. Rail attachment, relocation of the remaining electronics and commissioning await confirmation.
+**Side control module, November 19.** The owner reports assembling the REV02 enclosure and mounting all cable clips and the display. The fabricated revision uses a nominal 280 × 130 × 85 mm enclosure with a 65 × 48 mm display opening and a separate 5 mm-deep bezel. The owner fitted the switch in the lower 16 mm opening and assigned the upper 12.7 mm opening to the cables so the switch body fits inside. Rail attachment, relocation of the remaining electronics and commissioning await confirmation.
 
 The [control module designer](/tools/control-module/) opens with the 280 × 120 × 90 mm layout. The enclosure sits outside the left rail when viewed from the front. A 45° panel carries the TS24-R display, and the Raspberry Pi 5 sits ahead of the DLC32, with the MOSFET and fuse holder alongside. The rear panel has the power cable pass-through and cutoff switch opening, the top has a fan opening, and the rail-facing wall has honeycomb ventilation. Floor mounts support the boards and fuse holder.
 
