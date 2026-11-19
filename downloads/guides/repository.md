@@ -2,7 +2,9 @@
 
 An open build journal about creating an AI that can perceive and act in the real world. The first project is a robot that physically uses an iPhone. Plans, decisions, purchases, shipments and hardware files are documented openly.
 
-**Website:** https://livinginacat.world · **Current stage, November 16:** the owner confirms all project prints are complete; all 22 installed printed pieces now have completion recorded. The owner now confirms the frame, four corner brackets and feet assembled, with two nuts reserved per side for the bed. The bed crossmembers are next; diagonal measurements and independent inspection remain unavailable. The owner reports M3/M4/M5 checks passed in PLA Silk. Coupler fit, complete assembly and functional heat/load performance remain unvalidated. Continue with the bed crossmembers and later rail alignment using the [illustrated Spanish assembly guide](docs/ASSEMBLY-ES.md), also available as a [printable PDF](https://livinginacat.world/downloads/guia-ensamblaje-ft412-es.pdf). Current PLA preference does not reclassify the materials of earlier batches. See the [dated fit-check report](docs/FIT-CHECKS.md).
+**Current stage, November 19.** The owner reports assembling the REV02 side enclosure and mounting all cable clips and the display. Rail attachment, relocation of the remaining electronics and commissioning await confirmation. Follow the [illustrated Spanish assembly guide](docs/ASSEMBLY-ES.md), also available as a [printable PDF](https://livinginacat.world/downloads/guia-ensamblaje-ft412-es.pdf).
+
+The owner reported all 22 original printed parts complete on November 16 and confirmed M3/M4/M5 fit checks in PLA Silk. The [dated fit-check report](docs/FIT-CHECKS.md) records the materials and checks for each batch. [Project website](https://livinginacat.world)
 
 ## Contents
 
