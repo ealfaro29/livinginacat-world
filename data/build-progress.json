@@ -483,7 +483,7 @@
     "printedColourConfirmed": false
   },
   "controlModuleDesign": {
-    "status": "visual_layout_editor_available_final_enclosure_CAD_pending",
+    "status": "enclosure_assembled_display_mounted_owner_reported",
     "ownerRequested": true,
     "mountingLocation": "outside_left_longitudinal_profile_viewed_from_front",
     "initialLengthMM": 280,
@@ -518,8 +518,21 @@
     "editorUrl": "/tools/control-module/",
     "offlineEditorUrl": "/downloads/ft412-control-module-designer.html",
     "physicalDimensionsFullyConfirmed": false,
-    "finalEnclosureCADPrepared": false,
-    "newEnclosurePrinted": false,
+    "finalEnclosureCADPrepared": true,
+    "newEnclosurePrinted": true,
+    "fabrication": {
+      "revision": "REV02",
+      "nominalEnclosureMM": [280, 130, 85],
+      "displayOpeningMM": [65, 48],
+      "displayBezelDepthMM": 5,
+      "assemblyReport": {
+        "reportedOn": "2026-11-19",
+        "source": "owner",
+        "enclosureAssembled": true,
+        "allCableClipsInstalled": true,
+        "displayMounted": true
+      }
+    },
     "electronicsRelocated": false,
     "electricalValidationCompleted": false,
     "originalV01AndPrintedPartHistoryPreserved": true

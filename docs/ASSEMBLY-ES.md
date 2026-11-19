@@ -16,17 +16,19 @@ Las 22 piezas impresas están terminadas según el dueño. Sus encajes todavía 
 
 **Paso 25, acoplador:** el dueño reporta ajuste incómodo y apariencia oval de las mitades anteriores. La [pareja REV01](/documentation/coupler-rev01/) incorpora las medidas de su punta y se imprimió a **0,16 mm**. El dueño confirma las dos mitades impresas y colocadas, y después informa que completó la comprobación sin corriente y pide continuar. La fecha real de los eventos, la redondez medida y el comportamiento con corriente o calor siguen sin determinar.
 
-## Módulo de control lateral: diseño en curso
+## Módulo de control lateral REV02
 
-El boceto del dueño reúne la Raspberry Pi 5 con la refrigeración CanaKit, una **MKS DLC32 V2.2** identificada en la foto, dos TMC2209, pantalla TS24-R V2.1, interruptor S301T, MOSFET 5648 y portafusible. La caja mide **280 × 120 × 90 mm** y va por fuera del **perfil izquierdo, mirando desde el frente**. El frente tiene un labio vertical de **30 mm**. El panel de la pantalla sube a **45°** durante **60 mm en planta** para llegar a la tapa. Los primeros 55 mm corresponden a la zona de la pantalla.
+**Avance reportado el 19 de noviembre de 2026.** El dueño confirmó que armó la caja REV02 y montó todos los clips de cables y la pantalla. La caja fabricada tiene dimensiones nominales de **280 × 130 × 85 mm**. El frente inclinado tiene una abertura de **65 × 48 mm** y un marco separado de **5 mm** de profundidad. Quedan por confirmar la fijación al perfil, el traslado del resto de la electrónica y la puesta en marcha.
+
+El boceto del editor reúne la Raspberry Pi 5 con la refrigeración CanaKit, la **MKS DLC32 V2.2**, dos TMC2209, la pantalla TS24-R V2.1, el interruptor S301T, el MOSFET 5648 y el portafusible. El editor parte del boceto de **280 × 120 × 90 mm**, con labio de 30 mm, inclinación de 45° y una división a 135 mm del frente. El módulo va por fuera del **perfil izquierdo mirando desde el frente**.
 
 El interruptor y el paso de corriente quedan en el panel trasero. El ventilador tiene una abertura encima y el panal queda en la pared que mira hacia el perfil. Hay dos clips de cable en cada pared interna y dos bajo la tapa. El piso tiene bases con alojamientos para tornillos para la Pi, la MKS y el MOSFET, y una cuna atornillada para el portafusible. Quedan por definir la ruta de alimentación, el paso del mazo de la máquina y las medidas exactas de los alojamientos.
 
 [Abrir el editor visual del módulo](/tools/control-module/) · [Descargar el editor HTML completo](/downloads/ft412-control-module-designer.html).
 
-Mové las piezas en planta o en 3D y revisá el panel trasero y el panal en sus vistas. Desmarcá **Electrónica** para ver las bases y clips en la caja. El editor arranca con una división entre la Raspberry y la MKS, a 135 mm del frente, y la podés ajustar. Guardá la distribución como HTML o JSON. Las aberturas, alturas de las piezas, fijaciones y holguras de los cables se comprueban antes de generar el CAD final.
+Mové las piezas en planta o en 3D y revisá el panel trasero y el panal en sus vistas. Desmarcá **Electrónica** para ver las bases y clips. Guardá la distribución como HTML o JSON. Comprobá las aberturas, las fijaciones y las holguras antes de fabricar una variante.
 
-Los pasos 26–29 de abajo conservan el montaje trasero original como referencia histórica. Durante el diseño del módulo lateral, conservá la instalación actual hasta tener preparada y verificada la nueva fijación. El módulo nuevo todavía no se ha fabricado, instalado, conectado ni probado.
+Los pasos 26–29 documentan el soporte trasero original. Comprobá el anclaje del módulo lateral antes de trasladar las placas desde ese soporte.
 
 
 ## Paso 01. Separar los perfiles y las escuadras
