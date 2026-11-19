@@ -530,7 +530,11 @@
         "source": "owner",
         "enclosureAssembled": true,
         "allCableClipsInstalled": true,
-        "displayMounted": true
+        "displayMounted": true,
+        "rearPanelUse": {
+          "switch": {"opening": "lower", "nominalDiameterMM": 16},
+          "cablePassThrough": {"opening": "upper", "nominalDiameterMM": 12.7}
+        }
       }
     },
     "electronicsRelocated": false,
