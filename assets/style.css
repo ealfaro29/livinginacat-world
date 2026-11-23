@@ -530,6 +530,46 @@ h2 em {
   margin-top: 8px;
   max-width: 64ch;
 }
+.v2-budget-band .budget-local {
+  font: 500 clamp(1.2rem, 2vw, 1.65rem) / 1.3 var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.budget-terms {
+  grid-column: 1 / -1;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+.budget-lines {
+  margin: 0;
+  font-size: 0.94rem;
+}
+.budget-lines > div,
+.budget-list-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+}
+.budget-lines > div {
+  border-bottom: 1px solid #cedaca;
+  padding: 8px 0;
+}
+.budget-lines > div:last-child {
+  border: 0;
+}
+.budget-lines dd {
+  margin: 0 0 0 auto;
+  font-weight: 620;
+  font-variant-numeric: tabular-nums;
+}
+.budget-list-head {
+  margin-bottom: 12px;
+}
+.budget-list-head h3 {
+  font: 600 clamp(1.35rem, 2vw, 1.85rem) / 1.15 var(--display);
+  letter-spacing: -0.035em;
+}
 .parts-controls {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(160px, 0.6fr);
