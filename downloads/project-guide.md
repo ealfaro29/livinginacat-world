@@ -1,75 +1,69 @@
-# living in a cat world · Project guide
+# Living in a Cat World · Project guide
 
-**First touchscreen tap, November 22.** The owner reports that the iPhone detected a tap using the FT412's own aluminum frame as the stylus reference. A flexible 22 AWG wire connects the tip's side screw to the fixed rail. The [assembly guide](/documentation/assembly/#referencia-de-la-punta-en-el-marco) shows the attachment. Cable clearance and repeatable touch detection remain pending.
-
-**Side control module, November 19.** The owner reports assembling the REV02 enclosure and mounting all cable clips and the display. The fabricated revision uses a nominal 280 × 130 × 85 mm enclosure with a 65 × 48 mm display opening and a separate 5 mm-deep bezel. The owner fitted the switch in the lower 16 mm opening and assigned the upper 12.7 mm opening to the cables so the switch body fits inside. Rail attachment, relocation of the remaining electronics and commissioning await confirmation.
-
-The [control module designer](/tools/control-module/) opens with the 280 × 120 × 90 mm layout. The enclosure sits outside the left rail when viewed from the front. A 45° panel carries the TS24-R display, and the Raspberry Pi 5 sits ahead of the DLC32, with the MOSFET and fuse holder alongside. The rear panel has the power cable pass-through and cutoff switch opening, the top has a fan opening, and the rail-facing wall has honeycomb ventilation. Floor mounts support the boards and fuse holder.
-
-**Current assembly, November 17:** the owner confirms the electronics support mounted and reports an uneven underside. A separate optional 75 × 75 mm cosmetic plate and raised symbol are prepared as two separate parts, without clips or holes. The logo uses nominal Color Mix 90% yellow and 10% black and its matching job was observed starting at 0/12 layers, without completion confirmed. The black plate remains separate without a confirmed print; preserve the honeycomb openings when fitting the plate. The original 22-part manifest and archived CAD remain unchanged.
-
-Start assembling with the [illustrated Spanish assembly guide](ASSEMBLY-ES.md), including a printable PDF, exact fasteners, frame orientation and checks for each stage.
-
-**Later November 17 update:** the owner reports the solenoid installed with two bars and four screws. The original tip-coupler pair was reported awkward and apparently oval; the tip was measured and [coupler REV01](/documentation/coupler-rev01/) was prepared, saved and natively sliced. At the owner's explicit instruction the two replacement halves were sent to print in PLA with 0.16 mm layers and the main 0.4 mm nozzle. The matching job was observed active at 0/48 layers in initial preparation. The owner subsequently confirms both replacement halves printed and installed, and reports completing the unpowered retention/return check before requesting continuation. Actual event dates, measured printed roundness and powered or thermal performance were not supplied. The original 22-part print completion and historical CAD archive remain preserved.
-
-**Assembly update, November 17:** the owner reports the frame, bed, rails, motors, idlers and both belts assembled, with smooth manual travel. The original L-shaped cradle cannot seat because its two ribs interfere with the belt clamp. [Cradle REV01](/documentation/cradle-rev01/) corrects that interference in CAD, preserving mounting holes and nut cavities. At that earlier review, the replacement cradle had not been sliced or sent. The owner later reports the solenoid installed without identifying the printed cradle revision; no additional cradle print is scheduled by this completion update. The original 22-piece completion record and v0.1 archive remain intact. Powered operation and complete assembly acceptance remain unconfirmed.
-
-Updated: November 16, 2026 (Costa Rica). The owner confirms all project prints are complete and requests assembly. The electronics support retains its earlier observed yellow PLA and Generic PLA High Speed material evidence; no new printer observation was made. The original PETG preparation stays unchanged. Saved native history reports the solenoid cradle and two bars as Success. The first coupons/coupler, bed/four feet and motor-mount/belt-clamp batches retain their completion evidence. The owner now confirms eight finished pieces by count and shape groups, matching the preceding PETG plate. All 22 installed pieces have prepared files and recorded print completion. The exact completion event date, quality and measured fit were not supplied. No additional plate is scheduled. We can begin dry frame and rail assembly now. Fit of the complete assembly, the switch and coupler, motion, touch and heat/load behavior remain unvalidated.
-
-On November 15 the owner confirmed physical receipt of the existing project shipments matched to the received consolidations, and separately confirmed the controller. Actual delivery dates were not specified. Purchase quantities, original documents, forwarding assignments and earlier carrier evidence are preserved. The combined forwarding amount remains pending reconciliation without a numeric total; recipient receipt does not itself establish payment or a container billing relationship.
-
-Mouser shipped all ten replacement references. Its final invoice totals $87.22, superseding the $82.07 order confirmation, and explicitly reports paid in full; bank settlement remains unverified. FedEx confirms carrier delivery on November 9, and Speedy receipt in Miami was verified on November 10 through an independently verified full carrier alias. On November 14 Speedy confirmed the exact shipment in Costa Rica. On November 15 the owner confirms physical receipt; the actual arrival and recipient-delivery event dates remain unspecified. The original invoice, prealert and consolidation are complete. The Adafruit 412 solenoid, 5648 driver and original harness references are retained. NKK S301T replaces S301 and uses screw terminals; check the printed guard and terminal clearance before assembly. The planned local purchase of suitable 18 AWG stranded copper wire remains unconfirmed. Its supplier, length and price are unknown; there is no confirmed Remington order.
-
-The [Amazon DLC32 V2.1 replacement kit](https://www.amazon.com/dp/B0GY43P1CL) was ordered on November 7. Amazon confirms carrier delivery on November 10 for the controller's exact fulfillment group, and Speedy receipt in Miami was verified on November 11. On November 14 Speedy confirmed the exact controller shipment in Costa Rica. On November 15 the owner separately confirms receiving that exact controller shipment; the actual arrival and recipient-delivery event dates remain unspecified. Its authentic purchase receipt, unique prealert and consolidation are complete; a merchant payment observation does not establish bank settlement or a final tax invoice. Consult the shipment record for its current forwarding location. VXB confirmed cancellation and reports a full refund; bank receipt remains unverified. Its original amounts and shipment remain cancelled history. The [reference configuration](https://github.com/physiclaw/PhysiClaw/blob/main/firmware/config.yaml) specifies MKS DLC32 V2.1 and CoreXY. The published V2.1 schematics, pinout and dimensions match the Makerbase documents; physical inspection and commissioning remain necessary. Keep the two TMC2209 drivers already ordered.
+FT412 is a CoreXY machine that operates an iPhone through its own touchscreen. V1 is the working, aluminum-frame prototype. V2 is a printed-enclosure design that reuses its main components. The physical tests below were performed on V1.
 
 ## Goal
 
-Build an AI that can perceive and act in the real world. The first project connects that goal to a concrete task: physically using an iPhone.
-
-Use camera vision, XY motion and a vertically actuated capacitive stylus to operate an iPhone physically. First milestones: tap, double-tap, long press, swipe and drag with one contact point. One stylus cannot perform two-finger gestures. Extended autonomy and universal compatibility with every app are not demonstrated.
+A camera watches the phone. A carriage positions a mesh stylus over the glass, and a solenoid lowers it for a tap. The project tests what one physical point of contact can do, starting with taps and extending to holds and drags. Two-finger gestures require a second contact.
 
 ## Planned architecture
 
-USB camera → Raspberry Pi 5 → observation/decision application → structured, validated actions → DLC32 V2.1 with two TMC2209 drivers → two NEMA 17 motors and CoreXY mechanics. Contact uses an Adafruit 412 12 V solenoid, 5648 MOSFET driver, printed coupler and 7 mm mesh tip. Final wiring and software need development and verification before connection to the phone.
+- **Vision and control.** A USB camera feeds a Raspberry Pi 5. The Pi sends motion commands over USB to a Makerbase MKS DLC32. The installed board is marked V2.2 and runs CoreXY firmware. A TS24-R touchscreen provides local controls.
+- **Planar motion.** Two TMC2209 drivers operate two NEMA 17 motors. Two 6 mm GT2 belts move the bridge along the side rails and the stylus carriage across the bridge.
+- **Touch.** An Adafruit 5648 MOSFET driver switches the Adafruit 412 solenoid. A two-piece printed coupler holds the capacitive mesh tip. On V1, a flexible 22 AWG lead from the side screw of the tip to the fixed aluminum frame provides the reference that worked in the phone test. [Stylus connection in the assembly guide](/documentation/assembly/#referencia-de-la-punta-en-el-marco)
+- **Power.** V1 has separate supplies for the Pi, the 12 V mechanism and the phone. The actuator branch has a manual cutoff and a 3 A fuse. Logic can remain powered over USB after the 12 V supply is switched off.
 
-The camera sits on an external arm. The Pi, 12 V machine and phone charger use separate supplies. The actuator branch includes a manual cutoff and 3 A fuse; cutting 12 V may leave logic powered over USB.
+The side control box was tried during assembly and removed when its components did not fit together. Its editor remains available as an earlier layout study. [Side-module editor](/tools/control-module/)
 
 ## Mechanics and printing
 
-Planned FramingTech slot-5 profile cuts: two 20×40 at 355 mm, two 20×40 at 190 mm, one 10×20 at 185 mm and two 10×20 at 190 mm. The owner counted seven received profiles with the expected relative size groups; exact cut lengths were not measured and the count does not confirm every fastener. MGN9H rails: X 150 mm, two Y 250 mm. GT2 belt, 6 mm wide; drive pulleys for a 5 mm shaft. Consult the complete purchase record for exact fasteners and components.
+The V1 cut list specifies seven metric FramingTech slot-5 profiles. The two long sides are 20 × 40 × 355 mm. Two 20 × 40 × 190 mm profiles close the frame. The moving beam is 10 × 20 × 185 mm, and the two bed crossmembers are 10 × 20 × 190 mm. Two 250 mm Y rails carry the bridge. A 150 mm X rail carries the head. Each rail uses an MGN9H carriage.
 
-The public archive includes 16 final STL and 16 STEP files, three fit coupons and CAD review records. The manifest specifies 22 installed printed parts. Initial M3 and M5 checks were reported passed in PLA Silk with a 0.4 mm nozzle; M4 screw/nut fit was also reported passed on November 15; coupler fit remains pending. Hole, pocket and seat results were not individually itemized. Follow the original quantities and verify the remaining interfaces, motor heating and loaded behavior in the current build before accepting the assembly; the prior Silk fit results do not validate PETG. The archive's PETG preparation remains a historical design reference, with its original checksum and geometry unchanged. Commercial reference CAD, full reference assemblies and self-contained regeneration scripts are excluded. Read the [release scope](../hardware/ft412/PUBLIC-RELEASE.md), [hardware guide](../hardware/ft412/README.md), [motor mounts](../hardware/ft412/MOTOR-MOUNTS.md) and [electronics mount](../hardware/ft412/ELECTRONICS.md) together.
+The v0.1 release has 16 printable designs and their editable STEP files, plus three fit coupons. Its manifest calls for 22 installed printed pieces. The owner reported completing those prints. The illustrated guide identifies each part, the matching fasteners and the nuts that must go into a slot before the frame is closed. [Assembly guide in Spanish](ASSEMBLY-ES.md) · [Hardware guide](../hardware/ft412/README.md) · [Release scope](../hardware/ft412/PUBLIC-RELEASE.md)
 
-The electronics support is complete by the owner report of November 16. Its prior device estimate of 3 h 47 min 26 s and 60.00 g remains historical, not measured duration or consumption. Check the existing printed pieces against the 22-piece manifest before assembling the transmission. Start with frame squareness, feet and rail alignment. The local wire purchase and receipt of the specified grease remain pending for later wiring and commissioning.
+Two separate REV01 downloads address fit problems found during assembly. The revised cradle moves two ribs away from the belt clamp. The revised coupler fits the owner's measured 8.83 mm collar and 7.90 mm mesh tip. The owner installed the revised coupler and checked that the tip was retained and returned freely with power off. The installed cradle revision was not recorded. [Cradle correction](/documentation/cradle-rev01/) · [Tip coupler correction](/documentation/coupler-rev01/) · [Motor mounts](../hardware/ft412/MOTOR-MOUNTS.md) · [Electronics mount](../hardware/ft412/ELECTRONICS.md)
+
+## What V1 demonstrated
+
+| Bench check | Observation |
+|---|---|
+| Mechanical assembly | The owner fitted the frame, feet, phone bed, rails, motors, idlers and both belts. They reported smooth manual travel with the right rail tightened. |
+| X travel | With a physical ruler zeroed at the carriage, a command for 10 mm to the right produced a reported 10 mm movement. |
+| Y travel | With the ruler aligned front to back, a command for 10 mm toward the rear also produced a reported 10 mm movement. |
+| Contact | The owner reported that the iPhone Calculator registered a stylus tap with the tip connected to the machine's aluminum frame. |
+
+The ruler checks cover one move on each axis at the ruler's resolution. A screen-wide error map, repeatability after reseating the phone, and sustained thermal performance still need measurement. [Fit checks](/documentation/fit-checks/)
+
+## V2 design dimensions
+
+V2 integrates the phone bed, electronics compartment and camera support into a printed console. Its drawing places the lens 100 mm above the glass, based on the owner's measurement of V1. At that setting the modeled exterior is **196 × 302 × 231 mm**. The calculated travel with the three carriages fully supported and 2 mm reserved at each rail end is **106.1 mm in X and 206.1 mm in Y**. These are V2 CAD results. Physical fit, belt clearance under tension and thermal behavior need a built prototype. [Explore V2](/v2/)
 
 ## Build and verification order
 
-1. Receive and measure components; record any model or quantity differences.
-2. Print fit coupons and check sockets before the final batch.
-3. Assemble the frame, rails and transmission without the phone. Check squareness, belt tension, free movement and clearances.
-4. Verify wiring and polarity against each component’s documentation. Do not connect motors or drivers while powered. Verify pin assignments before energizing.
-5. Test slow motion, axis direction, software limits and actuator cutoff. Do not assume automatic homing or collision detection.
-6. Separately test tip retraction, force, return and capacitive recognition. Establish pulse/rest parameters using measurements.
-7. Calibrate the camera-to-XY transformation and measure error across the screen.
-8. Test supervised gestures and record results before adding AI control.
+1. Check the component markings, cut lengths and fastener sizes against the illustrated guide.
+2. Print the fit coupons before committing to a full batch. Check the actual screws, nuts and tip.
+3. Square the frame and align the rails with the phone removed. Check free movement, belt tension and cable clearance along the full travel.
+4. Disconnect power before fitting motors or drivers. Verify pin assignments, wiring and polarity against the actual boards.
+5. Start with slow, short moves and a physical reference. Check axis direction, travel limits and the cutoff before approaching the phone.
+6. Test tip retention, retraction and contact on a sacrificial surface at screen height.
+7. Align the camera with all four screen corners visible, calibrate camera coordinates to the machine and measure error across the screen.
+8. Run supervised gesture tests before enabling automated tasks.
 
 ## Provisional contact limits
 
-The solenoid is intermittent-duty. Initial development limits: no more than 1 second energized per action; rest at least 10 times the energized duration; stop if externally measured body/mount temperature reaches 45 °C. These are unvalidated development rules, not demonstrated operating specifications, and do not measure the internal coil temperature. Swipe, drag and hold capability must be demonstrated within the permitted thermal cycle. Implement and test timeout and safe retraction before AI operation.
+The solenoid is designed for intermittent use. For development, limit each energization to **1 second** and allow at least **10 times its duration** before the next pulse. Stop if the measured external temperature at the coil body or mount reaches **45 °C**, the printed support deforms, or the tip fails to retract. An external reading measures the surface. Internal coil temperature and the duty cycle of a finished device still need separate validation.
+
+Test the timeout and retraction behavior before automated operation. A tap that works once does not establish a safe hold or drag duration.
 
 ## Planned acceptance tests
 
-- A tap grid including edges and corners: publish coordinates, attempts, successes and observed error.
-- Double-tap, long press, swipes in four directions and drag: record duration, travel and result.
-- Repeatability after replacing the phone and recalibrating.
-- Camera occlusion, reflections, screen changes and failed actions: stop or recover explicitly, without unlimited retries.
-- Manual cutoff and timeout: verify actuator behavior and identify circuits that remain powered.
-- Thermal and wear testing under realistic sequences. Do not claim extended unattended operation before validating it.
+- Measure tap accuracy with a grid covering the center, edges and corners. Record attempts, detections and position error.
+- Record timing and travel for double taps, long presses, swipes and drags.
+- Repeat the grid after removing the phone, replacing it in the bed and recalibrating.
+- Test behavior with reflections, an obscured camera, a changed screen or a missed touch.
+- Check the manual cutoff, timeout and retraction. Identify every circuit that stays live through USB.
+- Measure temperature and wear under representative sequences before extended operation.
 
 ## Data and transparency
 
-Current parts and purchase status: https://livinginacat.world/purchases/. Shipments: https://livinginacat.world/shipments/. USD; quotes exclude tax and shipping unless noted. Ordered, paid, shipped and delivered are distinct states. API usage, substitutions and unknown charges will be added as verified.
-
-Mechanical foundation: PhysiClaw hardware v0.51 under MIT; [attribution](ATTRIBUTION.md). This variant and its limits are documented independently. Source: https://github.com/ealfaro29/livinginacat-world.
-
-The owner confirmed a $537.00 TechStorex project expense, recorded once under Taxes, tariffs, shipping and others. It is a standalone additional expense with no shipping or equipment allocation; it does not create a parcel to prealert. Payment evidence is retained privately and bank settlement remains unverified.
+The V1 catalog lists the equipment used for the project and its approximate overall investment. The V2 section presents the digital assembly, fastening details and design checks. [V1 components](/v1/) · [V2 model](/v2/) · [Attribution and licenses](ATTRIBUTION.md)

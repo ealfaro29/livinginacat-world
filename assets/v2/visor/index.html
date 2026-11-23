@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es" data-render="static">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#faf9f5">
+  <title>Visor de la consola V2 · Living in a Cat World</title>
+  <meta name="description" content="Explorá la consola FT412 en 3D, revisá las fijaciones y simulá el recorrido de los patines y la altura de la cámara.">
+  <link rel="canonical" href="https://livinginacat.world/assets/v2/visor/">
+  <link rel="icon" href="/assets/brand/robot-cat-48.png" type="image/png">
+  <link rel="stylesheet" href="./visor.css">
+  <noscript><style>.views { display: none; }</style></noscript>
+  <script>if(new URLSearchParams(location.search).get("embed")==="1")document.documentElement.classList.add("embed")</script>
+</head>
+<body>
+<a class="skip" href="#contenido">Ir al contenido</a>
+<header class="site-head">
+  <a class="brand" href="/es/" target="_top">living in a cat world</a>
+  <a href="/es/v2/" target="_top">Volver a V2</a>
+</header>
+<main id="contenido">
+  <div class="mast">
+    <div><p class="version">FT412 / V2</p><h1>Consola integrada</h1></div>
+    <div class="dims"><strong>196 × 302 × 231 mm</strong><span>Ancho × fondo × alto con el lente a 100 mm del vidrio</span></div>
+  </div>
+  <div class="workspace">
+    <nav class="views" aria-label="Vistas de la consola">
+      <button type="button" data-view="outside" aria-pressed="true">Conjunto</button>
+      <button type="button" data-view="hardware" aria-pressed="false">Herrajes</button>
+      <button type="button" data-view="travel" aria-pressed="false">Recorrido</button>
+      <button type="button" data-view="switch" aria-pressed="false">Interruptor</button>
+      <button type="button" data-view="optics" aria-pressed="false">Cámara</button>
+      <button type="button" data-view="electronics" aria-pressed="false">Electrónica</button>
+    </nav>
+    <div class="grid">
+      <div id="viewer" aria-label="Modelo tridimensional de la consola FT412">
+        <img id="poster" src="./outside.webp" width="900" height="810" alt="Vista del conjunto, con el pórtico de la cámara sobre la cama del teléfono">
+        <div class="angles" aria-label="Orientación del modelo"><button type="button" data-angle="iso" aria-pressed="true">Perspectiva</button><button type="button" data-angle="top">Planta</button><button type="button" data-angle="front">Frente</button><button type="button" data-angle="rear">Trasera</button></div>
+        <div id="pins"></div>
+        <div class="canvasfoot"><span>Arrastrá para girar · pellizcá o usá la rueda para acercar</span><label><input id="annotations" type="checkbox" checked> Puntos</label></div>
+        <p id="status" role="status" hidden></p>
+      </div>
+      <aside class="pane" aria-label="Detalles de la vista">
+        <h2 id="section-title">Consola compacta</h2>
+        <p id="section-text">La cámara mira al centro del teléfono. La pantalla y el interruptor quedan en el frente de la consola.</p>
+        <div id="travel-controls" class="controls" hidden>
+          <label for="sx">Carro X <output id="xout" for="sx">0 mm</output></label><input id="sx" type="range" min="-55.05" max="55.05" step="0.05" value="0">
+          <label for="sy">Puente Y <output id="yout" for="sy">0 mm</output></label><input id="sy" type="range" min="-105.05" max="105.05" step="0.05" value="0">
+          <div class="actions"><button type="button" data-position="-1">Frente izq.</button><button type="button" data-position="0">Centro</button><button type="button" data-position="1">Fondo der.</button></div>
+        </div>
+        <div id="optics-controls" class="controls" hidden><label for="sz">Vidrio a lente <output id="lensout" for="sz">100 mm</output></label><input id="sz" type="range" min="-5" max="10" step="1" value="0"><small>Altura exterior <strong id="heightout">231 mm</strong></small></div>
+        <div id="switch-controls" class="controls" hidden><div class="actions"><button type="button" data-toggle="off" aria-pressed="true">O · Apagado</button><button type="button" data-toggle="on" aria-pressed="false">I · Encendido</button></div></div>
+        <div id="parts"><p class="static-note">La cámara, la cama y los controles se muestran en su posición de diseño.</p></div>
+      </aside>
+    </div>
+    <div class="model-links"><a href="#herrajes" class="full-only">Lista de herrajes</a><a href="./ft412-v2-step.zip" download>Descargar CAD <span>STEP · ZIP</span></a></div>
+  </div>
+  <noscript><p>La vista estática, las medidas y la descarga del modelo están disponibles. Activá JavaScript para girarlo.</p></noscript>
+  <div class="full-details">
+    <section class="fixings" id="herrajes">
+      <div class="section-intro"><h2>Herrajes de la consola</h2><p>Los dos tornillos de uso general comparten diámetro, longitud y llave Allen de 2 mm. Cada tipo de cabeza tiene su propio asiento.</p></div>
+      <div class="measurements">
+        <div data-sku="7213" data-qty="14"><strong>14</strong><span>M3 × 8 avellanados · #7213</span></div>
+        <div data-sku="7219" data-qty="60"><strong>60</strong><span>M3 × 8 de botón · #7219</span></div>
+        <div><strong>54</strong><span>Tuercas cuadradas M3</span></div>
+      </div>
+      <figure><img src="./herrajes.webp" width="1575" height="762" loading="lazy" alt="Cortes del asiento cónico en plástico y del alojamiento de cabeza botón en el riel, con las cotas de 8 mm de cada tornillo."></figure>
+      <div class="schedule"><table><caption>Fijaciones por unión</caption><thead><tr><th scope="col">Unión</th><th scope="col">Tornillo</th><th scope="col" class="num">Unidades</th><th scope="col">Tuercas</th></tr></thead><tbody>
+        <tr><th scope="row">Mitades del chasis</th><td>#7213</td><td class="num">2</td><td>2 M3</td></tr>
+        <tr><th scope="row">Soportes de riel al piso</th><td>#7213</td><td class="num">6</td><td>6 M3</td></tr>
+        <tr><th scope="row">Pórtico al chasis</th><td>#7213</td><td class="num">4</td><td>4 M3</td></tr>
+        <tr><th scope="row">Panel de servicio y cama</th><td>#7213</td><td class="num">2</td><td>2 M3</td></tr>
+        <tr><th scope="row">Dos rieles largos y uno corto</th><td>#7219</td><td class="num">34</td><td>34 M3</td></tr>
+        <tr><th scope="row">Tres patines</th><td>#7219</td><td class="num">12</td><td>Rosca propia</td></tr>
+        <tr><th scope="row">Dos motores NEMA 17</th><td>#7219</td><td class="num">8</td><td>Rosca propia</td></tr>
+        <tr><th scope="row">Placa MKS</th><td>#7219</td><td class="num">4</td><td>4 M3</td></tr>
+        <tr><th scope="row">Corredera de la cámara</th><td>#7219</td><td class="num">2</td><td>2 M3</td></tr>
+        <tr><th scope="row">Pantalla TS24-R</th><td>M2,5 × 8</td><td class="num">4</td><td>4 M2,5 con arandela</td></tr>
+      </tbody></table></div>
+      <p>Los alojamientos para las tuercas cuadradas miden 5,8 × 2,7 mm en la boca. Se cargan de costado. La Raspberry Pi y la cajita Adafruit se sujetan con lengüetas impresas.</p>
+    </section>
+    <div class="notes">
+      <article><h2>Recorrido</h2><p>Los tres patines permanecen sobre sus guías en un campo geométrico de 110,1 × 210,1 mm. Con 2 mm de margen en cada extremo quedan 106,1 × 206,1 mm.</p></article>
+      <article><h2>Óptica</h2><p>La cámara se regula entre 95 y 110 mm del vidrio. Con la referencia de 100 mm, el conjunto alcanza 231 mm de altura y el lente queda 65 mm por encima del asiento de los rieles.</p></article>
+      <article><h2>Prototipo en CAD</h2><p>La menor distancia calculada entre una correa y un tornillo es de 1,4 mm. Quedan por probar la tensión, el ajuste de las lengüetas, la carga térmica y la alimentación por un único cable.</p></article>
+    </div>
+    <details><summary>Secuencia de montaje prevista</summary>
+      <ol><li>Antes de cerrar el piso, cargá las tuercas de la costura y de los seis pies. Uní las dos mitades y fijá los soportes largos desde abajo.</li>
+      <li>Cargá 26 tuercas para las guías largas y ocho para la corta. Fijá las dos primeras con tornillos #7219. En el modelo, sus cabezas quedan 1,55 mm por debajo de la cara superior de la guía.</li>
+      <li>Uní el puente a los dos patines largos con ocho #7219. Instalá el riel corto, fijá el cabezal a su patín y colocá cuatro #7219 en cada motor.</li>
+      <li>Instalá las placas, la pantalla y la cajita Adafruit. Enganchá las dos lengüetas traseras del panel de servicio antes de colocar los dos #7213 delanteros.</li>
+      <li>Cargá las cuatro tuercas del pórtico y fijalo desde ambos costados. Las dos tuercas de la capota entran por debajo. Los dos #7219 fijan el ajuste de altura.</li></ol>
+      <p>Las seis estaciones de polea requieren ejes de hombro liso de Ø5 mm con rosca M4. La C922 conserva la fijación de trípode de ¼″ y el interruptor S301T, su tuerca propia. El cierre definitivo del cabezal, el tensor y los separadores depende del prototipo físico.</p>
+    </details>
+    <details><summary>Referencias dimensionales</summary><p><a href="https://www.hiwin.com/wp-content/uploads/HIWIN-Linear-Guideway-Catalog.pdf">Guías MGN de HIWIN</a> · <a href="https://www.logitech.com/assets/64889/c922-pro-stream-webcam.pdf">Cámara Logitech C922</a> · <a href="https://pip.raspberrypi.com/documents/RP-008347-DS-1-raspberry-pi-5-mechanical-drawing.pdf">Plano Raspberry Pi 5</a>.</p></details>
+  </div>
+</main>
+<script type="module" src="./visor.js"></script>
+</body>
+</html>
