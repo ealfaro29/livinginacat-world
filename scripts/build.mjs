@@ -12,10 +12,11 @@ import {
   resource,
 } from "./presentation.mjs";
 
-const [site, hardware, catalog] = await Promise.all([
+const [site, hardware, catalog, v2Catalog] = await Promise.all([
   readJSON("data/site.json"),
   readJSON("data/hardware-release.json"),
   readJSON("data/v1-catalog.json"),
+  readJSON("data/v2-catalog.json"),
 ]);
 const out = path.join(rootPath, "dist");
 const assets = {};
@@ -88,12 +89,12 @@ const descriptions = {
   en: [
     "Meet the FT412 iPhone robot, from a working aluminum prototype to a printed console.",
     "Explore the working CoreXY prototype, its parts, illustrated assembly guide and approximate build cost.",
-    "Rotate the FT412 console, inspect the camera and fasteners, and download the STEP model.",
+    "Explore the FT412 console in 3D, see which parts to buy for a second machine and estimate its cost in Costa Rica.",
   ],
   es: [
     "Conocé el robot FT412 para iPhone, desde el prototipo de aluminio hasta el diseño de la consola impresa.",
     "Explorá el prototipo CoreXY, sus piezas, el manual ilustrado y el costo aproximado del proyecto.",
-    "Girá la consola FT412, revisá el recorrido y la tornillería y descargá el modelo STEP.",
+    "Explorá la consola FT412 en 3D, consultá qué comprar para una segunda máquina y cuánto cuesta tenerla en Costa Rica.",
   ],
 };
 
@@ -105,7 +106,7 @@ for (const lang of ["en", "es"]) {
         ? homePage(lang)
         : edition === "v1"
           ? v1Page(lang, catalog, hardware)
-          : v2Page(lang);
+          : v2Page(lang, v2Catalog);
     await page(route(lang, edition), {
       title: titles[lang][index],
       description: descriptions[lang][index],
@@ -129,6 +130,10 @@ for (const lang of ["en", "es"]) {
     i.note?.[lang] ?? "",
   ]);
   await write(`downloads/v1-${lang}.csv`, csv([headers, ...rows]));
+  const v2Rows = v2Catalog.groups.flatMap((group) =>
+    group.items.map((item) => [group[lang], item[lang], item.quantity]),
+  );
+  await write(`downloads/v2-${lang}.csv`, csv([headers.slice(0, 3), ...v2Rows]));
 }
 
 const docsLabels = {
@@ -241,6 +246,11 @@ for (const lang of ["en", "es"]) {
       if (id === "resources")
         links.unshift(
           resource(route(lang, "v2") + "#viewer", d.cad, d.cadText),
+          resource(
+            route(lang, "v2") + "#budget",
+            lang === "es" ? "V2 · Piezas y presupuesto" : "V2 · Parts and budget",
+            lang === "es" ? "Lista de compras y envío estimado a Costa Rica." : "Shopping list and estimated shipping to Costa Rica.",
+          ),
           resource("/tools/control-module/", d.planner, d.plannerText),
         );
       return `<section class="section" id="${id}"><h2>${d.sets[index]}</h2><div class="resources">${links.join("")}</div></section>`;
