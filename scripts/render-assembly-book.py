@@ -64,10 +64,10 @@ def figdata(token):
 
 def head(c,title,page):
  c.setFillColor(PAPER);c.rect(0,0,W,H,fill=1,stroke=0)
- c.setFillColor(TEAL);c.setFont('GB',8);c.drawString(M,H-22,'FT412 / MANUAL DE ENSAMBLAJE / EDICIÓN 3.2')
+ c.setFillColor(TEAL);c.setFont('GB',8);c.drawString(M,H-22,'FT412 / MANUAL DE ENSAMBLAJE / EDICIÓN 3.3')
  drawp(c,safe(title),M,H-38,CW,'h')
  c.setStrokeColor(colors.HexColor('#ccdad5'));c.line(M,24,W-M,24)
- c.setFillColor(INK);c.setFont('G',7.3);c.drawString(M,12,'17 NOV 2026 · Montaje FramingTech 355/250 · comprobar las piezas reales')
+ c.setFillColor(INK);c.setFont('G',7.3);c.drawString(M,12,'22 NOV 2026 · Montaje FramingTech 355/250 · comprobar las piezas reales')
  c.drawRightString(W-M,12,str(page))
 
 # Group the Markdown sections; the guide remains the single public source.
@@ -145,9 +145,9 @@ for group in appendix:
    for i,item in enumerate(t['items']):
     contents=' '.join(inline(q.get('tokens',[])) or safe(q.get('text','')) for q in item['tokens'] if q['type']!='space');prefix=f'{i+1}.' if t['ordered'] else ('[ ]' if item.get('task') else '•');story.append(par(prefix+' '+contents))
 def furniture(c,d):
- c.setFont('GB',8);c.setFillColor(TEAL);c.drawString(36,PH-24,'FT412 / REFERENCIAS Y COMPROBACIONES / EDICIÓN 3.2');c.setFont('G',7.5);c.drawRightString(PW-36,18,str(page+d.page-1))
+ c.setFont('GB',8);c.setFillColor(TEAL);c.drawString(36,PH-24,'FT412 / REFERENCIAS Y COMPROBACIONES / EDICIÓN 3.3');c.setFont('G',7.5);c.drawRightString(PW-36,18,str(page+d.page-1))
 doc=SimpleDocTemplate(str(QA/'appendices.pdf'),pagesize=(PW,PH),leftMargin=36,rightMargin=36,topMargin=48,bottomMargin=36)
 doc.build(story,onFirstPage=furniture,onLaterPages=furniture)
-a=fitz.open(QA/'cards.pdf');b=fitz.open(QA/'appendices.pdf');a.insert_pdf(b);a.set_metadata({'title':'FT412 · Manual de ensamblaje · edición 3.2','author':'Living in a Cat World','subject':'30 operaciones y correcciones REV01 de cuna y acoplador; prueba física pendiente'});a.save(OUT,garbage=4,deflate=True)
+a=fitz.open(QA/'cards.pdf');b=fitz.open(QA/'appendices.pdf');a.insert_pdf(b);a.set_metadata({'title':'FT412 · Manual de ensamblaje · edición 3.3','author':'Living in a Cat World','subject':'30 operaciones, correcciones REV01 y referencia táctil al marco'});a.save(OUT,garbage=4,deflate=True)
 (QA/'layout-check.json').write_text(json.dumps({'stepCount':30,'pages':len(a),'cards':report},ensure_ascii=False,indent=2)+'\n')
 print(json.dumps({'pages':len(a),'operationCards':30,'minimumContentY':min(r['lowestContentY'] for r in report),'pdf':str(OUT)}))
