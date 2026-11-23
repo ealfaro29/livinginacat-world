@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "reportedAt": "2026-11-17",
-  "source": "Direct owner report of electronics support mounting and cosmetic underside issue; separately prepared optional plate",
-  "stage": "Electronics support installed by owner report; optional cosmetic logo Color Mix 90% yellow and 10% black observed starting; black plate completion unconfirmed",
+  "reportedAt": "2026-11-22",
+  "source": "Direct owner report of a detected touchscreen tap with the tip referenced to the FT412 aluminum frame",
+  "stage": "First touchscreen tap reported with the FT412 aluminum frame as the stylus reference",
   "firstTestBatchCompleted": true,
   "secondBatchCompletionConfirmed": true,
   "material": "PLA Silk",
@@ -319,7 +319,15 @@
     "replacementPiecesInstalledByOwnerReport": 2,
     "optionalCosmeticPiecesPrinting": 1
   },
-  "nextAssemblyStep": "Let the observed logo print continue. The black 75 mm plate remains a separate prepared file without confirmed completion. Trial-fit cosmetic parts above the honeycomb, then continue guide step 27 with power disconnected.",
+  "nextAssemblyStep": "Secure the tip reference wire along the solenoid cable and check its clearance with the machine unpowered through the full travel before repeat tap testing.",
+  "touchCommissioning": {
+    "reportedOn": "2026-11-22",
+    "basis": "direct_owner_report",
+    "touchDetected": true,
+    "referencePath": "lateral tip contact screw to fixed aluminum frame",
+    "repeatabilityVerified": false,
+    "fullTravelCableClearanceVerified": false
+  },
   "fifthBatchCompletionConfirmed": true,
   "fifthBatch": {
     "batch": "FT412_05",

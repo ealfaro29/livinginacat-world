@@ -1,8 +1,8 @@
 # Guía de ensamblaje · robot FT412
 
-**Edición 3.2 · instrucciones de mesa · 17 de noviembre de 2026.** Montaje FramingTech 355/250 con Adafruit 412.
+**Edición 3.3 · instrucciones de mesa · 22 de noviembre de 2026.** Montaje FramingTech 355/250 con Adafruit 412.
 
-[Descargar el manual ilustrado en PDF](/downloads/guia-ensamblaje-ft412-es.pdf) · [Empezar: piezas del marco](#paso-01-separar-los-perfiles-y-las-escuadras) · [Cargar las tuercas antes de cerrar](#paso-02-cargar-las-tuercas-de-entrada-por-el-extremo)
+[Descargar el manual ilustrado en PDF](/downloads/guia-ensamblaje-ft412-es.pdf) · [Empezar: piezas del marco](#paso-01-separar-los-perfiles-y-las-escuadras) · [Cargar las tuercas antes de cerrar](#paso-02-cargar-las-tuercas-de-entrada-por-el-extremo) · [Conectar la punta al marco](#referencia-de-la-punta-en-el-marco)
 
 Cada paso empieza con **lo que necesitás**, seguido de la preparación previa, una ilustración, acciones numeradas y el resultado que debés comprobar. Una pieza que dice «ya colocada» se reutiliza: no saqués otra de la bolsa.
 
@@ -666,7 +666,7 @@ Todas las cifras de arandelas están en mm. La cabeza del eje cierra la columna 
 | BHCS M3×16 · #7222 | 2 | Cierre de las mitades |
 | BHCS M3×6 · #7218 | 1 | Contacto lateral de referencia |
 | Tuerca cuadrada M3 | 3 | 2 cierre + 1 contacto |
-| Conductor flexible de referencia | A medir | Según recorrido real; conexión eléctrica pendiente |
+| Cable flexible 22 AWG | 1 tramo | Del tornillo lateral al marco fijo |
 
 **Herramientas:** Allen M3 y multímetro para continuidad, sin alimentar.
 
@@ -677,7 +677,7 @@ Todas las cifras de arandelas están en mm. La cabeza del eje cierra la columna 
 1. Apoyá el extremo del palito del solenoide en el hueco superior y el aro metálico de la punta en el rebaje inferior. La malla sale hacia la cama y queda libre.
 2. Juntá las mitades con los dos M3×16. La rosca de la punta entra en una cavidad lisa: no se atornilla al vástago ni al plástico.
 3. La separación de diseño es 0,50 mm sin apretar. Ajustá solo hasta retener, sin juntar completamente las caras. Comprobá retención del aro y retorno del solenoide.
-4. Cuando esté disponible el conductor, su M3×6 lateral lo sujeta contra el metal de la punta. Dejá holgura y comprobá continuidad hasta la malla; la conexión de referencia se revisa después.
+4. El M3×6 lateral sujeta el cobre del cable contra el metal de la punta. Llevá el otro extremo al [perfil de aluminio del marco](#referencia-de-la-punta-en-el-marco).
 
 **Comprobá antes de seguir:** punta retenida, malla sin aplastar y retorno completo. La primera prueba de contacto será sobre una superficie de ensayo, sin teléfono.
 
@@ -818,17 +818,27 @@ Antes de energizar debe existir un dibujo de cableado de esta unidad y quedar co
 - Polaridad y tensión reales de la fuente; conexiones de alimentación y protección apropiadas al cableado.
 - Corte accesible que quite los 12 V de los actuadores y no solo una señal lógica.
 - Orientación y ajuste de los drivers, pares de bobinas de motores y correspondencia de conectores. No enchufar o sacar motores o drivers con alimentación.
-- Terminales S301T sujetos e individualmente aislados; continuidad y ausencia de cortos, sin conductores pelados junto al marco.
+- Terminales S301T sujetos y aislados individualmente. Comprobá continuidad y verificá que el cobre de alimentación quede cubierto.
 - Entrada del MOSFET en estado seguro al arrancar, al perder conexión y al detener el programa; temporizador de apagado probado.
-- Conductor de referencia de la punta separado de potencia. El diseño base lo lleva al metal desnudo de un chasis de PC correctamente puesto a tierra; **no a un tomacorriente ni al GND de la placa**. Su implementación real se verificará antes de probar contacto táctil.
+- Cable de referencia de la punta sujeto al perfil fijo y apartado de las correas, los rieles y los bornes de alimentación.
 
 Este soporte abierto está destinado al circuito de baja tensión. No aloja conexiones de red eléctrica.
 
 
+### Referencia de la punta en el marco
+
+**Tornillo lateral de la punta → cable flexible 22 AWG → perfil fijo de aluminio.**
+
+1. Desconectá los 12 V y el USB de la MKS. Sujetá un extremo del cable bajo el M3×6 lateral del acoplador, con el cobre contra el metal de la punta.
+2. Llevá el otro extremo a la ranura exterior del perfil largo derecho, cerca de atrás. Sujetá el cobre bajo un M5 con arandela, en contacto con aluminio desnudo. Dejá el cable apartado de las correas.
+3. Antes de mover el carro con corriente, guiá el cable junto al del solenoide y comprobá a mano que tenga holgura en todo el recorrido.
+
+**Resultado del 22 de noviembre.** El dueño reportó que el iPhone detectó un toque con la referencia conectada al marco del FT412. Quedan por comprobar la sujeción del cable en todo el recorrido y la repetibilidad de los toques.
+
 ### Secuencia posterior de puesta en marcha
 
 
-Estas pruebas quedan pendientes hasta completar la mecánica y la revisión eléctrica. Son criterios de avance, no resultados ya obtenidos.
+Usá esta secuencia para comprobar el montaje y preparar las pruebas de movimiento y toque repetido.
 
 1. **Sin alimentación:** recorrido manual completo, libre de roces, tornillos sueltos, cables tensos y puntas que sobresalgan. Lubricación compatible con los rieles reales antes de uso repetido.
 2. **Sin teléfono y sin accionar la punta:** comprobar el corte y estados seguros. Probar desplazamientos cortos y lentos; verificar sentidos, distancia real y límites. No ejecutar un homing de origen desconocido.
