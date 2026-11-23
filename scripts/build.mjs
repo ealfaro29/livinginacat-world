@@ -7,6 +7,7 @@ import {
   shell,
   homePage,
   v1Page,
+  v1Label,
   v2Page,
   route,
   resource,
@@ -76,24 +77,24 @@ for (const [key, file] of Object.entries({ css: "style.css", js: "site.js" })) {
 const titles = {
   en: [
     "FT412 · A robot that uses an iPhone",
-    "V1 · Open-frame prototype",
+    v1Label,
     "V2 · Integrated console",
   ],
   es: [
     "FT412 · Un robot que usa un iPhone",
-    "V1 · Prototipo abierto",
+    v1Label,
     "V2 · Consola integrada",
   ],
 };
 const descriptions = {
   en: [
-    "Meet the FT412 iPhone robot, from a working aluminum prototype to a printed console.",
-    "Explore the working CoreXY prototype, its parts, illustrated assembly guide and approximate build cost.",
+    "Meet Alfonsito, the working FT412 iPhone robot, and explore the design for the V2 printed console.",
+    "Explore Alfonsito, the working V1 CoreXY prototype, with its parts list, illustrated assembly guide and approximate build cost.",
     "Explore the FT412 console in 3D, see which parts to buy for a second machine and estimate its cost in Costa Rica.",
   ],
   es: [
-    "Conocé el robot FT412 para iPhone, desde el prototipo de aluminio hasta el diseño de la consola impresa.",
-    "Explorá el prototipo CoreXY, sus piezas, el manual ilustrado y el costo aproximado del proyecto.",
+    "Conocé a Alfonsito, el robot FT412 que usa un iPhone, y explorá el diseño de la consola impresa V2.",
+    "Consultá las piezas de Alfonsito, el prototipo CoreXY de la V1, su manual ilustrado y el costo aproximado de construcción.",
     "Explorá la consola FT412 en 3D, consultá qué comprar para una segunda máquina y cuánto cuesta tenerla en Costa Rica.",
   ],
 };
@@ -140,8 +141,8 @@ const docsLabels = {
   en: {
     title: "Documentation",
     text: "Use the illustrated manual at the workbench or download the drawings for a particular assembly.",
-    sets: ["Assemble V1", "Replacement parts", "Project resources"],
-    prototype: "V1 · Prototype",
+    sets: ["Assemble Alfonsito", "Replacement parts", "Project resources"],
+    prototype: v1Label,
     source: "Source files",
     cad: "FT412 V2 model",
     cadText:
@@ -153,8 +154,8 @@ const docsLabels = {
   es: {
     title: "Documentación",
     text: "Seguí el manual ilustrado en la mesa de montaje o descargá los planos del conjunto que estás armando.",
-    sets: ["Armar la V1", "Piezas de reemplazo", "Recursos del proyecto"],
-    prototype: "V1 · Prototipo",
+    sets: ["Armar a Alfonsito", "Piezas de reemplazo", "Recursos del proyecto"],
+    prototype: v1Label,
     source: "Archivos de diseño",
     cad: "Modelo de la consola V2",
     cadText:
@@ -278,7 +279,7 @@ for (const guide of publishedGuides) {
     await write("downloads/project-guide.md", markdown);
 }
 const listMD = [
-  "# V1 parts and equipment",
+  "# Alfonsito (V1) · Parts and equipment",
   "",
   "| Group | Item | Quantity |",
   "| --- | --- | ---: |",
@@ -309,10 +310,10 @@ for (const source of [
   "/journal/first-purchases/",
   "/journal/parts-on-the-way/",
 ]) {
-  await redirect(source, "/v1/#parts", "V1 parts and equipment");
+  await redirect(source, "/v1/#parts", "Alfonsito (V1) · Parts and equipment");
 }
 for (const source of ["/journal/", "/journal/project-begins/"])
-  await redirect(source, "/v1/", "V1 prototype");
+  await redirect(source, "/v1/", v1Label);
 for (const source of [
   "/brand-preview.html",
   "/documentation/hardware-art/",

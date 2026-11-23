@@ -1,6 +1,6 @@
 # living in a cat world
 
-FT412 is an open hardware robot that physically operates an iPhone. [Explore V1, the working prototype](https://livinginacat.world/v1/), or [inspect the V2 console in 3D](https://livinginacat.world/v2/). [Leer en español](https://livinginacat.world/es/).
+FT412 is an open hardware robot that physically operates an iPhone. [Meet Alfonsito, the working V1 prototype](https://livinginacat.world/v1/), or [inspect the V2 console in 3D](https://livinginacat.world/v2/). [Leer en español](https://livinginacat.world/es/).
 
 ## Design and assembly
 

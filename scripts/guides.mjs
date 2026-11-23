@@ -1,6 +1,7 @@
 import path from "node:path";
 import { Marked } from "marked";
 import { esc } from "./lib.mjs";
+import { v1Label } from "./presentation.mjs";
 
 export const guideGroups = [
   {
@@ -303,7 +304,7 @@ export function renderGuidePage(guide, markdown, context) {
   const download = `/downloads/guides/${guide.slug}.md`;
   const parent = es ? "/es/v1/" : "/documentation/";
   return `<article class="wrap guide-page"><header class="guide-header">
-    <div class="crumb"><a href="${parent}">${es ? "V1 · Prototipo" : "Documentation"}</a></div>
+    <div class="crumb"><a href="${parent}">${es ? v1Label : "Documentation"}</a></div>
     <h1>${esc(guide.title)}</h1><p class="lead">${esc(guide.description)}</p>
     <div class="guide-actions">${es ? '<a href="/downloads/guia-ensamblaje-ft412-es.pdf">Abrir el manual en PDF</a>' : ""}
     <a href="${download}" download>${es ? "Descargar Markdown" : "Download Markdown"}</a></div></header>

@@ -1,9 +1,12 @@
 import { esc } from "./lib.mjs";
 
+const v1Name = "Alfonsito";
+export const v1Label = `V1 · ${v1Name}`;
+
 const words = {
   en: {
     home: "Overview",
-    v1: "V1 · Prototype",
+    v1: v1Label,
     v2: "V2 · Console",
     guide: "Assembly guide",
     files: "Documentation",
@@ -14,7 +17,7 @@ const words = {
   },
   es: {
     home: "Inicio",
-    v1: "V1 · Prototipo",
+    v1: v1Label,
     v2: "V2 · Consola",
     guide: "Guía de montaje",
     files: "Documentación",
@@ -62,7 +65,7 @@ export function shell({
   const brand = `<img width="36" height="36" src="/assets/brand/robot-cat-48.png" alt=""><span>living in a cat world</span>`;
   return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)} · ${esc(site.name)}</title><meta name="description" content="${esc(description)}"><meta name="theme-color" content="#faf9f5"><link rel="canonical" href="${site.url + publicUrl}">${alternate ? `<link rel="alternate" hreflang="${lang}" href="${site.url + publicUrl}"><link rel="alternate" hreflang="${lang === "es" ? "en" : "es"}" href="${site.url + alternate}">` : ""}${noindex ? '<meta name="robots" content="noindex,follow">' : ""}<meta property="og:type" content="website"><meta property="og:site_name" content="living in a cat world"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${site.url + publicUrl}"><meta property="og:image" content="${site.url + (social ?? versionImage.v2)}"><meta name="twitter:card" content="summary_large_image"><link rel="icon" type="image/png" href="/assets/brand/robot-cat-48.png"><link rel="stylesheet" href="${assets.css}"><script src="${assets.js}" defer></script></head>
 <body><a class="skip" href="#main">${w.skip}</a><header class="mast"><div class="wrap mast-inner"><a class="wordmark" href="${route(lang)}">${brand}</a><nav class="primary" aria-label="${t(lang, "Main navigation", "Navegación principal")}">${nav.map(([p, label]) => `<a href="${route(lang, p)}"${page === p ? ' aria-current="page"' : ""}>${label}</a>`).join("")}</nav><div class="mast-tools"><a class="manual-link" href="/documentation/assembly/">${w.guide}</a>${alternate ? `<a class="lang" href="${alternate}" hreflang="${lang === "es" ? "en" : "es"}" aria-label="${w.lang}">${lang === "es" ? "EN" : "ES"}</a>` : ""}</div></div></header>
-<main id="main">${body}</main><footer class="foot"><div class="wrap foot-inner"><div><a class="foot-brand" href="${route(lang)}">living in a cat world</a><p>${w.footer}</p></div><nav aria-label="${t(lang, "Resources", "Recursos")}"><a href="${route(lang, "v1")}">V1</a><a href="${route(lang, "v2")}">V2</a><a href="${route(lang, "documentation")}">${w.files}</a><a href="/documentation/attribution/">${w.license}</a></nav></div></footer></body></html>`;
+<main id="main">${body}</main><footer class="foot"><div class="wrap foot-inner"><div><a class="foot-brand" href="${route(lang)}">living in a cat world</a><p>${w.footer}</p></div><nav aria-label="${t(lang, "Resources", "Recursos")}"><a href="${route(lang, "v1")}">${w.v1}</a><a href="${route(lang, "v2")}">V2</a><a href="${route(lang, "documentation")}">${w.files}</a><a href="/documentation/attribution/">${w.license}</a></nav></div></footer></body></html>`;
 }
 function link(href, label, secondary = false, download = false) {
   return `<a class="button${secondary ? " quiet" : ""}" href="${esc(href)}"${download ? " download" : ""}>${esc(label)}</a>`;
@@ -76,9 +79,9 @@ function navCrumb(lang, label) {
 const models = {
   en: {
     v1: {
-      title: "Open-frame prototype",
+      title: v1Name,
       detail: "Aluminum frame · CoreXY drive",
-      alt: "CAD reconstruction of the open aluminum frame and central iPhone bed on the V1 prototype.",
+      alt: "CAD view of Alfonsito with its open aluminum frame and an iPhone bed in the center.",
     },
     v2: {
       title: "Integrated console",
@@ -88,9 +91,9 @@ const models = {
   },
   es: {
     v1: {
-      title: "Prototipo abierto",
+      title: v1Name,
       detail: "Marco de aluminio · transmisión CoreXY",
-      alt: "Reconstrucción CAD del prototipo V1 con perfiles de aluminio y la cama central para el iPhone.",
+      alt: "Vista CAD de Alfonsito con su marco abierto de aluminio y la cama del iPhone en el centro.",
     },
     v2: {
       title: "Consola integrada",
@@ -108,9 +111,9 @@ ${versions.map((k) => `<div class="model-view" id="drawing-${k}" data-drawing="$
 export function homePage(lang) {
   const es = lang === "es",
     tr = (a, b) => t(lang, a, b);
-  return `<div class="wrap"><section class="hero home-hero"><div class="hero-copy"><p class="kicker">FT412 <span>/</span> ${tr("Open hardware", "Hardware abierto")}</p><h1>${es ? "Un robot que usa <em>un iPhone.</em>" : "A robot that uses <em>an iPhone.</em>"}</h1><p class="lead">${tr("A camera reads the screen. Two motors move a conductive tip to tap the glass. Explore the working prototype and the console taking shape around it.", "Una cámara observa la pantalla. Dos motores mueven una punta conductora para tocar el vidrio. Explorá el prototipo en funcionamiento y la consola que estamos diseñando.")}</p><div class="actions">${link(route(lang, "v2"), tr("Explore V2", "Explorar la V2"))}${link(route(lang, "v1"), tr("See the prototype", "Ver el prototipo"), true)}</div></div>${modelStage(lang, "v2", true)}</section>
+  return `<div class="wrap"><section class="hero home-hero"><div class="hero-copy"><p class="kicker">FT412 <span>/</span> ${tr("Open hardware", "Hardware abierto")}</p><h1>${es ? "Un robot que usa <em>un iPhone.</em>" : "A robot that uses <em>an iPhone.</em>"}</h1><p class="lead">${tr("A camera reads the screen. Two motors move a conductive tip to tap the glass. Alfonsito is the working V1 prototype. V2 brings the mechanism into a printed console.", "Una cámara observa la pantalla. Dos motores mueven una punta conductora para tocar el vidrio. Alfonsito es el prototipo V1 en funcionamiento. La V2 integra el mecanismo en una consola impresa.")}</p><div class="actions">${link(route(lang, "v2"), tr("Explore V2", "Explorar la V2"))}${link(route(lang, "v1"), tr("See Alfonsito", "Ver a Alfonsito"), true)}</div></div>${modelStage(lang, "v2", true)}</section>
 <section class="section versions" aria-labelledby="versions"><div class="section-head"><h2 id="versions">${tr("The two versions", "Las dos versiones")}</h2><p>${tr("The same motion system, built around two different frames.", "El mismo sistema de movimiento en dos estructuras distintas.")}</p></div><div class="edition-grid">
-<article class="edition"><div class="edition-top"><span class="edition-id">V1</span><span>${tr("Built & tested", "Construida y probada")}</span></div><h3><a href="${route(lang, "v1")}">${tr("The open frame", "El marco abierto")}</a></h3><p>${tr("Aluminum profiles carry the rails and printed mounts. The machine has tapped the iPhone and operated its calculator.", "Los perfiles de aluminio sostienen los rieles y las piezas impresas. La máquina ya tocó el iPhone y operó su calculadora.")}</p><div class="row-links"><a href="${route(lang, "v1")}#parts">${tr("Parts & cost", "Piezas e inversión")}</a><a href="/documentation/assembly/">${words[lang].guide}</a></div></article>
+<article class="edition"><div class="edition-top"><span class="edition-id">V1</span><span>${tr("Built & tested", "Construida y probada")}</span></div><h3><a href="${route(lang, "v1")}">${v1Name}</a></h3><p>${tr("Aluminum profiles carry the rails and printed mounts. The machine has tapped the iPhone and operated its calculator.", "Los perfiles de aluminio sostienen los rieles y las piezas impresas. La máquina ya tocó el iPhone y operó su calculadora.")}</p><div class="row-links"><a href="${route(lang, "v1")}#parts">${tr("Parts & cost", "Piezas e inversión")}</a><a href="/documentation/assembly/">${words[lang].guide}</a></div></article>
 <article class="edition"><div class="edition-top"><span class="edition-id">V2</span><span>${tr("CAD design", "Diseño en CAD")}</span></div><h3><a href="${route(lang, "v2")}">${tr("The integrated console", "La consola integrada")}</a></h3><p>${tr("A printed chassis carries the camera, phone and electronics in one enclosure. The model shows how the hardware fits and how the carriage travels.", "Un chasis impreso reúne la cámara, el teléfono y la electrónica. El modelo muestra cómo encajan las piezas y por dónde se desplaza el carro.")}</p><div class="row-links"><a href="${route(lang, "v2")}#budget">${tr("Parts & budget", "Piezas y presupuesto")}</a><a href="${route(lang, "v2")}#viewer">${tr("3D viewer", "Visor 3D")}</a><a href="${route(lang, "v2")}#fasteners">${tr("Fastener guide", "Guía de tornillería")}</a></div></article></div></section></div>`;
 }
 function partsSection(lang, catalog) {
@@ -130,7 +133,7 @@ function partsSection(lang, catalog) {
 }
 export function v1Page(lang, catalog, hardware) {
   const tr = (a, b) => t(lang, a, b);
-  return `<div class="wrap">${navCrumb(lang, tr("V1 · Prototype", "V1 · Prototipo"))}<section class="hero version-hero"><div class="hero-copy"><p class="kicker">V1 <span>/</span> ${tr("Working prototype", "Prototipo en funcionamiento")}</p><h1>${tr("The open", "El marco")}<br><em>${tr("frame.", "abierto.")}</em></h1><p class="lead">${tr("Printed mounts and aluminum profiles hold a CoreXY carriage over an iPhone 14. A solenoid lowers the mesh tip for each tap.", "Piezas impresas y perfiles de aluminio sostienen el carro CoreXY sobre un iPhone 14. Un solenoide baja la punta de malla en cada toque.")}</p><div class="actions">${link("#parts", tr("See the parts list", "Ver lista de piezas"))}${link("/documentation/assembly/", words[lang].guide, true)}</div></div>${modelStage(lang, "v1")}</section>
+  return `<div class="wrap">${navCrumb(lang, v1Label)}<section class="hero version-hero"><div class="hero-copy"><p class="kicker">V1 <span>/</span> ${tr("Working prototype", "Prototipo en funcionamiento")}</p><h1>${v1Name}</h1><p class="lead">${tr("Printed mounts and aluminum profiles hold a CoreXY carriage over an iPhone 14. A solenoid lowers the mesh tip for each tap.", "Piezas impresas y perfiles de aluminio sostienen el carro CoreXY sobre un iPhone 14. Un solenoide baja la punta de malla en cada toque.")}</p><div class="actions">${link("#parts", tr("See the parts list", "Ver lista de piezas"))}${link("/documentation/assembly/", words[lang].guide, true)}</div></div>${modelStage(lang, "v1")}</section>
 <section class="section resource-block" aria-labelledby="bench"><div class="section-head"><h2 id="bench">${tr("At the workbench", "En la mesa de montaje")}</h2><p>${tr("Start with the illustrated sequence. The two revisions replace the original cradle and tip coupler.", "Empezá con la secuencia ilustrada. Las dos revisiones sustituyen la cuna y el acoplador de punta originales.")}</p></div><div class="resources">
 ${resource("/documentation/assembly/", tr("Illustrated assembly guide", "Guía ilustrada de montaje"), tr("30 operations in Spanish, with hardware and diagrams for each step.", "30 operaciones con la tornillería y las ilustraciones de cada paso."))}
 ${resource("/downloads/" + hardware.filename, tr("Original print files", "Piezas originales para imprimir"), tr("STL and STEP for 16 designs, 22 installed pieces and three fit coupons.", "STL y STEP de 16 diseños, 22 piezas instaladas y tres cupones de prueba."))}
