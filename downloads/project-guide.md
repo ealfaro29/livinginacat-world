@@ -1,6 +1,6 @@
 # Living in a Cat World · Project guide
 
-FT412 is a CoreXY machine that operates an iPhone through its own touchscreen. V1 is the working, aluminum-frame prototype. V2 is a printed-enclosure design that reuses its main components. The physical tests below were performed on V1.
+FT412 is a CoreXY machine that operates an iPhone through its own touchscreen. Alfonsito (V1) is the working prototype with an aluminum frame. V2 is a printed-enclosure design that reuses its main components. The physical tests below were performed on V1.
 
 ## Goal
 

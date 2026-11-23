@@ -1,4 +1,4 @@
-# V1 parts and equipment
+# Alfonsito (V1) · Parts and equipment
 
 | Group | Item | Quantity |
 | --- | --- | ---: |
