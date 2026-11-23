@@ -7,6 +7,7 @@ FT412 is an open hardware robot that physically operates an iPhone. [Meet Alfons
 - [V1 project guide](docs/PROJECT.md) and [illustrated assembly manual](docs/ASSEMBLY-ES.md).
 - [Original print files](hardware/ft412/PUBLIC-RELEASE.md), [revised cradle](hardware/ft412-cradle-rev01/README.md) and [revised tip coupler](hardware/ft412-coupler-rev01/README.md).
 - The V1 parts list, quantities and whole-build estimate are maintained in `data/v1-catalog.json`. Each language has a searchable list and a downloadable CSV.
+- The [V2 shopping list and landed estimate](https://livinginacat.world/v2/#budget), the interactive planner and both CSV downloads use `data/v2-catalog.json`. They cover a second complete machine, including its shared 12 V supply and the separate converters for the Pi and iPhone.
 - The V2 viewer and STEP download live in `public/assets/v2/visor/`. Its source is in `tools/console-viewer/`.
 - [Credits and licenses](docs/ATTRIBUTION.md).
 
@@ -22,7 +23,7 @@ npm run check
 npm run dev
 ```
 
-Open `http://127.0.0.1:4173`. `scripts/build.mjs` generates the public editions from an explicit list of sources. `scripts/guides.mjs` renders the technical manuals. The [backend](backend/README.md) maintains a separate authenticated workspace.
+Open `http://127.0.0.1:4173`. `scripts/build.mjs` generates the public editions from an explicit list of sources. `scripts/guides.mjs` renders the technical manuals. For the same shopping planner in chat, `node scripts/shopping-planner.mjs es` or `en` writes the current fragment to standard output. The [backend](backend/README.md) maintains a separate authenticated workspace.
 
 ## Publish
 

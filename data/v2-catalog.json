@@ -4,17 +4,22 @@
     "packedWeightLb": [12, 14],
     "shippingWeightLb": 14,
     "shippingCRCPerLb": 4000,
-    "crcPerUSD": 450
+    "crcPerUSD": 450,
+    "powerBundleUSD": 77.85,
+    "phoneAllowanceUSD": 304,
+    "cameraAllowanceUSD": 74.99
   },
   "groups": [
     {
       "en": "Phone, camera and control",
       "es": "Teléfono, cámara y control",
       "items": [
-        { "quantity": 1, "en": "iPhone 14, 128 GB, unlocked and refurbished in excellent condition", "es": "iPhone 14 de 128 GB, desbloqueado y reacondicionado en estado excelente" },
-        { "quantity": 1, "en": "Logitech C922 USB camera", "es": "Cámara USB Logitech C922" },
-        { "quantity": 1, "en": "CanaKit Raspberry Pi 5 kit with 4 GB of RAM, 128 GB microSD, cooling and USB-C power supply", "es": "Kit CanaKit Raspberry Pi 5 con 4 GB de RAM, microSD de 128 GB, refrigeración y fuente USB-C" },
-        { "quantity": 1, "en": "Makerbase MKS DLC32 V2.2 kit with TS24-R touchscreen and cables", "es": "Kit Makerbase MKS DLC32 V2.2 con pantalla táctil TS24-R y cables" },
+        { "id": "phone", "quantity": 1, "en": "iPhone 14, 128 GB, unlocked and refurbished in excellent condition", "es": "iPhone 14 de 128 GB, desbloqueado y reacondicionado en estado excelente" },
+        { "id": "camera", "quantity": 1, "en": "Logitech C922 USB camera", "es": "Cámara USB Logitech C922" },
+        { "quantity": 1, "en": "CanaKit Raspberry Pi 5 kit with 4 GB of RAM, 128 GB microSD, cooling and USB-C power supply", "es": "Kit CanaKit Raspberry Pi 5 con 4 GB de RAM, microSD de 128 GB, refrigeración y fuente USB-C",
+          "note": {"en": "The kit includes its 128 GB card, cooling and wall adapter. In the console the Geekworm supplies the Pi over USB-C.", "es": "El kit incluye la tarjeta de 128 GB, la refrigeración y el adaptador de pared. En la consola el Geekworm alimenta la Pi por USB-C."} },
+        { "quantity": 1, "en": "Makerbase MKS DLC32 V2.2 kit with TS24-R touchscreen and cables", "es": "Kit Makerbase MKS DLC32 V2.2 con pantalla táctil TS24-R y cables",
+          "note": {"en": "The two motor drivers are bought separately. USB carries commands from the Pi. The motor supply connects to POWER 12–24 V.", "es": "Los dos drivers se compran aparte. El USB lleva las órdenes desde la Pi. La alimentación de los motores llega a la entrada POWER 12–24 V."} },
         { "quantity": 1, "en": "Pair of BIGTREETECH TMC2209 V1.3 stepper drivers with heatsinks", "es": "Par de drivers BIGTREETECH TMC2209 V1.3 con disipadores" }
       ]
     },
@@ -25,8 +30,10 @@
         { "quantity": 2, "en": "STEPPERONLINE NEMA 17 motor, 17HE15-1504S", "es": "Motor STEPPERONLINE NEMA 17, 17HE15-1504S" },
         { "quantity": 2, "en": "250 mm Y rail with one MGN9H carriage per rail", "es": "Riel Y de 250 mm con un patín MGN9H por riel" },
         { "quantity": 1, "en": "150 mm X rail with one MGN9H carriage", "es": "Riel X de 150 mm con un patín MGN9H" },
-        { "quantity": 1, "en": "GT2 kit with 6 mm belts and pulleys for both axes", "es": "Kit GT2 con correas de 6 mm y poleas para ambos ejes" },
-        { "quantity": 1, "en": "Complete V2 fastener set, including screws, nuts, idler shafts, shims and spacers", "es": "Juego completo de herrajes V2 con tornillos, tuercas, ejes de polea, arandelas de ajuste y separadores" }
+        { "quantity": 1, "en": "GT2 kit with 6 mm belts and pulleys for both axes", "es": "Kit GT2 con correas de 6 mm y poleas para ambos ejes",
+          "note": {"en": "One kit for both belt paths. Check its pulley assortment against the build before buying individual pulleys.", "es": "Un kit para los dos recorridos. Compará sus poleas con las que necesita el montaje antes de pedir piezas sueltas."} },
+        { "quantity": 1, "en": "Complete V2 fastener set, including screws, nuts, idler shafts, shims and spacers", "es": "Juego completo de herrajes V2 con tornillos, tuercas, ejes de polea, arandelas de ajuste y separadores",
+          "note": {"en": "The CAD specifies 14 countersunk M3 × 8 (#7213), 60 button-head M3 × 8 (#7219) and 54 square M3 nuts. Allow for display, camera and pulley hardware in the same lot.", "es": "El CAD especifica 14 M3 × 8 avellanados (#7213), 60 M3 × 8 de botón (#7219) y 54 tuercas cuadradas M3. El lote también contempla los herrajes de pantalla, cámara y poleas."} }
       ]
     },
     {
@@ -34,19 +41,27 @@
       "es": "Mecanismo de toque",
       "items": [
         { "quantity": 1, "en": "Adafruit #412, 12 V solenoid", "es": "Solenoide Adafruit #412 de 12 V" },
-        { "quantity": 1, "en": "Adafruit #5648 protected solenoid driver", "es": "Controlador protegido Adafruit #5648 para el solenoide" }
+        { "quantity": 1, "en": "Adafruit #5648 protected solenoid driver", "es": "Controlador protegido Adafruit #5648 para el solenoide",
+          "note": {"en": "Switches the solenoid on the 12 V branch when the MKS sends a control signal. Use a spare mesh tip.", "es": "Acciona el solenoide en el ramal de 12 V cuando la MKS da la señal. Se usa una punta de malla de repuesto."} }
       ]
     },
     {
+      "id": "power",
       "en": "Power and protection",
       "es": "Alimentación y protección",
       "items": [
-        { "quantity": 1, "en": "MEAN WELL GST160A12-R7B external 12 V power supply, 11.5 A (138 W)", "es": "Fuente externa MEAN WELL GST160A12-R7B de 12 V y 11,5 A (138 W)" },
-        { "quantity": 1, "en": "Kycon KPJX-PM-4S four-pin rear power inlet", "es": "Conector trasero de alimentación Kycon KPJX-PM-4S de cuatro pines" },
-        { "quantity": 1, "en": "Geekworm Pi5-5V5APD USB-C power module for the Raspberry Pi 5", "es": "Módulo de alimentación USB-C Geekworm Pi5-5V5APD para la Raspberry Pi 5" },
-        { "quantity": 1, "en": "DFRobot DFR0758 USB charging module for the iPhone", "es": "Módulo de carga USB DFRobot DFR0758 para el iPhone" },
-        { "quantity": 1, "en": "NKK S301T front toggle switch", "es": "Interruptor frontal de palanca NKK S301T" },
-        { "quantity": 1, "en": "Littelfuse FHAS101 inline holder with a 3 A ATO fuse for the protected branch", "es": "Portafusible Littelfuse FHAS101 y fusible ATO de 3 A para el ramal protegido" }
+        { "quantity": 1, "en": "MEAN WELL GST160A12-R7B external 12 V power supply, 11.5 A (138 W)", "es": "Fuente externa MEAN WELL GST160A12-R7B de 12 V y 11,5 A (138 W)",
+          "note": {"en": "One external brick for the entire V2. The design estimate is about 107 W, leaving about 31 W of nominal headroom. The budget assumes a spare grounded IEC C13 mains cord.", "es": "Una fuente externa para toda la V2. El consumo de diseño se estima en 107 W, con unos 31 W de margen nominal. El presupuesto supone que hay un cable de pared IEC C13 con tierra disponible."} },
+        { "quantity": 1, "en": "Kycon KPJX-PM-4S four-pin rear power inlet", "es": "Conector trasero de alimentación Kycon KPJX-PM-4S de cuatro pines",
+          "note": {"en": "Panel socket for the external supply’s R7B DC plug. Check panel fit and room for the cable before printing the final enclosure.", "es": "Toma de panel para la ficha R7B de la fuente. Quedan por comprobar el encaje y el espacio para el cable antes de imprimir la carcasa final."} },
+        { "quantity": 1, "en": "Geekworm Pi5-5V5APD USB-C power module for the Raspberry Pi 5", "es": "Módulo de alimentación USB-C Geekworm Pi5-5V5APD para la Raspberry Pi 5",
+          "note": {"en": "Select the 9–24 V input version. It converts 12 V to USB-C PD at 5 V / 5 A. The estimate assumes a spare 5 A USB-C cable.", "es": "Versión con entrada de 9–24 V. Convierte los 12 V a USB-C PD de 5 V y 5 A. El cálculo supone que hay un cable USB-C de 5 A disponible."} },
+        { "quantity": 1, "en": "DFRobot DFR0758 USB charging module for the iPhone", "es": "Módulo de carga USB DFRobot DFR0758 para el iPhone",
+          "note": {"en": "Dedicated to the iPhone 14. Use its USB-C port with the spare USB-C to Lightning cable.", "es": "Dedicado al iPhone 14. Su puerto USB-C usa el cable USB-C a Lightning disponible."} },
+        { "quantity": 1, "en": "NKK S301T front toggle switch", "es": "Interruptor frontal de palanca NKK S301T",
+          "note": {"en": "Front on/off switch on the DC side of the console.", "es": "Interruptor de encendido y apagado en el lado de corriente continua de la consola."} },
+        { "quantity": 1, "en": "Littelfuse FHAS101 inline holder with a 3 A ATO fuse for the protected branch", "es": "Portafusible Littelfuse FHAS101 y fusible ATO de 3 A para el ramal protegido",
+          "note": {"en": "The 3 A fuse belongs to the actuator branch. Main input protection is a separate design check.", "es": "El fusible de 3 A corresponde al ramal del actuador. La protección de la entrada general se verifica aparte."} }
       ]
     }
   ]

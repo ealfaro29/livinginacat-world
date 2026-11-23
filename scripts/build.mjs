@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { rootPath, readJSON, csv, esc } from "./lib.mjs";
+import { shoppingPlanner } from "./shopping-planner.mjs";
 import { publishedGuides, guideUrl, renderGuidePage } from "./guides.mjs";
 import {
   shell,
@@ -120,6 +121,15 @@ for (const lang of ["en", "es"]) {
           : "/assets/editions/v2-console.webp",
     });
   }
+  const plannerTitle = lang === "es" ? "Lista de compras de la V2" : "V2 shopping list";
+  await page(route(lang, "v2/planner"), {
+    title: plannerTitle,
+    description: lang === "es" ? "Calculá las compras y el flete de la V2 con tus repuestos disponibles." : "Estimate V2 purchases and freight using your available spares.",
+    lang,
+    page: "v2",
+    other: route(lang === "es" ? "en" : "es", "v2/planner"),
+    body: `<article class="wrap shopping-planner"><h1>${plannerTitle}</h1>${shoppingPlanner(lang, v2Catalog)}</article>`,
+  });
   const headers =
     lang === "es"
       ? ["Grupo", "Artículo", "Cantidad", "Nota"]
@@ -132,9 +142,9 @@ for (const lang of ["en", "es"]) {
   ]);
   await write(`downloads/v1-${lang}.csv`, csv([headers, ...rows]));
   const v2Rows = v2Catalog.groups.flatMap((group) =>
-    group.items.map((item) => [group[lang], item[lang], item.quantity]),
+    group.items.map((item) => [group[lang], item[lang], item.quantity, item.note?.[lang] ?? ""]),
   );
-  await write(`downloads/v2-${lang}.csv`, csv([headers.slice(0, 3), ...v2Rows]));
+  await write(`downloads/v2-${lang}.csv`, csv([headers, ...v2Rows]));
 }
 
 const docsLabels = {

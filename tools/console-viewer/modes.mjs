@@ -22,11 +22,11 @@ const modes={
       ['Dos patines laterales','Se comprueba el cuerpo completo de ambos MGN9H hasta cada extremo de los rieles de 250 mm.',[leftRail,138,99],'Patin_Y_'],
       ['Carro transversal','El bloque de 39,9 mm se desplaza por el riel de 150 mm. La punta sigue su movimiento.',[-5,152,139],'Patin_X'],
       ['Motores posteriores','El cuerpo y la placa de los motores quedan detrás del recorrido de la punta al fondo.',[21,275,88],'NEMA17_']]},
-  electronics:{title:'Debajo del teléfono',text:'El piso aloja las placas. La alimentación entra por atrás en corriente continua. Una sola fuente externa de 12 V alimenta la consola.',
+  electronics:{title:'Debajo del teléfono',text:'El piso aloja las placas. La alimentación entra por atrás en corriente continua. La MEAN WELL GST160A12-R7B entrega 12 V y 11,5 A por una toma Kycon KPJX-PM-4S.',
     groups:groups.floor,tags:[
-      ['Raspberry Pi 5','La cámara y la MKS se conectan por USB. Sobre la Pi queda el ventilador.',[39,114,37],'Raspberry_'],
-      ['MKS DLC32 y los dos drivers','Dos tornillos delanteros y dos lengüetas traseras retienen el panel de servicio.',[-31,195,18],'MKS_'],
-      ['Conversión de corriente','El rectángulo ámbar reserva 68 × 50 × 27 mm para la conversión interna. El diseño prevé un módulo Geekworm para la Pi y uno DFRobot para el iPhone. Falta comprobar su encaje y temperatura.',[-42,92,28],'Reserva_']]},
+      ['Raspberry Pi 5','El Geekworm Pi5-5V5APD alimenta la Pi a 5 V y 5 A por USB-C. La cámara y la MKS envían datos por USB.',[39,114,37],'Raspberry_'],
+      ['MKS DLC32 y los dos drivers','La MKS recibe 12 V en POWER 12–24 V y controla los dos TMC2209. El USB la comunica con la Pi.',[-31,195,18],'MKS_'],
+      ['Conversión de corriente','La reserva ámbar de 68 × 50 × 27 mm representa el espacio para el Geekworm y el cargador DFRobot DFR0758 del iPhone. Falta probar las dos placas con sus fichas y verificar la temperatura bajo carga.',[-42,92,28],'Reserva_']]},
   switch:{title:'Interruptor frontal',text:'Es el NKK S301T. La punta de la palanca sobresale de la tuerca y queda protegida dentro del borde. Podés simular sus dos posiciones.',
     groups:['detalleSwitch','switchmount','toggle'],tags:[
       ['Palanca de dos posiciones','Los 32° de recorrido quedan libres dentro del rebaje.',[48,8,25],'S301T_palanca'],

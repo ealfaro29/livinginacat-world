@@ -2,10 +2,25 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readJSON } from "../scripts/lib.mjs";
 import { v1Page, v2Page, homePage } from "../scripts/presentation.mjs";
+import { shoppingPlanner } from "../scripts/shopping-planner.mjs";
 
 const catalog = await readJSON("data/v1-catalog.json");
 const hardware = await readJSON("data/hardware-release.json");
 const v2Catalog = await readJSON("data/v2-catalog.json");
+
+test("the shopping planner carries the same V2 kits, power selection and budget as the site", () => {
+  for (const lang of ["en", "es"]) {
+    const fragment = shoppingPlanner(lang, v2Catalog);
+    const embedded = fragment.match(/<script type="application\/json" data-catalog>([^<]+)<\/script>/);
+    assert.deepEqual(JSON.parse(embedded[1]), v2Catalog);
+    assert.ok(fragment.includes('id="ft412-segunda-maquina" lang="' + lang + '"'));
+    assert.ok(v2Page(lang, v2Catalog).includes('id="power"'));
+  }
+  const power = v2Catalog.groups.find(group => group.id === "power");
+  for (const model of ["GST160A12-R7B", "KPJX-PM-4S", "Pi5-5V5APD", "DFR0758"]) {
+    assert.ok(power.items.some(item => item.en.includes(model) && item.es.includes(model)));
+  }
+});
 
 test("the edition catalog contains only public parts, quantities, notes and one rounded build cost", () => {
   assert.deepEqual(Object.keys(catalog).sort(), [
@@ -55,7 +70,8 @@ for (const lang of ["en", "es"]) {
     assert.ok(model.includes(lang === "es" ? "₡457.850" : "₡457,850"));
     for (const group of v2Catalog.groups) {
       for (const item of group.items) {
-        assert.ok(model.includes(`<td>${item[lang]}</td><td>${item.quantity}</td>`));
+        const note = item.note ? `<small>${item.note[lang]}</small>` : "";
+        assert.ok(model.includes(`<td>${item[lang]}${note}</td><td>${item.quantity}</td>`));
       }
     }
     assert.doesNotMatch(
