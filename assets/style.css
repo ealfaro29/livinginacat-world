@@ -570,6 +570,24 @@ h2 em {
   font: 600 clamp(1.35rem, 2vw, 1.85rem) / 1.15 var(--display);
   letter-spacing: -0.035em;
 }
+.shopping-planner {
+  max-width: 52rem;
+  padding-block: clamp(2rem, 4vw, 4rem);
+}
+.shopping-planner h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); }
+.shopping-planner h2 { font-size: clamp(1.3rem, 3vw, 1.7rem); }
+.shopping-planner h3 { font-size: 1.15rem; }
+.shopping-planner .viz-row,
+.shopping-planner .viz-controls { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.1rem; }
+.shopping-planner .form-check { display: inline-flex; align-items: center; gap: .4rem; }
+.shopping-planner .table input { width: 5rem; max-width: 100%; }
+.shopping-planner .table { border-collapse: collapse; }
+.shopping-planner .table td,
+.shopping-planner .table th { text-align: left; padding: .4rem; border-bottom: 1px solid var(--line); }
+.shopping-planner summary { cursor: pointer; }
+.shopping-planner small, .shopping-planner .text-small { color: var(--muted); }
+.shopping-planner [data-total-usd] { font-size: 1.45rem; }
+.budget-list-head .row-links { padding: 0; margin: 0; }
 .parts-controls {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(160px, 0.6fr);

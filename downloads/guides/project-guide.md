@@ -1,6 +1,6 @@
 # Living in a Cat World · Project guide
 
-FT412 is a CoreXY machine that operates an iPhone through its own touchscreen. Alfonsito (V1) is the working prototype with an aluminum frame. V2 is a printed-enclosure design that reuses its main components. The physical tests below were performed on V1.
+FT412 is a CoreXY machine that operates an iPhone through its own touchscreen. Alfonsito (V1) is the working prototype with an aluminum frame. V2 is a second machine in a printed enclosure, budgeted with dedicated electronics and motion hardware so Alfonsito can stay in service. The physical tests below were performed on V1.
 
 ## Goal
 
@@ -37,6 +37,8 @@ The ruler checks cover one move on each axis at the ruler's resolution. A screen
 ## V2 design dimensions
 
 V2 integrates the phone bed, electronics compartment and camera support into a printed console. Its drawing places the lens 100 mm above the glass, based on the owner's measurement of V1. At that setting the modeled exterior is **196 × 302 × 231 mm**. The calculated travel with the three carriages fully supported and 2 mm reserved at each rail end is **106.1 mm in X and 206.1 mm in Y**. These are V2 CAD results. Physical fit, belt clearance under tension and thermal behavior need a built prototype. [Explore V2](/v2/)
+
+The selected external MEAN WELL GST160A12-R7B supplies 12 V DC at up to 11.5 A (138 W) through a rear Kycon KPJX-PM-4S. The MKS takes 12 V directly. A Geekworm Pi5-5V5APD (9–24 V input) powers the Pi 5 over USB-C, and a DFRobot DFR0758 charges the iPhone over Lightning. The front S301T switches DC. The 3 A fuse is for the actuator branch. The sizing estimate allows 60 W for motion and the actuator, 25 W for the Pi and 15 W for the phone. At an assumed 85% USB conversion efficiency, that is about 107 W at the external supply, leaving about 31 W of nominal headroom. The drawing reserves space for conversion electronics. The panel opening, plug clearance and temperature under simultaneous load still require a physical check. [V2 power and budget](/v2/#power) · [MEAN WELL datasheet](https://www.meanwell.com/Upload/PDF/GST160A/GST160A-SPEC.PDF)
 
 ## Build and verification order
 
