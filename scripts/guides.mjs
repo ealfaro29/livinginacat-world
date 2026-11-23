@@ -29,7 +29,7 @@ export const guides = [
     lang: "es",
     title: "Guía de ensamblaje",
     description:
-      "30 pasos de montaje: materiales al inicio, carga previa de tuercas, escuadras, ilustraciones y comprobación de cada operación. PDF para la mesa de trabajo.",
+      "30 operaciones ilustradas. Cada paso empieza con las piezas y los herrajes y termina con una comprobación para seguir el montaje.",
   },
   {
     slug: "cradle-rev01",
@@ -45,7 +45,7 @@ export const guides = [
     group: "build",
     title: "Tip coupler REV01",
     description:
-      "Measured tip fit, circular CAD and a 0.16 mm replacement print. Printed roundness and physical acceptance remain pending.",
+      "Two printed halves fit the measured mesh tip. Includes STEP, STL and the original dimensional checks.",
   },
   {
     slug: "project-guide",
@@ -92,7 +92,8 @@ export const guides = [
     source: "docs/FIT-CHECKS.md",
     group: "build",
     title: "Initial fit checks",
-    description: "Owner-reported M3, M4 and M5 checks in PLA Silk, current print progress and remaining tests.",
+    description:
+      "Owner-reported M3, M4 and M5 checks in PLA Silk, current print progress and remaining tests.",
   },
   {
     slug: "release-scope",
@@ -140,7 +141,7 @@ export const guides = [
     group: "design",
     title: "Visual identity",
     description:
-      "The blog name, Real World hero, robot cat mark, palette, typography and editorial voice.",
+      "The robot cat mark, CAD illustrations, colors and type used across both editions.",
   },
   {
     slug: "hardware-art",
@@ -271,40 +272,42 @@ export function renderGuideMarkdown(markdown, guide, context) {
   return { html, headings };
 }
 
-export function guideCards(groupId) {
-  return `<div class="doc-grid">${guides
-    .filter((g) => g.group === groupId)
-    .map(
-      (g) =>
-        `<a class="note-card" href="${guideUrl(g)}"><span class="eyebrow">GUIDE ${String(guides.indexOf(g) + 1).padStart(2, "0")}</span><h3>${esc(g.title)} ↗</h3><p>${esc(g.description)}</p><span class="guide-card-action">Read the guide</span></a>`,
-    )
-    .join("")}</div>`;
-}
-
-export function guideCatalog() {
-  return `<div class="guide-catalog" id="guides">${guideGroups.map((group) => `<section class="guide-group" id="${group.id}-guides"><div class="section-heading"><div><p class="eyebrow">READ IN YOUR BROWSER / MARKDOWN SOURCE AVAILABLE</p><h2>${esc(group.title)}</h2><p class="caption">${esc(group.description)}</p></div></div>${guideCards(group.id)}</section>`).join("")}</div>`;
-}
+export const publishedGuideSlugs = [
+  "assembly",
+  "project-guide",
+  "hardware",
+  "motor-mounts",
+  "electronics",
+  "fit-checks",
+  "release-scope",
+  "cradle-rev01",
+  "coupler-rev01",
+  "attribution",
+  "contributing",
+  "visual-identity",
+];
+export const publishedGuides = publishedGuideSlugs.map((slug) =>
+  guides.find((guide) => guide.slug === slug),
+);
 
 export function renderGuidePage(guide, markdown, context) {
   const { html, headings } = renderGuideMarkdown(markdown, guide, context);
-  const group = guideGroups.find((g) => g.id === guide.group);
-  const peers = guides.filter((g) => g.group === guide.group),
-    index = peers.indexOf(guide);
+  const es = guide.lang === "es";
+  const contents = es ? "En esta guía" : "On this page";
   const toc = headings
     .map(
       (h) =>
-        `<a class="toc-depth-${h.depth}" href="#${h.id}">${esc(h.text)}</a>`,
+        `<a href="#${h.id}" class="${h.depth === 3 ? "sub" : "top"}">${esc(h.text)}</a>`,
     )
     .join("");
-  const sourceHref = guide.source.startsWith("@")
-    ? "/downloads/ledger.json"
-    : `${context.repo}/blob/main/${guide.source}`;
-  const sourceLabel = guide.source.startsWith("@")
-    ? "View source data ↗"
-    : "View Markdown on GitHub ↗";
-  return `<article class="guide-page wrap${guide.slug === "assembly" ? " assembly-guide" : ""}"${guide.lang ? ` lang="${esc(guide.lang)}"` : ""}>
-    <header class="guide-header"><a class="back" href="/documentation/#guides">← All documentation</a><p class="eyebrow">GUIDE ${String(guides.indexOf(guide) + 1).padStart(2, "0")} / ${esc(group.title)}</p><h1>${esc(guide.title)}</h1><p class="lead">${esc(guide.description)}</p><div class="guide-actions"><a href="/downloads/guides/${guide.slug}.md" download>Download Markdown ↓</a><a href="${sourceHref}">${sourceLabel}</a></div></header>
-    ${headings.length ? `<details class="guide-toc-mobile"><summary>In this guide <span>+</span></summary><nav aria-label="In this guide">${toc}</nav></details>` : ""}
-    <div class="guide-layout"><aside class="guide-sidebar">${headings.length ? `<nav class="guide-toc" aria-label="On this page"><p class="eyebrow">ON THIS PAGE</p>${toc}</nav>` : ""}<nav class="guide-related" aria-label="${esc(group.title)}"><p class="eyebrow">${esc(group.title)}</p>${peers.map((g) => `<a href="${guideUrl(g)}"${g === guide ? ' aria-current="page"' : ""}>${esc(g.title)}</a>`).join("")}</nav></aside><div class="guide-content"><div class="prose guide-prose">${html}</div><nav class="guide-pagination" aria-label="Guide navigation">${index > 0 ? `<a href="${guideUrl(peers[index - 1])}"><small>← PREVIOUS GUIDE</small>${esc(peers[index - 1].title)}</a>` : `<a href="/documentation/#guides"><small>← DOCUMENTATION</small>All guides</a>`}${index < peers.length - 1 ? `<a href="${guideUrl(peers[index + 1])}"><small>NEXT GUIDE →</small>${esc(peers[index + 1].title)}</a>` : `<a href="/documentation/#guides"><small>DOCUMENTATION →</small>All guides</a>`}</nav></div></div>
-  </article>`;
+  const download = `/downloads/guides/${guide.slug}.md`;
+  const parent = es ? "/es/v1/" : "/documentation/";
+  return `<article class="wrap guide-page"><header class="guide-header">
+    <div class="crumb"><a href="${parent}">${es ? "V1 · Prototipo" : "Documentation"}</a></div>
+    <h1>${esc(guide.title)}</h1><p class="lead">${esc(guide.description)}</p>
+    <div class="guide-actions">${es ? '<a href="/downloads/guia-ensamblaje-ft412-es.pdf">Abrir el manual en PDF</a>' : ""}
+    <a href="${download}" download>${es ? "Descargar Markdown" : "Download Markdown"}</a></div></header>
+    ${toc ? `<details class="guide-toc-mobile"><summary>${contents}</summary><nav aria-label="${contents}">${toc}</nav></details>` : ""}
+    <div class="guide-layout"><aside class="guide-sidebar">${toc ? `<nav class="guide-toc" aria-label="${contents}"><h2>${contents}</h2>${toc}</nav>` : ""}</aside>
+    <div class="guide-prose">${html}</div></div></article>`;
 }

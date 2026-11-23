@@ -1,11 +1,13 @@
 # Contributing
 
-Open an issue with a question, reproducible problem, mechanical improvement or test result. For a specific change, open a pull request describing the problem, proposed change and available evidence.
+Open an issue with a reproducible problem, a mechanical improvement or a measured result. For a change to the design, include its edition, the exact part, the material, print orientation and the conditions under which you measured it.
 
-For hardware, include file version, material, printer, orientation, exact commercial parts, measured tolerances and test conditions. Identify modifications. Do not present a simulation or CAD review as physical validation.
+## Public catalog
 
-For purchase data, share only an anonymized extract: item, quantity, amount, currency, date and source type. Do not upload original receipts containing personal details, full order IDs, card details, addresses, email addresses or tracking numbers.
+For a catalog correction, identify the part, group and quantity. The website presents one approximate cost for the complete V1 build. Operational records and receipts belong in the authenticated workspace.
 
-Before a pull request: `npm ci`, `npm test`, `npm run build`, `npm run check`. Inspect affected pages on desktop and mobile. Keep the public site and new documentation in English. Explain the need for any new dependency, analytics or automation.
+## Before a pull request
 
-Contributions are under MIT with third-party notices retained. Read the [attribution guide](docs/ATTRIBUTION.md) before adding external files.
+Run `npm ci`, `npm test`, `npm run build` and `npm run check`. Inspect the changed pages on desktop and mobile. Update both language versions of edition content. Retain the working language of individual technical manuals.
+
+Contributions use the MIT license with third-party notices retained. Read the [attribution guide](docs/ATTRIBUTION.md) before adding external files.

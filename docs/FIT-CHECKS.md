@@ -7,7 +7,7 @@ M3/M5 reported by the owner on November 13, 2026; M4 fit reported on November 15
 | M3 | Passed, according to the owner |
 | M5 | Passed, according to the owner |
 | M4 | Owner reports actual screws and nuts fit on November 15 |
-| Coupler fit | Not confirmed |
+| Original coupler | The owner reported a tight fit. The separate REV01 pair was later fitted and checked with power off. |
 
 The test material was PLA Silk with a 0.4 mm nozzle. The owner did not itemize results for each round hole, square-nut pocket or countersunk seat, and no measured clearance diameters were supplied. The report therefore does not establish a chosen compensation value or validate every individual feature.
 
@@ -29,7 +29,7 @@ On November 15, the owner reports the electronics support is printing and, after
 
 On November 16, the owner confirms all project prints complete and asks to begin assembly. This records completion of the previously active electronics support: all 22 installed printed pieces now have completion recorded. The exact completion date, quality and measured fit were not supplied. Earlier printer observations and estimates remain historical; no additional print was sent and no material was reclassified. Start with the dry frame and confirm each mechanical checkpoint physically.
 
-Coupler fit, complete assembly acceptance, motion, touch accuracy and thermal/load performance remain unvalidated. The original PETG design settings and all earlier Silk observations remain dated evidence. The PETG job has started, but no finished PETG fit result is confirmed. Changing material does not change the CAD geometry or complete functional acceptance.
+At the end of the print batches, the coupler fit, motion, touch accuracy and thermal behavior still required physical checks. The Silk coupons and the completed PETG batch provide separate evidence. Tests on the assembled V1 are recorded below.
 
 A subsequent November 16 owner report confirms the frame with four corner brackets and its feet assembled, with two loose nuts reserved in each long side’s inner lower slot. This is owner evidence, without supplied diagonal measurements or independent visual inspection. Bed crossmembers, rails and full assembly remain unconfirmed. With the bed crossmembers’ slot facing up, their section is 10 mm high and 20 mm wide; the guide’s earlier reversed orientation has been corrected.
 
@@ -39,6 +39,10 @@ On November 17, the reported inability to seat the original L-shaped cradle was 
 
 The owner subsequently reports the solenoid installed with both bars and four screws. This does not identify the printed cradle revision or establish measured return, clearance or load performance. The original coupler pair was reported awkward to fit and apparently oval around the tip; printed roundness was not independently measured. The owner measured an 8.83 mm diameter × 4.55 mm high metal collar and 7.90 mm mesh. The original CAD exit is 7.40 mm. [Coupler REV01](/documentation/coupler-rev01/) uses a 9.30 × 4.95 mm collar recess and 8.30 mm mesh exit, preserving the lower shoulder, cap socket and fasteners. CAD circles and uniform-scale meshes pass digital checks. The requested 0.16 mm pair was saved, natively sliced and explicitly authorized to print; the matching active job was observed in initial preparation at 0/48 layers. The owner subsequently confirms both replacement halves printed and installed, and reports completing the unpowered retention/return check before requesting continuation. Actual event dates, measured printed roundness and powered or thermal performance were not supplied. Closing the designed 0.50 mm split gap fully narrows the bore in that direction; this is a possible assembly effect, not a measured explanation of the owner's earlier print.
 
-On November 22, the owner reported a touchscreen tap detected with the stylus side screw connected to the FT412 aluminum frame. The [connection in the assembly guide](/documentation/assembly/#referencia-de-la-punta-en-el-marco) documents this initial result. Tap repeatability and full-travel cable clearance are pending.
+## Checks on the assembled V1
 
-The published CAD archive remains the original v0.1 snapshot; its files, quantities and checksum have not changed. The cradle and coupler REV01 downloads are separate replacements, not a change to that archive or the 22 installed-piece count. Current observations are also available as [build-progress JSON](/downloads/build-progress.json). See the [project guide](/documentation/project-guide/) for the verification sequence and the [shipment record](/shipments/) for current verified logistics.
+With a ruler zeroed at the carriage, the owner measured 10 mm for a commanded 10 mm move to the right. After realigning the ruler front to back, they also measured 10 mm for a commanded 10 mm move toward the rear. Each reading covers one move on one axis at the resolution of the ruler.
+
+The owner reported that iPhone Calculator registered a touch with the stylus side screw connected by a flexible wire to the FT412 aluminum frame. Repeatability over the full screen, cable clearance throughout the stroke, and the thermal response under repeated operation still need measurement. [Stylus reference connection](/documentation/assembly/#referencia-de-la-punta-en-el-marco)
+
+The v0.1 archive records the original CAD and 22 installed pieces. The cradle and coupler REV01 files are separate replacements. [Build and verification order](/documentation/project-guide/) · [Illustrated assembly guide](/documentation/assembly/)

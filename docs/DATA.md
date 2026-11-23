@@ -1,6 +1,12 @@
 # Ledger maintenance
 
-Public source: `data/ledger.json`. USD amounts are integer cents. `null` means unknown. Dates use YYYY-MM-DD. `updatedAt` retains the UTC review date; `reviewedAt` is the completed source-review timestamp and `reviewTimeZone` controls its display in Costa Rica. Neither is a delivery event. A shipment's `speedyReviewedAt` records its latest relevant Speedy review without replacing its carrier or recipient event date. Routine reviews cover current active queues; saved terminal carrier and recipient evidence is reused without reopening closed sources. Confirmed carrier deliveries display `carrierDeliveredDate`, or explicitly leave the date unknown, rather than reusing an earlier estimate.
+## Scope of the current website
+
+The public editions read `data/v1-catalog.json` for the V1 list and its rounded whole-build estimate. The public build excludes the operational ledger, individual prices, shipment history and granular exports. The historical accounting rules below apply to maintaining the project records.
+
+## Operational records
+
+Ledger source: `data/ledger.json`. USD amounts are integer cents. `null` means unknown. Dates use YYYY-MM-DD. `updatedAt` retains the UTC review date; `reviewedAt` is the completed source-review timestamp and `reviewTimeZone` controls its display in Costa Rica. Neither is a delivery event. A shipment's `speedyReviewedAt` records its latest relevant Speedy review without replacing its carrier or recipient event date. Routine reviews cover current active queues; saved terminal carrier and recipient evidence is reused without reopening closed sources. Confirmed carrier deliveries display `carrierDeliveredDate`, or explicitly leave the date unknown, rather than reusing an earlier estimate.
 
 `data/build-progress.json` contains selected, anonymized current build observations, separate from the immutable v0.1 CAD archive metadata. The November 13 owner report confirms M3 and M5 checks in PLA Silk, without itemized hole, pocket or seat measurements. The November 15 owner report additionally confirms that the actual M4 screws and nuts fit, without measurements or results for each feature. Keep coupler fit, PETG and full assembly acceptance unconfirmed. These coupon observations do not validate the complete robot or change the archive's checksum.
 

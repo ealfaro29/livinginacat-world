@@ -1,16 +1,16 @@
 # DIY iPhone robot · FramingTech 355/250 + Adafruit 412
 
-FDM prototype derived from PhysiClaw hardware v0.51, commit `8f610d48642aef7d974d3ce09d28e14a4a99bbae`. This variant uses cut profiles without machining, printed motor mounts and a modified touch head. **CAD and meshes have been checked digitally. The first test batch is complete; the owner reports M3/M5 checks passed in PLA Silk and, on November 15, that actual M4 screws and nuts fit. Coupler fit, PETG and full assembly acceptance remain unvalidated.** Individual feature results were not itemized. Files are a prototype starting point, not certification of strength or touch performance. The v0.1 archive remains its original dated CAD snapshot; see the [fit-check report](/documentation/fit-checks/) for current observations.
+This V1 FDM prototype derives from PhysiClaw hardware v0.51, commit `8f610d48642aef7d974d3ce09d28e14a4a99bbae`. It uses cut aluminum profiles, printed motor mounts and an adapted touch head. The owner completed the 22 pieces and reported M3, M4 and M5 fit in PLA Silk. The original v0.1 geometry and later REV01 downloads are documented separately. [Prototype fit and motion checks](/documentation/fit-checks/)
 
 For hands-on assembly, use the [illustrated Spanish assembly guide](/documentation/assembly/).
 
-**Tip-coupler correction:** use the separate [coupler REV01 pair](/documentation/coupler-rev01/) for the next physical trial. The owner reports an 8.83 × 4.55 mm collar and 7.90 mm mesh; the original exit is only 7.40 mm. The owner confirms the corrected 0.16 mm PLA pair printed and installed and the unpowered check completed. Measured roundness and powered acceptance remain unconfirmed; the original archived files are preserved.
+**Tip-coupler correction.** The [coupler REV01 pair](/documentation/coupler-rev01/) replaces the two original halves. The owner reports an 8.83 × 4.55 mm collar and 7.90 mm mesh; the original exit is only 7.40 mm. The owner confirms the corrected 0.16 mm PLA pair printed and installed and the unpowered check completed. Measured roundness and powered acceptance remain unconfirmed; the original archived files are preserved.
 
 **Cradle correction, November 17:** the original cradle's ribs collide with the belt clamp. Use the separate [REV01 replacement](/documentation/cradle-rev01/) for the next fit trial; its CAD checks pass, but it has not yet been printed or physically tested. The owner reports the frame, bed, rails, motors, idlers and both belts assembled with smooth manual travel. That original interference was an earlier assembly obstacle. The owner later reports the solenoid installed; the printed cradle revision was not identified.
 
 Read `PUBLIC-RELEASE.md` first. Use final files in `stl/` with quantities from `qa/print-manifest.json`, using the separate REV01 cradle and coupler replacements for those interfaces. `qa/base-generation.json` describes an intermediate PCB holder superseded by the electronics holder. The public release excludes commercial/reference folders and regeneration scripts. Do not mix this variant with the earlier MISUMI/ELECALL design.
 
-**Current build state, November 16:** the owner confirms all project prints complete. The electronics support retains the earlier A2 yellow PLA / Generic PLA High Speed observation and current PLA preference; completion is reported by the owner, not a new device observation. The earlier PETG preparation remains unchanged. Native saved history marks the cradle and two bars Success. The owner now confirms the preceding eight-piece batch by count and shape groups. All 22 installed parts have prepared files and recorded print completion. The exact completion date, quality and measured fit are unconfirmed. No duplicate or additional print has been scheduled. Begin with dry frame squareness, feet and rail alignment. The current material choice does not establish physical fit or thermal/load performance, and the original v0.1 archive and geometry remain unchanged.
+The owner assembled the frame, phone bed, three rails, motors, idlers and both belts, and reported smooth manual travel. Ruler checks produced 10 mm of movement for one 10 mm command on each axis. The owner also reported a detected tap in iPhone Calculator. Screen-wide accuracy, wear and thermal behavior still need measurement.
 
 ## Selected configuration
 
@@ -27,7 +27,7 @@ Read `PUBLIC-RELEASE.md` first. Use final files in `stl/` with quantities from `
 | M5 T-nuts | 20 RN05BM5; allocation below |
 | Actuator | Adafruit 412, 12 V / 0.3 A, 14×17×29.7 mm body; 4.9 mm drawing stroke |
 | Tip | Micro Traders B0DSVSVSZN, Ø8.9×4.5 mm metal collar, Ø7 mm mesh |
-| Remaining metal plates | 2 rear-idler braces from the purchased 40×18 mm joining plate pack; thickness and fit to be verified |
+| Remaining metal plates | 2 rear-idler braces from the 40×18 mm joining plate pack |
 
 Profiles are metric 10×20 and 20×40, not imperial 1010/1020. The FramingTech STEP slot opening is at least 5.15 mm. Earlier MISUMI slot-6 nuts are not used. Amazon square M3/M4/M5 nuts fit printed pockets and do not automatically replace FramingTech T-nuts.
 
@@ -43,7 +43,7 @@ Print all three coupons and both 412 coupler halves first. Check actual screws/n
 
 Inspect all slicer layers. Add removable local supports where cavity roofs, head recesses or undercuts require them; remove completely. The 412 cradle rests on the back of its wall, clamp bars on their outside faces, coupler halves with cavities up. Motor mounts rest on their outside faces and retain 3 mm screw seats. Avoid supports in inaccessible passages. Add a 6–8 mm brim to the tall narrow tube bracket.
 
-Four feet are Ø24×22 mm cylinders with 1 mm EVA on the bottom. Their 4 M5×16 screws and 4 RN05BM5 nuts are already counted. A 10.5 mm roof leaves 5.5 mm screw penetration and nominal 0.85 mm slot-bottom clearance. These replace purchased feet; do not fit both.
+Four feet are Ø24×22 mm cylinders with 1 mm EVA on the bottom. Their 4 M5×16 screws and 4 RN05BM5 nuts are already counted. A 10.5 mm roof leaves 5.5 mm screw penetration and nominal 0.85 mm slot-bottom clearance. These four printed feet support the frame.
 
 ## Motors and shoulder axles
 
@@ -113,7 +113,7 @@ Received rails may have fewer holes than the maximum 13+13+8 envelope. Use all a
 
 Print only `fdm_pcb_holder_electronics_x1`, replacing the simple PCB holder, plus `fdm_5648_retainer_x1`. The wing mounts Adafruit 5648 and the NKK S301 panel/guard. Four ties from the Fermerry kit pass through 6×3 mm slots; no new screws. Insulate both switch terminals individually. The open guard is low-voltage only, not a mains enclosure. See `ELECTRONICS.md`.
 
-The Mouser order confirmed November 5 substitutes **S301T screw terminals** for the S301 solder lugs used in this CAD release. Verify the received terminal geometry, connections and guard clearance before installation. The solenoid and MOSFET board remain Adafruit 412 and 5648; the alternate Amazon actuator/driver redesign is not being adopted. The 18 AWG wire is planned for local purchase on November 6, with supplier, length and price pending.
+V1 uses the **NKK S301T switch with screw terminals**. The archived guard was drawn around an S301 with solder lugs. Check the S301T body and both insulated terminals against the printed guard before assembly. The actuator and its driver are the Adafruit 412 and 5648. [Electronics mounting guide](/documentation/electronics/)
 
 ## Travel and commissioning
 

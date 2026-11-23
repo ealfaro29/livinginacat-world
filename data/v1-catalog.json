@@ -1,0 +1,680 @@
+{
+  "estimate": {
+    "roundUSD": 3000,
+    "note": {
+      "en": "Includes the iPhone, 3D printer and workshop tools. International forwarding charges are still being reconciled and are excluded from this estimate.",
+      "es": "Incluye el iPhone, la impresora 3D y las herramientas de taller. El flete internacional, aún por conciliar, queda fuera de este estimado."
+    }
+  },
+  "groups": [
+    {
+      "id": "frame",
+      "name": {
+        "en": "Aluminum frame",
+        "es": "Bastidor de aluminio"
+      }
+    },
+    {
+      "id": "motion",
+      "name": {
+        "en": "Motion and linear guides",
+        "es": "Movimiento y guías lineales"
+      }
+    },
+    {
+      "id": "touch",
+      "name": {
+        "en": "Touch head",
+        "es": "Cabezal táctil"
+      }
+    },
+    {
+      "id": "control",
+      "name": {
+        "en": "Control boards and computing",
+        "es": "Computación y control"
+      }
+    },
+    {
+      "id": "phone-camera",
+      "name": {
+        "en": "Phone, camera and lighting",
+        "es": "Teléfono, cámara e iluminación"
+      }
+    },
+    {
+      "id": "power-wiring",
+      "name": {
+        "en": "Power and wiring",
+        "es": "Alimentación y cableado"
+      }
+    },
+    {
+      "id": "fasteners",
+      "name": {
+        "en": "Fasteners and spacers",
+        "es": "Tornillería y separadores"
+      }
+    },
+    {
+      "id": "printing",
+      "name": {
+        "en": "3D printing",
+        "es": "Impresión 3D"
+      }
+    },
+    {
+      "id": "workshop",
+      "name": {
+        "en": "Workshop tools and supplies",
+        "es": "Herramientas y consumibles de taller"
+      }
+    }
+  ],
+  "items": [
+    {
+      "group": "phone-camera",
+      "name": {
+        "en": "Apple iPhone 14, 128 GB, unlocked, refurbished (Excellent)",
+        "es": "Apple iPhone 14, 128 GB, desbloqueado y reacondicionado (excelente)"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "control",
+      "name": {
+        "en": "CanaKit Raspberry Pi 5 PRO kit, 4 GB RAM and 128 GB microSD",
+        "es": "Kit CanaKit Raspberry Pi 5 PRO, 4 GB de RAM y microSD de 128 GB"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "phone-camera",
+      "name": {
+        "en": "EMEET C960 4K autofocus USB-A webcam",
+        "es": "Cámara web EMEET C960 4K, USB-A con enfoque automático"
+      },
+      "quantity": 1,
+      "note": {
+        "en": "The EMEET appears on the V1 purchase list. The V2 camera mount is designed around the Logitech C922.",
+        "es": "La EMEET figura en la lista de compras de la V1. El soporte de cámara de la V2 está diseñado para la Logitech C922."
+      }
+    },
+    {
+      "group": "motion",
+      "name": {
+        "en": "STEPPERONLINE 17HE15-1504S NEMA 17 stepper motor",
+        "es": "Motor paso a paso NEMA 17 STEPPERONLINE 17HE15-1504S"
+      },
+      "quantity": 2
+    },
+    {
+      "group": "motion",
+      "name": {
+        "en": "Zeelo GT2 timing belt, 5 m × 6 mm, with four 20-tooth pulleys",
+        "es": "Correa dentada Zeelo GT2 de 5 m × 6 mm con cuatro poleas de 20 dientes"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "motion",
+      "name": {
+        "en": "3Dman smooth idler pulleys, 5 mm bore, pack of 10",
+        "es": "Poleas locas lisas 3Dman, agujero de 5 mm, paquete de 10"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "motion",
+      "name": {
+        "en": "WINSINN toothed idler pulleys, 5 mm bore, pack of 5",
+        "es": "Poleas locas dentadas WINSINN, agujero de 5 mm, paquete de 5"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "printing",
+      "name": {
+        "en": "SUNLU black PETG filament, 2 kg",
+        "es": "Filamento PETG negro SUNLU, 2 kg"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "workshop",
+      "name": {
+        "en": "Plusivo S578 soldering kit with multimeter",
+        "es": "Kit de soldadura Plusivo S578 con multímetro"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "workshop",
+      "name": {
+        "en": "Kynup 150 mm digital caliper",
+        "es": "Calibre digital Kynup de 150 mm"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "workshop",
+      "name": {
+        "en": "AMTOVL metric hex keys, set of 9",
+        "es": "Juego de 9 llaves Allen métricas AMTOVL"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "phone-camera",
+      "name": {
+        "en": "Anker Nano Pro 20 W USB-C phone charger",
+        "es": "Cargador USB-C Anker Nano Pro de 20 W para el teléfono"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "phone-camera",
+      "name": {
+        "en": "Anker USB-C to Lightning cable, 3 ft",
+        "es": "Cable Anker de USB-C a Lightning, 0,91 m"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "phone-camera",
+      "name": {
+        "en": "Airlonv 17-inch LED desk lamp",
+        "es": "Lámpara LED de escritorio Airlonv de 17 pulgadas"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "phone-camera",
+      "name": {
+        "en": "NEEWER UA057 camera arm, 22 inches",
+        "es": "Brazo para cámara NEEWER UA057 de 22 pulgadas"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "power-wiring",
+      "name": {
+        "en": "Fermerry 22 AWG silicone-insulated wire, six colors",
+        "es": "Cable Fermerry de 22 AWG con aislamiento de silicona, seis colores"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "power-wiring",
+      "name": {
+        "en": "ALITOVE 12 V DC power supply, 5 A / 60 W",
+        "es": "Fuente de corriente continua ALITOVE de 12 V, 5 A y 60 W"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "motion",
+      "name": {
+        "en": "uxcell 150 mm X-axis linear rail with MGN9H carriage",
+        "es": "Riel lineal uxcell de 150 mm para el eje X con patín MGN9H"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "control",
+      "name": {
+        "en": "BIGTREETECH TMC2209 V1.3 stepper drivers with heatsinks, pack of 2",
+        "es": "Controladores de motor BIGTREETECH TMC2209 V1.3 con disipadores, paquete de 2"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "motion",
+      "name": {
+        "en": "uxcell 250 mm Y-axis linear rails with MGN9H carriages, set of 2",
+        "es": "Rieles lineales uxcell de 250 mm para el eje Y con patines MGN9H, juego de 2"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "uxcell precision shims, 5 × 8 × 0.5 mm, pack of 20",
+        "es": "Arandelas de ajuste uxcell de 5 × 8 × 0,5 mm, paquete de 20"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "USDRWAM M3 square nuts, pack of 50",
+        "es": "Tuercas cuadradas M3 USDRWAM, paquete de 50"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "USDRWAM M5 square nuts, pack of 30",
+        "es": "Tuercas cuadradas M5 USDRWAM, paquete de 30"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "uxcell M4 square nuts, pack of 50",
+        "es": "Tuercas cuadradas M4 uxcell, paquete de 50"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "Precision shims, 5 × 8 mm, four thicknesses, set of 48",
+        "es": "Arandelas de ajuste de 5 × 8 mm en cuatro espesores, juego de 48"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "uxcell shoulder screws, Ø5 × 10 mm shoulder and M4 thread, pack of 6",
+        "es": "Tornillos uxcell con hombro liso Ø5 × 10 mm y rosca M4, paquete de 6"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "MECCANIXITY shoulder screws, Ø5 × 20 mm shoulder and M4 thread, pack of 26",
+        "es": "Tornillos MECCANIXITY con hombro liso Ø5 × 20 mm y rosca M4, paquete de 26"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "workshop",
+      "name": {
+        "en": "IRWIN 226303 clamp-on bench vise, 3 inches",
+        "es": "Tornillo de banco IRWIN 226303 de 3 pulgadas con sujeción por abrazadera"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "workshop",
+      "name": {
+        "en": "Crescent Nicholson 21908N file, 8 inches",
+        "es": "Lima Crescent Nicholson 21908N de 8 pulgadas"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "workshop",
+      "name": {
+        "en": "Century 4082 file handle with 7 inserts",
+        "es": "Mango de lima Century 4082 con 7 adaptadores"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "workshop",
+      "name": {
+        "en": "BESSEY BV-NVJ soft vise jaws",
+        "es": "Mordazas blandas BESSEY BV-NVJ para tornillo de banco"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "workshop",
+      "name": {
+        "en": "Loctite 243 threadlocker, 10 mL (1329837)",
+        "es": "Fijador de roscas Loctite 243 de 10 mL (1329837)"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "touch",
+      "name": {
+        "en": "Micro Traders 7 mm capacitive mesh stylus tips, pack of 8",
+        "es": "Puntas táctiles de malla Micro Traders de 7 mm, paquete de 8"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "workshop",
+      "name": {
+        "en": "Crescent AC26VS adjustable wrench, 6 inches",
+        "es": "Llave ajustable Crescent AC26VS de 6 pulgadas"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "workshop",
+      "name": {
+        "en": "Landtek MILA34300N dual-channel contact thermometer",
+        "es": "Termómetro de contacto de dos canales Landtek MILA34300N"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "printing",
+      "name": {
+        "en": "Bambu Lab X2D 3D printer and AMS 2 Pro combo",
+        "es": "Impresora 3D Bambu Lab X2D con alimentador AMS 2 Pro"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "frame",
+      "name": {
+        "en": "FramingTech 20 × 40 mm aluminum extrusion, slot 5, 355 mm long",
+        "es": "Perfil de aluminio FramingTech de 20 × 40 mm, ranura 5, largo de 355 mm"
+      },
+      "quantity": 2
+    },
+    {
+      "group": "frame",
+      "name": {
+        "en": "FramingTech 20 × 40 mm aluminum extrusion, slot 5, 190 mm long",
+        "es": "Perfil de aluminio FramingTech de 20 × 40 mm, ranura 5, largo de 190 mm"
+      },
+      "quantity": 2
+    },
+    {
+      "group": "frame",
+      "name": {
+        "en": "FramingTech 10 × 20 mm aluminum extrusion, slot 5, 185 mm long",
+        "es": "Perfil de aluminio FramingTech de 10 × 20 mm, ranura 5, largo de 185 mm"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "frame",
+      "name": {
+        "en": "FramingTech 10 × 20 mm aluminum extrusion, slot 5, 190 mm long",
+        "es": "Perfil de aluminio FramingTech de 10 × 20 mm, ranura 5, largo de 190 mm"
+      },
+      "quantity": 2
+    },
+    {
+      "group": "frame",
+      "name": {
+        "en": "FramingTech GS20-05W corner bracket with two M4 × 8 screws and two slot nuts",
+        "es": "Escuadra FramingTech GS20-05W con dos tornillos M4 × 8 y dos tuercas de ranura"
+      },
+      "quantity": 8
+    },
+    {
+      "group": "frame",
+      "name": {
+        "en": "FramingTech RN05BM3 M3 T-slot nut for slot 5",
+        "es": "Tuerca de perfil M3 FramingTech RN05BM3 para ranura 5"
+      },
+      "quantity": 38
+    },
+    {
+      "group": "frame",
+      "name": {
+        "en": "FramingTech RN05BM5 M5 T-slot nut for slot 5",
+        "es": "Tuerca de perfil M5 FramingTech RN05BM5 para ranura 5"
+      },
+      "quantity": 20
+    },
+    {
+      "group": "control",
+      "name": {
+        "en": "Makerbase MKS DLC32 controller kit with TS24 touchscreen",
+        "es": "Kit de controladora Makerbase MKS DLC32 con pantalla táctil TS24"
+      },
+      "quantity": 1,
+      "note": {
+        "en": "The kit was listed as V2.1. The installed board is marked DLC32 V2.2.",
+        "es": "El kit figuraba como V2.1. La placa instalada lleva la inscripción DLC32 V2.2."
+      }
+    },
+    {
+      "group": "power-wiring",
+      "name": {
+        "en": "NKK S301T single-pole on/off toggle switch",
+        "es": "Interruptor de palanca unipolar de encendido y apagado NKK S301T"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "power-wiring",
+      "name": {
+        "en": "Littelfuse FHAS101 inline ATO fuse holder",
+        "es": "Portafusible ATO en línea Littelfuse FHAS101"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "power-wiring",
+      "name": {
+        "en": "Littelfuse 0287003.U 3 A ATO fuse",
+        "es": "Fusible ATO Littelfuse 0287003.U de 3 A"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "power-wiring",
+      "name": {
+        "en": "18 AWG stranded copper wire",
+        "es": "Cable de cobre multifilar de 18 AWG"
+      },
+      "quantity": 1,
+      "note": {
+        "en": "Planned local purchase. The length of wire is still to be determined.",
+        "es": "Compra local prevista, con el metraje aún por definir."
+      }
+    },
+    {
+      "group": "power-wiring",
+      "name": {
+        "en": "Desco 09838 ground adapter",
+        "es": "Adaptador de puesta a tierra Desco 09838"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "power-wiring",
+      "name": {
+        "en": "Pomona 1166-36-0 banana plug to clip test lead",
+        "es": "Cable de prueba Pomona 1166-36-0 con clavija banana y pinza"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "touch",
+      "name": {
+        "en": "Adafruit 412 12 V solenoid",
+        "es": "Solenoide Adafruit 412 de 12 V"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "control",
+      "name": {
+        "en": "Adafruit 5648 protected MOSFET driver for the solenoid",
+        "es": "Controlador MOSFET protegido Adafruit 5648 para el solenoide"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "power-wiring",
+      "name": {
+        "en": "Adafruit 3893 three-pin JST PH cable",
+        "es": "Cable JST PH de tres pines Adafruit 3893"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "power-wiring",
+      "name": {
+        "en": "Adafruit 4873 three-pin JST XH cable pair",
+        "es": "Par de cables JST XH de tres pines Adafruit 4873"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "power-wiring",
+      "name": {
+        "en": "Qualtek 3021001-03 USB-A to USB-B cable, 3 ft",
+        "es": "Cable Qualtek 3021001-03 de USB-A a USB-B, 0,91 m"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "Bolt Depot #7218 M3 × 6 mm hex socket button-head screw",
+        "es": "Tornillo Allen de cabeza botón M3 × 6 mm Bolt Depot #7218"
+      },
+      "quantity": 15
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "Bolt Depot #7219 M3 × 8 mm hex socket button-head screw",
+        "es": "Tornillo Allen de cabeza botón M3 × 8 mm Bolt Depot #7219"
+      },
+      "quantity": 50
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "Bolt Depot #7220 M3 × 10 mm hex socket button-head screw",
+        "es": "Tornillo Allen de cabeza botón M3 × 10 mm Bolt Depot #7220"
+      },
+      "quantity": 15
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "Bolt Depot #7222 M3 × 16 mm hex socket button-head screw",
+        "es": "Tornillo Allen de cabeza botón M3 × 16 mm Bolt Depot #7222"
+      },
+      "quantity": 10
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "Bolt Depot #15291 M3 × 25 mm hex socket button-head screw",
+        "es": "Tornillo Allen de cabeza botón M3 × 25 mm Bolt Depot #15291"
+      },
+      "quantity": 10
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "Bolt Depot #6632 M5 × 10 mm hex socket button-head screw",
+        "es": "Tornillo Allen de cabeza botón M5 × 10 mm Bolt Depot #6632"
+      },
+      "quantity": 10
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "Bolt Depot #6633 M5 × 12 mm hex socket button-head screw",
+        "es": "Tornillo Allen de cabeza botón M5 × 12 mm Bolt Depot #6633"
+      },
+      "quantity": 10
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "Bolt Depot #6634 M5 × 16 mm hex socket button-head screw",
+        "es": "Tornillo Allen de cabeza botón M5 × 16 mm Bolt Depot #6634"
+      },
+      "quantity": 10
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "Bolt Depot #6635 M5 × 20 mm hex socket button-head screw",
+        "es": "Tornillo Allen de cabeza botón M5 × 20 mm Bolt Depot #6635"
+      },
+      "quantity": 10
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "Bolt Depot #7213 M3 × 8 mm hex socket countersunk screw",
+        "es": "Tornillo Allen avellanado M3 × 8 mm Bolt Depot #7213"
+      },
+      "quantity": 10
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "Bolt Depot #7214 M3 × 10 mm hex socket countersunk screw",
+        "es": "Tornillo Allen avellanado M3 × 10 mm Bolt Depot #7214"
+      },
+      "quantity": 12
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "Bolt Depot #6674 M5 × 12 mm hex socket countersunk screw",
+        "es": "Tornillo Allen avellanado M5 × 12 mm Bolt Depot #6674"
+      },
+      "quantity": 10
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "Bolt Depot #4515 M5 flat washer, DIN 125",
+        "es": "Arandela plana M5 DIN 125 Bolt Depot #4515"
+      },
+      "quantity": 10
+    },
+    {
+      "group": "frame",
+      "name": {
+        "en": "2020 flat joining plates, 40 × 18 mm, pack of 12",
+        "es": "Placas planas de unión para perfil 2020, 40 × 18 mm, paquete de 12"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "fasteners",
+      "name": {
+        "en": "uxcell spacers, 5 mm inside × 10 mm outside × 9 mm high, pack of 20",
+        "es": "Separadores uxcell de 5 mm de diámetro interior, 10 mm exterior y 9 mm de alto, paquete de 20"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "power-wiring",
+      "name": {
+        "en": "uxcell spiral cable wrap, 4 mm inside diameter, 20 m",
+        "es": "Espiral uxcell para cables de 4 mm de diámetro interior, 20 m"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "phone-camera",
+      "name": {
+        "en": "SUPERDANT 1 mm adhesive EVA foam, 200 mm × 3 m roll",
+        "es": "Espuma adhesiva EVA SUPERDANT de 1 mm, rollo de 200 mm × 3 m"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "power-wiring",
+      "name": {
+        "en": "Creality PTFE tube, 2 mm inside × 4 mm outside diameter, 2 m length",
+        "es": "Tubo PTFE Creality de 2 mm de diámetro interior y 4 mm exterior, largo de 2 m"
+      },
+      "quantity": 1
+    },
+    {
+      "group": "motion",
+      "name": {
+        "en": "Mobil Mobilux EP2 rail grease, 10 mL syringe",
+        "es": "Grasa para rieles Mobil Mobilux EP2, jeringa de 10 mL"
+      },
+      "quantity": 1
+    }
+  ]
+}

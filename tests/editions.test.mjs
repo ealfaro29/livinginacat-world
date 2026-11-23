@@ -1,0 +1,56 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { readJSON } from "../scripts/lib.mjs";
+import { v1Page, v2Page, homePage } from "../scripts/presentation.mjs";
+
+const catalog = await readJSON("data/v1-catalog.json");
+const hardware = await readJSON("data/hardware-release.json");
+
+test("the edition catalog contains only public parts, quantities, notes and one rounded build cost", () => {
+  assert.deepEqual(Object.keys(catalog).sort(), [
+    "estimate",
+    "groups",
+    "items",
+  ]);
+  assert.ok(
+    catalog.estimate.roundUSD > 0 && catalog.estimate.roundUSD % 100 === 0,
+  );
+  assert.equal(catalog.items.length, 74);
+  const groups = new Set(catalog.groups.map((g) => g.id));
+  for (const item of catalog.items) {
+    assert.ok(
+      Object.keys(item).every((key) =>
+        ["group", "name", "quantity", "note"].includes(key),
+      ),
+    );
+    assert.ok(groups.has(item.group));
+    assert.ok(Number.isInteger(item.quantity) && item.quantity > 0);
+    for (const lang of ["en", "es"]) {
+      assert.ok(item.name[lang]);
+      assert.doesNotMatch(
+        item.name[lang] + " " + (item.note?.[lang] ?? ""),
+        /(?:US\$|\$\s*\d|tracking number|número de rastreo)/i,
+      );
+    }
+  }
+});
+
+for (const lang of ["en", "es"]) {
+  test(`${lang} edition pages render all parts, the CAD viewer and the corresponding language's routes`, () => {
+    const parts = v1Page(lang, catalog, hardware);
+    assert.equal(
+      [...parts.matchAll(/<tr data-part-row>/g)].length,
+      catalog.items.length,
+    );
+    assert.equal([...parts.matchAll(/US\$/g)].length, 1);
+    assert.ok(parts.includes(`/downloads/v1-${lang}.csv`));
+    const model = v2Page(lang);
+    assert.match(model, /data-src="\/assets\/v2\/visor\/\?embed=1"/);
+    assert.match(model, /href="\/assets\/v2\/visor\/ft412-v2-step.zip"/);
+    assert.match(model, /href="\/assets\/v2\/visor\/"/);
+    assert.doesNotMatch(
+      parts + model + homePage(lang),
+      /\/(?:purchases|shipments)\/|\/downloads\/ledger\.json/,
+    );
+  });
+}
