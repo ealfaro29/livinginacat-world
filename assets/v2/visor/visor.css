@@ -117,3 +117,5 @@ html.embed #viewer { height:clamp(24rem,42vw,36rem); }
   .site-head,.workspace,.skip,.model-links { display:none; } main { padding:0; }
   figure,.measurements,table { break-inside:avoid; }.full-details { max-width:none; }
 }
+
+.site-head nav{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.site-head [data-landing]{display:inline-flex;align-items:center;padding:6px 12px;min-height:42px;border:1px solid #b7c4bc;border-radius:7px;text-decoration:none}@media(max-width:520px){.site-head{flex-wrap:wrap;gap:8px}}

@@ -1298,3 +1298,6 @@ select {
     break-after: avoid;
   }
 }
+
+.return-row{padding-top:14px}.return-home{display:inline-flex;align-items:center;min-height:42px;padding:7px 14px;border:1px solid #b7c4bc;border-radius:7px;background:var(--paper,#faf9f5);color:#1a433d;font-size:.92rem;font-weight:650;text-decoration:none}.return-home:hover,.return-home:focus-visible{background:#e8efe9;border-color:#627d70}
+@media print{.return-row{display:none}}
