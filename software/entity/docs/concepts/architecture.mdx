@@ -1,0 +1,63 @@
+---
+title: System architecture
+description: How a "tap that button" decision becomes a stylus on glass, bottom-up from the FluidNC board to the runtime loop and the conductor, and how it keeps its context as cheap as possible.
+---
+
+## Hardware
+
+PhysiClaw's hardware uses a [CoreXY](https://corexy.com/) motion system. Two stepper motors drive the stylus across the X/Y plane, while the Z axis (the tap) is driven by a solenoid. The controller board runs [FluidNC](https://github.com/bdring/FluidNC) firmware, which receives [G-code](https://en.wikipedia.org/wiki/G-code) commands over USB serial from the Python server on your computer, and turns them into stylus moves and taps.
+
+## MCP tools
+
+The MCP tools abstract over the low-level hardware, giving the agent a set of ready-to-call tools: look at the phone screen through the camera, grab a screenshot, run common gestures, copy text to the phone's clipboard, and so on.
+
+| Group | Tools |
+| --- | --- |
+| Observe | `peek`, `screenshot` |
+| Gestures | `tap`, `double_tap`, `long_press`, `swipe` |
+| Navigate | `home_screen`, `go_back`, `force_quit` |
+| Unlock | `unlock_phone` |
+| Text | `send_to_clipboard` |
+| Sequence | `sequence` |
+
+### OCR and icon detection
+
+PhysiClaw runs OCR and icon detection on the camera frame and screenshots, then hands the results, along with a compressed image, to the agent.
+
+### Coordinate mapping
+
+Image pixel coordinates → phone screen coordinates → physical-plane coordinates. The full chain needs two transform matrices to convert between coordinate systems.
+
+Accurate coordinate conversion requires valid calibration data. Reuse the saved calibration if the hardware hasn't moved; recalibrate after moving it.
+
+### Screenshot
+
+When the camera view isn't clear enough, the arm taps AssistiveTouch once to run a Shortcut that captures the current screen and uploads it directly to the server, without switching pages.
+
+### Typing text
+
+Typing on the phone keyboard is natural for humans but unfriendly to the agent. The keys are small and densely packed, hard to target and tap precisely, and every keystroke needs a separate model call. That's slow, error-prone, and a waste of tokens.
+
+A better approach is to fetch the text from the computer via a Shortcut, write it to the clipboard, and paste it directly. That's fast and accurate.
+
+Shortcuts are iOS-only. Android has no native equivalent, which is why we currently use the iPhone.
+
+## The runtime loop
+
+The runtime keeps running a loop, constantly checking whether a scheduled job is due or the screen has lit up from a new notification; when either is true, it wakes the agent.
+
+Once awake, the agent unlocks the phone, reads the messages, opens the relevant app to do the task, reports the result back to the user, and finally saves a log and ends the session.
+
+## Context management
+
+An agent usually needs many model calls to finish a single task, and every call attaches an image of the phone screen for it to look at. Without good context management, you'd quickly hit the context-window limit.
+
+**Shrink the context.** On every model call, besides the action to run, the model also returns a short description. Only the most recent turn keeps its original image; images from earlier turns are replaced with OCR text, and as the turns pile up, that OCR text is further compressed into a one-line description of each step.
+
+**Update progress.** The model is prompted to update its task progress at key steps, so it doesn't lose its way after the context is compressed. The progress sits at the end of the message list, guiding the model.
+
+**Keep cache hits stable.** Put your stable content — system prompt, tool descriptions, memory — right at the front, and keep it byte-for-byte identical. When you compress the context, touch as little of the earlier content as you can. Every edit invalidates the cache from that point on.
+
+## The conductor
+
+The conductor runs [playbooks](/en/custom/playbooks/). When a user's task matches an available playbook, the conductor executes it directly instead of having the agent work through it step by step. Playbooks encode prior knowledge of the app, so most steps run programmatically, which means fewer model calls and lower token cost.

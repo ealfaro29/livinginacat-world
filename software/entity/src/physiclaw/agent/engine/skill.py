@@ -1,0 +1,348 @@
+"""Skill discovery and tiered dispatch.
+
+A skill comes in one of two shapes — a built-in flat file, or a folder (the
+shape both official and user skills share):
+
+  Built-in (flat file):  ``<pkg>/agent/skills/<name>.md``
+      frontmatter (name, description) + body. Ships in the wheel, so every
+      install has the core skills out of the box — no repo, no download.
+      References (tier 3) aren't supported here; built-in skills are
+      self-contained.
+
+  Official (folder):  ``~/.physiclaw/official/skills/<name>/SKILL.md`` — the
+      curated pack synced by ``physiclaw skills sync official``. Same folder
+      shape as user skills; the sync owns the tree wholesale.
+
+  User (folder):  ``~/.physiclaw/skills/<name>/SKILL.md`` (+ optional
+      ``references/``, ``assets/``). The user's own skills.
+
+Three roots are scanned:
+
+  1. built-in ``<pkg>/agent/skills/*.md`` — the shipped baseline, resolved
+     from the installed ``physiclaw`` package (never the cwd). **Always on:**
+     built-ins are inlined into SYSTEM every session and never shadowed.
+  2. ``~/.physiclaw/official/skills/<name>/SKILL.md`` (official).
+  3. ``~/.physiclaw/skills/<name>/SKILL.md`` (home) — the ONLY place a
+     user's custom skills come from, so a ``uv tool install``-ed server
+     finds them without a repo cwd.
+
+Official and user are the on-demand set (``## Available skills``) and do NOT
+shadow each other: on a name clash both are kept, disambiguated as
+``<name>-official`` / ``<name>-user``, with a numeric suffix when that alias
+is already taken; an unclashed name passes through unchanged. Built-ins are
+separate and always on. The cwd is deliberately not a root — discovery must
+not depend on where the server was launched.
+
+Loading differs by kind — the two render into SEPARATE prompt sections, so
+they never merge or override each other:
+  * Built-in — the full body is always inlined by `render_builtin` under
+    `## Built-in Skills`. No Skill() call; the model always has the steps.
+    (A Skill() call naming one anyway — models take the bait when a wake
+    trigger mentions it by name — gets an error redirecting to the inline
+    section, not the generic unknown-skill error.)
+  * User — only name+description go in, via `render_section` under
+    `## Available skills`. The description is the ONLY relevance signal, so it
+    must name triggers. The model then loads the body on demand:
+      - `Skill(name=...)` returns the SKILL.md body as a tool_result.
+      - `Skill(name=..., reference=<path>)` loads `<skill>/references/<path>`
+        as text, resolved under that skill's dir only (built-in skills, being
+        self-contained, have no references).
+
+Discovery is realpath-scoped within each root: a symlink that escapes
+its root is rejected so third-party skill installs can't path-traverse.
+"""
+
+import logging
+import re
+from dataclasses import dataclass, replace
+from importlib.resources import files as _pkg_files
+from pathlib import Path
+
+from physiclaw.common import paths
+from physiclaw.common.text import read_text
+
+log = logging.getLogger(__name__)
+# Same single-component names accepted by `physiclaw skills install`.
+_NAME_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.\-]*")
+
+
+def _builtin_skills_dir() -> Path:
+    """Flat-``.md`` skills shipped inside the wheel — the out-of-the-box
+    baseline every install gets. The engine inlines these separately from
+    on-demand skills.
+
+    Lives here (sole consumer), not in `common.paths`: resolving it
+    imports `physiclaw.agent` via the import system, an agent-layer
+    edge the common leaf must not carry."""
+    return Path(str(_pkg_files("physiclaw.agent") / "skills"))
+
+
+BUILTIN_SKILLS_DIR = _builtin_skills_dir()
+OFFICIAL_SKILLS_DIR = paths.official_skills_dir()
+HOME_SKILLS_DIR = paths.skills_dir()
+
+
+@dataclass
+class Skill:
+    """Snapshot of a skill at discovery time. `body` and `dir` are
+    captured on session start; edits to SKILL.md mid-session are not
+    reflected (deliberate: protects the SYSTEM prompt cache prefix)."""
+
+    name: str
+    description: str
+    body: str
+    dir: Path  # realpath; used to resolve references/ safely
+    flat: bool = False  # built-in flat-.md skill: body is authoritative, no references/
+    source: str = (
+        "user"  # origin root: "built-in" | "official" | "user" — groups the index
+    )
+
+
+def is_safe_skill_name(name: str) -> bool:
+    """Whether a name follows the installer's path-component character rules."""
+    return _NAME_RE.fullmatch(name) is not None
+
+
+def discover_builtin_skills() -> dict[str, Skill]:
+    """Built-in flat-`.md` skills shipped in the package. Their full body is
+    always inlined into the SYSTEM prompt, so they need no Skill() call."""
+    out: dict[str, Skill] = {}
+    _scan_flat_root(BUILTIN_SKILLS_DIR, out)
+    return out
+
+
+def discover_user_skills() -> dict[str, Skill]:
+    """The on-demand folder skills for ``## Available skills``: official (synced
+    to ~/.physiclaw/official/skills) + user (~/.physiclaw/skills). Only their
+    name+description go in the SYSTEM prompt; the body loads on demand via the
+    Skill() tool. Built-in skills are separate (always-on, inlined) and never
+    appear here. Official and user do NOT shadow each other — a name clash keeps
+    both, disambiguated ``<name>-official`` / ``<name>-user`` with numeric
+    suffixes if those names are already taken."""
+    official: dict[str, Skill] = {}
+    _scan_root(OFFICIAL_SKILLS_DIR, official, source="official")
+    user: dict[str, Skill] = {}
+    _scan_root(HOME_SKILLS_DIR, user, source="user")
+    return _merge_disambiguated(official, user)
+
+
+def _merge_disambiguated(
+    official: dict[str, Skill], user: dict[str, Skill]
+) -> dict[str, Skill]:
+    """Combine the official + user on-demand skills WITHOUT shadowing. On a name
+    clash both are kept, renamed ``<name>-official`` / ``<name>-user`` — on the
+    dict key AND ``Skill.name``, so the index bullet (uses ``.name``), the
+    Skill-tool name list + dispatch (use the key) all agree. Unclashed names
+    pass through unchanged. Reserve all original names before allocating aliases
+    so a generated name cannot hide another skill. Official is emitted first."""
+    clashes = official.keys() & user.keys()
+    reserved = official.keys() | user.keys()
+    out: dict[str, Skill] = {}
+    for suffix, group in (("official", official), ("user", user)):
+        for name, sk in group.items():
+            key = name
+            if name in clashes:
+                base = f"{name}-{suffix}"
+                key = base
+                number = 2
+                while key in reserved:
+                    key = f"{base}-{number}"
+                    number += 1
+                reserved.add(key)
+            out[key] = replace(sk, name=key)
+    return out
+
+
+def _scan_flat_root(root: Path, out: dict[str, Skill]) -> None:
+    """Scan a built-in root of flat ``<name>.md`` files. The frontmatter
+    `name` wins; otherwise the filename stem is the skill name. `dir` is
+    the root itself; built-in skills reject reference loads.
+    """
+    if not root.is_dir():
+        return
+    root_real = root.resolve()
+    for md in sorted(root.glob("*.md")):
+        if md.name.startswith("_"):
+            continue
+        sk = _read_skill(
+            md, root_real, fallback_name=md.stem, flat=True, source="built-in"
+        )
+        if sk is not None:
+            out[sk.name] = sk
+
+
+def _scan_root(root: Path, out: dict[str, Skill], *, source: str) -> None:
+    if not root.is_dir():
+        return
+    root_real = root.resolve()
+    for d in sorted(root.iterdir()):
+        if d.name.startswith("_"):
+            continue
+        md = d / "SKILL.md"
+        sk = _read_skill(md, root_real, fallback_name=d.name, flat=False, source=source)
+        if sk is not None:
+            out[sk.name] = sk
+
+
+def _read_skill(
+    md: Path, root: Path, *, fallback_name: str, flat: bool, source: str
+) -> Skill | None:
+    """Read one candidate, keeping both its directory and file inside the root."""
+    try:
+        if not md.is_file():
+            return None
+        directory = md.parent.resolve()
+        resolved = md.resolve()
+        if not directory.is_relative_to(root) or not resolved.is_relative_to(root):
+            log.warning("skill %s resolves outside %s; skipping", md, root)
+            return None
+        fm, body = parse_frontmatter(read_text(resolved))
+    except (OSError, UnicodeError, RuntimeError) as exc:
+        log.warning("cannot read skill %s; skipping: %s", md, exc)
+        return None
+    name = fm.get("name") or fallback_name
+    if not is_safe_skill_name(name):
+        log.warning("unsafe skill name %r in %s; skipping", name, md)
+        return None
+    return Skill(
+        name=name,
+        description=(fm.get("description") or "").strip(),
+        body=body.strip(),
+        dir=directory,
+        flat=flat,
+        source=source,
+    )
+
+
+def dispatch(skills: dict[str, Skill], args: dict) -> str:
+    """Route a Skill() invocation by exact name. Raises ValueError /
+    FileNotFoundError on bad input so `dispatch.dispatch` marks the
+    tool_result as is_error=True (principle 5).
+
+    A miss that names a BUILT-IN skill gets a redirecting error instead
+    of the generic one: built-in bodies are never served here (they ride
+    inline in SYSTEM), but wake triggers refer to them by skill name
+    (e.g. "follow the `screen-layout` skill") and models take the bait —
+    observed on a real first run, where the generic error cost two turns
+    and a corrective before the model found the inline section."""
+    name = (args.get("name") or "").strip()
+    if not name:
+        raise ValueError("Skill call requires a 'name' argument")
+    skill = skills.get(name)
+    if skill is None:
+        if name in discover_builtin_skills():
+            raise ValueError(
+                f"{name!r} is a built-in skill — not loadable via Skill(). "
+                "Its full steps are already in your system prompt under "
+                "`## Built-in Skills`; follow them directly."
+            )
+        available = ", ".join(sorted(skills.keys())) or "(none)"
+        raise ValueError(f"unknown skill {name!r}. Available: {available}")
+
+    ref = args.get("reference")
+    if ref:
+        return _load_reference(skill, ref)
+    return skill.body
+
+
+def _load_reference(skill: Skill, ref_path: str) -> str:
+    if skill.flat:
+        raise ValueError(
+            f"skill {skill.name!r} is built-in and self-contained — it has no "
+            "references"
+        )
+    # skill.dir is already a realpath from discovery; no need to resolve it
+    # again. Only the target needs resolving to collapse any `..` segments
+    # in `ref_path` before the scope check.
+    root = skill.dir / "references"
+    target = (root / ref_path).resolve()
+    if not target.is_relative_to(root):
+        raise ValueError(f"reference path {ref_path!r} escapes skill directory")
+    if not target.exists():
+        raise FileNotFoundError(
+            f"reference {ref_path!r} not found in skill {skill.name!r}"
+        )
+    return read_text(target)
+
+
+def parse_frontmatter(text: str) -> tuple[dict[str, str], str]:
+    """Parse `---\\nkey: value\\n...\\n---\\n<body>`. Simple scalar-only
+    format with optional balanced quotes; missing or malformed frontmatter
+    returns ({}, text)."""
+    if not text.startswith("---\n"):
+        return {}, text
+    end = text.find("\n---", 4)
+    if end < 0:
+        return {}, text
+    fm_text = text[4:end]
+    body = text[end + 4 :].lstrip("\n")
+    fm: dict[str, str] = {}
+    for line in fm_text.splitlines():
+        if ":" in line:
+            k, v = line.split(":", 1)
+            value = v.strip()
+            if len(value) >= 2 and value[0] in ("'", '"') and value[-1] == value[0]:
+                value = value[1:-1]
+            fm[k.strip()] = value
+    return fm, body
+
+
+def _skill_bullets(skills: list[Skill]) -> list[str]:
+    """One `- **name** — description` index line per skill."""
+    return [f"- **{s.name}** — {s.description or '(no description)'}" for s in skills]
+
+
+# Subsection heading per `source`, in the order they appear under
+# `## Available skills` (dict insertion order). A subsection is emitted only if
+# that source has any skills.
+_SECTION_LABELS = {
+    "official": "official skills",
+    "user": "user skills",
+}
+
+
+def render_section(skills: dict[str, Skill]) -> str:
+    """`## Available skills`, split into `### official skills` / `### user skills`
+    subsections — one `- **name** — description` line per skill. Empty string if none.
+    A pure index; the body loads on demand via the Skill tool. Built-in skills in
+    the engine path use `render_builtin` instead (full bodies, not an index)."""
+    if not skills:
+        return ""
+    grouped: dict[str, list[Skill]] = {}
+    for s in skills.values():
+        grouped.setdefault(s.source, []).append(s)
+    # Known sources in fixed order first, then any unknown source (stable) so a
+    # future origin still renders rather than vanishing.
+    ordered = [s for s in _SECTION_LABELS if s in grouped]
+    ordered += [s for s in grouped if s not in _SECTION_LABELS]
+    blocks = [
+        f"### {_SECTION_LABELS.get(src, f'{src} skills')}\n\n"
+        + "\n".join(_skill_bullets(grouped[src]))
+        for src in ordered
+    ]
+    return "## Available skills\n\n" + "\n\n".join(blocks)
+
+
+def render_builtin(builtin: dict[str, Skill]) -> str:
+    """The built-in skills' FULL bodies, inlined under `## Built-in Skills`. Always
+    present in the SYSTEM prompt, so the model never needs Skill() for these
+    — the steps and bboxes are already in front of it (`dispatch` redirects
+    the call here if it tries). Own section, so a user skill can never
+    shadow or collide with a built-in workflow."""
+    if not builtin:
+        return ""
+    lines = [
+        "## Built-in Skills",
+        "",
+        "Already loaded; follow the applicable workflow. Code templates use "
+        "learned coordinates when available. Unresolved `{{…}}` boxes are "
+        "not coordinates: complete setup or ground the target from a live view.",
+        "",
+    ]
+    for s in builtin.values():
+        lines.append(f"### {s.name}")
+        lines.append("")
+        if s.body:
+            lines.append(s.body)
+            lines.append("")
+    return "\n".join(lines).rstrip()

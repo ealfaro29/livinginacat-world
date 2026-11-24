@@ -1,0 +1,1026 @@
+[
+  {
+    "part_id": "ext-2040-y",
+    "ref": "¥60",
+    "inquiry": "用于 PhysiClaw 组装的欧标铝型材定制切割，共 7 根 4 种规格：\n1. 2040 黑色阳极氧化 {Y_EXTRUSION_LENGTH} mm ×2，M6 沉孔开在 40 mm 宽面，每端各开两个，距端面 10 mm\n2. 2040 黑色阳极氧化 {X_EXTRUSION_LENGTH} mm ×2，两端攻丝 M6\n3. 1020 {X_BEAM_LENGTH} mm ×1\n4. 1020 {PHONE_BED_BEAM_LENGTH} mm ×2，距两端 10 mm 开 M5 通孔\n5. 内六角圆柱头螺栓 M6×20 ×8\n请帮忙报价",
+    "suppliers": [
+      {
+        "name": "TDT 铝型材",
+        "url": "https://item.taobao.com/item.htm?id=610862084791&skuId=4475647915072"
+      },
+      {
+        "name": "众达铝业",
+        "url": "https://item.taobao.com/item.htm?id=569658195210&skuId=4518325341481"
+      },
+      {
+        "name": "智恩铝业",
+        "url": "https://item.taobao.com/item.htm?id=577553756280&skuId=5090964084362"
+      }
+    ],
+    "note": "定制商品，请将{inquiry}和<a href=\"https://github.com/physiclaw/PhysiClaw/releases/latest/download/physiclaw_extrusion_drawing_zh.pdf\">加工图纸</a>（PDF）一并发给店铺客服报价。"
+  },
+  {
+    "part_id": "ext-2040-x",
+    "ref": "Ditto",
+    "inquiry": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "ext-1020-x-beam",
+    "ref": "Ditto",
+    "inquiry": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "ext-1020-phone-support",
+    "ref": "Ditto",
+    "inquiry": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "printed-parts",
+    "ref": "¥190",
+    "suppliers": [
+      {
+        "name": "未来工场",
+        "url": "https://detail.tmall.com/item.htm?id=611650162725"
+      },
+      {
+        "name": "美艺橙",
+        "url": "https://detail.tmall.com/item.htm?id=586246509958"
+      },
+      {
+        "name": "聚衣美",
+        "url": "https://detail.tmall.com/item.htm?id=667925514795"
+      }
+    ],
+    "note": "<a href=\"https://github.com/physiclaw/PhysiClaw/releases/latest/download/physiclaw_custom_parts.zip\">下载 STEP 文件</a>（内含打印说明），发给店铺客服。"
+  },
+  {
+    "part_id": "rail-y",
+    "ref": "¥120",
+    "inquiry": "用于 PhysiClaw 组装的 MGN9H 微型直线导轨套装，共 3 根导轨 + 3 个滑块：\n导轨 {Y_RAIL_LENGTH} mm ×2\n导轨 {X_RAIL_LENGTH} mm ×1\nH 型加长滑块 ×3\n请帮忙报价",
+    "suppliers": [
+      {
+        "name": "HIWIN台湾上银",
+        "url": "https://item.taobao.com/item.htm?id=668877121156"
+      },
+      {
+        "name": "林邓机械",
+        "url": "https://item.taobao.com/item.htm?id=998753624442"
+      },
+      {
+        "name": "姆优",
+        "url": "https://detail.tmall.com/item.htm?id=681898609711&skuId=5723622205969"
+      }
+    ],
+    "note": "定制商品，请将{inquiry}发给店铺客服。<br>MGN9H 导轨滑块是精密运动件。各厂商做工和精度等级差异明显，价格区间较大，请按需选择。"
+  },
+  {
+    "part_id": "rail-x",
+    "ref": "Ditto",
+    "inquiry": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "carriage",
+    "ref": "Ditto",
+    "inquiry": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "pulley",
+    "ref": "¥3",
+    "suppliers": [
+      {
+        "name": "俩棵树",
+        "product": "20齿内孔5（带宽6）",
+        "url": "https://item.taobao.com/item.htm?id=571029008660&skuId=3695816317651"
+      },
+      {
+        "name": "三维立方",
+        "product": "20齿内孔5（带宽6）",
+        "url": "https://item.taobao.com/item.htm?id=545252492404&skuId=3691748481218"
+      },
+      {
+        "name": "同拓展志",
+        "product": "【20齿内孔5mm高16】带宽6",
+        "url": "https://item.taobao.com/item.htm?id=559194333476&skuId=4038283182661"
+      }
+    ],
+    "note": "标准件，各厂商规格一致，选最便宜的即可。"
+  },
+  {
+    "part_id": "idler-smooth",
+    "ref": "¥25",
+    "suppliers": [
+      {
+        "name": "俩棵树",
+        "product": "20齿内孔5带宽6mm（不带齿）",
+        "url": "https://item.taobao.com/item.htm?id=572126642416&skuId=3714008004304"
+      },
+      {
+        "name": "三维立方",
+        "product": "20齿内孔5不带齿带宽6mm",
+        "url": "https://item.taobao.com/item.htm?id=544358606505&skuId=3422244497830"
+      },
+      {
+        "name": "同拓展志",
+        "product": "20齿内孔5不带齿（带宽6）",
+        "url": "https://item.taobao.com/item.htm?id=559682437946&skuId=3872290557038"
+      }
+    ],
+    "note": "Ditto"
+  },
+  {
+    "part_id": "idler-toothed",
+    "ref": "¥5",
+    "suppliers": [
+      {
+        "name": "俩棵树",
+        "product": "20齿内孔5带宽6mm（带齿）",
+        "url": "https://item.taobao.com/item.htm?id=572126642416&skuId=3714008004303"
+      },
+      {
+        "name": "三维立方",
+        "product": "20齿内孔5带齿带宽6mm",
+        "url": "https://item.taobao.com/item.htm?id=544358606505&skuId=3422244497837"
+      },
+      {
+        "name": "同拓展志",
+        "product": "20齿内孔5带齿（带宽6）",
+        "url": "https://item.taobao.com/item.htm?id=559682437946&skuId=3872290557039"
+      }
+    ],
+    "note": "Ditto"
+  },
+  {
+    "part_id": "belt",
+    "ref": "¥15",
+    "suppliers": [
+      {
+        "name": "俩棵树",
+        "product": "GT2-6MM（橡胶）【5米/卷】",
+        "url": "https://item.taobao.com/item.htm?id=572171792144&skuId=4454393450696"
+      },
+      {
+        "name": "三维立方",
+        "product": "GT2-6MM橡胶同步带（5米/卷）",
+        "url": "https://item.taobao.com/item.htm?id=544300031449&skuId=5019700795849"
+      },
+      {
+        "name": "同拓展志",
+        "product": "GT2-6mm橡胶同步带（5米/卷）",
+        "url": "https://item.taobao.com/item.htm?id=558903222636&skuId=3869974812267"
+      }
+    ],
+    "note": "Ditto"
+  },
+  {
+    "part_id": "control-board",
+    "ref": "¥100",
+    "suppliers": [
+      {
+        "name": "创客基地",
+        "product": "MKS DLC32",
+        "url": "https://item.taobao.com/item.htm?id=660133023604&skuId=4759861713260"
+      },
+      {
+        "name": "三维立方",
+        "product": "主板MKS DLC32 V2.1",
+        "url": "https://item.taobao.com/item.htm?id=624116243332&skuId=4759128976305"
+      },
+      {
+        "name": "俩棵树",
+        "product": "MKS DLC32 V2.1主板",
+        "url": "https://item.taobao.com/item.htm?id=652783651566&skuId=4937682023482"
+      }
+    ],
+    "note": "控制板和驱动模块为标准件，各厂商规格一致。"
+  },
+  {
+    "part_id": "tmc2209",
+    "ref": "¥35",
+    "suppliers": [
+      {
+        "name": "创客基地",
+        "product": "MKS TMC2209电机驱动（带散热片）",
+        "url": "https://item.taobao.com/item.htm?id=660133023604&skuId=5166488233343"
+      },
+      {
+        "name": "三维立方",
+        "product": "【驱动器】TT TMC2209",
+        "url": "https://item.taobao.com/item.htm?id=624116243332&skuId=5688178270462"
+      },
+      {
+        "name": "俩棵树",
+        "product": "MKS TMC2209 V2.0【含散热片】",
+        "url": "https://item.taobao.com/item.htm?id=609820751177&skuId=5772521021382"
+      }
+    ],
+    "note": "Ditto"
+  },
+  {
+    "part_id": "psu",
+    "ref": "¥50",
+    "suppliers": [
+      {
+        "name": "绿联",
+        "product": "12V2A/外径5.5*2.5mm-1.5米",
+        "url": "https://item.taobao.com/item.htm?id=731915982634&skuId=5937503277169"
+      },
+      {
+        "name": "山泽",
+        "product": "12V2A/外径5.5*2.1mm-1.5米",
+        "url": "https://detail.tmall.com/item.htm?id=861594569451&skuId=6078092673551"
+      },
+      {
+        "name": "品胜",
+        "product": "12V2A-1.2m电源适配器",
+        "url": "https://detail.tmall.com/item.htm?id=926498939211&skuId=6116098339184"
+      }
+    ],
+    "note": "选择知名品牌。5.5×2.5 mm 的 DC 插头同样适用。"
+  },
+  {
+    "part_id": "camera",
+    "ref": "¥200",
+    "suppliers": [
+      {
+        "name": "绿联",
+        "product": "4K 800万超高清 自动对焦",
+        "url": "https://detail.tmall.com/item.htm?id=737764280362&skuId=6292857203427"
+      },
+      {
+        "name": "海康威视",
+        "product": "自动聚焦 8MP",
+        "url": "https://detail.tmall.com/item.htm?id=631167230453&skuId=6226416526048"
+      },
+      {
+        "name": "罗技",
+        "product": "c925e 高清摄像头",
+        "url": "https://detail.tmall.com/item.htm?id=537650209055&skuId=6071259240979"
+      }
+    ],
+    "note": "建议选择原生 800 万像素、带自动对焦的型号。"
+  },
+  {
+    "part_id": "motor-cable",
+    "ref": "¥2",
+    "suppliers": [
+      {
+        "name": "天乐",
+        "product": "0.3米 PH2.0-6P XH-4P",
+        "url": "https://item.taobao.com/item.htm?id=807040319382&skuId=5928464937081"
+      },
+      {
+        "name": "轮趣",
+        "product": "XH2.54 4P 转 PH2.0 6P 步进电机连接线（线长30cm）",
+        "url": "https://item.taobao.com/item.htm?id=594099488032&skuId=4330049361960"
+      },
+      {
+        "name": "林祥电子",
+        "product": "XH2.54 4P 转 PH2.0 6P 步进电机连接线（线长30cm）",
+        "url": "https://item.taobao.com/item.htm?id=822954691545&skuId=5949725363039"
+      }
+    ],
+    "note": "选配。电机自带的连接线约 1 m，过长不便收纳，买 30 cm 的即可。"
+  },
+  {
+    "part_id": "lead-wire",
+    "ref": "¥6",
+    "suppliers": [
+      {
+        "name": "杭州鹏菲",
+        "product": "5m 0.3平方毫米 红色 国标足米",
+        "url": "https://item.taobao.com/item.htm?id=679174967756&skuId=5710275586172"
+      },
+      {
+        "name": "艾唯美",
+        "product": "5m 红色 0.3平方毫米",
+        "url": "https://detail.tmall.com/item.htm?id=657813674873&skuId=5652917324466"
+      },
+      {
+        "name": "宏迈斯",
+        "product": "5m 红色 0.3平方毫米",
+        "url": "https://item.taobao.com/item.htm?id=668641608310&skuId=6196538982576"
+      }
+    ],
+    "note": "建议购买 5 m，为接地走线预留余量。"
+  },
+  {
+    "part_id": "stepper-motor",
+    "ref": "¥50",
+    "suppliers": [
+      {
+        "name": "俩棵树",
+        "product": "黑色高品质(XH配线)",
+        "url": "https://item.taobao.com/item.htm?id=586441580168&skuId=4946625633271"
+      },
+      {
+        "name": "达川",
+        "product": "42步进/0.45NM机身长40MM",
+        "url": "https://item.taobao.com/item.htm?id=674923594606&skuId=4995409077330"
+      },
+      {
+        "name": "高洋",
+        "product": "42电机38高配1000mmXH2.54线",
+        "url": "https://item.taobao.com/item.htm?id=714153589005&skuId=4998215524564"
+      }
+    ]
+  },
+  {
+    "part_id": "solenoid",
+    "ref": "¥15",
+    "suppliers": [
+      {
+        "name": "朗硕电气",
+        "product": "LSD-0530B-12V",
+        "url": "https://item.taobao.com/item.htm?id=592528485538&skuId=5295181857221"
+      },
+      {
+        "name": "伊莱科",
+        "product": "EML-0530B: 12V 6N 行程10mm",
+        "url": "https://detail.tmall.com/item.htm?id=571034504694&skuId=4521602674575"
+      },
+      {
+        "name": "铭霆",
+        "product": "LS-0530B-12v【推拉力:0.2N-6N】行程10mm",
+        "url": "https://detail.tmall.com/item.htm?id=972516011330&skuId=6091561787183"
+      }
+    ],
+    "note": "引线需接长，操作不当易损坏，建议多买一个备用。"
+  },
+  {
+    "part_id": "flat-bracket",
+    "ref": "¥8",
+    "suppliers": [
+      {
+        "name": "邦寨五金",
+        "product": "黑色2020型-2孔 垂直连接板",
+        "url": "https://item.taobao.com/item.htm?id=712391133249&skuId=5160114146517"
+      },
+      {
+        "name": "宇昊通",
+        "product": "烤漆黑色2020-2孔",
+        "url": "https://item.taobao.com/item.htm?id=611152722401&skuId=4298783200415"
+      },
+      {
+        "name": "新兴华",
+        "product": "2020-2孔-黑色（2个）",
+        "url": "https://item.taobao.com/item.htm?id=746273984466&skuId=5188576336708"
+      }
+    ]
+  },
+  {
+    "part_id": "motor-bracket",
+    "ref": "¥5",
+    "suppliers": [
+      {
+        "name": "俩棵树",
+        "product": "42步进电机支架 黑色",
+        "url": "https://item.taobao.com/item.htm?id=594071400687&skuId=4282774614351"
+      },
+      {
+        "name": "优胜光彩",
+        "product": "42步进电机支架 黑色",
+        "url": "https://item.taobao.com/item.htm?id=672120132474&skuId=4840246572119"
+      },
+      {
+        "name": "三维立方",
+        "product": "42步进电机支架 黑色",
+        "url": "https://item.taobao.com/item.htm?id=592349548006&skuId=4596541845952"
+      }
+    ]
+  },
+  {
+    "part_id": "corner-bracket",
+    "ref": "¥3",
+    "suppliers": [
+      {
+        "name": "双子五金",
+        "product": "3030垂直2孔单槽26mm宽黑色",
+        "url": "https://item.taobao.com/item.htm?id=860347001929&skuId=5771583005773"
+      },
+      {
+        "name": "茂荣铝业",
+        "product": "3030黑色圆孔垂直角码（3只）",
+        "url": "https://item.taobao.com/item.htm?id=1005971692015&skuId=5997549096414"
+      },
+      {
+        "name": "德旺铝材",
+        "product": "3030两边圆孔【黑色】",
+        "url": "https://item.taobao.com/item.htm?id=569803438727&skuId=6230897831983"
+      }
+    ]
+  },
+  {
+    "part_id": "bumper",
+    "ref": "¥5",
+    "suppliers": [
+      {
+        "name": "天卓五金",
+        "product": "大径20*小径20*高度22 (10个) 送机牙",
+        "url": "https://detail.tmall.com/item.htm?id=850698518813&skuId=5653203589906"
+      },
+      {
+        "name": "杜蕾家居",
+        "product": "20*20*22（送机牙）",
+        "url": "https://detail.tmall.com/item.htm?id=592188833539&skuId=4078088461124"
+      },
+      {
+        "name": "金缝凰",
+        "product": "20*20*22（10只）送机牙",
+        "url": "https://item.taobao.com/item.htm?id=657240920029&skuId=4743630412377"
+      }
+    ]
+  },
+  {
+    "part_id": "stylus-tip",
+    "ref": "¥15",
+    "suppliers": [
+      {
+        "name": "温酷",
+        "product": "M3内牙-6.8布头",
+        "url": "https://item.taobao.com/item.htm?id=540696187134&skuId=3710468466331"
+      },
+      {
+        "name": "永兴",
+        "product": "M3内牙-6.8布头(5个装)",
+        "url": "https://item.taobao.com/item.htm?id=951707635228&skuId=6037112926646"
+      },
+      {
+        "name": "帕森杰",
+        "product": "M3内牙-7.0布头（5个装）",
+        "url": "https://detail.tmall.com/item.htm?id=652898030762&skuId=5197108428102"
+      }
+    ]
+  },
+  {
+    "part_id": "teflon-tube",
+    "ref": "¥2",
+    "suppliers": [
+      {
+        "name": "纯仕",
+        "product": "黑色内径2mm*外径4mm（1米价）",
+        "url": "https://detail.tmall.com/item.htm?id=655172054388&skuId=5856340424371"
+      },
+      {
+        "name": "OUPLI",
+        "product": "2*4mm 5米价",
+        "url": "https://detail.tmall.com/item.htm?id=569970454162&skuId=4508365327825"
+      },
+      {
+        "name": "道冠",
+        "product": "2*4mm 1米",
+        "url": "https://detail.tmall.com/item.htm?id=20845971530&skuId=4499661631183"
+      }
+    ]
+  },
+  {
+    "part_id": "spiral-wrap",
+    "ref": "¥5",
+    "suppliers": [
+      {
+        "name": "佰瑞特",
+        "product": "Φ4mm【20米】黑色",
+        "url": "https://detail.tmall.com/item.htm?id=615427949338&skuId=4334995916672"
+      },
+      {
+        "name": "固万基",
+        "product": "4MM（黑色）20米",
+        "url": "https://detail.tmall.com/item.htm?id=668814695975&skuId=4986898195854"
+      },
+      {
+        "name": "天卓五金",
+        "product": "Φ4mm(黑色) 20米",
+        "url": "https://detail.tmall.com/item.htm?id=854808621205&skuId=5656161788144"
+      }
+    ]
+  },
+  {
+    "part_id": "gooseneck",
+    "ref": "¥8",
+    "suppliers": [
+      {
+        "name": "飞影",
+        "product": "30CM长内外丝1/4软管",
+        "url": "https://item.taobao.com/item.htm?id=856578400006&skuId=5663181169281"
+      },
+      {
+        "name": "丽途",
+        "product": "30厘米长 内外牙1/4软管 配1个螺母",
+        "url": "https://item.taobao.com/item.htm?id=955656202854&skuId=6047477731494"
+      },
+      {
+        "name": "欧林波思",
+        "product": "30cm软管：1/4内牙+1/4外牙",
+        "url": "https://detail.tmall.com/item.htm?id=723765800541&skuId=5200393014254"
+      }
+    ]
+  },
+  {
+    "part_id": "bhcs-m3x6",
+    "ref": "¥25",
+    "suppliers": [
+      {
+        "name": "佰瑞特",
+        "product": "内六角半圆头螺栓 按规格和数量选购",
+        "url": "https://detail.tmall.com/item.htm?id=16979965616&skuId=5241613567720"
+      },
+      {
+        "name": "固万基",
+        "product": "内六角半圆头螺栓 按规格和数量选购",
+        "url": "https://detail.tmall.com/item.htm?id=1048175312634&skuId=6073237337873"
+      },
+      {
+        "name": "天卓五金",
+        "product": "内六角半圆头螺栓 按规格和数量选购",
+        "url": "https://detail.tmall.com/item.htm?id=601878431269&skuId=5751904261691"
+      }
+    ],
+    "note": "购买足够的包数，确保总数量不少于物料清单所需数量。"
+  },
+  {
+    "part_id": "bhcs-m3x8",
+    "ref": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "bhcs-m3x10",
+    "ref": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "bhcs-m5x10",
+    "ref": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "bhcs-m5x12",
+    "ref": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "bhcs-m5x16",
+    "ref": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "bhcs-m5x20",
+    "ref": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "fhcs-m3x8",
+    "ref": "¥10",
+    "suppliers": [
+      {
+        "name": "佰瑞特",
+        "product": "内六角沉头螺栓 按规格和数量选购",
+        "url": "https://detail.tmall.com/item.htm?id=17046691882&skuId=5070760537532"
+      },
+      {
+        "name": "固万基",
+        "product": "内六角沉头螺栓 按规格和数量选购",
+        "url": "https://detail.tmall.com/item.htm?id=693377485791&skuId=4920755308732"
+      },
+      {
+        "name": "天卓五金",
+        "product": "内六角沉头螺栓 按规格和数量选购",
+        "url": "https://detail.tmall.com/item.htm?id=601686390456&skuId=5058384094300"
+      }
+    ],
+    "note": "Ditto"
+  },
+  {
+    "part_id": "fhcs-m3x10",
+    "ref": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "fhcs-m5x12",
+    "ref": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "shcs-m6x20",
+    "ref": "¥3",
+    "suppliers": [
+      {
+        "name": "佰瑞特",
+        "product": "M6*20【50个】全牙",
+        "url": "https://detail.tmall.com/item.htm?id=22060492907&skuId=5256984043602"
+      },
+      {
+        "name": "固万基",
+        "product": "M6*20[50个]",
+        "url": "https://detail.tmall.com/item.htm?id=534600992151&skuId=5044451193674"
+      },
+      {
+        "name": "天卓五金",
+        "product": "M6*20-50个",
+        "url": "https://detail.tmall.com/item.htm?id=684328822068&skuId=5937566337891"
+      }
+    ],
+    "note": "如果定制铝型材已包含这 8 颗螺栓，无需再买。"
+  },
+  {
+    "part_id": "shcs-unc14-16",
+    "ref": "¥5",
+    "suppliers": [
+      {
+        "name": "佰瑞特",
+        "product": "1/4-20*5/8(30个)",
+        "url": "https://detail.tmall.com/item.htm?id=15831362641&skuId=5056818688424"
+      },
+      {
+        "name": "固万基",
+        "product": "1/4-20*5/8(10个)",
+        "url": "https://detail.tmall.com/item.htm?id=641602915619&skuId=5179374758354"
+      },
+      {
+        "name": "天卓五金",
+        "product": "1/4-20*5/8（50只）",
+        "url": "https://detail.tmall.com/item.htm?id=617126314161&skuId=5917844858026"
+      }
+    ],
+    "note": "需使用英制 3/16\" 内六角扳手。"
+  },
+  {
+    "part_id": "shoulder-5x10",
+    "ref": "¥5",
+    "suppliers": [
+      {
+        "name": "佰瑞特",
+        "product": "Ø5*10*M4(20个)",
+        "url": "https://detail.tmall.com/item.htm?id=629302870354&skuId=5720274725623"
+      },
+      {
+        "name": "固万基",
+        "product": "5*M4*10[10只] 304",
+        "url": "https://detail.tmall.com/item.htm?id=651089596067&skuId=5701335813692"
+      },
+      {
+        "name": "天卓五金",
+        "product": "5*10*M4-50个",
+        "url": "https://detail.tmall.com/item.htm?id=989320776058&skuId=5953211896803"
+      }
+    ]
+  },
+  {
+    "part_id": "shoulder-5x20",
+    "ref": "¥5",
+    "suppliers": [
+      {
+        "name": "佰瑞特",
+        "product": "Ø5*20*M4(20个)",
+        "url": "https://detail.tmall.com/item.htm?id=629302870354&skuId=5720274725628"
+      },
+      {
+        "name": "固万基",
+        "product": "5*M4*20[5个]",
+        "url": "https://detail.tmall.com/item.htm?id=651089596067&skuId=6112813150976"
+      },
+      {
+        "name": "天卓五金",
+        "product": "5*20*M4-50个",
+        "url": "https://detail.tmall.com/item.htm?id=989320776058&skuId=5953211896810"
+      }
+    ],
+    "note": "共需 6 个。若按 5 个一包出售，买 2 包。"
+  },
+  {
+    "part_id": "tnut-dropin-m3",
+    "ref": "¥3",
+    "suppliers": [
+      {
+        "name": "佰瑞特",
+        "product": "镀镍T型 欧标20型-M3【100个】",
+        "url": "https://detail.tmall.com/item.htm?id=602648155862&skuId=6028240481084"
+      },
+      {
+        "name": "固万基",
+        "product": "304T型欧标20型-M3(10只)",
+        "url": "https://detail.tmall.com/item.htm?id=839660050219&skuId=5771557042783"
+      },
+      {
+        "name": "天卓五金",
+        "product": "20型-M3 (镀镍/50个)",
+        "url": "https://detail.tmall.com/item.htm?id=998391792202&skuId=6144993723885"
+      }
+    ]
+  },
+  {
+    "part_id": "tnut-dropin-m5",
+    "ref": "¥3",
+    "suppliers": [
+      {
+        "name": "佰瑞特",
+        "product": "镀镍T型 欧标20型-M5【100个】",
+        "url": "https://detail.tmall.com/item.htm?id=602648155862&skuId=6028240481086"
+      },
+      {
+        "name": "固万基",
+        "product": "304T型欧标20型-M5(10只)",
+        "url": "https://detail.tmall.com/item.htm?id=839660050219&skuId=5771557042785"
+      },
+      {
+        "name": "天卓五金",
+        "product": "20型-M5 (镀镍/50个)",
+        "url": "https://detail.tmall.com/item.htm?id=998391792202&skuId=6144993723887"
+      }
+    ]
+  },
+  {
+    "part_id": "tnut-slidein-m5",
+    "ref": "¥3",
+    "suppliers": [
+      {
+        "name": "佰瑞特",
+        "product": "蓝白锌 欧标20型-M5【50个】",
+        "url": "https://detail.tmall.com/item.htm?id=602648155862&skuId=6028240481110"
+      },
+      {
+        "name": "固万基",
+        "product": "镀镍滑块 欧标20型-M5(10只)",
+        "url": "https://detail.tmall.com/item.htm?id=615760488508&skuId=5750868440086"
+      },
+      {
+        "name": "天卓五金",
+        "product": "镀锌滑块 欧标20-M5【50个】",
+        "url": "https://detail.tmall.com/item.htm?id=601878555152&skuId=5916317895782"
+      }
+    ]
+  },
+  {
+    "part_id": "sqnut-m3",
+    "ref": "¥3",
+    "suppliers": [
+      {
+        "name": "佰瑞特",
+        "product": "M3*5.4*2.4(100个)304",
+        "url": "https://detail.tmall.com/item.htm?id=39362025926&skuId=5494564676452"
+      },
+      {
+        "name": "固万基",
+        "product": "M3[50颗]304",
+        "url": "https://detail.tmall.com/item.htm?id=542282923317&skuId=3422524066282"
+      },
+      {
+        "name": "天卓五金",
+        "product": "304 M3*5.4*2.4【100个】",
+        "url": "https://detail.tmall.com/item.htm?id=601243432591&skuId=5918561703451"
+      }
+    ]
+  },
+  {
+    "part_id": "sqnut-m4",
+    "ref": "¥3",
+    "suppliers": [
+      {
+        "name": "佰瑞特",
+        "product": "M4*7*3(100个)304",
+        "url": "https://detail.tmall.com/item.htm?id=39362025926&skuId=5494564676453"
+      },
+      {
+        "name": "固万基",
+        "product": "M4[50颗]304",
+        "url": "https://detail.tmall.com/item.htm?id=542282923317&skuId=5994345312291"
+      },
+      {
+        "name": "天卓五金",
+        "product": "304 M4*7*3【100个】",
+        "url": "https://detail.tmall.com/item.htm?id=601243432591&skuId=5918561703452"
+      }
+    ]
+  },
+  {
+    "part_id": "sqnut-m5",
+    "ref": "¥3",
+    "suppliers": [
+      {
+        "name": "佰瑞特",
+        "product": "M5*8*4(50个)304",
+        "url": "https://detail.tmall.com/item.htm?id=39362025926&skuId=5494564676430"
+      },
+      {
+        "name": "固万基",
+        "product": "M5[50颗]304",
+        "url": "https://detail.tmall.com/item.htm?id=542282923317&skuId=5994345312292"
+      },
+      {
+        "name": "天卓五金",
+        "product": "304 M5*8*3.8【50个】",
+        "url": "https://detail.tmall.com/item.htm?id=601243432591&skuId=5918561703453"
+      }
+    ]
+  },
+  {
+    "part_id": "hexnut-unc14",
+    "ref": "¥3",
+    "suppliers": [
+      {
+        "name": "佰瑞特",
+        "product": "1/4-20牙(50粒)美制",
+        "url": "https://detail.tmall.com/item.htm?id=20955552239&skuId=5664372939211"
+      },
+      {
+        "name": "固万基",
+        "product": "1/4-20 UNC（20个）",
+        "url": "https://detail.tmall.com/item.htm?id=642493938891&skuId=5094407607810"
+      },
+      {
+        "name": "天卓五金",
+        "product": "1/4-20牙【20个】英美制螺母",
+        "url": "https://detail.tmall.com/item.htm?id=601243664282&skuId=5709263519067"
+      }
+    ],
+    "note": "使用 11 mm 开口扳手拧紧。"
+  },
+  {
+    "part_id": "shim-5x8x0_5",
+    "ref": "¥3",
+    "suppliers": [
+      {
+        "name": "佰瑞特",
+        "product": "M5*8*0.5【200粒】",
+        "url": "https://detail.tmall.com/item.htm?id=941703196459&skuId=5839868929269"
+      },
+      {
+        "name": "固万基",
+        "product": "5*8*0.5[100个]",
+        "url": "https://detail.tmall.com/item.htm?id=867766340538&skuId=5863163199025"
+      },
+      {
+        "name": "嘉耐特",
+        "product": "M5*8*0.5[100颗]",
+        "url": "https://detail.tmall.com/item.htm?id=597917653553&skuId=5919206455674"
+      }
+    ]
+  },
+  {
+    "part_id": "spacer-5x10",
+    "ref": "¥4",
+    "suppliers": [
+      {
+        "name": "俩棵树",
+        "product": "内径5外径10厚9",
+        "url": "https://item.taobao.com/item.htm?id=608843333546&skuId=4447032678855"
+      },
+      {
+        "name": "库梵三维",
+        "product": "隔离柱5*10*9mm(5个装)",
+        "url": "https://item.taobao.com/item.htm?id=643586054546&skuId=4710482460571"
+      },
+      {
+        "name": "天卓五金",
+        "product": "Φ5*10*9【5个】",
+        "url": "https://detail.tmall.com/item.htm?id=851546806052&skuId=5815653223547"
+      }
+    ],
+    "note": "若买不到 9 mm 高的轴套，可叠放较短的轴套，使总高度达到 9 mm。"
+  },
+  {
+    "part_id": "spacer-6x12x8",
+    "ref": "¥5",
+    "suppliers": [
+      {
+        "name": "OPPU",
+        "product": "6.2*12*8(5个)",
+        "url": "https://detail.tmall.com/item.htm?id=719279682169&skuId=5151398852266"
+      },
+      {
+        "name": "固万基",
+        "product": "Φ6*12*8[20只]",
+        "url": "https://detail.tmall.com/item.htm?id=914092442727&skuId=5947803851139"
+      },
+      {
+        "name": "天卓五金",
+        "product": "Φ6*12*8【5个】",
+        "url": "https://detail.tmall.com/item.htm?id=851546806052&skuId=5815653223616"
+      }
+    ],
+    "note": "高度必须与所列规格一致；内径、外径可不同，内径 >5 mm、外径 <20 mm 均可。"
+  },
+  {
+    "part_id": "spacer-6x12x12",
+    "ref": "¥5",
+    "suppliers": [
+      {
+        "name": "OPPU",
+        "product": "6.2*12*12(5个)",
+        "url": "https://detail.tmall.com/item.htm?id=719279682169&skuId=5151398852268"
+      },
+      {
+        "name": "固万基",
+        "product": "Φ6*12*12[10只]",
+        "url": "https://detail.tmall.com/item.htm?id=914092442727&skuId=5947803851143"
+      },
+      {
+        "name": "天卓五金",
+        "product": "Φ6*12*12【2个】",
+        "url": "https://detail.tmall.com/item.htm?id=851546806052&skuId=5815653223620"
+      }
+    ],
+    "note": "Ditto"
+  },
+  {
+    "part_id": "hex-key",
+    "ref": "¥10",
+    "suppliers": [
+      {
+        "name": "世达",
+        "product": "短款平头 2/3/5mm",
+        "url": "https://detail.tmall.com/item.htm?id=718483830822&skuId=5976740613168"
+      },
+      {
+        "name": "绿林",
+        "product": "T型六角-平头 2/3/5mm",
+        "url": "https://detail.tmall.com/item.htm?id=557514119321&skuId=4614839901621"
+      },
+      {
+        "name": "EIGHT",
+        "product": "标准长 2/3/5mm",
+        "url": "https://detail.tmall.com/item.htm?id=605719869164&skuId=4417109167397"
+      }
+    ],
+    "note": "需要 3 把内六角扳手：2 mm 和 3 mm 最常用，选质量好的；5 mm 普通款即可。"
+  },
+  {
+    "part_id": "grease",
+    "ref": "¥10",
+    "suppliers": [
+      {
+        "name": "BKD",
+        "product": "白色268°【拍3桶送1桶】350g",
+        "url": "https://detail.tmall.com/item.htm?id=535528431778&skuId=3246189537196"
+      },
+      {
+        "name": "屹嘉临",
+        "product": "白色高温脂100克 *1瓶",
+        "url": "https://detail.tmall.com/item.htm?id=745296950254&skuId=6085234235052"
+      },
+      {
+        "name": "3D创客空间",
+        "product": "润滑脂 1支",
+        "url": "https://item.taobao.com/item.htm?id=835124349906&skuId=5755178218291"
+      }
+    ]
+  },
+  {
+    "part_id": "threadlocker",
+    "ref": "¥6",
+    "suppliers": [
+      {
+        "name": "佰瑞特",
+        "product": "243(蓝50ml)",
+        "url": "https://detail.tmall.com/item.htm?id=815495429995&skuId=5920702171814"
+      },
+      {
+        "name": "固万基",
+        "product": "蓝243（50ml)1支装",
+        "url": "https://detail.tmall.com/item.htm?id=1053791122137&skuId=6094068880617"
+      },
+      {
+        "name": "乐泰",
+        "product": "LOCTITE 乐泰243螺纹胶 10ml",
+        "url": "https://detail.tmall.com/item.htm?id=652235448903&skuId=5855300089874"
+      }
+    ]
+  },
+  {
+    "part_id": "heat-shrink",
+    "ref": "¥4",
+    "suppliers": [
+      {
+        "name": "牛享",
+        "product": "彩色164pcs【袋装】 3倍收缩",
+        "url": "https://detail.tmall.com/item.htm?id=653659815504&skuId=4887481207761"
+      },
+      {
+        "name": "欣嘉",
+        "product": "彩色8种164只",
+        "url": "https://item.taobao.com/item.htm?id=652182822333&skuId=4873785482841"
+      },
+      {
+        "name": "欣欣",
+        "product": "5倍热缩：袋装【164根】阻燃耐磨防腐",
+        "url": "https://item.taobao.com/item.htm?id=904644065796&skuId=5931489415648"
+      }
+    ]
+  }
+]

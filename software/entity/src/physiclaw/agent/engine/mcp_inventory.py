@@ -1,0 +1,59 @@
+"""Static MCP tool inventory — AST-parses `src/physiclaw/core/server/tools.py` to
+enumerate tool names + first-line descriptions without importing the
+module or requiring the MCP server to be running.
+
+Used by source conformance tests. Runtime prompts and CLI previews use
+the validated action catalog built from live or captured MCP schemas.
+"""
+
+import ast
+import logging
+from pathlib import Path
+
+from physiclaw.common.text import read_text
+
+log = logging.getLogger(__name__)
+
+_TOOLS_PY = Path(__file__).resolve().parents[2] / "core" / "server" / "tools.py"
+
+
+def discover_mcp_tools() -> list[dict]:
+    """Return `[{"name", "description"}]` for every `@mcp.tool()`-decorated
+    function inside `src/physiclaw/core/server/tools.py`. No import, no MCP
+    connection. Returns `[]` if the file is unreadable or unparseable."""
+    if not _TOOLS_PY.exists():
+        log.debug("mcp_inventory: %s missing; skipping static MCP tools", _TOOLS_PY)
+        return []
+    try:
+        tree = ast.parse(read_text(_TOOLS_PY))
+    except (OSError, UnicodeError, SyntaxError):
+        log.exception("mcp_inventory: failed to parse or read %s", _TOOLS_PY)
+        return []
+
+    out: list[dict] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.AsyncFunctionDef, ast.FunctionDef)):
+            continue
+        if not _has_mcp_tool_decorator(node):
+            continue
+        out.append(
+            {
+                "name": node.name,
+                "description": ast.get_docstring(node) or "",
+            }
+        )
+    return out
+
+
+def _has_mcp_tool_decorator(node: ast.AsyncFunctionDef | ast.FunctionDef) -> bool:
+    """True if any decorator is `@mcp.tool()` or `@mcp.tool`."""
+    for d in node.decorator_list:
+        target = d.func if isinstance(d, ast.Call) else d
+        if (
+            isinstance(target, ast.Attribute)
+            and target.attr == "tool"
+            and isinstance(target.value, ast.Name)
+            and target.value.id == "mcp"
+        ):
+            return True
+    return False

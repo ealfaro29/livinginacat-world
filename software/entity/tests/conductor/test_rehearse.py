@@ -1,0 +1,789 @@
+"""Tests for the rehearsal harness (`conductor.rehearsal` behind
+`playbooks run`) — the surface that replaced arming as the way to
+test a walk.
+
+Lives beside the conductor tests, not under `tests/cli/`, because it
+drives a real `Program` over the shared pack fixtures in
+`conductor_fakes` (a bare sibling import, so only siblings can use it).
+
+What is worth pinning: the routing it reproduces from the engine (local
+`run_macro` vs plain MCP) and its never-persist promise. No hardware —
+the MCP connection and the macro runner are both faked.
+"""
+
+from __future__ import annotations
+
+import json
+
+import pytest
+from conductor_fakes import (
+    HOME,
+    PACK_MACRO,
+    RESULTS,
+    ScriptedProvider,
+    make_screen,
+    write_pack,
+)
+
+from physiclaw.cli import playbooks as cli
+from physiclaw.common import gesture_vocab
+from physiclaw.conductor.drive import exchange, rehearsal
+from physiclaw.conductor.load.pack import load_spec
+from physiclaw.conductor.walk import suspension
+from physiclaw.contract.dto import ToolCall
+
+
+async def test_rehearsal_caller_closes_the_provider_it_created(mocker) -> None:
+    provider = ScriptedProvider([])
+    mocker.patch("physiclaw.common.config.model_ref", return_value="demo/model")
+    mocker.patch("physiclaw.provider.make_chat_provider", return_value=provider)
+
+    caller = rehearsal.micro_caller()
+    await caller.aclose()
+
+    assert provider.closed
+
+
+async def test_rehearsal_closes_its_caller_when_abandonment_fails(mocker) -> None:
+    from conductor_fakes import build_program
+
+    from physiclaw.conductor.micro.channel import MicroCaller
+
+    write_pack(playbooks={"flow": AGENT_FLOW})
+    program = build_program(dry=True, keyword="milk")
+    provider = ScriptedProvider([])
+    caller = MicroCaller.owning(provider, confidence_floor=0.6)
+    mocker.patch.object(rehearsal, "micro_caller", return_value=caller)
+    mocker.patch.object(program, "abandon", side_effect=OSError("record failed"))
+
+    with pytest.raises(OSError, match="record failed"):
+        await rehearsal.walk(
+            program, {}, _FakeMcp(), emit=lambda line: None, unlock=False
+        )
+
+    assert provider.closed
+
+
+async def test_turn_exhaustion_bounds_dispatch_and_abandons_with_provider_closed(
+    mocker,
+) -> None:
+    from conductor_fakes import agent_reply, build_program
+
+    from physiclaw.conductor.micro.channel import MicroCaller
+    from physiclaw.conductor.walk.walklog import Outcome
+
+    write_pack(playbooks={"flow": AGENT_FLOW})
+    program = build_program(dry=True, keyword="milk")
+    provider = ScriptedProvider([agent_reply("done", keyword="milk")])
+    caller = MicroCaller.owning(provider, confidence_floor=0.6)
+    mocker.patch.object(rehearsal, "micro_caller", return_value=caller)
+    mocker.patch.object(rehearsal, "REHEARSE_MAX_TURNS", 2)
+    dispatch = mocker.patch.object(
+        rehearsal, "dispatch", new=mocker.AsyncMock(return_value=(HOME, False))
+    )
+    advance = mocker.spy(program, "advance")
+
+    result = await rehearsal.walk(
+        program, {}, _FakeMcp(), emit=lambda line: None, unlock=False
+    )
+
+    assert result == "stopped after 2 turns"
+    assert advance.call_count == 2
+    assert [call.args[1].name for call in dispatch.await_args_list] == [
+        "peek",
+        "run_macro",
+    ]
+    assert program.outcome is Outcome.ABANDONED
+    assert len(provider.calls) == 1 and provider.closed
+
+
+FLOW = """\
+description: two moves
+inputs:
+  keyword:
+    description: what to search
+route:
+  - page: app.pages.home
+  - do: open
+    macro: app.macros.open-app
+    with: {message: "{inputs.keyword}"}
+  - page: app.pages.home
+  - do: search
+    macro: app.macros.add-cart
+    with: {message: "go"}
+  - page: app.pages.results
+"""
+
+
+class _FakeMcp:
+    """Records tool calls; answers each with a VIEW-shaped reply.
+
+    Block shape is load-bearing: `verdict.screen_text` drops block 0 when
+    it is text, because a gesture replies `[action text, image, listing]`
+    while a view replies `[image, listing]`. A fake that returns one bare
+    text block would be read as action text and yield nothing."""
+
+    def __init__(self, reply: str = HOME):
+        self.calls: list[tuple[str, dict]] = []
+        self.reply = reply
+
+    async def call_tool(self, name, args=None):
+        self.calls.append((name, args or {}))
+        return [{"type": "image", "data": "x"}, {"type": "text", "text": self.reply}]
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *exc):
+        return False
+
+
+def _registry():
+    """The qualified dispatch registry a rehearsal builds — the pack's
+    macros under `app/name` keys, exactly like the engine's hidden set."""
+    write_pack(playbooks={"flow": FLOW}, macros=("open-app", "add-cart"))
+    from physiclaw.conductor.load.pack import load_pack
+    from physiclaw.conductor.spec.pack import qualified_pack
+
+    return qualified_pack("demo", load_pack("demo"))
+
+
+# ---------- _dispatch: the engine's routing, reproduced ----------
+
+
+async def test_regression_dispatch_records_pack_macros_separately():
+    from physiclaw.common import paths
+    from physiclaw.conductor.load.pack import load_pack
+    from physiclaw.macros import stats
+
+    write_pack(app="alpha", macros=("open-app",))
+    write_pack(app="beta", macros=("open-app",))
+    registry = {
+        "alpha/open-app": load_pack("alpha").macros["open-app"],
+        "beta/open-app": load_pack("beta").macros["open-app"],
+    }
+    first = ToolCall(id="a", name="run_macro", arguments={"name": "alpha/open-app"})
+    second = ToolCall(id="b", name="run_macro", arguments={"name": "beta/open-app"})
+
+    a = await rehearsal.dispatch(_FakeMcp(), first, registry)
+    b = await rehearsal.dispatch(_FakeMcp(), second, registry)
+
+    assert not a[1] and not b[1]
+    assert {name: row["total_runs"] for name, row in stats.load().items()} == {
+        "alpha/open-app": 1,
+        "beta/open-app": 1,
+    }
+    assert {
+        json.loads(p.read_text(encoding="utf-8").splitlines()[0])["macro"]
+        for p in paths.macros_log_dir().glob("*/events.jsonl")
+    } == {"alpha/open-app", "beta/open-app"}
+
+
+async def test_dispatch_sends_an_ordinary_gesture_to_mcp() -> None:
+    mcp = _FakeMcp()
+    call = ToolCall(id="c", name="peek", arguments={})
+
+    text, is_error = await rehearsal.dispatch(mcp, call, _registry())
+
+    assert is_error is False
+    assert mcp.calls == [("peek", {})]
+    assert "Files" in text
+
+
+async def test_dispatch_routes_run_macro_to_the_macro_runner(mocker) -> None:
+    # run_macro is the LOCAL tool — it must NOT go out as an MCP call.
+    mcp = _FakeMcp()
+    runner = mocker.patch(
+        "physiclaw.macros.runner.run_and_record",
+        new=mocker.AsyncMock(
+            return_value=mocker.Mock(
+                ok=True,
+                # The runner contract: composed header + step log is block 0.
+                blocks=[
+                    {"type": "text", "text": "ran open-app"},
+                    {"type": "text", "text": RESULTS},
+                ],
+            )
+        ),
+    )
+    call = ToolCall(
+        id="c",
+        name=gesture_vocab.RUN_MACRO,
+        arguments={"name": "demo/open-app", "inputs": {"message": "hi"}},
+    )
+
+    text, is_error = await rehearsal.dispatch(mcp, call, _registry())
+
+    assert is_error is False and "综合" in text
+    assert mcp.calls == []  # never went over MCP
+    assert runner.await_count == 1
+
+
+async def test_dispatch_returns_an_aborted_macro_as_a_result(mocker) -> None:
+    # An abort is a result, not an error — exactly what the live engine
+    # returns: the header + step log is block 0 and the current screen
+    # follows, so the page check judges the landing and a recover hand's
+    # miss is one try, while the abort's cause (which step, which guard)
+    # still reaches the note and the log.
+    mcp = _FakeMcp()
+    header = "macro demo/open-app: ABORTED at step 2/3 (guard_failed) — steps 1-1 already executed"
+    mocker.patch(
+        "physiclaw.macros.runner.run_and_record",
+        new=mocker.AsyncMock(
+            return_value=mocker.Mock(
+                ok=False,
+                blocks=[
+                    {"type": "text", "text": header},
+                    {"type": "image", "data": "x"},
+                    {"type": "text", "text": RESULTS},
+                ],
+            )
+        ),
+    )
+    call = ToolCall(
+        id="c", name=gesture_vocab.RUN_MACRO, arguments={"name": "demo/open-app"}
+    )
+
+    text, is_error = await rehearsal.dispatch(mcp, call, _registry())
+
+    assert is_error is False
+    assert text.startswith(header) and "综合" in text
+
+
+async def test_dispatch_reports_an_unknown_pack_macro() -> None:
+    mcp = _FakeMcp()
+    call = ToolCall(
+        id="c", name=gesture_vocab.RUN_MACRO, arguments={"name": "demo/nope"}
+    )
+
+    text, is_error = await rehearsal.dispatch(mcp, call, _registry())
+
+    assert is_error is True and "nope" in text
+
+
+async def test_dispatch_turns_a_raised_error_into_a_result(mocker) -> None:
+    # A rehearsal reports, it does not crash: the walk must see an errored
+    # result and hand over, the way it would in a real session.
+    mcp = _FakeMcp()
+    mocker.patch.object(mcp, "call_tool", side_effect=RuntimeError("bridge down"))
+    call = ToolCall(id="c", name="peek", arguments={})
+
+    text, is_error = await rehearsal.dispatch(mcp, call, _registry())
+
+    assert is_error is True and "bridge down" in text
+
+
+async def test_dispatch_transform_replaces_a_successful_result(mocker) -> None:
+    # The debug fake-channel seam, reproduced: a transformer may swap the
+    # blocks the program reads; None keeps the real ones.
+    mcp = _FakeMcp()
+    call = ToolCall(id="c", name="peek", arguments={})
+    seen: list = []
+
+    def transform(c, blocks):
+        seen.append((c.name, len(blocks)))
+        return [{"type": "image", "data": "x"}, {"type": "text", "text": RESULTS}]
+
+    text, is_error = await rehearsal.dispatch(
+        mcp, call, _registry(), transform=transform
+    )
+
+    assert is_error is False and "综合" in text and "Files" not in text
+    assert seen == [("peek", 2)]
+
+
+async def test_dispatch_forwards_macro_step_range_to_the_runner(mocker) -> None:
+    mcp = _FakeMcp()
+    runner = mocker.patch(
+        "physiclaw.macros.runner.run_and_record",
+        new=mocker.AsyncMock(
+            return_value=mocker.Mock(ok=True, blocks=[{"type": "text", "text": "ran"}])
+        ),
+    )
+    call = ToolCall(
+        id="c", name=gesture_vocab.RUN_MACRO, arguments={"name": "demo/open-app"}
+    )
+
+    await rehearsal.dispatch(mcp, call, _registry(), start_at="clip", stop_after="clip")
+
+    kwargs = runner.await_args.kwargs
+    assert kwargs["start_at"] == "clip" and kwargs["stop_after"] == "clip"
+
+
+# ---------- walk with step_one: the stepping pause ----------
+
+
+async def test_walk_pauses_when_the_stepping_cursor_moves(mocker) -> None:
+    # `step_one` = run one node only: the first move settles (verify
+    # matched), the cursor advances, and the walk pauses BEFORE the next
+    # step opens — reporting PAUSED, not a handover — with the position
+    # projected for the next invocation.
+    from conductor_fakes import build_program
+
+    write_pack(playbooks={"flow": FLOW}, macros=("open-app", "add-cart"))
+    mcp = _FakeMcp()
+    mocker.patch(
+        "physiclaw.macros.runner.run_and_record",
+        new=mocker.AsyncMock(
+            return_value=mocker.Mock(
+                ok=True,
+                blocks=[
+                    {"type": "text", "text": "ran"},
+                    {"type": "text", "text": HOME},
+                ],
+            )
+        ),
+    )
+    program = build_program(dry=True, keyword="milk")
+    program.step_one = True
+    from physiclaw.conductor.load.pack import load_pack
+    from physiclaw.conductor.spec.pack import qualified_pack
+
+    registry = qualified_pack("demo", load_pack("demo"))
+
+    out = await rehearsal.walk(program, registry, mcp, emit=lambda s: None)
+
+    assert out == rehearsal.WALK_PAUSED
+    assert program.phase == "paused" and program.outcome is None
+    assert program.state()["idx"] == 1
+    assert [n for n, _ in mcp.calls] == ["peek", "peek"]  # unlock probe + opening
+
+
+ONE_MOVE = """\
+description: one move
+inputs:
+  keyword:
+    description: what to search
+route:
+  - page: app.pages.home
+  - do: open
+    macro: app.macros.open-app
+    with: {message: "{inputs.keyword}"}
+  - page: app.pages.home
+"""
+
+
+async def test_a_completed_walk_reports_completion_and_keeps_a_real_suspension(
+    monkeypatch, mocker
+) -> None:
+    # A completed walk closes the session DONE by its own end_session —
+    # the same tool a suspension uses. Read as a suspension, the loop
+    # would report the wrong outcome AND drop the file a REAL wake's
+    # walk left mid-purchase, sending that wake back to the top.
+    from conductor_fakes import build_program
+
+    from physiclaw.conductor.load.pack import load_pack
+    from physiclaw.conductor.spec.pack import qualified_pack
+
+    write_pack(playbooks={"flow": ONE_MOVE}, macros=("open-app",))
+    mocker.patch(
+        "physiclaw.macros.runner.run_and_record",
+        new=mocker.AsyncMock(
+            return_value=mocker.Mock(
+                ok=True,
+                blocks=[
+                    {"type": "text", "text": "ran"},
+                    {"type": "text", "text": HOME},
+                ],
+            )
+        ),
+    )
+    _fake_micro(monkeypatch)  # answers the close's summarize call
+    pending = suspension.suspended_path()
+    pending.parent.mkdir(parents=True, exist_ok=True)
+    pending.write_text('{"app": "taobao", "playbook": "buy"}', encoding="utf-8")
+    program = build_program(dry=True, keyword="milk")
+    registry = qualified_pack("demo", load_pack("demo"))
+
+    out = await rehearsal.walk(program, registry, _FakeMcp(), emit=lambda s: None)
+
+    assert out == rehearsal.WALK_COMPLETED
+    assert program.outcome == "completed"
+    assert pending.exists()  # another walk's suspension, untouched
+
+
+async def test_a_stopped_walk_reports_a_stop_and_drops_nothing(mocker) -> None:
+    # The move's landing page is not reached and the move says stop: the
+    # walk closes the session by its own hand having recorded a handover
+    # — the loop reports the stop, and there is no suspension to drop.
+    from conductor_fakes import build_program
+
+    from physiclaw.conductor.load.pack import load_pack
+    from physiclaw.conductor.spec.pack import qualified_pack
+
+    write_pack(
+        playbooks={
+            "flow": FLOW.replace(
+                "  - do: search\n", "  - do: search\n    on_fail: stop\n"
+            )
+        },
+        macros=("open-app", "add-cart"),
+    )
+    mocker.patch(
+        "physiclaw.macros.runner.run_and_record",
+        new=mocker.AsyncMock(
+            return_value=mocker.Mock(
+                ok=True,
+                blocks=[
+                    {"type": "text", "text": "ran"},
+                    {"type": "text", "text": HOME},  # never `results`
+                ],
+            )
+        ),
+    )
+    program = build_program(dry=True, keyword="milk")
+    registry = qualified_pack("demo", load_pack("demo"))
+
+    out = await rehearsal.walk(program, registry, _FakeMcp(), emit=lambda s: None)
+
+    assert out == rehearsal.WALK_STOPPED
+    assert program.outcome == "handover"
+
+
+ASKING = """\
+description: one ask
+inputs:
+  keyword:
+    description: what
+route:
+  - page: app.pages.results
+  - do: open
+    macro: app.macros.open-app
+    with: {message: "{inputs.keyword}"}
+  - page: app.pages.results
+  - ask: go
+    approve: go
+    message: "go on?"
+    yes: ["yes"]
+    no: ["no"]
+    wait: 5
+    rounds: 1
+"""
+
+
+async def test_a_suspended_walk_reports_the_suspension_and_drops_its_file(
+    mocker,
+) -> None:
+    # The ask hears nothing for its rounds and suspends — the one close
+    # that writes a file. A rehearsal has no later wake, so the loop
+    # drops that file, and only that one.
+    from conductor_fakes import build_program, write_channel
+
+    from physiclaw.conductor.load.pack import load_pack
+    from physiclaw.conductor.spec.pack import qualified_pack
+
+    mocker.patch(
+        "physiclaw.conductor.drive.rehearsal.asyncio.sleep", new=mocker.AsyncMock()
+    )
+    write_channel()
+    write_pack(playbooks={"flow": ASKING}, macros=("open-app",))
+    # One screen that reads as the pack's `results` AND the channel's
+    # thread, so every landing and every reply peek reads the same way.
+    both = make_screen(("综合", 0.5, 0.1), ("MyChat", 0.5, 0.05)).text
+    mocker.patch(
+        "physiclaw.macros.runner.run_and_record",
+        new=mocker.AsyncMock(
+            return_value=mocker.Mock(
+                ok=True,
+                blocks=[
+                    {"type": "text", "text": "ran"},
+                    {"type": "text", "text": both},
+                ],
+            )
+        ),
+    )
+    program = build_program(dry=False, keyword="milk")
+    registry = qualified_pack("demo", load_pack("demo")) | {
+        "channel/send": load_pack("channel").macros["send"]
+    }
+
+    out = await rehearsal.walk(
+        program, registry, _FakeMcp(reply=both), emit=lambda s: None
+    )
+
+    assert out == rehearsal.WALK_SUSPENDED
+    assert program.outcome == "suspended"
+    assert not suspension.suspended_path().exists()
+
+
+# ---------- _rehearse: drives, then leaves nothing behind ----------
+
+
+async def test_rehearse_drives_the_walk_and_persists_nothing(mocker) -> None:
+    write_pack(playbooks={"flow": FLOW}, macros=("open-app", "add-cart"))
+    mcp = _FakeMcp()
+    mocker.patch.object(cli, "McpClient", return_value=mcp, create=True)
+    mocker.patch(
+        "physiclaw.agent.engine.mcp_tool.McpClient", return_value=mcp, create=True
+    )
+    mocker.patch(
+        "physiclaw.macros.runner.run_and_record",
+        new=mocker.AsyncMock(
+            return_value=mocker.Mock(
+                ok=True,
+                blocks=[
+                    {"type": "text", "text": "ran"},
+                    {"type": "text", "text": HOME},
+                ],
+            )
+        ),
+    )
+
+    out = await cli._rehearse("demo", "flow", {"keyword": "milk"})
+
+    assert "handed over" in out or "finished" in out
+    assert not suspension.suspended_path().exists()
+
+
+async def test_rehearse_rejects_bad_inputs_before_touching_the_phone() -> None:
+    from physiclaw.conductor.spec.model import PlaybookError
+
+    write_pack(playbooks={"flow": FLOW}, macros=("open-app", "add-cart"))
+
+    with pytest.raises(PlaybookError, match="unknown input"):
+        await cli._rehearse("demo", "flow", {"bogus": "1"})
+
+
+async def test_rehearse_runs_a_disabled_playbook() -> None:
+    # `macros run` rehearses disabled macros for the same reason: you
+    # rehearse BEFORE you enable. A disabled playbook must not be refused.
+
+    write_pack(
+        playbooks={
+            "flow": FLOW.replace(
+                "description: two moves", "enabled: false\ndescription: two moves"
+            )
+        },
+        macros=("open-app", "add-cart"),
+    )
+
+    spec, _ = load_spec("demo", "flow")
+
+    assert spec.enabled is False  # and load_spec did not raise
+
+
+def test_pack_macro_fixture_is_wired() -> None:
+    # Guards the fixture the routing tests lean on: the registry carries
+    # the pack's macros under their qualified dispatch keys.
+    assert set(_registry()) == {"demo/open-app", "demo/add-cart"}
+    assert PACK_MACRO  # the template the fixture writes
+
+
+# ---------- the model log: what went to the provider, what came back ----------
+
+AGENT_FLOW = """\
+description: a pure-text call then a move
+inputs:
+  keyword:
+    description: what to search
+route:
+  - agent: parse
+    context:
+      prompt: "a keyword for {keyword}"
+      given: {keyword: "{inputs.keyword}"}
+    returns:
+      keyword: the keyword
+  - page: app.pages.home
+  - do: open
+    macro: app.macros.open-app
+    with: {message: "{parse.keyword}"}
+  - page: app.pages.home
+"""
+
+OPENAI_REPLY = {
+    "choices": [{"message": {"content": '{"reason": "r", "answer": "done"}'}}]
+}
+
+
+def _fake_micro(monkeypatch):
+    """`micro_caller` → a caller that logs one round-trip to the sink the
+    walk wired, then answers `done` with the return field."""
+    from physiclaw.conductor.micro.decision import MicroOutcome, MicroResult
+    from physiclaw.conductor.spec.calls import AGENT_DONE
+    from physiclaw.contract.dto import MicroRecord
+
+    class Caller:
+        def __init__(self, rlog):
+            self.rlog = rlog
+
+        async def run(self, req):
+            self.rlog.write_micro(
+                MicroRecord(
+                    call=req.call,
+                    node=req.node_id,
+                    thinking=None,
+                    allowed=(AGENT_DONE,),
+                    answer=AGENT_DONE,
+                    confidence=0.9,
+                    request=[
+                        {"role": "system", "content": "sys"},
+                        {"role": "user", "content": "ask"},
+                    ],
+                    raw=OPENAI_REPLY,
+                )
+            )
+            return MicroResult(
+                outcome=MicroOutcome(
+                    out=AGENT_DONE,
+                    reason="r",
+                    confidence=0.9,
+                    payload={"keyword": "milk"},
+                ),
+                detail="r",
+                attempts=1,
+                elapsed_ms=3,
+            )
+
+        async def aclose(self):
+            pass
+
+    monkeypatch.setattr(rehearsal, "micro_caller", lambda rlog=None: Caller(rlog))
+
+
+async def test_walk_captures_each_model_round_trip(monkeypatch, mocker) -> None:
+    from conductor_fakes import build_program
+
+    write_pack(playbooks={"flow": AGENT_FLOW}, macros=("open-app",))
+    mocker.patch(
+        "physiclaw.macros.runner.run_and_record",
+        new=mocker.AsyncMock(
+            return_value=mocker.Mock(
+                ok=True,
+                blocks=[
+                    {"type": "text", "text": "ran"},
+                    {"type": "text", "text": HOME},
+                ],
+            )
+        ),
+    )
+    _fake_micro(monkeypatch)
+    from physiclaw.conductor.load.pack import load_pack
+    from physiclaw.conductor.spec.pack import qualified_pack
+
+    program = build_program(dry=True, keyword="milk")
+    registry = qualified_pack("demo", load_pack("demo"))
+    lines: list[str] = []
+    seen: list[dict] = []
+
+    await rehearsal.walk(
+        program,
+        registry,
+        _FakeMcp(),
+        emit=lines.append,
+        raw=True,
+        on_exchange=seen.append,
+    )
+
+    x, close = seen  # the agent's call, then the close's record in the thread
+    assert close["call"] == "summarize"
+    assert x["call"] == "agent_fields" and x["node"] == "parse"
+    assert x["request"][0]["role"] == "system" and x["reply"] == OPENAI_REPLY
+    assert x["attempt"] == 1 and x["attempts"] == 1 and x["history"] == 0
+    assert x["outcome"].startswith("done")
+    text = "\n".join(lines)
+    assert "── model agent_fields (parse)" in text
+    assert "[system]\n      sys" in text and "[user]\n      ask" in text
+    assert '── reply\n      {"reason": "r", "answer": "done"}' in text
+    assert "── decision: done" in text
+
+
+async def test_walk_without_raw_still_hands_exchanges_to_the_hook(
+    monkeypatch, mocker
+) -> None:
+    from conductor_fakes import build_program
+
+    write_pack(playbooks={"flow": AGENT_FLOW}, macros=("open-app",))
+    mocker.patch(
+        "physiclaw.macros.runner.run_and_record",
+        new=mocker.AsyncMock(
+            return_value=mocker.Mock(
+                ok=True,
+                blocks=[
+                    {"type": "text", "text": "ran"},
+                    {"type": "text", "text": HOME},
+                ],
+            )
+        ),
+    )
+    _fake_micro(monkeypatch)
+    from physiclaw.conductor.load.pack import load_pack
+    from physiclaw.conductor.spec.pack import qualified_pack
+
+    lines: list[str] = []
+    seen: list[dict] = []
+
+    await rehearsal.walk(
+        build_program(dry=True, keyword="milk"),
+        qualified_pack("demo", load_pack("demo")),
+        _FakeMcp(),
+        emit=lines.append,
+        on_exchange=seen.append,
+    )
+
+    assert [x["call"] for x in seen] == ["agent_fields", "summarize"]
+    assert not any("── model" in line for line in lines)
+
+
+def test_exchange_lines_folds_the_replayed_turns_and_reads_both_shapes() -> None:
+    # The record is whole (system, one replayed turn, the newest block);
+    # the eye gets the system message and the newest exchange.
+    anthropic = {"content": [{"type": "text", "text": "hi"}]}
+    record = {
+        "call": "agent_act",
+        "node": "pick",
+        "attempt": 2,
+        "attempts": 2,
+        "history": 2,
+        "request": [
+            {"role": "system", "content": "contract"},
+            {"role": "user", "content": "earlier screen"},
+            {"role": "assistant", "content": "{}"},
+            {"role": "user", "content": [{"type": "text", "text": "block"}]},
+        ],
+        "reply": anthropic,
+        "outcome": "act → 'row'",
+    }
+
+    lines = exchange.exchange_lines(record)
+
+    assert (
+        lines[0]
+        == "── model agent_act (pick) attempt 2/2 · 2 replayed message(s) folded"
+    )
+    assert lines[1:5] == ["[system]", "contract", "[user]", "block"]
+    assert lines[5:7] == ["── reply", "hi"]
+    assert lines[-1] == "── decision: act → 'row'"
+    assert exchange.reply_text({"odd": 1}) == '{"odd": 1}'
+
+
+@pytest.mark.parametrize("repair", [False, True])
+def test_exchanges_keep_the_current_request_after_folding_history(repair) -> None:
+    from physiclaw.conductor.micro.decision import MicroRequest
+
+    history = (("user", "old screen"), ("assistant", "old reply"))
+    req = MicroRequest(
+        call="agent_act", node_id="pick", outcomes=(), material={}, history=history
+    )
+    request = [
+        {"role": "system", "content": "contract"},
+        *({"role": role, "content": content} for role, content in history),
+        {"role": "user", "content": "current screen"},
+    ]
+    if repair:
+        request.extend(
+            [
+                {"role": "assistant", "content": "invalid reply"},
+                {"role": "user", "content": "repair instructions"},
+            ]
+        )
+
+    (record,) = exchange.exchanges(
+        [{"call": "agent_act", "request": request, "reply": {}}], req, "done"
+    )
+
+    assert "current screen" in record["lines"]
+    assert "old screen" not in record["lines"]
+    assert "old reply" not in record["lines"]
+    if repair:
+        assert "invalid reply" in record["lines"]
+        assert "repair instructions" in record["lines"]

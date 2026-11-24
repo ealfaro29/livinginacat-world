@@ -1,0 +1,106 @@
+---
+title: Macros
+description: Rehearsed gesture sequences the agent replays in one step. You author and test them; the agent runs them cheaply.
+---
+
+Tokens are expensive. A macro batches many gestures into a single model call, so the agent invokes a sequence you authored and rehearsed instead of driving the phone step by step. Macros save tokens and time.
+
+## Create a macro
+
+Scaffold one, then edit the macro file:
+
+```bash
+physiclaw macros init notify-user-whatsapp
+```
+
+<FileTree>
+- ~/.physiclaw/macros/
+  - README.md
+  - notify-user-whatsapp.yml
+</FileTree>
+
+### notify-user-whatsapp.yml
+
+```yaml
+# What this file is: a recorded hand, so it lives in macros/.
+kind: macro
+# The pack grammar this file is written in.
+schema: 1
+name: notify-user-whatsapp
+# The agent picks a macro by this line alone, so make clear when to use it and what it does.
+description: Use when messaging your user on WhatsApp. Opens the chat and stages the text, stopping before Send
+
+# false means the agent can't see or call it.
+enabled: true
+
+# The args needed for this macro.
+inputs:
+  message:
+    description: The message text to send
+    example: "Order placed, $4.77"
+
+# Run top to bottom, one action per step: a verb and its object,
+# then anything the step needs beside it.
+steps:
+  - home_screen
+
+  # A press names what it taps; `at` is the box, [left, top, right,
+  # bottom] as 0–1 screen fractions. On-screen text as the object lets
+  # the tap follow that text if it moves; icons get a plain description.
+  - tap: "the WhatsApp icon"
+    at: [0.31, 0.893, 0.491, 0.974]
+
+  # Sleep, then confirm what arrived. WhatsApp reopens where it was
+  # left, so accept either title.
+  - wait: 2
+    expect: {text: ["Chats", "your-user-name"], within: top}
+    hint: "WhatsApp did not open — log in, then send manually"
+
+  # `skip_when` skips the step when the chat is already open; `require`
+  # checks the right row sits where the tap lands.
+  - tap: "your-user-name"
+    at: [0.03, 0.32, 0.60, 0.42]
+    skip_when: {text: "your-user-name", within: [0.20, 0.05, 0.60, 0.11]}
+    require: {text: "your-user-name", within: [0.03, 0.30, 0.95, 0.44]}
+
+  - send_to_clipboard: "{message}"
+
+  # Skip if the keyboard is up. Its space bar has no label, so use "123".
+  - tap: "the message input box"
+    at: [0.2, 0.928, 0.6, 0.962]
+    skip_when: {text: "123", within: [0.05, 0.86, 0.30, 0.93]}
+
+  # The input box sits higher once the keyboard is up.
+  - long_press: "the message input box (keyboard up)"
+    at: [0.2, 0.59, 0.6, 0.62]
+
+  - tap: "Paste"
+    at: [0.10, 0.545, 0.21, 0.566]
+    require: {text: "Paste", within: [0.03, 0.52, 0.40, 0.59]}
+
+# No send step: the agent checks the text and decides whether to send.
+```
+
+
+## Rehearse
+
+Start the MCP server:
+
+```bash
+physiclaw mcp
+```
+
+Then lint every macro file and replay this one on the live rig:
+
+```bash
+physiclaw macros check
+physiclaw macros run notify-user-whatsapp -i message=hi
+```
+
+## Best practices
+
+**Keep macros short and single-purpose.** Anything that needs a decision mid-way, like confirmations, payments, or choosing among results, belongs to the agent, not a macro.
+
+**Let an agent draft it.** Connect `claude` or `codex` to your MCP server, then ask it to write the macro.
+
+**Watch the stats.** `physiclaw macros stats` shows per-macro counters. A rising `consecutive_aborts` streak may indicate that the app layout has changed; test the macro again on your phone and update the bounding boxes.

@@ -1,0 +1,48 @@
+# Doctrine
+
+## IDENTITY.md
+
+Identity instructions.
+
+## USER.md
+
+User profile.
+
+## AGENT.md
+
+Agent instructions.
+
+## MACRO.md
+
+Macro instructions.
+
+## Tooling
+
+Choose exactly one case-sensitive action key in TurnOutput.action.
+
+- **remote** — Remote inspection.
+- **local** — Local operation.
+
+## Built-in Skills
+
+Built-in workflow.
+
+## Screen layout
+
+Learned screen coordinates.
+
+## Available skills
+
+On-demand skill index.
+
+## Available Macros
+
+Enabled macro index.
+
+## Learned pitfalls
+
+Remember this pitfall.
+
+## memory.md
+
+Persistent facts.

@@ -1,0 +1,17 @@
+kind: macro
+schema: 1
+name: store-nudge
+description: shift a storefront cart's list a finger's width up — the 全选 row under the floating button moves clear of it
+# Disabled until rehearsed on YOUR device: physiclaw macros run taobao/store-nudge
+enabled: false
+steps:
+  # This phone's AssistiveTouch button floats over the left edge at y
+  # 0.31–0.37, where the 全选 row sits under a coupon header; a short
+  # slow stroke moves it clear (a full scroll would snap the list back
+  # to the top), run only while the row is in that band.
+  - swipe: up
+    at: [0.30, 0.50, 0.70, 0.60]
+    size: s
+    speed: slow
+    when: {text: "全选", within: [0.0, 0.28, 0.6, 0.40]}
+  - wait: 1

@@ -1,0 +1,477 @@
+"""One pack, many playbooks: what the manifest declares once — pages
+with their recover hands, landmarks, placeholders — and the hands the
+macros directory records, every playbook file sees. The Taobao shape
+before the second task arrives, proved on a fixture pack."""
+
+from __future__ import annotations
+
+import pytest
+from conductor_fakes import PACK_MACRO, write_local_macro, write_playbook
+
+from physiclaw.common import paths
+from physiclaw.common.placeholders import write_placeholder_values
+from physiclaw.conductor.drive import activation, build
+from physiclaw.conductor.drive import setup as conductor_setup
+from physiclaw.conductor.load import pack as pb
+from physiclaw.conductor.load.pack import discover, load_spec, qualified_all
+from physiclaw.conductor.load.prints import prints_for_app
+from physiclaw.conductor.spec.model import PlaybookError, RecoverHand, resolve_inputs
+
+MANIFEST = """\
+kind: manifest
+schema: 1
+app: shop
+description: two tasks in one app
+placeholders:
+  CONTACT:
+    description: the user thread
+    example: Someone
+landmarks:
+  dismiss:
+    label: "scrim"
+    at: [0.35, 0.16, 0.65, 0.24]
+pages:
+  home:
+    description: the home page
+    anchors: ["Files"]
+    recover: force_quit
+  results:
+    description: the results page
+    anchors: ["综合"]
+    recover:
+      covered: {tap: app.landmarks.dismiss}
+      elsewhere: {macro: app.macros.launch}
+    tries: 2
+"""
+
+BUY = """\
+kind: entry
+schema: 1
+name: buy
+description: buy something
+inputs:
+  keyword:
+    description: what to search
+route:
+  - start: app
+    macro: app.macros.launch
+  - page: app.pages.home
+  - do: search
+    macro: app.macros.search
+    with: {message: "{inputs.keyword}"}
+  - page: app.pages.results
+  - agent: pick
+    context:
+      prompt: "pick for <<CONTACT>>, dismissing promos at {dismiss}"
+      given: {dismiss: app.landmarks.dismiss}
+    tools: [tap]
+    returns:
+      summary: one line
+  - page: app.pages.results
+"""
+
+TRACK = """\
+kind: entry
+schema: 1
+name: track
+description: track an order
+route:
+  - start: app
+    macro: app.macros.launch
+  - page: app.pages.home
+  - do: orders
+    macro: app.macros.search
+    with: {message: "orders"}
+  - page: app.pages.results
+    recover: go_back
+  - tell: done
+    message: "<<CONTACT>>, your order is on its way"
+"""
+
+
+def _write_pack(app: str, manifest: str, **playbooks: str):
+    """A pack the fixtures share: two recorded hands, the manifest, and
+    the playbook files given by name."""
+    root = paths.playbooks_dir() / app
+    (root / "macros").mkdir(parents=True, exist_ok=True)
+    for name in ("launch", "search"):
+        (root / "macros" / f"{name}.yml").write_text(
+            PACK_MACRO.format(name=name), encoding="utf-8"
+        )
+    (root / "APP.yml").write_text(manifest, encoding="utf-8")
+    for name, text in playbooks.items():
+        write_playbook(root, name, text)
+    return root
+
+
+@pytest.fixture
+def shop():
+    write_placeholder_values({"CONTACT": "Alice"})
+    return _write_pack("shop", MANIFEST, buy=BUY, track=TRACK)
+
+
+def test_the_manifest_says_what_it_is_and_which_grammar_it_is_in() -> None:
+    _write_pack("shop", MANIFEST.replace("kind: manifest\n", ""), buy=BUY)
+    with pytest.raises(PlaybookError, match="shop/APP.yml: no `kind:`"):
+        pb.load_pack("shop")
+
+    _write_pack("shop", MANIFEST.replace("schema: 1\n", ""), buy=BUY)
+    with pytest.raises(PlaybookError, match="shop/APP.yml: no `schema:`"):
+        pb.load_pack("shop")
+
+    _write_pack("shop", MANIFEST.replace("kind: manifest", "kind: entry"), buy=BUY)
+    with pytest.raises(PlaybookError, match="`kind: entry` sits where"):
+        pb.load_pack("shop")
+
+
+def test_both_playbooks_parse_against_the_one_manifest(shop) -> None:
+    pack = pb.load_pack("shop")
+    entries = {e.name: e for e in pb.scan_playbooks("shop", pack)}
+
+    assert set(entries) == {"buy", "track"}
+    assert all(e.error is None for e in entries.values()), entries
+    assert set(pack.pages) == {"home", "results"}
+    assert set(pack.landmarks) == {"dismiss"}
+
+
+def test_manifest_hands_are_inherited_and_a_route_may_override(shop) -> None:
+    pack = pb.load_pack("shop")
+    buy, track = (
+        next(e.spec for e in pb.scan_playbooks("shop", pack) if e.name == n)
+        for n in ("buy", "track")
+    )
+    assert buy is not None and track is not None
+
+    # buy declares nothing: it walks with the manifest's hands as is.
+    assert buy.recovers["home"].elsewhere == RecoverHand(tool="force_quit")
+    assert buy.recovers["results"].covered == RecoverHand(
+        tool="tap", landmark="dismiss"
+    )
+    assert buy.recovers["results"].elsewhere == RecoverHand(macro="launch")
+    assert buy.recovers["results"].tries == 2
+    # track overrides results for its own walk and still inherits home.
+    assert track.recovers["results"].elsewhere == RecoverHand(tool="go_back")
+    assert track.recovers["home"] == buy.recovers["home"]
+
+
+def test_shared_macros_placeholders_and_landmarks_reach_every_file(shop) -> None:
+    pack = pb.load_pack("shop")
+    specs = {e.name: e.spec for e in pb.scan_playbooks("shop", pack)}
+
+    # Both routes start with the same recorded hand, by name.
+    assert specs["buy"].nodes[0].macro == "launch"
+    assert specs["track"].nodes[0].macro == "launch"
+    # The one dispatch table a walk of this pack needs: both directory
+    # macros, and no inline bodies since neither file embedded one.
+    assert set(qualified_all("shop", pack)) == {"shop/launch", "shop/search"}
+    # The placeholder filled at load, in a prompt and in a message.
+    assert "pick for Alice" in specs["buy"].nodes[2].prompt
+    assert specs["track"].nodes[2].message.startswith("Alice,")
+    # The landmark granted by name in one file is the manifest's.
+    assert specs["buy"].nodes[2].landmarks == {"dismiss": "dismiss"}
+
+
+def test_the_matcher_sees_the_shared_pages_and_a_walk_builds(shop) -> None:
+    pack = pb.load_pack("shop")
+    assert {p.decl.name for p in prints_for_app("shop", decls=pack.pages)} == {
+        "home",
+        "results",
+    }
+    for name in ("buy", "track"):
+        spec, _ = load_spec("shop", name)
+        program = build.build_program(
+            spec,
+            pack,
+            resolve_inputs(spec, {"keyword": "x"} if name == "buy" else {}),
+            None,
+            dry=True,
+        )
+        assert set(conductor_setup.walk_registry(program, None)) == {
+            "shop/launch",
+            "shop/search",
+        }
+        assert program.spec.recovers["home"].elsewhere == RecoverHand(tool="force_quit")
+
+
+def test_manifest_hand_must_name_a_recorded_macro_never_a_body(shop) -> None:
+    # The manifest's hands are resolved once, at pack load: a body there
+    # is the pack's own fault, raised before any playbook compiles.
+    (shop / "APP.yml").write_text(
+        MANIFEST.replace(
+            "elsewhere: {macro: app.macros.launch}",
+            "elsewhere: {macro: {steps: [home_screen]}}\n",
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(PlaybookError, match="record the body as macros/<name>.yml"):
+        pb.load_pack("shop")
+
+
+def test_manifest_hand_on_an_undeclared_page_is_refused(shop) -> None:
+    # A page entry with a hand and no anchors is not a declaration: the
+    # pack refuses it as a page, before any route could inherit it.
+    (shop / "APP.yml").write_text(
+        MANIFEST + "  ghost:\n    recover: go_back\n", encoding="utf-8"
+    )
+
+    with pytest.raises(PlaybookError, match="ghost"):
+        pb.load_pack("shop")
+
+
+def test_a_page_declared_in_the_manifest_and_a_file_is_refused(shop) -> None:
+    (shop / "track").mkdir(exist_ok=True)
+    (shop / "track" / "PLAYBOOK.yml").write_text(
+        TRACK.replace(
+            "  - page: app.pages.home\n",
+            '  - page: home\n    description: the home page\n    anchors: ["Files"]\n',
+            1,
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(PlaybookError, match="declared twice"):
+        pb.load_pack("shop")
+
+
+def test_activation_menu_is_one_line_per_playbook_and_check_flags_twins(shop) -> None:
+    # A second pack offering the same task with the same words: the
+    # menu shows two identical lines under different refs, and `check`
+    # says so — the fix is a description that names the app.
+    from typer.testing import CliRunner
+
+    from physiclaw.cli import app as cli_app
+
+    _write_pack(
+        "mall",
+        MANIFEST.replace("app: shop", "app: mall"),
+        buy=BUY.replace("app.macros.", "app.macros."),
+    )
+    entries = {}
+    for app in ("shop", "mall"):
+        pack = pb.load_pack(app)
+        for e in pb.scan_playbooks(app, pack):
+            if e.name == "buy":
+                entries[f"{app}/buy"] = (e.spec, pack)
+
+    menu = activation.Activation(entries=entries, channel=None)._menu()
+    result = CliRunner().invoke(cli_app, ["playbooks", "check"])
+
+    assert menu.splitlines() == [
+        "Available playbooks:",
+        "- shop/buy: buy something [inputs: keyword (what to search)]",
+        "- mall/buy: buy something [inputs: keyword (what to search)]",
+    ]
+    assert "same description" in result.output and "mall/buy" in result.output
+
+
+# ---------- a playbook's own recorded hands ----------
+
+LOCAL_BUY = """\
+kind: entry
+schema: 1
+name: buy
+description: buy with its own recorded search
+route:
+  - start: open
+    macro: app.macros.launch
+  - page: app.pages.home
+  - do: find
+    macro: search-own
+  - page: app.pages.results
+"""
+
+
+def test_a_playbook_macro_file_resolves_by_bare_name_under_the_inline_spelling() -> (
+    None
+):
+    root = _write_pack("shop", MANIFEST, buy=LOCAL_BUY)
+    write_local_macro(root, "buy", "search-own")
+
+    pack = pb.load_pack("shop")
+    (buy,) = (e.spec for e in pb.scan_playbooks("shop", pack) if e.name == "buy")
+
+    assert buy is not None
+    # The route names it bare; it dispatches as the route's own, exactly
+    # like an inline body, and joins the pack's dispatch table.
+    assert buy.nodes[1].macro == "buy.search-own"
+    assert buy.inline_macros["buy.search-own"].name == "buy.search-own"
+    assert set(qualified_all("shop", pack)) == {
+        "shop/launch",
+        "shop/search",
+        "shop/buy.search-own",
+    }
+
+
+def test_an_unreferenced_playbook_macro_is_still_the_routes_to_run() -> None:
+    root = _write_pack("shop", MANIFEST, buy=LOCAL_BUY)
+    write_local_macro(root, "buy", "search-own")
+    write_local_macro(root, "buy", "spare")
+
+    pack = pb.load_pack("shop")
+
+    assert "shop/buy.spare" in qualified_all("shop", pack)
+
+
+def test_a_bare_name_is_the_playbooks_own_file_even_when_the_pack_has_one() -> None:
+    # `macro: search` is buy/macros/search.yml; the pack's is
+    # `app.macros.search` — two spellings, no clash.
+    root = _write_pack("shop", MANIFEST, buy=LOCAL_BUY.replace("search-own", "search"))
+    write_local_macro(root, "buy", "search")  # the pack already records `search`
+
+    pack = pb.load_pack("shop")
+    (buy,) = (e.spec for e in pb.scan_playbooks("shop", pack) if e.name == "buy")
+
+    assert buy is not None and buy.nodes[1].macro == "buy.search"
+
+
+def test_two_playbooks_may_each_own_a_macro_of_the_same_name() -> None:
+    root = _write_pack(
+        "shop",
+        MANIFEST,
+        buy=LOCAL_BUY,
+        track=LOCAL_BUY.replace("name: buy", "name: track"),
+    )
+    write_local_macro(root, "buy", "search-own")
+    write_local_macro(root, "track", "search-own")
+
+    pack = pb.load_pack("shop")
+    specs = {e.name: e.spec for e in pb.scan_playbooks("shop", pack)}
+
+    assert specs["buy"].nodes[1].macro == "buy.search-own"
+    assert specs["track"].nodes[1].macro == "track.search-own"
+
+
+def test_a_broken_playbook_macro_fails_the_route_that_names_it_with_the_cause() -> None:
+    root = _write_pack("shop", MANIFEST, buy=LOCAL_BUY)
+    write_local_macro(root, "buy", "search-own", "name: other\n")
+
+    pack = pb.load_pack("shop")
+    entries = {e.name: e for e in pb.scan_playbooks("shop", pack)}
+
+    assert pack.local["buy"].macros.errors["search-own"]
+    assert "buy/macros/search-own.yml) is invalid" in (entries["buy"].error or "")
+
+
+def test_an_inline_body_may_not_take_a_recorded_macros_name() -> None:
+    inline = LOCAL_BUY.replace(
+        "    macro: search-own\n", "    macro: {steps: [home_screen]}\n"
+    ).replace("do: find", "do: search-own")
+    root = _write_pack("shop", MANIFEST, buy=inline)
+    write_local_macro(root, "buy", "search-own")
+
+    entries = {e.name: e for e in pb.scan_playbooks("shop")}
+
+    assert "already holds — rename one" in (entries["buy"].error or "")
+
+
+# ---------- optional inputs ----------
+
+
+def test_an_input_with_a_default_is_optional_and_the_menu_says_so() -> None:
+    # The boot's parse prompt tells the model to omit inputs the message
+    # does not specify; a default makes that safe, and the menu names it
+    # so the model knows which omissions the activation will fill.
+    optional = LOCAL_BUY.replace(
+        "description: buy with its own recorded search\n",
+        "description: buy with its own recorded search\n"
+        "inputs:\n  keyword:\n    description: what to buy\n"
+        '  qty:\n    description: how many\n    default: "1"\n',
+    )
+    _write_pack("shop", MANIFEST, buy=optional)
+    write_local_macro(paths.playbooks_dir() / "shop", "buy", "search-own")
+    entries = discover().entries
+    spec, pack = entries["shop/buy"]
+
+    menu = activation.Activation(entries=entries, channel=None)._menu()
+
+    assert "qty (how many; optional, default '1')" in menu
+    assert "keyword (what to buy)" in menu
+    assert resolve_inputs(spec, {"keyword": "water"}) == {
+        "keyword": "water",
+        "qty": "1",
+    }
+
+
+# ---------- the ambiguity advisory ----------
+
+
+def _pages_pack(pages_yaml: str):
+    _write_pack(
+        "shop", MANIFEST.replace("pages:\n", "pages:\n" + pages_yaml, 1), buy=BUY
+    )
+    return pb.load_pack("shop")
+
+
+def test_check_warns_when_one_page_reads_whole_on_anothers_screen() -> None:
+    from physiclaw.conductor.route import lints
+
+    pack = _pages_pack(
+        "  sheet:\n    description: the pay sheet\n"
+        '    anchors: ["实付", "免密支付"]\n'
+        '  total:\n    description: the total row\n    anchors: ["实付"]\n'
+    )
+
+    lines = [w for w in lints.pack_warnings(pack, []) if "also reads" in w]
+
+    assert lines == [
+        "pages 'total' and 'sheet': a screen showing 'sheet' whole also reads "
+        "'total' — add an anchor or a `forbid` to 'total'"
+    ]
+
+
+def test_ambiguity_is_judged_by_the_matcher_not_by_text_sets() -> None:
+    from physiclaw.conductor.route import lints
+
+    # A band tells the pages apart (the same text pinned to the bottom is
+    # not the mid-screen row), and a forbid term does too.
+    pack = _pages_pack(
+        "  sheet:\n    description: the pay sheet\n"
+        '    anchors: ["实付", "免密支付"]\n'
+        "  bar:\n    description: the pay bar\n"
+        '    anchors: [{text: "实付", within: bottom}]\n'
+        "  receipt:\n    description: the receipt\n"
+        '    anchors: ["实付"]\n    forbid: ["免密支付"]\n'
+    )
+
+    lines = [w for w in lints.pack_warnings(pack, []) if "also reads" in w]
+
+    # sheet vs bar: the band separates them; sheet vs receipt: the forbid
+    # does. bar vs receipt is a real overlap — bar's screen shows 实付 and
+    # no 免密支付, which is exactly receipt — and the matcher says so.
+    assert lines == [
+        "pages 'receipt' and 'bar': a screen showing 'bar' whole also reads "
+        "'receipt' — add an anchor or a `forbid` to 'receipt'"
+    ]
+
+
+def test_a_manifest_pages_on_fail_is_inherited_and_a_route_may_override() -> None:
+    # `on_fail` is a page's word like its hands: declared once in the
+    # manifest it reaches every route; a route may say its own.
+    from conductor_fakes import PAGES, write_pack
+
+    pages = PAGES.replace(
+        '  anchors: ["综合"]\n', '  anchors: ["综合"]\n  on_fail: stop\n'
+    )
+    route = """\
+description: d
+inputs:
+  keyword:
+    description: what
+route:
+  - page: app.pages.home
+  - do: open
+    macro: app.macros.open-app
+    with: {message: "{inputs.keyword}"}
+  - page: app.pages.results
+"""
+    override = route.replace(
+        "  - page: app.pages.results\n",
+        "  - page: app.pages.results\n    on_fail: handover\n",
+    )
+    write_pack(pages=pages, playbooks={"inherits": route, "overrides": override})
+    pack = pb.load_pack("demo")
+    specs = {e.name: e.spec for e in pb.scan_playbooks("demo", pack)}
+
+    assert specs["inherits"].recovers["results"].on_fail == "stop"
+    assert specs["overrides"].recovers["results"].on_fail == "handover"

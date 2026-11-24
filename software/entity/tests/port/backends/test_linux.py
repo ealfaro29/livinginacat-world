@@ -1,0 +1,367 @@
+"""Tests for `physiclaw.port.backends.linux`.
+
+The module only imports stdlib, so it imports and runs on any host — the
+OS calls (`shutil.which`, `subprocess`) are mocked so nothing actually
+launches.
+"""
+
+from __future__ import annotations
+
+from types import SimpleNamespace
+from unittest.mock import MagicMock, call
+
+import pytest
+
+from physiclaw.port.backends import linux
+
+
+def test_regression_aim_viewer_tries_next_after_launch_failure(mocker) -> None:
+    mocker.patch.object(linux.shutil, "which", side_effect=lambda name: "/bin/" + name)
+    launch = mocker.patch.object(
+        linux.subprocess, "Popen", side_effect=[PermissionError, MagicMock()]
+    )
+
+    linux.open_camera_aim_app()
+
+    assert [item.args[0] for item in launch.call_args_list] == [
+        ["snapshot"],
+        ["cheese"],
+    ]
+
+
+def test_regression_aim_cleanup_tolerates_missing_pkill(mocker) -> None:
+    run = mocker.patch.object(linux.subprocess, "run", side_effect=FileNotFoundError)
+    sleep = mocker.patch.object(linux.time, "sleep")
+
+    linux.quit_camera_aim_app()
+
+    assert run.called
+    sleep.assert_called_once_with(0.5)
+
+
+def test_regression_image_viewer_tolerates_execution_denied(mocker) -> None:
+    run = mocker.patch.object(linux.subprocess, "run", side_effect=PermissionError)
+
+    linux.open_image_files(["capture.png"])
+
+    run.assert_called_once_with(["xdg-open", "capture.png"], capture_output=True)
+
+
+def test_regression_primary_video_group_does_not_warn(mocker) -> None:
+    mocker.patch.object(
+        linux.glob,
+        "glob",
+        side_effect=lambda pattern: ["/dev/video0"] if pattern == "/dev/video*" else [],
+    )
+    mocker.patch.object(
+        linux, "grp", SimpleNamespace(getgrnam=lambda name: SimpleNamespace(gr_gid=123))
+    )
+    mocker.patch.object(linux.os, "getegid", return_value=123, create=True)
+    mocker.patch.object(linux.os, "getgroups", return_value=[], create=True)
+
+    hints = linux.hardware_permission_hints()
+
+    assert hints == []
+
+
+@pytest.mark.parametrize("value", [float("inf"), float("nan"), -1.0])
+def test_regression_read_nonfinite_focus_is_unavailable(value) -> None:
+    cap = MagicMock()
+    cap.get.return_value = value
+
+    focus = linux.camera_read_focus(cap)
+
+    assert focus is None
+
+
+@pytest.mark.parametrize("value", [float("inf"), float("nan"), -1.0, 0.5, 2**31, 1e100])
+def test_regression_apply_invalid_focus_preserves_autofocus(value) -> None:
+    cap = MagicMock()
+
+    ok = linux.camera_apply_focus(cap, value)
+
+    assert ok is False
+    cap.set.assert_not_called()
+
+
+def test_trust_proxy_env_is_true() -> None:
+    assert linux.TRUST_PROXY_ENV is True
+
+
+def test_ensure_camera_permission_is_a_noop() -> None:
+    # No prompt on Linux — must not raise and must not shell out.
+    assert linux.ensure_camera_permission() is None
+
+
+def test_local_hostname_strips_dns_suffix(monkeypatch) -> None:
+    monkeypatch.setattr(linux.socket, "gethostname", lambda: "rig.local")
+    assert linux.local_hostname() == "rig"
+
+
+def test_local_hostname_returns_none_on_failure(monkeypatch) -> None:
+    def boom() -> str:
+        raise OSError("no hostname")
+
+    monkeypatch.setattr(linux.socket, "gethostname", boom)
+    assert linux.local_hostname() is None
+
+
+def test_open_camera_aim_app_launches_first_available(monkeypatch) -> None:
+    # cheese is missing, guvcview is present → guvcview is launched.
+    monkeypatch.setattr(
+        linux.shutil, "which", lambda app: app if app == "guvcview" else None
+    )
+    popen = MagicMock()
+    monkeypatch.setattr(linux.subprocess, "Popen", popen)
+    linux.open_camera_aim_app()
+    popen.assert_called_once()
+    assert popen.call_args[0][0] == ["guvcview"]
+
+
+def test_open_camera_aim_app_noop_when_none_installed(monkeypatch) -> None:
+    monkeypatch.setattr(linux.shutil, "which", lambda app: None)
+    popen = MagicMock()
+    monkeypatch.setattr(linux.subprocess, "Popen", popen)
+    linux.open_camera_aim_app()
+    popen.assert_not_called()
+
+
+def test_quit_camera_aim_app_pkills_candidates(monkeypatch) -> None:
+    run = MagicMock()
+    monkeypatch.setattr(linux.subprocess, "run", run)
+    monkeypatch.setattr(linux.time, "sleep", lambda _s: None)
+    linux.quit_camera_aim_app()
+    killed = {call.args[0][-1] for call in run.call_args_list}
+    assert killed == set(linux._AIM_APPS)
+
+
+def test_open_image_files_uses_xdg_open(monkeypatch) -> None:
+    run = MagicMock()
+    monkeypatch.setattr(linux.subprocess, "run", run)
+    linux.open_image_files(["/tmp/a.jpg", "/tmp/b.jpg"])
+    assert [call.args[0] for call in run.call_args_list] == [
+        ["xdg-open", "/tmp/a.jpg"],
+        ["xdg-open", "/tmp/b.jpg"],
+    ]
+
+
+def test_camera_denied_hint_mentions_video_group() -> None:
+    assert "video" in linux.camera_denied_hint()
+
+
+def test_camera_aim_hint_is_present() -> None:
+    assert linux.camera_aim_hint()  # non-empty on Linux
+
+
+def test_opencv_import_hint_only_for_libgl() -> None:
+    assert linux.opencv_import_hint(ImportError("libGL.so.1: cannot open")) is not None
+    assert linux.opencv_import_hint(ImportError("some other error")) is None
+
+
+def test_hardware_permission_hints_warns_when_not_in_group(monkeypatch) -> None:
+    # video + ttyUSB nodes exist; user is in neither 'video' nor 'dialout'.
+    monkeypatch.setattr(
+        linux.glob,
+        "glob",
+        lambda pat: ["/dev/video0"] if "video" in pat else ["/dev/ttyUSB0"],
+    )
+    monkeypatch.setattr(linux, "_in_group", lambda name: False)
+    monkeypatch.setattr(linux, "_group_exists", lambda name: name == "dialout")
+    hints = linux.hardware_permission_hints()
+    assert any("video" in h for h in hints)
+    assert any("dialout" in h for h in hints)
+
+
+def test_hardware_permission_hints_silent_when_in_group(monkeypatch) -> None:
+    monkeypatch.setattr(linux.glob, "glob", lambda pat: ["/dev/video0"])
+    monkeypatch.setattr(linux, "_in_group", lambda name: True)
+    monkeypatch.setattr(linux, "_group_exists", lambda name: True)
+    assert linux.hardware_permission_hints() == []
+
+
+# ---------- camera exposure ----------
+
+
+def test_camera_exposure_tunable_on_linux() -> None:
+    assert linux.camera_exposure_tunable() is True
+
+
+def test_no_camera_size_cap_on_linux() -> None:
+    # Exposure is always correctable here, so no mode is unsafe.
+    assert linux.camera_size_cap() is None
+
+
+def test_camera_backend_is_v4l2() -> None:
+    # The setters encode raw V4L2 menu values — the backend must match.
+    import cv2
+
+    assert linux.camera_backend() == cv2.CAP_V4L2
+
+
+def test_set_auto_exposure_v4l2_encoding() -> None:
+    # Modern OpenCV 4.x V4L2 takes raw menu values: 3 = aperture-priority
+    # auto (the usual UVC "auto"), not the legacy normalized 0.75.
+    import cv2
+
+    cap = MagicMock()
+    linux.camera_set_auto_exposure(cap)
+
+    assert cap.set.call_args_list == [call(cv2.CAP_PROP_AUTO_EXPOSURE, 3)]
+
+
+def test_set_manual_exposure_converts_log2_seconds_to_v4l2_ticks() -> None:
+    # `set_manual` receives the shared log2-seconds scale (exposure.py's
+    # -8..-5 band); V4L2 wants ~100µs ticks. Passing the raw negative
+    # through (old behavior) got driver-clamped, so converge()'s luma
+    # stall check read "driver ignores or clamps exposure writes" and
+    # every tune on Linux reverted to blown-out auto (observed on a
+    # real session).
+    import cv2
+
+    cap = MagicMock()
+    linux.camera_set_manual_exposure(cap, -6)  # 2**-6 s = 15.6ms → 156 ticks
+
+    assert cap.set.call_args_list == [
+        call(cv2.CAP_PROP_AUTO_EXPOSURE, 1),
+        call(cv2.CAP_PROP_EXPOSURE, 156),
+    ]
+
+
+def test_set_manual_exposure_tick_conversion_bounds() -> None:
+    import cv2
+
+    for log2_value, ticks in [
+        (-8, 39),  # band floor: 3.9ms
+        (-5, 312),  # band ceiling: 31.2ms
+        (-2, 2500),  # out of band: the mapping itself is total
+        (-20, 1),  # far out of band: clamps to the 1-tick floor, not 0
+    ]:
+        cap = MagicMock()
+        linux.camera_set_manual_exposure(cap, log2_value)
+
+        assert call(cv2.CAP_PROP_EXPOSURE, ticks) in cap.set.call_args_list
+
+
+# ---------- camera focus ----------
+
+
+def test_camera_focus_lockable_on_linux() -> None:
+    assert linux.camera_focus_lockable() is True
+
+
+@pytest.mark.parametrize("register", [42.0, -1.0], ids=["stale", "unreadable"])
+def test_lock_focus_does_not_use_the_manual_register(register) -> None:
+    import cv2
+
+    cap = MagicMock()
+    cap.set.return_value = True
+    cap.get.return_value = register
+
+    assert linux.camera_lock_focus(cap) is True
+    assert cap.set.call_args_list == [call(cv2.CAP_PROP_AUTOFOCUS, 0)]
+    cap.get.assert_not_called()
+
+
+def test_lock_focus_fails_when_af_toggle_refused() -> None:
+    cap = MagicMock()
+    cap.set.return_value = False
+    cap.get.return_value = 42.0
+
+    assert linux.camera_lock_focus(cap) is False
+
+
+def test_unlock_focus_reenables_af() -> None:
+    import cv2
+
+    cap = MagicMock()
+    cap.set.return_value = True
+    cap.get.return_value = 1
+    assert linux.camera_unlock_focus(cap) is True
+
+    assert cap.set.call_args_list == [call(cv2.CAP_PROP_AUTOFOCUS, 1)]
+    cap.get.assert_called_once_with(cv2.CAP_PROP_AUTOFOCUS)
+
+
+def test_read_focus_returns_position() -> None:
+    import cv2
+
+    cap = MagicMock()
+    cap.get.return_value = 42.0
+
+    assert linux.camera_read_focus(cap) == 42.0
+    cap.get.assert_called_once_with(cv2.CAP_PROP_FOCUS)
+
+
+def test_read_focus_accepts_zero_on_v4l2() -> None:
+    cap = MagicMock()
+    cap.get.return_value = 0.0
+
+    assert linux.camera_read_focus(cap) == 0.0
+
+
+def test_apply_focus_disables_af_then_drives_the_lens() -> None:
+    import cv2
+
+    cap = MagicMock()
+    cap.set.return_value = True
+    cap.get.side_effect = lambda prop: 137.0 if prop == cv2.CAP_PROP_FOCUS else 0.0
+
+    assert linux.camera_apply_focus(cap, 137.0) is True
+    assert cap.set.call_args_list == [
+        call(cv2.CAP_PROP_AUTOFOCUS, 0),
+        call(cv2.CAP_PROP_FOCUS, 137.0),
+    ]
+
+
+def test_apply_focus_fails_when_af_toggle_refused() -> None:
+    cap = MagicMock()
+    cap.set.return_value = False
+
+    assert linux.camera_apply_focus(cap, 137.0) is False
+    assert cap.set.call_count == 1  # never writes a position over live AF
+
+
+@pytest.mark.parametrize("autofocus", [1.0, -1.0, float("nan")])
+def test_manual_focus_never_writes_before_confirming_af_off(autofocus):
+    import cv2
+
+    cap = MagicMock()
+    cap.set.return_value = True  # The driver claims to accept AF-off.
+    cap.get.side_effect = lambda prop: (
+        autofocus if prop == cv2.CAP_PROP_AUTOFOCUS else 137
+    )
+
+    assert not linux.camera_apply_focus(cap, 137)
+    assert cap.set.call_args_list == [call(cv2.CAP_PROP_AUTOFOCUS, 0)]
+
+
+@pytest.mark.parametrize(
+    "requested,readback,af,accepted",
+    [
+        (0, 0, 0, True),
+        (1024, 1023, 0, False),
+        (137, 137, 1, False),
+        (137, -1, 0, False),
+        (137, float("nan"), 0, False),
+    ],
+)
+def test_manual_focus_requires_exact_readback_and_af_off(
+    requested, readback, af, accepted
+):
+    import cv2
+
+    cap = MagicMock()
+    cap.set.return_value = True
+    # AF-off is initially confirmed; the absolute write can still change it.
+    af_reads = iter([0, af])
+    cap.get.side_effect = lambda prop: (
+        readback if prop == cv2.CAP_PROP_FOCUS else next(af_reads)
+    )
+    assert linux.camera_apply_focus(cap, requested) is accepted
+
+
+def test_refused_linux_af_restore_is_reported(caplog):
+    cap = MagicMock()
+    cap.set.return_value = False
+    assert linux.camera_unlock_focus(cap) is False
+    assert "could not re-enable autofocus" in caplog.text

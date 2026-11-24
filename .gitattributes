@@ -1,1 +1,4 @@
 *.pdf binary
+*.step -text
+*.stl -text
+*.3mf binary

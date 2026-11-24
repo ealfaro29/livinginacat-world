@@ -1,0 +1,714 @@
+"""Tests for `physiclaw.provider.vendors.google.chat`.
+
+GoogleChatProvider extends OpenAICompatibleProvider with shim-specific
+quirks: image_url isn't allowed in role:tool, and tool_calls require
+a thought_signature. Tests exercise both wire-level transformations
+without going through the network.
+"""
+
+from __future__ import annotations
+
+from types import SimpleNamespace
+
+import pytest
+import respx
+
+from physiclaw.common.provider_errors import ProviderTransientError
+from physiclaw.contract.dto import (
+    AssistantMessage,
+    FinishReason,
+    ImageBlock,
+    SystemMessage,
+    TextBlock,
+    ToolCall,
+    ToolResultMessage,
+    Usage,
+    UserMessage,
+)
+from physiclaw.provider.chat.history import NO_CACHE_MARKERS
+from physiclaw.provider.chat.wire import tool_result_with_user_images
+from physiclaw.provider.vendors.google.chat import (
+    _SIG_BYPASS,
+    GoogleChatProvider,
+    _extract_thought_signature,
+)
+
+
+@pytest.fixture(autouse=True)
+def _stub_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("GOOGLE_API_KEY", "test-key")
+
+
+@pytest.fixture
+def provider() -> GoogleChatProvider:
+    return GoogleChatProvider(model="gemini-3-flash-preview")
+
+
+# ---------- constants ----------
+
+
+def test_provider_id_is_google() -> None:
+    assert GoogleChatProvider.PROVIDER_ID == "google"
+
+
+def test_base_url_uses_google_openai_shim() -> None:
+    assert GoogleChatProvider.BASE_URL == (
+        "https://generativelanguage.googleapis.com/v1beta/openai"
+    )
+
+
+@pytest.mark.parametrize(
+    "delay,wrapped,header,expected",
+    [
+        ("51s", False, None, 51),
+        ("84890s", True, None, 84890),
+        ("1.250s", True, "1", 1.25),
+        ("2s", False, "7", 7),
+        ("0s", False, None, 0),
+        ("-1s", False, None, None),
+        ("NaNs", True, None, None),
+        ("51", True, None, None),
+        (51, False, None, None),
+    ],
+)
+async def test_quota_retry_uses_rpc_delay_and_http_header(
+    provider, respx_mock, delay, wrapped, header, expected
+):
+    body = {
+        "error": {
+            "details": [
+                {
+                    "@type": "type.googleapis.com/google.rpc.RetryInfo",
+                    "retryDelay": delay,
+                }
+            ]
+        }
+    }
+    route = respx_mock.route(method="POST").respond(
+        429,
+        json=[body] if wrapped else body,
+        headers={"Retry-After": header} if header else {},
+    )
+    try:
+        with pytest.raises(ProviderTransientError) as caught:
+            await provider.chat([UserMessage("test")], [])
+        assert caught.value.retry_after == expected
+        assert caught.value.status_code == 429
+        assert route.call_count == 1
+    finally:
+        await provider.aclose()
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        "not json",
+        "null",
+        '{"error": null}',
+        '{"error": {"details": null}}',
+        '{"error": {"details": [null, {"retryDelay": "60s"}]}}',
+    ],
+)
+async def test_malformed_quota_body_preserves_header(provider, respx_mock, body):
+    respx_mock.route(method="POST").respond(
+        429, content=body, headers={"Retry-After": "7"}
+    )
+    try:
+        with pytest.raises(ProviderTransientError) as caught:
+            await provider.chat([UserMessage("test")], [])
+        assert caught.value.retry_after == 7
+    finally:
+        await provider.aclose()
+
+
+def test_sig_bypass_constant_pinned() -> None:
+    assert _SIG_BYPASS == "skip_thought_signature_validator"
+
+
+# ---------- list_models ----------
+
+
+@pytest.mark.asyncio
+async def test_list_models_strips_models_slash_prefix(
+    provider: GoogleChatProvider, respx_mock: respx.MockRouter
+) -> None:
+    respx_mock.get(
+        "https://generativelanguage.googleapis.com/v1beta/openai/models"
+    ).respond(
+        json={
+            "data": [
+                {"id": "models/gemini-3-flash-preview", "object": "model"},
+                {"id": "models/gemini-2.5-pro", "owned_by": "google"},
+            ],
+        },
+    )
+
+    out = await provider.list_models()
+
+    assert out == [
+        {"id": "gemini-3-flash-preview", "object": "model"},
+        {"id": "gemini-2.5-pro", "owned_by": "google"},
+    ]
+
+
+@pytest.mark.asyncio
+async def test_list_models_passes_through_id_without_models_prefix(
+    provider: GoogleChatProvider, respx_mock: respx.MockRouter
+) -> None:
+    # Defensive — if Google ever drops the prefix, the helper must not
+    # double-mangle.
+    respx_mock.get(
+        "https://generativelanguage.googleapis.com/v1beta/openai/models"
+    ).respond(json={"data": [{"id": "gemini-3"}]})
+
+    assert await provider.list_models() == [{"id": "gemini-3"}]
+
+
+# ---------- cache markers: disabled for Google ----------
+
+
+def test_cache_markers_disabled() -> None:
+    """The shim ignores `cache_control`, and the shifting stub marker
+    would perturb Gemini's implicit prefix cache — markers off. (The
+    null-object template path itself is pinned in
+    `test_provider_base.py`.)"""
+    assert GoogleChatProvider.CACHE_MARKERS is NO_CACHE_MARKERS
+
+
+# ---------- _encode_message dispatch ----------
+
+
+def test_encode_system_message_delegates_to_super(
+    provider: GoogleChatProvider,
+) -> None:
+    out = provider._encode_message(SystemMessage(content="hi"))
+
+    assert out == {"role": "system", "content": "hi"}
+
+
+def test_encode_user_message_delegates_to_super(
+    provider: GoogleChatProvider,
+) -> None:
+    out = provider._encode_message(UserMessage(content="ping"))
+
+    assert out == {"role": "user", "content": "ping"}
+
+
+def test_encode_assistant_with_no_tool_calls_delegates_to_super(
+    provider: GoogleChatProvider,
+) -> None:
+    out = provider._encode_message(
+        AssistantMessage(
+            content="ack",
+            tool_calls=[],
+            finish_reason=FinishReason.STOP,
+        )
+    )
+
+    assert out == {"role": "assistant", "content": "ack"}
+
+
+def test_encode_assistant_with_tool_calls_uses_captured_thought_signature(
+    provider: GoogleChatProvider,
+) -> None:
+    msg = AssistantMessage(
+        content="reasoning",
+        tool_calls=[ToolCall(id="t1", name="tap", arguments={"x": 1})],
+        finish_reason=FinishReason.TOOL_CALLS,
+        vendor_extra={"google": {"thought_signature": "sig-from-prev-turn"}},
+    )
+
+    out = provider._encode_message(msg)
+
+    assert out["tool_calls"][0]["extra_content"] == {
+        "google": {"thought_signature": "sig-from-prev-turn"},
+    }
+
+
+def test_encode_assistant_with_tool_calls_falls_back_to_bypass_when_sig_missing(
+    provider: GoogleChatProvider,
+) -> None:
+    msg = AssistantMessage(
+        content="reasoning",
+        tool_calls=[ToolCall(id="t1", name="tap", arguments={})],
+        finish_reason=FinishReason.TOOL_CALLS,
+        # no vendor_extra set
+    )
+
+    out = provider._encode_message(msg)
+
+    assert out["tool_calls"][0]["extra_content"] == {
+        "google": {"thought_signature": _SIG_BYPASS},
+    }
+
+
+def test_encode_assistant_falls_back_to_bypass_when_sig_value_empty(
+    provider: GoogleChatProvider,
+) -> None:
+    msg = AssistantMessage(
+        content="",
+        tool_calls=[ToolCall(id="t1", name="x", arguments={})],
+        finish_reason=FinishReason.TOOL_CALLS,
+        vendor_extra={"google": {"thought_signature": ""}},
+    )
+
+    out = provider._encode_message(msg)
+
+    assert (
+        out["tool_calls"][0]["extra_content"]["google"]["thought_signature"]
+        == _SIG_BYPASS
+    )
+
+
+def test_encode_tool_result_message_routes_to_helper(
+    provider: GoogleChatProvider,
+) -> None:
+    out = provider._encode_message(ToolResultMessage(tool_call_id="t1", content="ok"))
+
+    # Helper returns a list (single entry for text-only).
+    assert out == [{"role": "tool", "tool_call_id": "t1", "content": "ok"}]
+
+
+# ---------- _parse_response ----------
+
+
+def test_parse_response_captures_signature_from_tool_call_extra_content(
+    provider: GoogleChatProvider,
+) -> None:
+    raw = {
+        "choices": [
+            {
+                "message": {
+                    "tool_calls": [
+                        {
+                            "id": "c1",
+                            "function": {"name": "tap", "arguments": "{}"},
+                            "extra_content": {"google": {"thought_signature": "sig-A"}},
+                        }
+                    ],
+                },
+                "finish_reason": "tool_calls",
+            }
+        ],
+    }
+
+    out = provider._parse_response(raw)
+
+    assert out.vendor_extra["google"]["thought_signature"] == "sig-A"
+
+
+def test_parse_response_captures_signature_from_message_extra_content(
+    provider: GoogleChatProvider,
+) -> None:
+    # Text-only response — signature on the message rather than tool_call.
+    raw = {
+        "choices": [
+            {
+                "message": {
+                    "content": "thinking out loud",
+                    "extra_content": {"google": {"thought_signature": "sig-B"}},
+                },
+                "finish_reason": "stop",
+            }
+        ],
+    }
+
+    out = provider._parse_response(raw)
+
+    assert out.vendor_extra["google"]["thought_signature"] == "sig-B"
+
+
+def test_parse_response_no_signature_leaves_vendor_extra_empty(
+    provider: GoogleChatProvider,
+) -> None:
+    raw = {
+        "choices": [
+            {
+                "message": {"content": "x"},
+                "finish_reason": "stop",
+            }
+        ],
+    }
+
+    out = provider._parse_response(raw)
+
+    assert "google" not in out.vendor_extra
+
+
+def test_parse_response_preserves_existing_google_vendor_extra(
+    provider: GoogleChatProvider, mocker
+) -> None:
+    # super()._parse_response is what builds the AssistantMessage; we
+    # verify our override only overlays "thought_signature" without
+    # clobbering other vendor_extra keys.
+    raw = {
+        "choices": [
+            {
+                "message": {
+                    "content": "x",
+                    "extra_content": {"google": {"thought_signature": "sig-C"}},
+                },
+                "finish_reason": "stop",
+            }
+        ],
+    }
+    # Patch base parse to inject pre-existing vendor_extra so we can
+    # check that setdefault preserves it.
+    base_msg = AssistantMessage(
+        content="x",
+        tool_calls=[],
+        finish_reason=FinishReason.STOP,
+        vendor_extra={"google": {"other_key": "kept"}},
+    )
+    mocker.patch(
+        "physiclaw.provider.chat.openai_compat.OpenAICompatibleProvider._parse_response",
+        return_value=base_msg,
+    )
+
+    out = provider._parse_response(raw)
+
+    assert out.vendor_extra["google"]["other_key"] == "kept"
+    assert out.vendor_extra["google"]["thought_signature"] == "sig-C"
+
+
+# ---------- _encode_tool_result ----------
+
+
+def test_encode_tool_result_text_only_returns_single_role_tool() -> None:
+    result = ToolResultMessage(tool_call_id="t1", content="ok")
+
+    out = tool_result_with_user_images(result)
+
+    assert out == [{"role": "tool", "tool_call_id": "t1", "content": "ok"}]
+
+
+def test_encode_tool_result_text_block_only_returns_single_entry() -> None:
+    result = ToolResultMessage(
+        tool_call_id="t1",
+        content=[TextBlock(text="caption")],
+    )
+
+    out = tool_result_with_user_images(result)
+
+    assert len(out) == 1
+    assert out[0]["role"] == "tool"
+
+
+def test_encode_tool_result_with_image_splits_into_two_entries() -> None:
+    result = ToolResultMessage(
+        tool_call_id="t1",
+        content=[
+            TextBlock(text="caption"),
+            ImageBlock(media_type="image/png", data_b64="aGk="),
+        ],
+    )
+
+    out = tool_result_with_user_images(result)
+
+    assert len(out) == 2
+    # First: role:tool with text content (preserving tool_call_id pairing)
+    assert out[0]["role"] == "tool"
+    assert out[0]["tool_call_id"] == "t1"
+    # Second: synthetic role:user carrying the image parts
+    assert out[1]["role"] == "user"
+    assert out[1]["content"][0]["type"] == "image_url"
+
+
+def test_encode_tool_result_image_only_uses_placeholder_text() -> None:
+    # When there are images but NO text blocks, the role:tool entry
+    # gets a placeholder text instead of an empty content list.
+    result = ToolResultMessage(
+        tool_call_id="t1",
+        content=[ImageBlock(media_type="image/png", data_b64="aGk=")],
+    )
+
+    out = tool_result_with_user_images(result)
+
+    assert len(out) == 2
+    assert out[0]["content"] == "(image attached after tool results)"
+    assert out[1]["role"] == "user"
+
+
+# ---------- _extract_thought_signature ----------
+
+
+def test_extract_signature_from_tool_call_extra_content() -> None:
+    raw = {
+        "choices": [
+            {
+                "message": {
+                    "tool_calls": [
+                        {
+                            "extra_content": {
+                                "google": {"thought_signature": "sig-extra"}
+                            },
+                        }
+                    ],
+                },
+            }
+        ],
+    }
+
+    assert _extract_thought_signature(raw) == "sig-extra"
+
+
+def test_extract_signature_from_tool_call_function_fallback() -> None:
+    # Defensive — some shim variants nest under function.
+    raw = {
+        "choices": [
+            {
+                "message": {
+                    "tool_calls": [
+                        {
+                            "function": {"thought_signature": "sig-from-fn"},
+                        }
+                    ],
+                },
+            }
+        ],
+    }
+
+    assert _extract_thought_signature(raw) == "sig-from-fn"
+
+
+def test_extract_signature_from_message_level_when_no_tool_calls() -> None:
+    raw = {
+        "choices": [
+            {
+                "message": {
+                    "extra_content": {"google": {"thought_signature": "sig-msg"}},
+                },
+            }
+        ],
+    }
+
+    assert _extract_thought_signature(raw) == "sig-msg"
+
+
+def test_extract_signature_returns_none_when_absent() -> None:
+    raw = {"choices": [{"message": {"content": "x"}}]}
+
+    assert _extract_thought_signature(raw) is None
+
+
+def test_extract_signature_returns_none_for_empty_choices() -> None:
+    assert _extract_thought_signature({}) is None
+
+
+def test_extract_signature_falls_through_to_message_level_when_tool_call_paths_empty() -> (
+    None
+):
+    # tool_calls present but neither extra_content nor function carry
+    # the signature — falls through to message.extra_content.
+    raw = {
+        "choices": [
+            {
+                "message": {
+                    "tool_calls": [{"function": {"name": "tap"}}],
+                    "extra_content": {"google": {"thought_signature": "msg-sig"}},
+                },
+            }
+        ],
+    }
+
+    assert _extract_thought_signature(raw) == "msg-sig"
+
+
+def test_extract_signature_prefers_extra_content_over_function_fallback() -> None:
+    # Both paths populated — extra_content wins.
+    raw = {
+        "choices": [
+            {
+                "message": {
+                    "tool_calls": [
+                        {
+                            "extra_content": {
+                                "google": {"thought_signature": "primary"}
+                            },
+                            "function": {"thought_signature": "fallback"},
+                        }
+                    ],
+                },
+            }
+        ],
+    }
+
+    assert _extract_thought_signature(raw) == "primary"
+
+
+# ---------- thinking table ----------
+
+
+def _cfg(**kw):
+    return {"extra_body": {"google": {"thinking_config": kw}}}
+
+
+async def test_chat_places_google_thinking_inside_http_extra_body(
+    provider: GoogleChatProvider, respx_mock: respx.MockRouter
+) -> None:
+    import json
+
+    route = respx_mock.post(
+        "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+    ).respond(
+        json={"choices": [{"message": {"content": "ok"}, "finish_reason": "stop"}]}
+    )
+
+    await provider.chat([UserMessage(content="hi")], [], thinking="low")
+
+    body = json.loads(route.calls.last.request.content)
+    assert body["extra_body"] == {
+        "google": {"thinking_config": {"thinking_level": "low"}}
+    }
+    assert "google" not in body
+
+
+def test_gemini_25_takes_a_budget_and_pro_cannot_go_below_its_floor():
+    flash = GoogleChatProvider(model="gemini-2.5-flash")
+    pro = GoogleChatProvider(model="gemini-2.5-pro")
+    assert flash.thinking_params("off") == _cfg(thinking_budget=0)
+    assert flash.thinking_params("medium") == _cfg(thinking_budget=8192)
+    assert pro.thinking_params("off") == _cfg(thinking_budget=128)
+    assert pro.thinking_params("high") == _cfg(thinking_budget=24576)
+
+
+def test_gemini_3_takes_a_level_each_line_floors_where_it_can():
+    flash = GoogleChatProvider(model="gemini-3-flash-preview")
+    pro3 = GoogleChatProvider(model="gemini-3-pro-preview")
+    pro31 = GoogleChatProvider(model="gemini-3.1-pro-preview")
+    assert flash.thinking_params("off") == _cfg(thinking_level="minimal")
+    assert pro3.thinking_params("off") == _cfg(thinking_level="low")
+    assert pro3.thinking_params("medium") == _cfg(thinking_level="low")
+    assert pro31.thinking_params("medium") == _cfg(thinking_level="medium")
+    assert flash.thinking_params("high") == _cfg(thinking_level="high")
+
+
+def test_a_model_outside_both_generations_gets_no_field() -> None:
+    assert GoogleChatProvider(model="gemini-1.5-pro").thinking_params("off") == {}
+
+
+@pytest.mark.parametrize(
+    "counters,expected",
+    [
+        (
+            {"prompt_tokens": 10960, "completion_tokens": 20, "total_tokens": 11037},
+            Usage(10960, 77, reasoning_tokens=57),
+        ),
+        (
+            {
+                "prompt_tokens": 11836,
+                "completion_tokens": 20,
+                "total_tokens": 11938,
+                "prompt_tokens_details": {"cached_tokens": 9750},
+            },
+            Usage(11836, 102, cached_tokens=9750, reasoning_tokens=82),
+        ),
+        (
+            {"prompt_tokens": 10409, "completion_tokens": 20, "total_tokens": 10450},
+            Usage(10409, 41, reasoning_tokens=21),
+        ),
+        (
+            {
+                "prompt_tokens": 100,
+                "completion_tokens": 70,
+                "total_tokens": 170,
+                "completion_tokens_details": {"reasoning_tokens": 50},
+            },
+            Usage(100, 70, reasoning_tokens=50),
+        ),
+        ({"prompt_tokens": 100, "completion_tokens": 20}, Usage(100, 20)),
+        (
+            {"prompt_tokens": 100, "completion_tokens": 20, "total_tokens": 90},
+            Usage(100, 20),
+        ),
+        (
+            {"prompt_tokens": "100", "completion_tokens": "20", "total_tokens": "150"},
+            Usage(100, 50, reasoning_tokens=30),
+        ),
+        (
+            {"prompt_tokens": 100, "completion_tokens": 20, "total_tokens": True},
+            Usage(100, 20),
+        ),
+        ({"completion_tokens": 20, "total_tokens": 150}, Usage(0, 20)),
+    ],
+)
+async def test_google_paid_thinking_is_included_in_output_and_usage_event(
+    counters, expected, provider, respx_mock
+):
+    events = []
+
+    provider.usage_sink = SimpleNamespace(write=events.append)
+    respx_mock.route(method="POST").respond(
+        json={
+            "choices": [{"message": {"content": "OK"}, "finish_reason": "stop"}],
+            "usage": counters,
+        }
+    )
+    try:
+        reply = await provider.chat([UserMessage("test")], [])
+        assert reply.usage == expected
+        assert len(events) == 1
+        assert events[0]["output"] == expected.completion_tokens
+        assert events[0]["reasoning"] == expected.reasoning_tokens
+    finally:
+        await provider.aclose()
+
+
+@pytest.mark.parametrize(
+    "field", ["prompt_tokens", "completion_tokens", "total_tokens"]
+)
+@pytest.mark.parametrize(
+    "invalid", [None, True, False, -1, "-1", 1.5, "invalid", [], {}]
+)
+async def test_malformed_google_counter_cannot_invent_reasoning_tokens(
+    field, invalid, provider, respx_mock
+):
+    counters = {"prompt_tokens": 100, "completion_tokens": 20, "total_tokens": 150}
+    counters[field] = invalid
+    raw = {
+        "choices": [{"message": {"content": "OK"}, "finish_reason": "stop"}],
+        "usage": counters,
+    }
+    route = respx_mock.route(method="POST").respond(json=raw)
+    events = []
+
+    provider.usage_sink = SimpleNamespace(write=events.append)
+    try:
+        reply = await provider.chat([UserMessage("test")], [])
+        assert reply.content == "OK"
+        assert reply.usage == Usage(
+            0 if field == "prompt_tokens" else 100,
+            0 if field == "completion_tokens" else 20,
+        )
+        assert route.call_count == 1
+        assert len(events) == 1
+        assert events[0]["output"] == reply.usage.completion_tokens
+        assert events[0]["reasoning"] == 0
+    finally:
+        await provider.aclose()
+
+
+@pytest.mark.parametrize("model", ["gemini-3.8-flash", "gemini-4-argon"])
+async def test_current_gemini_models_use_supported_thinking_floor(model, respx_mock):
+    import json
+
+    provider = GoogleChatProvider(model=model)
+    route = respx_mock.post(
+        "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+    ).respond(
+        json={"choices": [{"message": {"content": "OK"}, "finish_reason": "stop"}]}
+    )
+    try:
+        for thinking, expected in [
+            ("off", "low"),
+            ("low", "low"),
+            ("medium", "medium"),
+            ("high", "high"),
+        ]:
+            await provider.chat([UserMessage("Reply OK")], [], thinking=thinking)
+            payload = json.loads(route.calls.last.request.content)
+            assert payload["extra_body"]["google"]["thinking_config"] == {
+                "thinking_level": expected
+            }
+    finally:
+        await provider.aclose()

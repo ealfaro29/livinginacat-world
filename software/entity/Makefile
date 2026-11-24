@@ -1,0 +1,256 @@
+.PHONY: test-bootstrap test test-cov test-all-cov test-fast test-encoding test-encoding-0 test-encoding-1 test-slow test-integration test-all testall test-studio-ui mutate lint fmt typecheck loc help firmware bump build publish release release-check release-start release-status release-approve release-watch docs-deploy check-site-assets \
+        manual hw-help hw-parts hw-build hw-check hw-step hw-print hw-manual hw-manual-pdf hw-sourcing hw-url hw-drawing hw-rebuild hw-preflight hw-prepare hw-verify hw-publish hw-release _hw-package
+
+PY ?= uv run
+PYTHON ?= $(PY) python
+
+# The suites collect CAD modules as well as application tests. Select both
+# groups so uv updates stale optional dependencies instead of retaining them.
+PYTEST = $(PY) --locked --group dev --group cad pytest
+# Keep the source in pyproject.toml so relative paths merge across OS checkouts.
+COVERAGE = --cov --cov-report=term-missing --cov-report=html --cov-branch
+
+# Like the other targets, docs-deploy runs from the checkout by default.
+# External -f callers can set this path explicitly; the hook stays relative to
+# their working directory. Pass the path as environment data, never shell text.
+DOCS_DEPLOY_SCRIPT ?= scripts/docs_deploy.py
+export DOCS_DEPLOY_SCRIPT
+
+# Hardware CAD pipeline (see hardware/README.md). Geometry stages need the
+# `cad` group; the manual / sourcing / drawing builders are standard-library only.
+# Pass flags through ARGS, e.g.  make hw-build ARGS="--bom --bom-delta"
+HW     = $(PY) --locked --group cad python -m hardware
+HW_DOC = $(PY) --locked python -m hardware
+
+# Passed as data through the environment, never interpolated into a shell command.
+export HW_VERSION
+
+# Guard for hw-* targets that need a positional: fail with a usage hint when
+# ARGS is empty. $(1) describes the expected value.
+need-args = $(if $(strip $(ARGS)),,$(error usage: make $@ ARGS=$(1)))
+
+# Release options are passed as data, never interpolated into shell commands.
+export VERSION VERBOSE RUN_ID JSON
+
+help:
+	@echo "Targets:"
+	@echo "  help                  - show this list (the default make target)"
+	@echo "  test-bootstrap        - prepare the locked dev + CAD test environment"
+	@echo "  test                  - fast unit suite (excludes slow + integration)"
+	@echo "  test-cov              - fast suite with coverage report (term + html)"
+	@echo "  test-all-cov          - all suites with subprocess and branch coverage"
+	@echo "  test-fast             - alias for test"
+	@echo "  test-encoding         - strict encoding regressions with UTF-8 mode off and on"
+	@echo "  test-slow             - only @pytest.mark.slow"
+	@echo "  test-integration      - only @pytest.mark.integration"
+	@echo "  test-all              - every test, including slow and integration"
+	@echo "  testall               - alias for test-all"
+	@echo "  test-studio-ui        - JavaScript UI regressions (Node 22+)"
+	@echo "  mutate MOD=path       - mutmut on a path (e.g. MOD=src/physiclaw/agent/engine/validator.py)"
+	@echo "  lint                  - ruff check + format check (repository Python files)"
+	@echo "  fmt                   - ruff format (repository Python files)"
+	@echo "  typecheck             - mypy on application and hardware port (scope in [tool.mypy])"
+	@echo "  loc                   - Total = Code + Test + Text (NO_COLOR=1 for plain output)"
+	@echo "  firmware [ARGS=...]    - rebuild fluidnc.zip, preserve output/.cache; ARGS=--help for options"
+	@echo "  bump [VERSION=X.Y.Z]   - increment a stable version's patch number by default."
+	@echo "                          Set VERSION explicitly for major/minor/prereleases."
+	@echo "                          Commits version + lockfile locally; push main before release."
+	@echo "  build                 - uv build wheel + sdist for the version in pyproject.toml"
+	@echo "  release-check         - check lockfile, upstream and exact-commit main CI; no tag/push."
+	@echo "  release-start         - repeat preflight, push the version tag and start release CI."
+	@echo "  release-status        - show release progress and the next action (read-only)."
+	@echo "  release-approve       - approve PyPI publication after release checks pass."
+	@echo "  release-watch         - follow CI to completion (read-only)."
+	@echo "                          Uses this version + commit; RUN_ID=ID selects a specific run."
+	@echo "                          Status/approval/watch require gh; JSON=1 for status/approval."
+	@echo "  release, publish      - compatibility aliases for release-start."
+	@echo "                          VERBOSE=1 shows command logs; NO_COLOR=1 disables color."
+	@echo ""
+	@$(MAKE) --no-print-directory hw-help
+
+test-bootstrap:
+	$(PYTEST) --version
+
+test:
+	$(PYTEST)
+
+test-cov:
+	$(PYTEST) $(COVERAGE)
+
+test-all-cov:
+	$(PYTEST) -m "" $(COVERAGE)
+
+test-fast: test
+
+# PEP 597 catches implicit encodings at runtime; PEP 686 recommends testing
+# with UTF-8 mode disabled and enabled. Subprocess regressions forward the flags.
+ENCODING_TESTS = tests/test_text_encoding.py tests/common/test_text.py tests/scripts/test_eval_context.py tests/scripts/test_loc.py tests/cli/test_session_debug.py tests/hardware/documents/sourcing/test_urls.py
+test-encoding:
+	$(MAKE) test-encoding-0
+	$(MAKE) test-encoding-1
+
+test-encoding-0 test-encoding-1:
+	$(PYTHON) -X utf8=$(@:test-encoding-%=%) -X warn_default_encoding -W error::EncodingWarning -m pytest $(ENCODING_TESTS)
+
+test-slow:
+	$(PYTEST) -m slow
+
+test-integration:
+	$(PYTEST) -m integration
+
+test-all:
+	$(PYTEST) -m ""
+
+testall: test-all
+
+test-studio-ui:
+	node --test tests/studio/test_studio_ui.cjs tests/agent/test_viewer_ui.cjs tests/core/test_setup_hardware_ui.cjs tests/core/test_bridge_focus_ui.cjs tests/cli/test_assistive_touch_ui.cjs
+
+mutate:
+	$(if $(strip $(MOD)),,$(error usage: make mutate MOD=src/physiclaw/<path>))
+	$(PY) mutmut run --paths-to-mutate "$(MOD)"
+
+lint:
+	$(PY) ruff check .
+	$(PY) ruff format --check .
+
+fmt:
+	$(PY) ruff format .
+
+# Scope and settings live in [tool.mypy] in pyproject.toml.
+typecheck:
+	$(PY) mypy
+
+# Standalone report; uv installs only the small counting / display dependencies.
+loc:
+	@$(PY) scripts/loc.py
+
+# Standalone PEP 723 script; uv supplies the image build dependencies.
+# Example: make firmware ARGS="--tag v4.1.0 --out /tmp/fluidnc.zip"
+firmware:
+	@$(PY) firmware/firmware.py $(ARGS)
+
+# --- Release workflow ---------------------------------------------------------
+# See RELEASING.md for commands and Trusted Publisher configuration.
+# One cross-platform driver keeps each action sequential under make -j.
+# --no-project avoids syncing dependencies before checking the working tree.
+bump build publish release release-check release-start release-status release-approve release-watch:
+	@$(PY) --no-project python scripts/release.py $@
+
+# --- Hardware CAD pipeline ----------------------------------------------------
+# Thin wrappers over `python -m hardware <subcommand>` (see `make hw-help` and
+# hardware/README.md). hw-prefixed so `build` stays the wheel build above.
+# Flags / positionals go through ARGS, e.g.  make hw-build ARGS="--bom".
+
+hw-help:
+	@echo "Hardware - run from the repository root:"
+	@echo ""
+	@echo "  Local work (no upload):"
+	@echo "    make manual                         Build CAD -> manual HTML/PDFs -> sourcing HTML"
+	@echo "    make hw-build [ARGS=--bom]           Build CAD drawings and STEPs; reuse cache"
+	@echo "    make hw-check                       Check hardware source consistency"
+	@echo "    make hw-url                         Show 3 Taobao and 3 AliExpress URLs"
+	@echo "    make hw-prepare HW_VERSION=X.Y       Build and verify a local release bundle; reuse cache"
+	@echo "    make hw-verify HW_VERSION=X.Y        Verify an existing bundle without rebuilding"
+	@echo ""
+	@echo "  Release (commit and push main first):"
+	@echo "    make hw-release HW_VERSION=X.Y       Prepare -> verify -> publish -> deploy and check sites"
+	@echo "    make hw-publish HW_VERSION=X.Y       Publish a prepared bundle -> deploy and check sites"
+	@echo "    make hw-preflight HW_VERSION=X.Y     Check Git/GitHub readiness; no upload"
+	@echo "    make docs-deploy [HW_VERSION=X.Y]    Trigger docs, wait for readiness, check both sites"
+	@echo "    make check-site-assets [HW_VERSION=X.Y]  Check both sites without deploying"
+	@echo "      DOCS_DEPLOY_SCRIPT=path overrides the driver location for external -f use"
+	@echo ""
+	@echo '  Build or edit one output (flags through ARGS="..."):'
+	@echo "    make hw-step ARGS=<stem>             Build one assembly step with its BOM"
+	@echo "    make hw-parts                       Export part STEPs"
+	@echo "    make hw-print                       Package custom parts for 3D printing"
+	@echo "    make hw-manual                      Build bilingual manual HTML"
+	@echo "    make hw-manual-pdf                   Build bilingual manual HTML and PDFs"
+	@echo "    make hw-sourcing                    Build bilingual sourcing guides"
+	@echo "    make hw-drawing                     Build extrusion drawings as HTML and PDFs"
+	@echo ""
+	@echo "  Force rebuild:"
+	@echo "    make hw-rebuild [ARGS=--bom]         Same as hw-build; bypass CAD cache"
+	@echo ""
+	@echo "  Options: make hw-build ARGS=--help (also works for other build commands)"
+	@echo "  Guide: hardware/README.md"
+
+# Keep the document builds after CAD, even under make -j; stop on failure.
+manual:
+	@$(MAKE) --no-print-directory hw-build
+	@$(MAKE) --no-print-directory hw-manual-pdf
+	@$(MAKE) --no-print-directory hw-sourcing
+
+hw-parts:
+	@$(HW) parts $(ARGS)
+
+hw-build:
+	@$(HW) build $(ARGS)
+
+# Static cross-artifact consistency check (stems / annotations / manual /
+# sourcing) — stdlib-only, no cad group, also run in CI.
+hw-check:
+	@$(HW_DOC) check $(ARGS)
+
+hw-step:
+	$(call need-args,<procedure_stem>)
+	@$(HW) step $(ARGS)
+
+hw-print:
+	@$(HW) print $(ARGS)
+
+hw-manual:
+	@$(HW_DOC) manual $(ARGS)
+
+# Convenience alias for `make hw-manual ARGS="--pdf"`; extra flags still go
+# through ARGS, e.g.  make hw-manual-pdf ARGS="--lang en".
+hw-manual-pdf:
+	@$(HW_DOC) manual --pdf $(ARGS)
+
+hw-sourcing:
+	@$(HW_DOC) sourcing $(ARGS)
+
+hw-url:
+	@$(HW_DOC) url $(ARGS)
+
+# The supplier's sheet for the frame extrusions — drawn from the same
+# constants the assembly cuts and drills with, so it can't drift from the
+# model. PDFs print through headless Chrome like the manual.
+hw-drawing:
+	@$(HW_DOC) drawing --pdf $(ARGS)
+
+# Same assembly build and flags as hw-build, bypassing persistent cache reads.
+hw-rebuild:
+	@$(HW) build --no-cache $(ARGS)
+
+# All release entry points delegate to the same guarded Python workflow.
+# Each is a single recipe, so make -j cannot reorder preflight/build/publish.
+# hw-prepare and hw-verify are local; hw-release and hw-publish publish.
+hw-preflight:
+	@$(HW_DOC) release preflight $(ARGS)
+
+hw-prepare:
+	@$(HW) release prepare $(ARGS)
+
+hw-verify:
+	@$(HW_DOC) release verify $(ARGS)
+
+hw-release:
+	@$(HW) release deploy $(ARGS)
+
+hw-publish:
+	@$(HW_DOC) release publish $(ARGS)
+
+# Keep the legacy internal target on the guarded publication path.
+_hw-package: hw-publish
+
+# Redeploy docs.physiclaw.ai after a hardware release: the site pulls the
+# manual, sourcing guide and drawing from the latest release at build time.
+# The Cloudflare Pages deploy hook URL is a secret (anyone holding it can
+# trigger a deploy), so it lives in the gitignored .docs-deploy-hook, one line.
+docs-deploy:
+	@$(PYTHON) -c "import os, runpy; runpy.run_path(os.environ['DOCS_DEPLOY_SCRIPT'], run_name='__main__')"
+
+check-site-assets:
+	@$(PYTHON) -c "import os, runpy, sys; sys.argv.append('--check-only'); runpy.run_path(os.environ['DOCS_DEPLOY_SCRIPT'], run_name='__main__')"

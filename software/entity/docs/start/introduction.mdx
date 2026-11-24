@@ -1,0 +1,40 @@
+---
+title: What Is PhysiClaw?
+description: An AI agent that operates a real phone. Not built for engineers, but to handle the everyday errands that fill your day.
+---
+
+PhysiClaw is an agent that operates a phone. It watches the screen with a camera and taps with a stylus, working the phone the way a person would.
+
+## What PhysiClaw does
+
+Today's AI agents are built mainly for technical work. They're best at coding, file handling, and the like. But most people don't write code. Their daily needs live on the phone, like shopping, ordering takeout, booking rides, paying bills, and making reservations. These tasks barely overlap with what agents are currently good at.
+
+PhysiClaw is built for exactly this kind of everyday task. It asks nothing technical of you and doesn't depend on apps exposing an API. It operates the phone directly. Anything you can do by hand on your phone, PhysiClaw can do for you.
+
+## PhysiClaw vs. OpenClaw
+
+| | PhysiClaw | OpenClaw |
+|---|---|---|
+| Best at | Everyday routine tasks | Coding and technical work |
+| How it operates | Physically operates a phone | Commands / APIs / browser automation |
+| Hardware | Dedicated hardware + phone | None |
+| Reads/writes computer files | No | Yes |
+| Security boundary | Runs no commands | Has system-level access |
+| Detectable by platforms | Physical actions are hard to detect | Software actions are easily flagged |
+| Chat on WhatsApp | Chats with friends directly | Needs protocol reverse-engineering or a third-party integration |
+
+## Hardware
+
+PhysiClaw runs on a set of dedicated hardware. See the [Hardware Gallery](/en/hardware-gallery/) for the full build, and the [demo video](https://youtu.be/YJ1O6gW0KVw) to watch it in action.
+
+## Environment
+
+**Runs on:** Windows, macOS, Linux
+
+**Operates:** iPhone only (needs iOS Shortcuts)
+
+**Python:** 3.12+
+
+## License
+
+PhysiClaw is fully open source under the MIT License, covering both the CAD-as-code hardware and the agent software.

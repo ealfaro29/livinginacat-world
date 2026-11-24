@@ -1,0 +1,11 @@
+[Unit]
+Description=Entity Pulse
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/share/entity/current/venv/bin/python -m physiclaw.entity.pulse --host 127.0.0.1 --port 8050 --phone-url https://entity.livinginacat.world/jugar
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

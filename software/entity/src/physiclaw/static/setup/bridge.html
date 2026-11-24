@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#e5e5e5">
+<title>Entity by Sentient</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{
+  width:100%;height:100%;
+  overflow:hidden;
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  user-select:none;
+}
+body{position:relative}
+
+/* ── Calibration mode ─────────────────────────────── */
+body.mode-calibrate{background:#fff;touch-action:none}
+body.mode-calibrate #bridge-layer{display:none}
+body.mode-calibrate #calib-layer{display:block}
+
+/* ── Bridge mode ──────────────────────────────────── */
+body.mode-bridge{
+  background:#10130f;color:#f3f5e9;
+  font-family:-apple-system,system-ui,"Helvetica Neue",sans-serif;
+  touch-action:manipulation;
+}
+body.mode-bridge #calib-layer{display:none}
+body.mode-bridge #bridge-layer{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  padding:env(safe-area-inset-top,20px) 20px env(safe-area-inset-bottom,20px);
+}
+
+/* ── Calibration elements ─────────────────────────── */
+#calib-layer{position:fixed;top:0;left:0;width:100%;height:100%}
+#phase-label{
+  position:fixed;
+  top:env(safe-area-inset-top,4px);
+  right:4px;
+  font:10px monospace;color:#ccc;z-index:1;
+}
+
+/* ── Bridge elements ──────────────────────────────── */
+#msg-text{
+  font-weight:600;
+  text-align:center;
+  white-space:nowrap;
+  line-height:1.4;
+  padding:20px;
+  max-width:100%;
+  overflow:hidden;
+  transition:opacity 0.15s;
+}
+#msg-text.waiting{color:#d0ff00;opacity:0.95;font-size:min(6vw,40px);font-weight:400}
+#msg-status{
+  position:fixed;
+  top:calc(env(safe-area-inset-top,10px) + 6px);
+  right:10px;
+  font-size:11px;opacity:0.8;
+  padding:4px 8px;
+}
+#msg-conn-label{color:#999;}
+#center-circle{
+  position:fixed;
+  width:40px;height:40px;
+  border-radius:50%;
+  border:3px solid #4ade80;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  opacity:0;
+  transition:opacity 0.3s;
+  pointer-events:none;
+  z-index:10;
+}
+#center-circle.show{opacity:1;}
+#msg-feedback{
+  display:none;
+  color:#16a34a;
+  font-weight:700;
+  font-size:min(5.5vw,24px);
+  letter-spacing:0.3px;
+  text-align:center;
+  margin-bottom:20px;
+}
+#msg-hint{
+  position:fixed;
+  bottom:calc(env(safe-area-inset-bottom,20px) + 16px);
+  font-size:13px;opacity:0.25;
+  letter-spacing:0.5px;
+}
+</style>
+</head>
+<body class="mode-bridge">
+
+<!-- Calibration layer -->
+<div id="calib-layer">
+  <div id="phase-label">idle</div>
+  <svg id="canvas" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<!-- Bridge layer -->
+<div id="bridge-layer">
+  <div id="msg-status">● <span id="msg-conn-label">connecting…</span></div>
+  <div id="msg-feedback"></div>
+  <div id="msg-text" class="waiting">Entity</div>
+  <div id="msg-hint">Tap anywhere to copy · Tocá para copiar</div>
+  <button id="bridge-lang" style="position:fixed;top:calc(env(safe-area-inset-top,10px) + 6px);left:12px;background:transparent;color:inherit;border:1px solid #718168;border-radius:5px;padding:5px 10px" type="button">ES / EN</button>
+  <div id="center-circle"></div>
+</div>
+
+<script>
+(function(){
+  // ════════════════════════════════════════════════════════
+  // DOM REFS
+  // ════════════════════════════════════════════════════════
+  var svg = document.getElementById('canvas');
+  var phaseLabel = document.getElementById('phase-label');
+  var msgTextEl = document.getElementById('msg-text');
+  var msgStatusEl = document.getElementById('msg-status');
+  var msgFeedbackEl = document.getElementById('msg-feedback');
+  var msgHintEl = document.getElementById('msg-hint');
+  var preferred;
+  try { preferred=localStorage.getItem('entity-language'); } catch {}
+  var spanish = !(new URLSearchParams(location.search).get('lang') || preferred || navigator.language || 'es').toLowerCase().startsWith('en');
+  var languageButton=document.getElementById('bridge-lang');
+  function say(es,en){return spanish?es:en}
+  function showLanguage(){
+    document.documentElement.lang=say('es','en');
+    languageButton.textContent=say('EN','ES');
+    languageButton.setAttribute('aria-label',say('Switch to English','Cambiar a español'));
+  }
+  languageButton.onclick=function(e){
+    e.stopPropagation();spanish=!spanish;showLanguage();
+    try{localStorage.setItem('entity-language',say('es','en'));var url=new URL(location.href);url.searchParams.set('lang',say('es','en'));history.replaceState(null,'',url)}catch{}
+  };
+  showLanguage();
+  document.getElementById('msg-conn-label').textContent=say('conectando…','connecting…');
+
+  var centerCircleEl = document.getElementById('center-circle');
+
+  // ════════════════════════════════════════════════════════
+  // VIEWPORT SIZE — used for SVG viewBox and calibration rendering only
+  // ════════════════════════════════════════════════════════
+  var W = window.innerWidth;
+  var H = window.innerHeight;
+
+  function updateSize(){
+    W = window.innerWidth;
+    H = window.innerHeight;
+    svg.setAttribute('viewBox', '0 0 '+W+' '+H);
+  }
+  updateSize();
+  window.addEventListener('resize', updateSize);
+  window.addEventListener('resize', sendDeviceInfo);
+
+  // ════════════════════════════════════════════════════════
+  // SVG HELPERS — draw calibration targets (dots, markers, labels) into #canvas
+  // ════════════════════════════════════════════════════════
+  function clearSvg(){ svg.innerHTML = ''; }
+
+  function circle(cx, cy, r, fill){
+    var el = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    el.setAttribute('cx', cx); el.setAttribute('cy', cy);
+    el.setAttribute('r', r); el.setAttribute('fill', fill);
+    svg.appendChild(el);
+  }
+
+  function rect(x, y, w, h, fill, rx){
+    var el = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    el.setAttribute('x', x); el.setAttribute('y', y);
+    el.setAttribute('width', w); el.setAttribute('height', h);
+    el.setAttribute('fill', fill);
+    if(rx) el.setAttribute('rx', rx);
+    svg.appendChild(el);
+  }
+
+  function text(x, y, str, size, fill){
+    var el = document.createElementNS('http://www.w3.org/2000/svg','text');
+    el.setAttribute('x', x); el.setAttribute('y', y);
+    el.setAttribute('font-size', size); el.setAttribute('fill', fill);
+    el.setAttribute('text-anchor', 'middle');
+    el.setAttribute('dominant-baseline', 'middle');
+    el.setAttribute('font-family', 'system-ui, sans-serif');
+    el.setAttribute('font-weight', 'bold');
+    el.textContent = str;
+    svg.appendChild(el);
+  }
+
+  // Animated expanding rings at touch point — visual feedback during calibration
+  function flashTouch(cx, cy){
+    var rings = [
+      {delay: 0,   dur: 700, maxR: 50,  sw: 6},
+      {delay: 120, dur: 700, maxR: 90,  sw: 5},
+      {delay: 240, dur: 700, maxR: 130, sw: 4}
+    ];
+    rings.forEach(function(cfg){
+      setTimeout(function(){
+        var el = document.createElementNS('http://www.w3.org/2000/svg','circle');
+        el.setAttribute('cx', cx); el.setAttribute('cy', cy);
+        el.setAttribute('r', 8);
+        el.setAttribute('fill', 'none');
+        el.setAttribute('stroke', '#f97316');
+        el.setAttribute('stroke-width', cfg.sw);
+        el.setAttribute('opacity', '1');
+        svg.appendChild(el);
+        var start = performance.now();
+        function animate(now){
+          var t = Math.min((now - start) / cfg.dur, 1);
+          var ease = 1 - (1 - t) * (1 - t);
+          el.setAttribute('r', 8 + (cfg.maxR - 8) * ease);
+          el.setAttribute('opacity', String(1 - ease));
+          el.setAttribute('stroke-width', String(cfg.sw * (1 - ease * 0.5)));
+          if(t < 1) requestAnimationFrame(animate);
+          else if(el.parentNode) el.parentNode.removeChild(el);
+        }
+        requestAnimationFrame(animate);
+      }, cfg.delay);
+    });
+    var dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    dot.setAttribute('cx', cx); dot.setAttribute('cy', cy);
+    dot.setAttribute('r', 12); dot.setAttribute('fill', '#f97316');
+    dot.setAttribute('opacity', '1');
+    svg.appendChild(dot);
+    setTimeout(function(){ if(dot.parentNode) dot.parentNode.removeChild(dot); }, 800);
+  }
+
+  // ════════════════════════════════════════════════════════
+  // RENDER FROM SERVER STATE (no local state)
+  // ════════════════════════════════════════════════════════
+  var lastCalKey = '';
+  function renderCalibrate(data){
+    var calKey = JSON.stringify([W, H, data.phase, data.square, data.dot,
+                                 data.grid, data.at, data.nonce]);
+    if(calKey === lastCalKey) return;
+    lastCalKey = calKey;
+    clearSvg();
+    var phase = data.phase || 'idle';
+    var r = Math.min(W, H) * 0.08;
+    switch(phase){
+      case 'idle':
+        text(W/2, H/2, 'PhysiClaw', 24, '#ddd');
+        text(W/2, H/2+30, 'Waiting for calibration...', 14, '#ccc');
+        break;
+      case 'screenshot_cal':
+        // Position/size come from the server (calib.py SQUARE_CSS_*) so
+        // the page draws the square exactly where the calibration
+        // viewport.py screenshot mapping expects it. Fallback mirrors
+        // those values for one stale-cache poll at most.
+        var sq = data.square || {x: 100, y: 200, size: 50};
+        rect(sq.x, sq.y, sq.size, sq.size, '#f97316', 0);
+        break;
+      case 'center':
+        circle(W*0.5, H*0.5, r, '#f97316');
+        break;
+      case 'markers':
+        // Keep the background distinct from both markers under a cool white balance.
+        var markerUnit = Math.min(W, H);
+        rect(0, 0, W, H, '#fff2b8', 0);
+        rect(W*0.5-markerUnit*0.25, H*0.12-markerUnit*0.10, markerUnit*0.50, markerUnit*0.20, '#103ce8', 8);
+        text(W*0.5, H*0.12, '↑', markerUnit*0.10, '#ffffff');
+        rect(W*0.78-markerUnit*0.18, H*0.5-markerUnit*0.10, markerUnit*0.36, markerUnit*0.20, '#e80000', 8);
+        text(W*0.78, H*0.5, '→', markerUnit*0.10, '#ffffff');
+        break;
+      case 'corners':
+        // 2×2 RGBM cluster at every screen corner. Any single cluster
+        // is enough to identify the camera and orientation, so a stylus
+        // or arm occluding 1–3 corners still leaves auto-pick working.
+        // Each cluster is clockwise R→G→M→B from its own top-left:
+        //   R G
+        //   B M
+        // Magenta (not yellow): the camera renders the screen's yellow as a
+        // yellow-green that collides with the Green block — magenta sits alone
+        // in the empty 130–170 hue band (vision/colors.py:CORNER_HSV_RANGES).
+        // M sits diagonal to R (R+B = magenta) so it never borders the red
+        // block — its only same-channel neighbour is blue.
+        (function drawCornerClusters(){
+          // 10% of phone's shorter side per quadrant → 2×2 cluster ≈ 20%
+          // of phone's shorter side. Camera-side `max_cluster_span` is 25%
+          // of frame's shorter side (vision/grid_detect.py:detect_bridge_corners),
+          // so even with the phone filling most of the frame the cluster
+          // stays well under the cross-cluster cutoff.
+          var bs = Math.min(W, H) * 0.10;  // block size (one RGBM quadrant)
+          function cluster(x, y){
+            rect(x,      y,      bs, bs, '#ff0000', 0);  // R
+            rect(x+bs,   y,      bs, bs, '#00ff00', 0);  // G
+            rect(x+bs,   y+bs,   bs, bs, '#ff00ff', 0);  // M (magenta)
+            rect(x,      y+bs,   bs, bs, '#0000ff', 0);  // B
+          }
+          cluster(0,        0);          // top-left corner
+          cluster(W-2*bs,   0);          // top-right
+          cluster(W-2*bs,   H-2*bs);     // bottom-right
+          cluster(0,        H-2*bs);     // bottom-left
+        })();
+        break;
+      case 'focus':
+        var cell = Math.min(W, H) * 0.01;
+        var defs = document.createElementNS(svg.namespaceURI, 'defs');
+        var addChecker = function(id, fill){
+          var pattern = document.createElementNS(svg.namespaceURI, 'pattern');
+          pattern.setAttribute('id', id);
+          pattern.setAttribute('patternUnits', 'userSpaceOnUse');
+          pattern.setAttribute('width', cell*2);
+          pattern.setAttribute('height', cell*2);
+          var squares = document.createElementNS(svg.namespaceURI, 'path');
+          squares.setAttribute('d', 'M0 0h'+cell+'v'+cell+'H0z M'+cell+' '+cell+'h'+cell+'v'+cell+'h-'+cell+'z');
+          squares.setAttribute('fill', fill);
+          pattern.appendChild(squares);
+          defs.appendChild(pattern);
+        };
+        addChecker('focus-checker', '#000');
+        // Blue lettering preserves the checker edges.
+        addChecker('focus-brand-checker', '#0055ff');
+        svg.appendChild(defs);
+        rect(0, 0, W, H, 'url(#focus-checker)', 0);
+
+        var glyphs = [
+          ['0111110','1111111','1100011','1100011','1100011','1111111','1111110','1100000','1100000','1100000','1100000'], // P
+          ['0100010','1100011','1100011','1100011','1111111','1111111','1100011','1100011','1100011','1100011','1100010'], // H
+          ['1100011','1100011','1100011','0110110','0011100','0011100','0011100','0011100','0011100','0011100','0011100'], // Y
+          ['0011111','0111111','1110001','1100000','1111100','0111110','0000111','0000011','1000011','1111110','1111100'], // S
+          ['0111110','1111111','0011100','0011100','0011100','0011100','0011100','0011100','0011100','1111111','0111110'], // I
+          ['0011111','0111111','1110011','1100001','1100000','1100000','1100000','1100001','1110011','0111111','0011111'], // C
+          ['0100000','1100000','1100000','1100000','1100000','1100000','1100000','1100000','1100011','1111111','1111110'], // L
+          ['0011110','0111111','1110011','1100011','1100011','1111111','1111111','1100011','1100011','1100011','1100010'], // A
+          ['0100010','1100011','1100011','1100011','1100011','1100011','1101011','1101011','1111111','1111111','0110110']  // W
+        ];
+        var glyphHeight = glyphs[0].length;
+        var glyphWidth = glyphs[0][0].length;
+        var glyphAdvance = glyphWidth+1;
+        var wordLength = glyphs.length*glyphAdvance-1;
+        var maxUnit = Math.min(W*0.6/glyphHeight, H*0.9/wordLength);
+        var unit = cell*Math.max(1, Math.floor(maxUnit/cell));
+        var brandX = Math.round((W-glyphHeight*unit)/(2*cell))*cell;
+        var brandY = Math.round((H-wordLength*unit)/(2*cell))*cell;
+        var pixels = '';
+        for(var gi=0; gi<glyphs.length; gi++)
+          for(var gy=0; gy<glyphHeight; gy++)
+            for(var gx=0; gx<glyphWidth; gx++)
+              if(glyphs[gi][gy][gx] === '1'){
+                var px = brandX+(glyphHeight-1-gy)*unit;
+                var py = brandY+(gi*glyphAdvance+gx)*unit;
+                pixels += 'M'+px+' '+py+'h'+unit+'v'+unit+'h-'+unit+'z ';
+              }
+        var brand = document.createElementNS(svg.namespaceURI, 'path');
+        brand.setAttribute('d', pixels);
+        brand.setAttribute('fill', 'url(#focus-brand-checker)');
+        brand.setAttribute('aria-hidden', 'true');
+        brand.setAttribute('pointer-events', 'none');
+        svg.appendChild(brand);
+        break;
+      case 'grid':
+        var grid = data.grid || {cols: [0.25, 0.50, 0.75], rows: [0.20, 0.40, 0.50, 0.60, 0.80]};
+        var dotR = Math.min(W, H) * 0.015;
+        for(var ri=0; ri<grid.rows.length; ri++)
+          for(var ci=0; ci<grid.cols.length; ci++)
+            circle(W*grid.cols[ci], H*grid.rows[ri], dotR, '#ef4444');
+        break;
+      case 'dot':
+        var dot = data.dot || {x: 0.5, y: 0.5};
+        circle(dot.x * W, dot.y * H, r*0.6, '#f97316');
+        break;
+      case 'assistive_touch':
+        // Orange circle showing where to place AT button. Fallback
+        // mirrors iphone.py's AT_CSS_X/AT_CSS_Y/AT_RADIUS — get_state
+        // omits `at` only when the nonce isn't set yet.
+        var at = data.at || {x: 39, y: 260, r: 28};
+        circle(at.x, at.y, at.r, '#f97316');
+        // Grey nonce grid — squares laid out row-major, `cols` per row.
+        // Fallback mirrors nonce.py's NONCE_* constants; with no colors
+        // it draws nothing, so it only shapes a one-poll stale render.
+        var nonce = data.nonce || {colors: [], x: 180, y: 300, size: 15, cols: 8};
+        var ncols = nonce.cols || 8;
+        for(var ni=0; ni<nonce.colors.length; ni++){
+          var c = nonce.colors[ni];
+          rect(nonce.x + (ni % ncols) * nonce.size,
+               nonce.y + Math.floor(ni / ncols) * nonce.size,
+               nonce.size, nonce.size,
+               'rgb('+c[0]+','+c[1]+','+c[2]+')', 0);
+        }
+        break;
+    }
+    phaseLabel.textContent = phase;
+  }
+
+  function fitTextSize(){
+    // Shrink the font until the text fits on ONE line within the viewport
+    // width (#msg-text is nowrap) — a short code like PhysiClaw-ED6F9B
+    // stays on a single line instead of wrapping and blowing up huge.
+    var maxW = window.innerWidth * 0.9;
+    var size = Math.min(window.innerWidth * 0.14, 100);
+    msgTextEl.style.fontSize = size + 'px';
+    while(size > 12 && msgTextEl.scrollWidth > maxW){
+      size -= 2;
+      msgTextEl.style.fontSize = size + 'px';
+    }
+  }
+
+  function renderBridge(data){
+    // Defaults; only the "copied" branch overrides these two.
+    msgFeedbackEl.style.display = 'none';
+    msgHintEl.textContent = say('Tocá para copiar','Tap anywhere to copy');
+    if(data.text !== null){
+      msgTextEl.textContent = data.text;
+      msgTextEl.className = '';
+      fitTextSize();
+      if(data.copied){
+        // The clipboard Shortcut fetched the text (or a tap confirmed it).
+        // Confirm on-screen with the text still shown so the operator can
+        // paste it somewhere and check it matches.
+        msgFeedbackEl.textContent = say('✓ Copiado al portapapeles','✓ Copied to clipboard');
+        msgFeedbackEl.style.display = 'block';
+        msgHintEl.textContent = say('Pegá el texto para comprobarlo','Paste to verify');
+        msgHintEl.style.opacity = '0.5';
+      } else {
+        msgHintEl.style.opacity = '0.4';
+      }
+    } else {
+      msgTextEl.textContent = document.querySelector('meta[name=apple-mobile-web-app-title]')?.content || 'Entity';
+      msgHintEl.textContent = say('Listo para conectar desde el panel','Ready to connect from the dashboard');
+      msgTextEl.className = 'waiting';
+      msgTextEl.style.fontSize = Math.min(window.innerWidth * 0.06, 40) + 'px';
+      msgHintEl.style.opacity = '0.75';
+    }
+  }
+
+  // ════════════════════════════════════════════════════════
+  // CLIPBOARD (iOS Safari compatible)
+  // ════════════════════════════════════════════════════════
+  function copyToClipboard(txt){
+    // iOS Safari over HTTP: navigator.clipboard is unavailable.
+    // Use execCommand('copy') with a focused textarea.
+    // Must be synchronous within the user gesture handler.
+    var ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;font-size:16px';
+    document.body.appendChild(ta);
+    try {
+      ta.focus();
+      ta.setSelectionRange(0, ta.value.length);
+      return document.execCommand('copy');
+    } catch(e) {
+      return false;
+    } finally {
+      document.body.removeChild(ta);
+    }
+  }
+
+  function bridgeFlash(){
+    msgTextEl.style.opacity = '0.3';
+    setTimeout(function(){ msgTextEl.style.opacity = '1'; }, 200);
+  }
+
+  function notifyBridgeTap(textId){
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/bridge/tapped', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({text_id: textId}));
+  }
+
+  // ════════════════════════════════════════════════════════
+  // STATE — mirrors server's PageState.get_state() response
+  // ════════════════════════════════════════════════════════
+  // Updated every 250ms from GET /api/bridge/state. Touch handlers read this.
+  // Bridge mode:    {mode, text, text_id, copied}
+  // Calibrate mode: {mode, phase, phase_id, screen_dimension, grid:{cols,rows},
+  //                   square?:{x,y,size}, dot?:{x,y}, at?:{x,y,r},
+  //                   nonce?:{colors,x,y,size,cols}}
+  var state = {
+    mode: 'bridge',
+    text: null,
+    text_id: null,
+    copied: false,
+    phase: 'idle',
+    grid: {cols: [0.25, 0.50, 0.75], rows: [0.20, 0.40, 0.50, 0.60, 0.80]},
+    screen_dimension: null
+  };
+
+  // ════════════════════════════════════════════════════════
+  // TOUCH HANDLING
+  // ════════════════════════════════════════════════════════
+  function sendTouch(payload){
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/bridge/touch', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify(payload));
+  }
+
+  // Calibrate mode: touchstart for immediate touch coordinate reporting
+  document.body.addEventListener('touchstart', function(e){
+    if(state.mode !== 'calibrate') return;
+    e.preventDefault();
+    var t = e.touches[0];
+    if(state.phase === 'idle'){
+      flashTouch(t.clientX, t.clientY);
+      return;
+    }
+    sendTouch({ clientX: t.clientX, clientY: t.clientY, phase_id: state.phase_id });
+    flashTouch(t.clientX, t.clientY);
+  }, {passive:false});
+
+  // Bridge mode: click for clipboard copy (iOS Safari needs click
+  // for reliable transient activation — execCommand('copy') fails
+  // in touchstart async callbacks)
+  document.body.addEventListener('click', function(){
+    if(state.mode !== 'bridge' || state.text === null) return;
+    if(copyToClipboard(state.text)){
+      bridgeFlash();
+      notifyBridgeTap(state.text_id);
+    }
+  });
+
+  // ════════════════════════════════════════════════════════
+  // POLL LOOP — single source of truth from server
+  // ════════════════════════════════════════════════════════
+  var pollErrors = 0;
+  var polling = false;
+
+  function poll(){
+    // A slow response must not arrive after a newer one and restore an
+    // obsolete calibration target or clipboard item.
+    if(polling) return;
+    polling = true;
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/api/bridge/state', true);
+    xhr.timeout = 3000;
+    xhr.onload = function(){
+      polling = false;
+      if(xhr.status === 401 && location.protocol === "https:"){
+        location.replace("/iphone?lang=" + say("es","en"));
+        return;
+      }
+      if(xhr.status === 200){
+        pollErrors = 0;
+        document.getElementById('msg-conn-label').textContent = say('conectado','connected');
+        msgStatusEl.style.color = '#4ade80';
+
+        var data = JSON.parse(xhr.responseText);
+        Object.assign(state, data);
+
+        // Re-send device info if server lost it (e.g. after restart)
+        if(!data.has_device_info) sendDeviceInfo();
+
+        // Always set mode from server
+        document.body.className = 'mode-' + data.mode;
+
+        if(data.mode === 'calibrate'){
+          renderCalibrate(data);
+        } else {
+          renderBridge(data);
+        }
+      } else {
+        onPollError();
+      }
+    };
+    xhr.onerror = onPollError;
+    xhr.ontimeout = onPollError;
+    xhr.send();
+  }
+
+  function onPollError(){
+    polling = false;
+    pollErrors++;
+    if(pollErrors > 3){
+      document.getElementById('msg-conn-label').textContent = say('sin conexión','disconnected');
+      msgStatusEl.style.color = '#ef4444';
+    }
+  }
+
+  setInterval(poll, 250);
+  poll();
+
+  // ════════════════════════════════════════════════════════
+  // DEVICE INFO (sent on load + re-sent if server lost it)
+  // ════════════════════════════════════════════════════════
+  function sendDeviceInfo(){
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/bridge/screen-dimension?markers=2', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({
+      screen_width: screen.width,
+      screen_height: screen.height,
+      viewport_width: window.innerWidth,
+      viewport_height: window.innerHeight
+    }));
+  }
+  sendDeviceInfo();
+})();
+</script>
+</body>
+</html>

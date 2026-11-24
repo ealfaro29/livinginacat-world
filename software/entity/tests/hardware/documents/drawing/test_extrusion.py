@@ -1,0 +1,365 @@
+"""Tests for hardware/documents/drawing/extrusion.py — the cut list's
+join to the BOM, the section outlines traced from the CAD constants, and
+the rendered sheet."""
+
+from __future__ import annotations
+
+import re
+from dataclasses import replace
+from xml.etree import ElementTree as ET
+
+import pytest
+
+from hardware.documents import BuildError
+from hardware.documents.drawing import extrusion as bed
+from hardware.parts import _fits
+from hardware.parts.standard import extrusion_spec as spec
+
+
+def bom_rows(overrides: dict[str, dict] | None = None) -> list[dict]:
+    """One BOM row per spec, stating the model's length in both languages;
+    ``overrides`` replaces a row's fields, keyed by part_id."""
+    rows = []
+    for cut in bed.SPECS:
+        row = {
+            "part_id": cut.part_id,
+            "spec": {
+                "en": f"Length {cut.length:g} mm",
+                "zh": f"长度 {cut.length:g} mm",
+            },
+            "qty": "2",
+            "desc": {"en": f"use of {cut.part_id}", "zh": "用途"},
+        }
+        row.update((overrides or {}).get(cut.part_id, {}))
+        rows.append(row)
+    return rows
+
+
+# ── cut list ──────────────────────────────────────────────────────────────────
+
+
+def test_cut_list_joins_each_spec_to_its_bom_row_in_spec_order():
+    items = bed.cut_list(bom_rows({"ext-2040-x": {"qty": "5"}}))
+
+    assert [(i.spec.part_id, i.qty) for i in items] == [
+        ("ext-2040-y", 2),
+        ("ext-2040-x", 5),
+        ("ext-1020-x-beam", 2),
+        ("ext-1020-phone-support", 2),
+    ]
+    assert items[0].application == {"en": "use of ext-2040-y", "zh": "用途"}
+
+
+def test_cut_list_reads_the_real_bom():
+    items = bed.cut_list()
+
+    assert sum(i.qty for i in items) == 7
+
+
+def test_cut_list_refuses_a_bom_row_that_states_another_length():
+    rows = bom_rows(
+        {"ext-2040-y": {"spec": {"en": "Length 999 mm", "zh": "长度 999 mm"}}}
+    )
+
+    with pytest.raises(
+        BuildError, match=r"'ext-2040-y' spec \[en\] does not state '345 mm'"
+    ):
+        bed.cut_list(rows)
+
+
+def test_cut_list_checks_the_chinese_spec_too():
+    rows = bom_rows(
+        {"ext-2040-x": {"spec": {"en": "Length 190 mm", "zh": "长度 191 mm"}}}
+    )
+
+    with pytest.raises(BuildError, match=r"spec \[zh\] does not state '190 mm'"):
+        bed.cut_list(rows)
+
+
+def test_cut_list_refuses_a_missing_bom_row():
+    rows = [r for r in bom_rows() if r["part_id"] != "ext-1020-x-beam"]
+
+    with pytest.raises(BuildError, match="no BOM row with part_id 'ext-1020-x-beam'"):
+        bed.cut_list(rows)
+
+
+def test_cut_list_refuses_a_non_numeric_qty():
+    with pytest.raises(BuildError, match="qty 'two' is not a number"):
+        bed.cut_list(bom_rows({"ext-2040-y": {"qty": "two"}}))
+
+
+# ── the counterbore and tap are the standard ones for the frame screw ─────────
+
+
+def test_counterbore_is_the_standard_clearance_for_the_frame_screw():
+    assert spec.frame_screw == "M6" and spec.cb_shaft_d == _fits.M6_NORMAL
+    assert (spec.cb_head_d, spec.cb_head_depth) == (11.0, 6.8)  # DIN 974-1
+
+
+def test_counterbore_and_tap_match_the_screw_tables():
+    pytest.importorskip("build123d")  # the screw tables load the CAD kernel
+    from hardware.parts.standard.screw import COMMON, SHCS_DIMS
+
+    head, thread = SHCS_DIMS[spec.frame_screw], COMMON[spec.frame_screw]
+
+    assert spec.cb_head_d > head["dk"] and spec.cb_head_depth > head["k"]
+    # The tapped end: the profile's bore is the tap drill for the coarse
+    # thread, and the thread runs at least 1.5 d into the aluminum.
+    assert spec.end_tap == spec.frame_screw
+    assert spec.end_tap_pitch == thread["P"]
+    assert spec.bore_diameter == thread["d"] - thread["P"]
+    assert spec.end_tap_depth >= 1.5 * thread["d"]
+
+
+# ── section outlines ──────────────────────────────────────────────────────────
+
+
+def bbox(pts):
+    xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+    return (min(xs), max(xs), min(ys), max(ys))
+
+
+def mirrored(pts, fn):
+    return {(round(a, 6), round(b, 6)) for a, b in (fn(x, y) for x, y in pts)}
+
+
+def test_2040_outline_spans_two_cells_and_is_mirror_symmetric():
+    pts = bed.outline_2040()
+
+    assert bbox(pts) == (-2 * spec.leg, 2 * spec.leg, -spec.leg, spec.leg)
+    assert all(not bed._same(a, b) for a, b in zip(pts, pts[1:] + pts[:1], strict=True))
+    for fn in (lambda x, y: (-x, y), lambda x, y: (x, -y)):
+        assert mirrored(pts, fn) == mirrored(pts, lambda x, y: (x, y))
+
+
+def test_2040_channel_sits_inside_the_profile():
+    floor = spec.cell_offset - spec.wedge_vertices[1][0]
+
+    assert bbox(bed.channel_2040()) == (
+        -floor,
+        floor,
+        -spec.slot_h / 2,
+        spec.slot_h / 2,
+    )
+    assert spec.slot_h / 2 < spec.leg
+
+
+def test_2040_channel_refuses_a_spec_it_cannot_trace(monkeypatch):
+    monkeypatch.setattr(spec, "slot_w", 2 * spec.leg)
+
+    with pytest.raises(BuildError, match="channel rectangle no longer meets"):
+        bed.channel_2040()
+
+
+def test_1020_outline_is_the_half_profile_mirrored_and_centred():
+    pts = bed.outline_1020()
+    hx, hy = spec.half_x_1020, spec.half_x_1020 / 2
+
+    assert bbox(pts) == (-hx, hx, -hy, hy)
+    assert len(pts) == 2 * len(spec.half_vertices_1020) - 2
+
+
+# ── words ─────────────────────────────────────────────────────────────────────
+
+
+def test_machining_sentences_carry_the_spec_constants():
+    assert bed.machining_text(bed.CB, "en") == (
+        "4×M6 counterbore (two per end): Ø6.6 through, Ø11 × 6.8 deep, "
+        "on the 40 mm face, 10 mm from the end · for M6 socket head cap screws"
+    )
+    assert bed.machining_text(bed.CB, "zh").endswith("配合 M6 圆柱头螺栓使用")
+    assert (
+        bed.machining_text(bed.TAP, "zh")
+        == "两端各 2 个中心孔（Ø5 底孔）攻丝 M6×1-6H，深 12 mm"
+    )
+    assert bed.callout_lines(bed.TAP, "en") == (
+        "2×M6×1-6H, 12 deep",
+        "both ends",
+        "Ø5 bore = tap drill",
+    )
+    assert bed.callout_lines(bed.HOLE, "en") == (
+        "2×Ø5.5 through · square to the slot face",
+    )
+
+
+# ── table wrapping ────────────────────────────────────────────────────────────
+
+
+def test_wrap_breaks_at_sentence_joints_never_inside_a_dimension():
+    en = "4× M6 counterbore: Ø6.6 through, Ø11 × 6.8 deep · 40 mm face · for M6 screws"
+    lines = bed.wrap(
+        en,
+        bed.text_width(
+            "4× M6 counterbore: Ø6.6 through, Ø11 × 6.8 deep · 40 mm", bed.TD_FS
+        ),
+        bed.TD_FS,
+    )
+
+    assert lines == [
+        "4× M6 counterbore: Ø6.6 through, Ø11 × 6.8 deep",
+        "· 40 mm face · for M6 screws",
+    ]
+    zh = "沉孔 Ø11 深 6.8，开在 40 mm 宽面，配合 M6 圆柱头螺栓使用"
+    assert bed.wrap(
+        zh, bed.text_width("沉孔 Ø11 深 6.8，开在 40 mm 宽面，", bed.TD_FS), bed.TD_FS
+    ) == [
+        "沉孔 Ø11 深 6.8，开在 40 mm 宽面，",
+        "配合 M6 圆柱头螺栓使用",
+    ]
+
+
+def test_wrap_leaves_a_fitting_or_unbreakable_string_alone():
+    assert bed.wrap("short", 100, bed.TD_FS) == ["short"]
+    assert bed.wrap("unbreakable-run-of-text", 5, bed.TD_FS) == [
+        "unbreakable-run-of-text"
+    ]
+
+
+# ── the sheet ─────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.parametrize(("lang", "pages"), [("en", 2), ("zh", 1)])
+def test_document_has_a4_landscape_sheets_with_every_length(lang, pages):
+    doc = bed.render_document(bed.cut_list(bom_rows()), lang)
+
+    sheets = re.findall(r"<svg\b.*?</svg>", doc, re.DOTALL)
+    assert len(sheets) == pages
+    assert "@page { size: A4 landscape; margin: 0; }" in doc
+    assert f'<html lang="{ {"en": "en", "zh": "zh-Hans"}[lang] }">' in doc
+    for sheet in sheets:
+        assert 'width="297mm" height="210mm"' in sheet
+        for cut in bed.SPECS:
+            assert f">{cut.length:g} mm<" in sheet  # the cut-list cell
+            assert f">{cut.length:g}<" in sheet  # the length dimension
+    assert "Ø11" in doc and "M6" in doc
+    # Standard sections are dimensioned by their nominal size, never the
+    # model's measured 19.8 × 9.9.
+    assert ">19.8<" not in doc and ">9.9<" not in doc
+    assert ">20<" in doc and ">10<" in doc and ">40<" in doc
+
+
+def test_english_document_appends_the_chinese_sheet_with_original_footers():
+    items = bed.cut_list(bom_rows())
+    en = bed.render_document(items, "en")
+    zh = bed.render_document(items, "zh")
+    english, chinese = re.findall(r"<svg\b.*?</svg>", en, re.DOTALL)
+    standalone = re.search(r"<svg\b.*?</svg>", zh, re.DOTALL).group()
+
+    assert "Aluminum extrusion tech drawing" in english
+    assert "铝型材加工图" not in english
+    assert "Sheet 1 of 1" in english
+    assert "第 1 页，共 1 页" in chinese
+    assert chinese == standalone.replace(bed.DEFS, "")
+    assert ".sheet + .sheet { break-before: page; }" in en
+    assert "break-before" not in zh
+    # IDs are document-wide, including across separate inline SVG sheets.
+    ids = re.findall(r'\bid="([^"]+)"', en)
+    assert len(ids) == len(set(ids))
+    assert set(re.findall(r"url\(#([^)]+)\)", en)) <= set(ids)
+
+
+def test_chinese_sheet_is_localized():
+    doc = bed.render_document(bed.cut_list(bom_rows()), "zh")
+
+    assert (
+        "铝型材加工图" in doc
+        and "攻丝 M6×1-6H" in doc
+        and "Aluminum extrusion" not in doc
+    )
+
+
+def test_document_is_byte_stable():
+    items = bed.cut_list(bom_rows())
+
+    assert bed.render_document(items, "en") == bed.render_document(items, "en")
+
+
+def test_explicit_pdf_request_fails_without_chrome(tmp_path, monkeypatch):
+    monkeypatch.setattr(bed, "find_chrome", lambda: None)
+
+    with pytest.raises(BuildError, match="no Chrome/Chromium"):
+        bed.build(["en", "zh"], tmp_path, pdf=True)
+
+
+@pytest.mark.parametrize("langs", [["en"], ["zh"], ["en", "zh"]])
+def test_build_prints_the_same_sheets_as_the_selected_html(
+    tmp_path, monkeypatch, langs
+):
+    printed = {}
+
+    def fake_render(html: str, pdf_path, chrome: str) -> bool:
+        printed[pdf_path.name] = html
+        pdf_path.write_bytes(b"%PDF")
+        return True
+
+    monkeypatch.setattr(bed, "find_chrome", lambda: "chrome")
+    monkeypatch.setattr(bed, "render_pdf", fake_render)
+
+    written = bed.build(langs, tmp_path, pdf=True)
+
+    assert [p.name for p in written] == [
+        name
+        for lang in langs
+        for name in (bed.LANG_FILENAME[lang], bed.PDF_FILENAME[lang])
+    ]
+    for lang in langs:
+        document = (tmp_path / bed.LANG_FILENAME[lang]).read_text(encoding="utf-8")
+        assert printed[bed.PDF_FILENAME[lang]] == document
+        assert document.count("<svg") == (2 if lang == "en" else 1)
+
+
+def test_output_names_are_ascii_release_asset_names():
+    assert bed.PDF_FILENAME["zh"] == "physiclaw_extrusion_drawing_zh.pdf"
+    assert all(name.isascii() for name in bed.LANG_FILENAME.values())
+
+
+def _face_widths(svg: str) -> list[float]:
+    return [
+        float(node.get("width"))
+        for node in ET.fromstring(svg).iter("{http://www.w3.org/2000/svg}rect")
+        if float(node.get("x", "-1")) == bed.MARGIN + 66
+    ]
+
+
+def test_long_extrusions_reduce_labelled_face_scale_to_clear_the_details():
+    items = [
+        replace(item, spec=replace(item.spec, length=600))
+        for item in bed.cut_list(bom_rows())
+    ]
+    svg = bed.render_sheet(items, "en")
+    # All four face views keep the real 600 mm dimension. Their drawn lengths
+    # agree with the individual scale labels; the 1:1 details stay unchanged.
+    assert _face_widths(svg) == pytest.approx(
+        [600 / 4, 600 / 5, 600 / 3, 600 / 5], abs=0.01
+    )
+    assert ">600 mm<" in svg and ">600<" in svg
+    for denominator in (3, 4, 5):
+        assert f"1:{denominator}" in svg
+    assert "Section 1:1" in svg
+
+
+def test_original_frame_keeps_its_one_to_two_face_views():
+    original_lengths = {bed.CB: 345, bed.TAP: 190, bed.PLAIN: 185, bed.HOLE: 230}
+    items = [
+        replace(
+            item, spec=replace(item.spec, length=original_lengths[item.spec.machining])
+        )
+        for item in bed.cut_list(bom_rows())
+    ]
+    svg = bed.render_sheet(items, "en")
+    assert _face_widths(svg) == [172.5, 95, 92.5, 115]
+    assert svg.count("face · 1:2") == 4
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+@pytest.mark.parametrize("scale", [1 / 3, 1 / 4, 1 / 6])
+def test_reduced_counterbore_callout_clears_plate_and_fits_reported_ink(lang, scale):
+    svg, end = bed.face_2040_cb(74, 20, 545, lang, scale=scale)
+    root = ET.fromstring(f"<svg>{svg}</svg>")
+    plate = next(n for n in root.iter("rect") if n.get("class") == "outline")
+    bottom = float(plate.get("y")) + float(plate.get("height"))
+    notes = [n for n in root.iter("text") if n.get("class") == "note"]
+    assert notes
+    # Account for glyph height above each text baseline and descenders below it.
+    assert min(float(n.get("y")) for n in notes) - 2.6 > bottom
+    assert max(float(n.get("y")) for n in notes) + 1 <= end

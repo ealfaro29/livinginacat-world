@@ -1,0 +1,59 @@
+# taobao/hema-buy.add — one item into the 盒马 cart; run by `hema-buy`,
+# once per item, after it enters the storefront. Starts and ends
+# on the storefront's home, so the rounds chain without a relaunch.
+kind: playbook
+schema: 1
+name: add
+description: put one item in the 盒马 (Hema) cart inside Taobao, nothing paid
+enabled: false  # rehearse on YOUR device, then enable
+inputs:
+  item:
+    description: one product, name + spec + quantity, as the buyer named it
+returns:
+  line: "{pick.title} ×{pick.qty}  ¥{pick.price}"
+
+route:
+  - agent: parse
+    context:
+      prompt: app.prompts.item-keyword  # the product words, no quantity or unit
+      given: {item: inputs.item}
+    returns:
+      keyword: the search keyword, exactly as it should be typed
+    think: off
+
+  - page: app.pages.hema-home
+
+  - do: find                      # type the keyword into the storefront's search, run it
+    with: {keyword: "{parse.keyword}"}
+    macro: app.macros.store-search
+
+  - page: app.pages.store-results
+
+  - agent: pick
+    context:
+      prompt: app.prompts.store-pick  # rows to an item, one add, the sheets that follow
+      given:
+        item: inputs.item
+        keyword: parse.keyword
+        close: app.landmarks.close                    # a promo ✕
+        pairing_close: app.landmarks.pairing-close    # the 推荐搭配 sheet's ✕
+    tools: [tap, scroll]
+    never_tap:
+      - {label: ["去结算", "领券结算", "立即购买"], within: bottom}   # one target: the checkout button
+      - {label: ["提交订单", "立即支付", "免密支付"], within: bottom}   # one target: the pay button
+      - "凑单"
+      - "换购"
+    returns:
+      title: the item title exactly as its page shows it
+      qty: the quantity set, a number
+      price: the unit price shown, a number
+    limit: {calls: 12, scrolls: 4}
+    think: low
+    on_fail: stop
+
+  - page: app.pages.store-detail
+
+  - do: back-to-store             # the item page's arrow, then the results' — lands on hema-home
+    macro: back                 # this entry's own hand
+
+  - page: app.pages.hema-home

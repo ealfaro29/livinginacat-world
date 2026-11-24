@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#10130f" />
+    <title>Pulso · Entity</title>
+    <link rel="icon" href="../sentient.svg" />
+    <link rel="stylesheet" href="/pulse.css" />
+    <style>
+      .director {
+        max-width: 690px;
+        padding-top: clamp(18px, 6vh, 60px);
+      }
+      .director h1 {
+        margin: 36px 0 14px;
+      }
+      .ctl {
+        border: 1px solid var(--edge);
+        border-radius: 17px;
+        padding: clamp(18px, 4vw, 30px);
+        background: var(--panel);
+        margin: 24px 0 15px;
+      }
+      .ctl h2 {
+        font-size: 23px;
+        margin: 0 0 9px;
+        font-weight: 500;
+      }
+      .ctl p {
+        min-height: 2.8em;
+        margin-bottom: 18px;
+      }
+      .ctl .readout {
+        margin-top: 21px;
+        border-top: 1px solid var(--edge);
+        padding-top: 14px;
+      }
+      .buttons {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .director a {
+        color: var(--lime);
+        text-underline-offset: 4px;
+      }
+      .director .phone {
+        font-size: 13px;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell director">
+      <header class="brandbar">
+        <div class="brand">
+          <img src="../sentient.svg" alt="" /><strong>Entity</strong><span>by Sentient</span>
+        </div>
+        <button class="quiet" id="lang">EN</button>
+      </header>
+      <h1 id="title">Pulso</h1>
+      <p id="intro">Cinco blancos. Entity los busca con la cámara y los toca en el iPhone.</p>
+      <section class="ctl">
+        <h2 id="heading">Control de la toma</h2>
+        <p id="explain" role="status"></p>
+        <div class="buttons">
+          <button id="start" class="primary" disabled>Jugar con Entity</button
+          ><button id="stop" class="secondary" hidden>Detener</button>
+        </div>
+        <div class="readout">
+          <div><span id="label">Aciertos</span><strong id="score">00 / 05</strong></div>
+        </div>
+      </section>
+      <p class="phone">
+        <span id="phoneLabel">En el iPhone, abrí</span> <a id="link" href="/jugar">Pulso</a>
+      </p>
+    </main>
+    <script type="module" src="/control.js"></script>
+  </body>
+</html>

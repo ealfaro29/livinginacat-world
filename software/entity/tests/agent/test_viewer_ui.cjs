@@ -1,0 +1,207 @@
+const assert = require('node:assert/strict');
+const {test} = require('node:test');
+const {createViewer} = require('./viewer_ui_fixture.cjs');
+
+const row = (rec, src = 'events', extra = {}) => ({src, line: 1, rec, ...extra});
+
+for (const path of [
+  'https://attacker.example/track?session=private', '//attacker.example/frame.jpg',
+  'file:///private/frame.jpg', 'data:image/svg+xml,<svg/>',
+  'images/../../../api/screenshot', 'images/../outside.jpg',
+  'images/%2e%2e/outside.jpg', 'images/%252e%252e/outside.jpg',
+  'images/..\\outside.jpg', 'images/frame.jpg?next=outside',
+  'images/frame.jpg#fragment', 'images/frame\n.jpg', 'images/frame.svg',
+]) {
+  test(`test_recorded_image_paths_cannot_escape_the_viewer_${JSON.stringify(path)}`, () => {
+    const records = [
+      row({event: 'tool_result', name: 'screenshot', images: [path]}, 'events', {frames: [path]}),
+      row({kind: 'request', messages: [{role: 'user', content: [{type: 'image_url', image_url: {url: path}}]}]}, 'wire', {frames: [path]}),
+    ];
+    const ui = createViewer(records, {files: [{name: path, bytes: 10}]});
+
+    assert.equal(ui.document.querySelectorAll('img').length, 0);
+    for (const id of ['events-1', 'wire-1']) {
+      ui.select(id);
+      assert.equal(ui.document.querySelectorAll('img').length, 0);
+      assert.ok(ui.detail.includes(path));
+    }
+  });
+}
+
+test('test_session_images_render_in_thumbnails_details_and_filmstrip', () => {
+  const path = 'images/120000_123_t7.jpg';
+  const ui = createViewer([
+    row({event: 'tool_result', name: 'screenshot', images: [path]}, 'events', {frames: [path]}),
+  ], {files: [{name: path, bytes: 10}]});
+
+  ui.select('events-1');
+
+  assert.equal(ui.document.querySelectorAll('img').length, 3);
+  for (const image of ui.document.querySelectorAll('img')) assert.equal(image.getAttribute('src'), path);
+});
+
+test('test_host_bound_plugin_is_not_presented_as_a_playbook', () => {
+  const rec = {kind: 'response', producer: {plugin_id: 'actual-slot'}, presentation: 'plugin', raw: {}};
+  const ui = createViewer([row(rec, 'wire')]);
+  ui.select('wire-1');
+  assert.match(ui.detail, /plugin actual-slot/);
+  assert.doesNotMatch(ui.detail, /The playbook|nothing was sent to the model/);
+});
+
+test('test_llm_response_is_presented_as_the_main_model', () => {
+  const rec = {kind: 'response', producer: {plugin_id: 'physiclaw.llm'}, presentation: 'model', raw: {}};
+  const ui = createViewer([row(rec, 'wire')]);
+  ui.select('wire-1');
+  assert.match(ui.detail, /The model replied/);
+  assert.doesNotMatch(ui.detail, /composed this turn/);
+});
+
+test('test_playbook_response_uses_the_host_plugin_id', () => {
+  const ui = createViewer([row({kind: 'response', producer: {plugin_id: 'conductor-slot'}, presentation: 'playbook', raw: {}}, 'wire')]);
+  ui.select('wire-1');
+  assert.match(ui.detail, /playbook conductor-slot/);
+});
+
+test('test_selected_recording_can_navigate_to_internal_session_with_same_name', () => {
+  const ui = createViewer([], {sid: 'same name', review_url: '/review/', sessions: [{sid: 'same name', outcome: {}}]});
+  const pick = ui.document.querySelector('#hdr select');
+  const initialOptions = ui.document.querySelectorAll('#hdr option').map(o => [o.value, !!o.selected]);
+
+  pick.value = '/sessions/same%20name/';
+  pick.listeners.get('change')();
+
+  assert.equal(ui.href, '/sessions/same%20name/');
+  assert.deepEqual(initialOptions, [['/review/', true], ['/sessions/same%20name/', false]]);
+});
+
+test('test_normal_session_picker_preserves_encoded_navigation', () => {
+  const ui = createViewer([], {sid: 'one', sessions: [{sid: 'one', outcome: {}}, {sid: '记录 #?', outcome: {}}]});
+  const options = ui.document.querySelectorAll('#hdr option');
+  const pick = ui.document.querySelector('#hdr select');
+
+  pick.value = options[1].value;
+  pick.listeners.get('change')();
+
+  assert.equal(options[0].selected, true);
+  assert.equal(ui.href, `/sessions/${encodeURIComponent('记录 #?')}/`);
+});
+
+for (const rec of [
+  {event: 'wake', triggers: [null]},
+  {event: 'wake', triggers: 1},
+  {event: 'tool_result', images: 'images/broken.jpg', text: 'screen'},
+  {event: 'other', t: 12, elapsed_ms: {toString: null}},
+]) {
+  test(`test_regression_bad_record_keeps_page_and_raw_tab_${JSON.stringify(rec)}`, () => {
+    const following = {src: 'events', line: 2, rec: {event: 'done', sentinel: 'DONE', recap: 'still visible'}};
+
+    const ui = createViewer([row(rec), following]);
+    ui.select('events-1');
+    ui.tab('raw');
+
+    assert.ok(ui.detail.includes(JSON.stringify(rec, null, 2)));
+    ui.select('events-2');
+    assert.match(ui.detail, /still visible/);
+  });
+}
+
+for (const messages of [1, 'broken', [null], [{role: 'assistant', tool_calls: [null]}]]) {
+  test(`test_regression_bad_request_can_still_show_raw_messages_${JSON.stringify(messages)}`, () => {
+    const rec = {kind: 'request', messages};
+    const ui = createViewer([row(rec, 'wire')]);
+
+    ui.select('wire-1');
+    ui.tab('raw');
+
+    assert.ok(ui.detail.includes(JSON.stringify(rec, null, 2)));
+  });
+}
+
+test('test_unformatted_server_record_shows_raw_fallback_immediately', () => {
+  const rec = {event: 'tool_result', arguments: {bbox: 1}};
+  const ui = createViewer([row(rec, 'events', {unformatted: true, warn: true})]);
+
+  ui.select('events-1');
+
+  assert.match(ui.detail, /Could not format/);
+  assert.ok(ui.detail.includes(JSON.stringify(rec, null, 2)));
+});
+
+test('test_regression_damaged_summary_does_not_block_session_rows', () => {
+  const ui = createViewer([row({event: 'done', recap: 'available'})], {
+    summary: {started_at: 42, duration_s: {toString: null}, usage: {cache_hit_pct: {toString: null}}, outcome: {sentinel: {toString: null}, recap: {toString: null}}, walks: [null, 7, {app: {toString: null}, playbook: {toString: null}, outcome: {toString: null}, node: {toString: null}, reason: {toString: null}}], turns: {toString: null}},
+    sessions: [{sid: 'other', outcome: {recap: 42}}],
+  });
+
+  ui.select('events-1');
+
+  assert.match(ui.detail, /available/);
+});
+
+test('test_valid_request_renders_messages_and_raw_tab', () => {
+  const rec = {kind: 'request', messages: [{role: 'user', content: 'a real message'}]};
+  const ui = createViewer([row(rec, 'wire', {new_from: 0, carried: 0})]);
+
+  ui.select('wire-1');
+
+  assert.match(ui.detail, /a real message/);
+  assert.doesNotMatch(ui.detail, /Could not format/);
+});
+
+test('test_regression_show_carried_messages_preserves_damaged_message', () => {
+  const rec = {kind: 'request', messages: [null, {role: 'user', content: 'new message'}]};
+  const ui = createViewer([row(rec, 'wire', {new_from: 1, carried: 1})]);
+  ui.select('wire-1');
+
+  ui.document.querySelector('#detail .more').listeners.get('click')();
+
+  assert.match(ui.detail, /Could not format/);
+  assert.match(ui.detail, /null/);
+  assert.match(ui.detail, /new message/);
+});
+
+test('test_keyboard_navigation_moves_past_damaged_record', () => {
+  const records = [row({event: 'wake', triggers: 1}), {src: 'events', line: 2, rec: {event: 'done', recap: 'next row'}}];
+  const ui = createViewer(records);
+  ui.select('events-1');
+
+  ui.document.listeners.get('keydown')({target: {tagName: 'DIV'}, key: 'ArrowDown', preventDefault() {}});
+
+  assert.match(ui.detail, /next row/);
+});
+
+test('test_regression_summary_data_cannot_impersonate_a_dom_node', () => {
+  const summary = {outcome: {recap: {nodeType: 1, toString: null}}};
+
+  const ui = createViewer([], {summary});
+
+  assert.match(ui.document.getElementById('hdr').textContent, /"nodeType":1/);
+});
+
+
+for (const field of ['messages', 'input']) test(`test_native_request_search_indexes_only_new_messages_once_${field}`, () => {
+  const messages = [{role: 'user', content: 'carried-only'}, {role: 'user', content: 'new-only'}];
+  const rec = {kind: 'request', messages, body: {[field]: messages, model: 'provider-option'}};
+  const original = JSON.stringify(rec);
+  const ui = createViewer([row(rec, 'wire', {new_from: 1, carried: 1})]);
+
+  const searchable = ui.document.getElementById('wire-1').searchable();
+
+  assert.doesNotMatch(searchable, /carried-only/);
+  assert.equal(searchable.split('new-only').length - 1, 1);
+  assert.match(searchable, /provider-option/);
+  assert.equal(JSON.stringify(rec), original);
+});
+
+test('Responses input images and text render in native request and tool receipts', () => {
+  const path = 'images/frame.jpg';
+  const blocks = [{type: 'input_text', text: 'observed labels'}, {type: 'input_image', image_url: path}];
+  const records = [row({kind: 'request', messages: [
+    {role: 'user', content: blocks},
+    {type: 'function_call_output', call_id: 'call-1', output: blocks},
+  ]}, 'wire', {frames: [path]})];
+  const ui = createViewer(records, {files: [{name: path, bytes: 10}]});
+  ui.select('wire-1');
+  assert.ok(ui.detail.includes('observed labels'));
+  assert.equal(ui.document.querySelectorAll('#detail img').length, 2);
+});

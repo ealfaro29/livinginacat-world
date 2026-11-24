@@ -1,0 +1,79 @@
+# taobao/tmall-buy — staples from 天猫超市 inside Taobao, several items
+# in ONE order (~4 h): open the store once through 闪购's search,
+# `add` per item then `checkout`, the playbooks beside it. Starts anywhere. Ends on
+# the paid page, the buyer told.
+kind: entry
+schema: 1
+name: tmall-buy
+description: >-
+  buy supermarket staples from 天猫超市 (猫超) inside 淘宝, one order in ~4 h:
+  packaged food, snacks, milk, rice, oil, tissue, household goods — when the
+  buyer says 天猫超市 / 猫超 or wants staples today
+enabled: false  # rehearse on YOUR device, then enable
+inputs:
+  user_said:
+    description: what the user said, verbatim — the original message the task came from
+
+route:
+  - agent: parse
+    context:
+      prompt: |
+        The buyer said: "{buyer_said}"
+        Later replies, if any: {replies}
+        The list as it stood before those replies: {earlier_list}
+        Already in the 天猫超市 cart from this errand: {already_in_cart}
+        Return the FULL list the buyer wants now, one product per line as
+        name + spec + quantity (e.g. 金典纯牛奶 250ml*24盒 ×1); leave out
+        anything they no longer want. Keep the buyer's language. Keep every
+        line of the earlier list the buyer did not change WORD FOR WORD —
+        that line is how the cart knows the item is already in it.
+        If the message names no concrete product, escalate.
+      given:
+        buyer_said: inputs.user_said
+        replies: ask.replies
+        earlier_list: parse.items
+        already_in_cart: add.line
+    returns:
+      items: the full list now, one per line
+    think: off
+
+  - tell: ack
+    message: "收到，正在天猫超市为你挑选：\n{parse.items}"
+
+  - start: app
+    macro: app.macros.launch      # to the feed: resumed as it is, else cold-launched
+
+  - page: app.pages.home
+
+  - do: open-shangou              # the feed's 闪购外卖 tab, its coupon card closed
+    macro: app.macros.open-shangou
+
+  - page: app.pages.shangou-home
+
+  - do: find-store                # type the store's name into the 闪购 search, run it
+    with: {keyword: "天猫超市"}
+    macro: app.macros.shangou-search
+
+  - page: app.pages.shangou-results
+
+  - do: open-store                # the first card, 天猫超市闪购
+    macro: open-tmall
+
+  - page: app.pages.tmall-home
+
+  - run: add                      # store search, pick, 加入购物车, back to the store; one
+    each: {item: parse.items}     # round per item; a line already in the cart is not
+    miss: skip                    # re-added, an item not found is skipped
+    limit: {rounds: 4}
+
+  - page: app.pages.tmall-home
+
+  - run: checkout                 # the cart sheet, tick, settle, confirm, pay
+    with: {lines: "{add.line}"}
+    revise: parse                 # a reply the ask's words miss re-plans from `parse`
+    limit: {revisions: 2}
+
+  - page: app.pages.paid
+
+  - tell: report
+    message: "天猫超市已下单并完成支付：\n{add.line}"

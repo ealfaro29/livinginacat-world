@@ -1,0 +1,26 @@
+kind: macro
+schema: 1
+name: cold-launch
+description: quit the Taobao in front and launch it cold — past the opening ad, onto the feed's 推荐 tab, settled
+# Disabled until rehearsed on YOUR device: physiclaw macros run taobao/cold-launch
+enabled: false
+steps:
+  # force_quit kills whatever is in FRONT: run this with Taobao raised.
+  - force_quit                               # the card the switcher flings is taobao's
+  - home_screen
+  - tap: "blank area below the app cards"    # home_screen FROM home can open the switcher
+    at: [0.42, 0.855, 0.58, 0.885]
+  - tap: "the taobao app icon"
+    at: [0.720, 0.425, 0.909, 0.551]
+  - wait: 5
+  # A cold launch may open on a full-screen ad — without this step
+  # every relaunch fails verify.
+  - tap: "跳过"
+    at: [0.79, 0.030, 0.87, 0.065]
+    when: {text: "跳过", within: [0.70, 0.0, 1.0, 0.12]}
+  # A post-ad cold render needs the slack before the tab row is read.
+  - wait: 4
+  - tap: "推荐"                              # the tab Taobao restored may be 闪购外卖 — its row says 我的闪购
+    at: [0.14, 0.055, 0.26, 0.095]
+    when: ["我的闪购"]
+  - wait: 2                                  # the tab switch settles before the caller reads the feed

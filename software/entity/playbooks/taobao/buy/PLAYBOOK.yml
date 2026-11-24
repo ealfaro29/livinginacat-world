@@ -1,0 +1,101 @@
+# taobao/buy — one item from a keyword to a paid order, by courier.
+# Starts anywhere (cold launch). Ends on the paid page, the buyer told.
+kind: entry
+schema: 1
+name: buy                       # = this folder's name; referenced as taobao/buy
+description: buy one item on 淘宝 (Taobao) by keyword, shipped by courier — the default for a product that names no store
+enabled: false  # rehearse on YOUR device, then enable
+inputs:
+  user_said:
+    description: what the user said, verbatim — the original message the task came from
+
+route:
+  # No tools: a pure-text call, before the arm moves. Its fields read
+  # downstream as {parse.keyword}.
+  - agent: parse
+    context:
+      prompt: |
+        From the buyer's message, produce the Taobao search keyword.
+        The buyer said: "{buyer_said}"
+        Rules:
+        - a pure product keyword: name + spec (e.g. 五常大米 5kg)
+        - no quantity words (一袋/两盒), no verbs, no politeness
+        - keep the language the buyer used
+        If the message names no concrete product, escalate.
+      given:
+        buyer_said: inputs.user_said
+    returns:
+      keyword: the search keyword, exactly as it should be typed
+    think: off                    # a keyword is read off the words, not reasoned out
+
+  - start: app
+    macro: app.macros.launch      # to the feed: resumed as it is, else cold-launched
+
+  - page: app.pages.home
+
+  - do: search                    # type the keyword into the feed's bar, run it
+    with: {keyword: "{parse.keyword} 非直播"}  # suffix the search, not the field
+    macro: app.macros.search
+
+  - page: app.pages.results
+  # The model picks a listing and opens its buy sheet (立即购买 / 领券购买)
+  # with one spec at one exact price, then stops: the ask reads the
+  # total there and the pay move is one recorded tap. The cart is never
+  # touched; it is the buyer's own.
+  - agent: pick
+    context:
+      prompt: prompts.pick        # rows to a listing, the sheet's spec, stop before paying
+      given:                     # what the prompt writes in braces
+        buyer_said: inputs.user_said
+        keyword: parse.keyword
+        close: app.landmarks.close    # the ✕ of a promo card over the page
+    tools: [tap, scroll, back]
+    never_tap:                    # bans the walker enforces; never shown to the model
+      # Banded because 免密支付 is also a label the total sits beside
+      # (`total_label:` below), read mid-page: y 0.56 the label, y 0.92
+      # the button.
+      - {label: ["免密支付", "立即支付"], within: bottom}
+      - {label: ["提交订单", "确认支付"], within: bottom}
+      - "先用后付"                 # an option row at y 0.34, so not banded
+      - "顺手买"                   # the add-on strip the sheet offers below the spec
+    returns:
+      summary: one line - title, spec, qty, the 实付 price
+      message: a short Chinese message to the buyer asking them to
+        confirm this purchase - name the item, spec, qty and price;
+        say nothing about tools, walkers, or how the payment is made
+    limit: {calls: 12, scrolls: 4}
+    think: low
+    on_fail: stop                 # it stands on the buy sheet: a free model with the
+                                  # tools there is how an unasked payment happened
+
+  - page: app.pages.buysheet
+
+  - ask: confirm-pay              # the human approves before money moves
+    approve: payment
+    total_label: ["实付", "免密支付", "优惠后"]  # the label the total sits
+                                  # beside — {ask.total} is that row's amount
+    message: "{pick.message}（实付以屏幕读数为准：¥{ask.total}）回复 好的 确认支付，或 不用 取消。"
+    yes: ["好的", "好", "可以", "确认"]   # whole-message replies that open the gate
+    no: ["不用", "不要", "取消", "算了"]   # …and that close it; anything else hands over
+    denied: "好的，已取消，未付款。"     # the walk's answer to a no, before it stops
+    wait: 45                      # seconds between reply polls…
+    rounds: 3                     # …and silent polls before the session suspends
+    think: off                    # a reply the words miss is read, not deliberated over
+    on_fail: stop                 # a failure (or an answered no) ends the session; nothing paid
+    resume: app.macros.foreground  # the ask left the app — come back where it was
+
+  # One recorded tap once the consented amount still shows.
+  - do: pay
+    irreversible: payment
+    on_fail: handover             # money may have moved: the model verifies and reports
+    macro:
+      steps:
+        - tap: ["免密支付", "立即支付", "提交订单"]   # one target, three spellings
+          at: [0.368, 0.923, 0.629, 0.948]
+        - wait: 4
+        - run: app.macros.cashier  # 立即支付 / 确认支付, only while one shows
+
+  - page: app.pages.paid
+
+  - tell: report                  # the walk is done; a reply is the next wake's request
+    message: "已下单并完成支付：{pick.summary}。"

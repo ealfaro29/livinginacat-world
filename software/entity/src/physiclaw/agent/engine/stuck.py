@@ -1,0 +1,423 @@
+"""Stuck guard — engine-enforced loop detection.
+
+The failure class: the model repeats itself for half an hour because a
+prompt rule ("stop after N attempts") cannot work — compaction erases
+the evidence the model would need to count. So the ENGINE counts.
+Three blocking detectors share a pair of tiers; a fourth only warns:
+
+  tier 1 (warn)   the WARN_AT-th occurrence appends a ⚠ to the tool
+                  result — the highest-adherence channel.
+  tier 2 (block)  the BLOCK_AT-th is refused pre-dispatch with an error
+                  result. Models sometimes ignore warnings; they cannot
+                  ignore an action that doesn't execute.
+
+The detectors, by the loop they catch:
+
+  1. SAME TARGET  press-family gestures (tap / double_tap / long_press
+     — switching gesture type on a dead element is not "changing
+     method") whose results carry `screen: no visible change`
+     (`physiclaw.common.verdict`). A silent refusal — stock-limit toast the
+     camera never sees — looks exactly like this. Nav gestures
+     (go_back / home_screen / force_quit) count the same way, keyed
+     per tool name (they have no target): a back swipe whose tip
+     misses the ~30pt edge zone registers nothing, and a screen with
+     no back action (modal, root tab, image viewer) refuses forever.
+  2. ACTION CYCLES  repeating the same 2–3-action cycle (checkout ↔
+     cart, tab ↔ tab ↔ back) — each action CHANGES the screen, so
+     detector 1 is blind to it; identity comes from action signatures.
+  3. SAME FAILING CALL  identical calls that raise on execution (e.g. a
+     target overlapping the AssistiveTouch button) — no verdict ever
+     exists, so detectors 1–2 never see them.
+  4. POSITION ORBIT (warn-only)  BLOCK_AT of the last 2×BLOCK_AT presses
+     landing on one spot, regardless of gesture type, verdict, or what
+     ran in between — catches erratic circling that slips between 1–3.
+     Advisory only: five presses on one spot is also what a legitimate
+     "press + five times" task looks like, so the model judges from the
+     warning; blocking stays with the evidence-based detectors.
+
+Detector 1 only uses standalone verdicts: a changed press resets its
+target, and a missing verdict fails open. A sequence's before/after
+comparison cannot attribute change or no-change to individual steps,
+so it neither increments nor resets their misses. It still cannot
+dispatch a target exhausted by standalone presses. Swipes are absent
+from detector 1 (repeated scrolls are normal; direction-alternating
+swipes are caught by detector 2). Learned repeatable keyboard keys
+are exempt everywhere (clearing a field takes 10–20 backspaces).
+
+Counters are per-step: they reset when the plan's `in_progress` step
+changes, so a new objective gets a clean slate on the same coordinates.
+Tier 1 is advisory. Tier 2 blocks the configured BLOCK_AT-th attempt
+after no-ops, repeated cycles, or failing calls supply the evidence.
+"""
+
+from dataclasses import dataclass, field
+
+from physiclaw.agent import layout
+from physiclaw.common.bbox import center_of, near, validate_bbox
+from physiclaw.common.config import CONFIG
+
+# Presses count toward same-target tiers by bbox center, nav gestures
+# by tool name (both from the shared vocabulary). Swipes are
+# deliberately absent (see module docstring).
+from physiclaw.common.gesture_vocab import (
+    NAV_TOOLS,
+    PRESS_TOOLS,
+    SEQUENCE,
+    STEP_ACTIONS,
+    STEP_ARG,
+    STEP_TOOL,
+    SWIPE,
+)
+
+WARN_AT = CONFIG.engine.same_target_warn
+BLOCK_AT = CONFIG.engine.same_target_block
+
+# Two press centers within this L∞ distance are the same target —
+# covers the coordinate jitter of re-transcribed bboxes without
+# swallowing a genuinely different neighbor element. Deliberately a
+# separate knob from `layout.store.BOX_MARGIN` even though the values
+# coincide today: same-target matching and learned-box slack may
+# drift apart legitimately.
+MATCH_TOLERANCE = 0.02
+
+
+def _press_centers(name: str, arguments: dict) -> list[tuple[float, float]]:
+    """Extract the press-family target centers of a gesture call.
+
+    A plain press yields one center; a `sequence` yields one per
+    press-family step (so a blocked element can't be smuggled through a
+    batch); anything else yields none.
+    """
+    if name in PRESS_TOOLS:
+        # Sequence steps have only a dict schema. Leave malformed boxes to
+        # the tool's validation rather than quantizing NaN/string coordinates.
+        try:
+            bbox = validate_bbox(arguments.get("bbox") or [])
+        except ValueError:
+            return []
+        c = center_of(bbox)
+        return [c] if c else []
+    if name == SEQUENCE:
+        actions = arguments.get(STEP_ACTIONS)
+        if not isinstance(actions, list):
+            return []
+        centers = []
+        for step in actions:
+            if not isinstance(step, dict):
+                continue
+            tool = step.get(STEP_TOOL)
+            if isinstance(tool, str) and tool in PRESS_TOOLS:
+                centers.extend(_press_centers(tool, {"bbox": step.get(STEP_ARG)}))
+        return centers
+    return []
+
+
+# Action signatures (detectors 2–3): presses = (tool, quantized
+# center); swipes = (tool, direction); nav gestures = (tool,). Views,
+# local tools, and exempt keyboard keys have NO signature — they
+# neither extend nor break a cycle.
+
+# Longest lookback any detection needs: BLOCK_AT repeats of a period-3
+# cycle (+1 headroom for the pre-append should_block probe). Derived so
+# a config change can't silently outgrow the history.
+_HISTORY_MAX = 3 * BLOCK_AT + 1
+
+# Position-orbit window (detector 4): warn when BLOCK_AT of the last
+# _ORBIT_WINDOW presses hit one quantized spot.
+_ORBIT_WINDOW = 2 * BLOCK_AT
+
+
+def _quant(center: tuple[float, float]) -> tuple[int, int]:
+    """Quantize a center to MATCH_TOLERANCE cells so jittered re-taps
+    share a signature (border-straddling jitter splits — conservative)."""
+    return (round(center[0] / MATCH_TOLERANCE), round(center[1] / MATCH_TOLERANCE))
+
+
+def _hashable(v: object) -> object:
+    """Stable, hashable form of a non-press step's argument so different
+    sequence actions aren't conflated. Normalized coordinates quantize
+    to MATCH_TOLERANCE cells, whether JSON spells them as ints or floats.
+    Out-of-range numbers stay unchanged: the tool rejects them, and
+    scaling a huge malformed coordinate here could overflow."""
+    if isinstance(v, dict):
+        return tuple(sorted((k, _hashable(x)) for k, x in v.items()))
+    if isinstance(v, (list, tuple)):
+        return tuple(_hashable(x) for x in v)
+    if isinstance(v, (int, float)) and not isinstance(v, bool) and 0 <= v <= 1:
+        return round(v / MATCH_TOLERANCE)
+    return v
+
+
+def _trailing_cycles(history: list[tuple]) -> int:
+    """Max count of consecutive repeats of the trailing action cycle,
+    for cycle periods 2 and 3. The cycle must contain ≥2 distinct
+    signatures (A,A,A… is repetition, not a cycle — pagination and
+    feed-scrolling stay untouched). ABAB → 2; ABCABC → 2; ABC → 0."""
+    best = 0
+    for period in (2, 3):
+        if len(history) < 2 * period:
+            continue
+        block = history[-period:]
+        if len(set(block)) < 2:
+            continue
+        n = 0
+        i = len(history)
+        while i >= period and history[i - period : i] == block:
+            n += 1
+            i -= period
+        best = max(best, n)
+    return best
+
+
+@dataclass
+class _Target:
+    center: tuple[float, float]
+    misses: int = 0  # camera-verified no-change presses on this spot
+
+
+@dataclass
+class StuckGuard:
+    """Per-session loop detectors (see module docstring). Engine calls,
+    in order: `observe_step` at each turn start, `should_block` before
+    dispatching a gesture, then `record` (success) or `record_error`
+    (execution raised) when its result comes back."""
+
+    _targets: list[_Target] = field(default_factory=list)
+    _history: list[tuple] = field(default_factory=list)  # action signatures
+    _error_counts: dict[tuple, int] = field(default_factory=dict)
+    # Detector-1 counting for nav gestures — per tool name, since they
+    # have no target bbox to key on.
+    _nav_misses: dict[str, int] = field(default_factory=dict)
+    _presses: list[tuple[int, int]] = field(
+        default_factory=list
+    )  # quantized press positions
+    _orbit_warned: set[tuple[int, int]] = field(default_factory=set)
+    _step_identity: str | None = None
+    # Lazily read on the first press (None = not loaded yet) so Session
+    # construction stays I/O-free; the layout file changes only during
+    # first-run setup, which restarts the session anyway.
+    _exempt: list[tuple[float, float]] | None = None
+
+    def observe_step(self, identity: str | None) -> None:
+        """Reset counters when the plan's in_progress step changes — a
+        new objective gets a clean slate on the same coordinates."""
+        if identity != self._step_identity:
+            self._step_identity = identity
+            self._targets.clear()
+            self._history.clear()
+            self._error_counts.clear()
+            self._nav_misses.clear()
+            self._presses.clear()
+            self._orbit_warned.clear()
+
+    def should_block(self, name: str, arguments: dict) -> str | None:
+        """Blocking message if this call would be the BLOCK_AT-th press on
+        an exhausted target, the BLOCK_AT-th repeat of an action cycle, or
+        the BLOCK_AT-th identical failing call — else None. Blocked calls
+        are never dispatched and never recorded, so repeated attempts stay
+        blocked without extending state."""
+        for center in self._press_centers_counted(name, arguments):
+            t = self._find(center)
+            if t is not None and t.misses >= BLOCK_AT - 1:
+                return (
+                    f"BLOCKED — not executed: press #{t.misses + 1} on the same "
+                    f"target this step, {t.misses} camera-verified no-ops so far. "
+                    "This element is exhausted (refusing or dead). Pick a "
+                    "different element or method, or report the blocker to the "
+                    "user and close (CONVENTION § Stuck)."
+                )
+        if name in NAV_TOOLS:
+            n = self._nav_misses.get(name, 0)
+            if n >= BLOCK_AT - 1:
+                return (
+                    f"BLOCKED — not executed: `{name}` #{n + 1} this step, "
+                    f"{n} camera-verified no-ops so far. The gesture isn't "
+                    "registering or this screen doesn't respond to it — use "
+                    "an on-screen control (‹ Back / X / Done) or another "
+                    "exit, or report the blocker to the user and close "
+                    "(CONVENTION § Stuck)."
+                )
+        sig = self._signature(name, arguments)
+        if sig is not None:
+            if self._error_counts.get(sig, 0) >= BLOCK_AT - 1:
+                return (
+                    f"BLOCKED — not executed: this exact call has already "
+                    f"failed {BLOCK_AT - 1}×. Retrying identical arguments "
+                    "won't fix the error — change the target or the method "
+                    "(CONVENTION § Stuck)."
+                )
+            if _trailing_cycles(self._history + [sig]) >= BLOCK_AT:
+                return (
+                    f"BLOCKED — not executed: {BLOCK_AT}th repeat of the same "
+                    "action cycle (A→B→…→A→B→…). Bouncing between the same "
+                    "screens/elements is a loop even though each action "
+                    "changes the screen. Change method or escalate "
+                    "(CONVENTION § Stuck)."
+                )
+        return None
+
+    def record_error(self, name: str, arguments: dict) -> str | None:
+        """Feed a FAILED execution back in (MCP raised — e.g. a target
+        overlapping the AssistiveTouch button). Identical errors are
+        stronger loop evidence than no-ops: the same signature failing
+        WARN_AT times returns a warning to append to the error result."""
+        warnings: list[str] = []
+        for center in self._press_centers_counted(name, arguments):
+            orbit = self._track_orbit(center)
+            if orbit:
+                warnings.append(orbit)
+        sig = self._signature(name, arguments)
+        if sig is not None:
+            n = self._error_counts.get(sig, 0) + 1
+            self._error_counts[sig] = n
+            if n == WARN_AT:
+                warnings.append(
+                    f"⚠ this exact call has failed {n}× with the same error. "
+                    "Retrying identical arguments won't fix it — change the "
+                    f"target or method (CONVENTION § Stuck). The engine blocks "
+                    f"attempt #{BLOCK_AT}."
+                )
+        return "\n".join(warnings) if warnings else None
+
+    def record(self, name: str, arguments: dict, changed: bool | None) -> str | None:
+        """Feed a dispatched gesture's screen-change verdict back in.
+        Returns tier-1 warning text to append to the tool result when a
+        threshold is crossed, else None.
+
+        Verdict attribution: a STANDALONE press owns its verdict — changed
+        proves the target works (reset), no-change is a miss. A `sequence`
+        verdict covers the whole batch: steps may change the screen then
+        restore it, or an early failure may leave later steps unexecuted.
+        Neither verdict proves an individual press worked or failed, so
+        batch presses only contribute to the warn-only orbit detector."""
+        warnings: list[str] = []
+        for center in self._press_centers_counted(name, arguments):
+            orbit = self._track_orbit(center)
+            if orbit:
+                warnings.append(orbit)
+            if name not in PRESS_TOOLS or changed is None:
+                continue  # no attributable verdict → fail open
+            t = self._find(center)
+            if changed is True:
+                if t is not None:
+                    self._targets.remove(t)
+                continue
+            if t is None:
+                t = _Target(center=center)
+                self._targets.append(t)
+            t.misses += 1
+            if t.misses == WARN_AT:
+                warnings.append(
+                    f"⚠ press #{t.misses} on this target this step, screen "
+                    "unchanged every time. The element is refusing (a toast "
+                    "you can never see — stock limit, cap, disabled) or dead. "
+                    "Don't re-press: read the value you're changing, look for "
+                    "a limit label, or switch method (CONVENTION § Stuck). "
+                    f"The engine blocks press #{BLOCK_AT}."
+                )
+        # Nav-gesture misses mirror the target counting, keyed per tool
+        # name. A pop that lands resets — the gesture provably works, so
+        # accumulated misses were transient (arm drift, mid-animation).
+        if name in NAV_TOOLS:
+            if changed is True:
+                self._nav_misses.pop(name, None)
+            elif changed is False:
+                n = self._nav_misses.get(name, 0) + 1
+                self._nav_misses[name] = n
+                if n == WARN_AT:
+                    warnings.append(
+                        f"⚠ `{name}` #{n} this step, screen unchanged every "
+                        "time. The gesture isn't registering or this screen "
+                        "doesn't respond to it (modal, root tab, image "
+                        "viewer). Don't re-issue — use an on-screen control "
+                        "(‹ Back / X / Done) or another exit (CONVENTION "
+                        f"§ Stuck). The engine blocks attempt #{BLOCK_AT}."
+                    )
+        # Cycle history extends regardless of the verdict — the loop it
+        # detects is screen-CHANGING by nature. A successful execution
+        # also clears the signature's error count (the error was fixed).
+        sig = self._signature(name, arguments)
+        if sig is not None:
+            self._error_counts.pop(sig, None)
+            self._history.append(sig)
+            del self._history[:-_HISTORY_MAX]
+            if _trailing_cycles(self._history) == WARN_AT:
+                warnings.append(
+                    f"⚠ you've repeated the same action cycle {WARN_AT}× "
+                    "(A→B→…→A→B→…). Each action changes the screen, but "
+                    "nothing progresses — this is a loop. Change method "
+                    f"(CONVENTION § Stuck); the engine blocks repeat "
+                    f"#{BLOCK_AT}."
+                )
+        return "\n".join(warnings) if warnings else None
+
+    # ---------- internals ----------
+
+    def _track_orbit(self, center: tuple[float, float]) -> str | None:
+        """Detector 4: append this executed press to the position window;
+        warn (once per position per step) when BLOCK_AT of the last
+        _ORBIT_WINDOW presses share its quantized spot."""
+        pos = _quant(center)
+        self._presses.append(pos)
+        del self._presses[:-_ORBIT_WINDOW]
+        if self._presses.count(pos) < BLOCK_AT or pos in self._orbit_warned:
+            return None
+        self._orbit_warned.add(pos)
+        return (
+            f"⚠ {BLOCK_AT} of your last {len(self._presses)} presses hit "
+            "this same spot. If its value/state is genuinely progressing "
+            "(a counter stepping up), carry on; otherwise you are circling "
+            "one element — change method (CONVENTION § Stuck)."
+        )
+
+    def _press_centers_counted(
+        self, name: str, arguments: dict
+    ) -> list[tuple[float, float]]:
+        if self._exempt is None:
+            self._exempt = [
+                c for c in (center_of(b) for b in layout.repeatable_key_boxes()) if c
+            ]
+        return [
+            c
+            for c in _press_centers(name, arguments)
+            if not any(near(c, e, tolerance=MATCH_TOLERANCE) for e in self._exempt)
+        ]
+
+    def _signature(self, name: str, arguments: dict) -> tuple | None:
+        """Ping-pong identity of a gesture call, or None for calls that
+        neither extend nor break a pattern (views, local tools, exempt
+        keyboard keys — typing two letters alternately must not trip)."""
+        if name in PRESS_TOOLS:
+            counted = self._press_centers_counted(name, arguments)
+            return (name, _quant(counted[0])) if counted else None
+        if name == SWIPE:
+            direction = arguments.get("direction")
+            return (SWIPE, direction) if direction else None
+        if name in NAV_TOOLS:
+            return (name,)
+        if name == SEQUENCE:
+            actions = arguments.get(STEP_ACTIONS)
+            if not isinstance(actions, list):
+                return None
+            # Preserve every step and its order: correcting a later action
+            # must not inherit the first press's failing-call identity.
+            # Presses share standalone jitter matching and key exemptions.
+            shape = []
+            for action in actions:
+                if not isinstance(action, dict):
+                    continue
+                tool, arg = action.get(STEP_TOOL), action.get(STEP_ARG)
+                if isinstance(tool, str) and tool in PRESS_TOOLS:
+                    sig = self._signature(tool, {"bbox": arg})
+                    if sig is not None:
+                        shape.append(sig)
+                else:
+                    shape.append((_hashable(tool), _hashable(arg)))
+            return (SEQUENCE, tuple(shape)) if shape else None
+        return None
+
+    def _find(self, center: tuple[float, float]) -> _Target | None:
+        for t in self._targets:
+            if near(center, t.center, tolerance=MATCH_TOLERANCE):
+                return t
+        return None

@@ -1,0 +1,29 @@
+---
+title: Get an API key
+description: Pick a model provider, grab an API key, and add it to PhysiClaw.
+---
+
+PhysiClaw works with many LLM providers. Pick one, create an account, and generate an API key. Then add the key to PhysiClaw and choose a `provider/model`.
+
+| Provider | Where to get the key |
+| --- | --- |
+| openai | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
+| anthropic | [platform.claude.com/settings/keys](https://platform.claude.com/settings/keys) |
+| google | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
+| openrouter | [openrouter.ai/keys](https://openrouter.ai/keys) |
+| qwen | [bailian.console.aliyun.com](https://bailian.console.aliyun.com) |
+| moonshot | [platform.moonshot.cn](https://platform.moonshot.cn/console/api-keys) |
+| deepseek | [platform.deepseek.com](https://platform.deepseek.com/api_keys) |
+
+Once you have an API key, add it and pick a model:
+
+```bash
+physiclaw models key <provider>      # paste the key when prompted
+physiclaw models use <provider/model>
+```
+
+:::tip[Pick a multimodal model]
+PhysiClaw looks at the phone screen on every step, so it needs a **multimodal model that takes both images and text**. A text-only model won't work.
+:::
+
+For example, run `physiclaw models key anthropic`, paste your API key, then run `physiclaw models use anthropic/claude-sonnet-5` to start using Claude.

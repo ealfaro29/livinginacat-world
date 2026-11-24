@@ -1,0 +1,1554 @@
+"""Tests for the playbook grammar — `model`, `pack`, and `route`: the
+route grammar, its lints, and pack loading. Every rejection must name the
+exact field and rule; the money lint is the safety substance."""
+
+from __future__ import annotations
+
+import pytest
+from conductor_fakes import CHANNEL_OPEN, write_pack, write_playbook
+
+from physiclaw.common import paths
+from physiclaw.conductor.load import pack as pb
+from physiclaw.conductor.route import playbook
+from physiclaw.conductor.spec.live import disabled_macros
+from physiclaw.conductor.spec.model import PlaybookError
+from physiclaw.conductor.spec.pack import qualified_inline
+
+VALID = """\
+kind: entry
+schema: 1
+name: buy
+description: test playbook
+enabled: false
+inputs:
+  keyword:
+    description: what to search
+route:
+  - page: app.pages.home
+  - do: open
+    macro: app.macros.open-app
+    with: {message: "{inputs.keyword}"}
+  - page: app.pages.home
+  - agent: choose
+    context:
+      prompt: "Pick the cheapest of {keyword} and land on the results"
+      given: {keyword: "{inputs.keyword}"}
+    tools: [tap, scroll]
+    returns:
+      pick: the chosen item's title
+    limit: {calls: 4, scrolls: 2}
+  - page: app.pages.results
+  - do: to-cart
+    macro: app.macros.add-cart
+    with: {message: "{choose.pick}"}
+  - page: app.pages.done
+  - tell: confirm
+    message: "Added to the cart, ordering soon"
+  - ask: pay
+    approve: payment
+    total_label: "Total"
+    message: "Total ¥{ask.total}, reply ok to pay, or no to cancel"
+    yes: ["ok"]
+    no: ["no"]
+    resume: app.macros.open-app
+"""
+
+# A payment move appended as the ask's fall-through — several money
+# tests share it.
+PAY_TAIL = """\
+  - do: do-pay
+    macro: app.macros.add-cart
+    with: {message: "pay"}
+    irreversible: payment
+  - page: app.pages.results
+"""
+
+
+# A self-contained playbook file: its one page declared in place, its
+# one hand embedded — nothing from the manifest or the macros dir.
+FLOW_MIN = """\
+description: minimal
+route:
+  - page: home
+    description: the home page
+    anchors: ["Files"]
+  - do: open
+    macro: {steps: [home_screen]}
+  - page: home
+"""
+
+
+def _pack(app: str = "demo"):
+    write_pack(app)
+    return pb.load_pack(app)
+
+
+def _required_message_pack(app: str = "demo"):
+    """The pack with `open-app.message` made REQUIRED again — the shared
+    fixture defaults it (a role macro must carry no required inputs), so
+    tests exercising the missing-required lints strip the default here."""
+    root = write_pack(app)
+    mp = root / "macros" / "open-app.yml"
+    mp.write_text(
+        mp.read_text(encoding="utf-8").replace("    default: hi\n", ""),
+        encoding="utf-8",
+    )
+    return pb.load_pack(app)
+
+
+# ---------- happy path ----------
+
+
+def test_parse_valid_playbook() -> None:
+    p = playbook.parse_playbook(VALID, "buy", _pack())
+
+    assert p.name == "buy" and p.enabled is False
+    assert p.start == "home"
+    kinds = [type(n).__name__ for n in p.nodes]
+    assert kinds == ["DoNode", "AgentNode", "DoNode", "TellNode", "AskNode"]
+    choose = p.nodes[1]
+    assert choose.tools == ("tap", "scroll") and choose.return_fields == ("pick",)
+    assert choose.max_calls == 4 and choose.max_scrolls == 2
+    assert p.nodes[2].irreversible is None
+    assert p.nodes[4].approve == "payment"
+
+
+def test_derived_checks_come_from_the_waypoints() -> None:
+    # A move's enter is the nearest preceding page, its verify the page
+    # that follows it — no enter/verify keys exist to author.
+    p = playbook.parse_playbook(VALID, "buy", _pack())
+
+    assert p.nodes[0].enter == "home" and p.nodes[0].verify == "home"
+    assert p.nodes[1].enter == "home" and p.nodes[1].verify == "results"
+    assert p.nodes[2].enter == "results" and p.nodes[2].verify == "done"
+
+
+def test_scan_playbooks_reads_pack_files() -> None:
+    write_pack(playbooks={"buy": VALID, "broken": "description: d\nroute: []"})
+
+    entries = {e.name: e for e in pb.scan_playbooks("demo")}
+
+    assert entries["buy"].spec is not None
+    assert entries["broken"].spec is None and entries["broken"].error
+
+
+def test_retired_keys_are_unknown() -> None:
+    # The grammar has no decide, sync, context, undo, open, or return:
+    # whatever needs judgment is an agent step, whatever needs a human
+    # is an ask, and a page's recover is the only recovery.
+    pack = _pack()
+    for text, fragment in (
+        (
+            VALID.replace("enabled: false\n", "enabled: false\nmemory: [x]\n"),
+            "unknown key",
+        ),
+        (VALID + "  - sync: fix\n", "exactly one of"),
+        (
+            VALID.replace('    with: {message: "pay"}', "")  # no-op guard
+            + "  - decide: q\n    uses: decide\n",
+            "exactly one of",
+        ),
+        (
+            VALID.replace(
+                "  - page: app.pages.done\n",
+                "  - page: app.pages.done\n    open: open-app\n",
+            ),
+            "unknown key",
+        ),
+        (VALID + "    return: open-app\n", "unknown key"),
+    ):
+        with pytest.raises(PlaybookError, match=fragment):
+            playbook.parse_playbook(text, "buy", pack)
+
+
+# ---------- rejection lints ----------
+
+
+def _mutate(old: str, new: str) -> str:
+    # count==1 pins each entry's blast radius: replace() substitutes every
+    # occurrence, so a repeated fragment would mutate more than intended.
+    assert VALID.count(old) == 1, old
+    return VALID.replace(old, new)
+
+
+@pytest.mark.parametrize(
+    "text, fragment",
+    [
+        # inner `name:` is gone — the map key IS the name
+        (
+            _mutate(
+                "description: test playbook", "stem: buy\ndescription: test playbook"
+            ),
+            "unknown key",
+        ),
+        # unknown top key
+        (VALID + "bogus: 1\n", "unknown key"),
+        # duplicate move name
+        (_mutate("- tell: confirm", "- tell: open"), "duplicate move name"),
+        # unknown entry kind
+        (_mutate("  - tell: confirm\n", "  - shout: confirm\n"), "exactly one of"),
+        # unknown macro
+        (
+            _mutate("macro: app.macros.add-cart", "macro: ghost"),
+            "no macro 'ghost' in buy/macros/",
+        ),
+        # unknown page
+        (
+            _mutate("  - page: app.pages.results\n", "  - page: app.pages.mars\n"),
+            "not declared",
+        ),
+        # foreign app page
+        (
+            _mutate("  - page: app.pages.results\n", "  - page: jd.home\n"),
+            "reserved namespace",
+        ),
+        # undeclared placeholder
+        (
+            _mutate(
+                'with: {message: "{inputs.keyword}"}',
+                'with: {message: "{inputs.typo}"}',
+            ),
+            "not declared under `inputs`",
+        ),
+        # dotted ref to a non-earlier move
+        (
+            _mutate(
+                'with: {message: "{inputs.keyword}"}',
+                'with: {message: "{choose.pick}"}',
+            ),
+            "EARLIER agent",
+        ),
+        # dotted ref to unknown payload field
+        (_mutate("{choose.pick}", "{choose.nope}"), "no output"),
+        # do with: key not a macro input
+        (
+            _mutate(
+                'with: {message: "{inputs.keyword}"}',
+                'with: {bogus: "x", message: "m"}',
+            ),
+            "inputs of macro",
+        ),
+        # unknown irreversible class
+        (
+            _mutate(
+                'with: {message: "{choose.pick}"}',
+                'with: {message: "{choose.pick}"}\n    irreversible: nuclear',
+            ),
+            "`irreversible` must be one of",
+        ),
+        # stray brace
+        (_mutate("cheapest of {keyword}", "cheapest {Keyword}"), "stray"),
+        # bare ref: `{inputs.name}` is the ONE written form
+        (
+            _mutate(
+                'with: {message: "{inputs.keyword}"}', 'with: {message: "{keyword}"}'
+            ),
+            "every ref is dotted",
+        ),
+        # a move named `inputs` would shadow the input ref root
+        (_mutate("- do: open", "- do: inputs"), "ref root"),
+        # a move sharing a route page's name — one namespace
+        (_mutate("- tell: confirm", "- tell: results"), "also a page"),
+    ],
+)
+def test_rejections_name_the_rule(text: str, fragment: str) -> None:
+    pack = _pack()
+
+    with pytest.raises(PlaybookError, match=fragment):
+        playbook.parse_playbook(text, "buy", pack)
+
+
+# ---------- the route shape ----------
+
+
+def test_route_must_start_at_a_page() -> None:
+    # A screen-touching move before the first page breaks the start
+    # contract — only pure-text agents and the `start` move may precede.
+    text = _mutate("route:\n  - page: app.pages.home\n", "route:\n")
+
+    with pytest.raises(PlaybookError, match="precede the first page"):
+        playbook.parse_playbook(text, "buy", _pack())
+
+
+def test_route_needs_at_least_one_move() -> None:
+    text = "kind: entry\nschema: 1\nname: buy\ndescription: only a place\nroute:\n  - page: app.pages.home\n"
+
+    with pytest.raises(PlaybookError, match="needs at least one move"):
+        playbook.parse_playbook(text, "buy", _pack())
+
+
+def test_do_must_be_followed_by_its_landing_page() -> None:
+    text = _mutate("  - page: app.pages.done\n", "")
+
+    with pytest.raises(PlaybookError, match="followed by the page"):
+        playbook.parse_playbook(text, "buy", _pack())
+
+
+def test_route_declared_page_reaches_the_pack() -> None:
+    # A waypoint carrying anchors DECLARES the page — the matcher sees
+    # it through every door (load_pack merges route declarations).
+    from physiclaw.conductor.load import prints
+
+    text = _mutate(
+        "  - page: app.pages.results\n",
+        "  - page: app.pages.results\n  - page: cart\n"
+        '    description: the cart\n    anchors: ["Cart"]\n',
+    )
+    write_pack(playbooks={"buy": text})
+
+    pack = pb.load_pack("demo")
+    (entry,) = pb.scan_playbooks("demo", pack)
+
+    assert entry.spec is not None, entry.error
+    assert "cart" in pack.pages
+    assert "cart" in prints.scan_app_decls("demo")
+
+
+def test_page_declared_twice_rejected() -> None:
+    # `home` lives in the appendix already — declaring it again on the
+    # route is a conflict, not an override.
+    text = _mutate(
+        "route:\n  - page: app.pages.home\n",
+        'route:\n  - page: home\n    description: the home page\n    anchors: ["Files"]\n',
+    )
+    write_pack(playbooks={"buy": text})
+
+    with pytest.raises(PlaybookError, match="declared twice"):
+        pb.load_pack("demo")
+
+
+def test_waypoints_are_bare_names() -> None:
+    # Own-pack pages are written bare — the route IS the pack's context.
+    with pytest.raises(PlaybookError, match="bare"):
+        playbook.parse_playbook(
+            _mutate("  - page: app.pages.results\n", "  - page: pages.results\n"),
+            "buy",
+            _pack(),
+        )
+
+
+# ---------- money lints ----------
+
+
+def test_money_requires_an_ask_directly_before() -> None:
+    pack = _pack()
+    # Make to-cart a payment move: the pay ask sits AFTER it → unguarded.
+    text = _mutate(
+        'with: {message: "{choose.pick}"}',
+        'with: {message: "{choose.pick}"}\n    irreversible: payment',
+    )
+
+    with pytest.raises(PlaybookError, match="DIRECTLY follow an `ask`"):
+        playbook.parse_playbook(text, "buy", pack)
+
+
+def test_payment_is_the_only_irreversible_class() -> None:
+    pack = _pack()
+    text = _mutate(
+        'with: {message: "{choose.pick}"}',
+        'with: {message: "{choose.pick}"}\n    irreversible: send_message',
+    )
+
+    with pytest.raises(PlaybookError, match="`irreversible` must be one of payment"):
+        playbook.parse_playbook(text, "buy", pack)
+
+
+def test_payment_move_must_directly_follow_its_ask() -> None:
+    # Adjacency, not just reachability: the conductor reads the sheet AT
+    # the ask and fires the move as its fall-through — a move in between
+    # desynchronizes consent from the sheet, so the parser rejects it.
+    pack = _pack()
+    text = (
+        VALID
+        + """  - do: detour
+    macro: app.macros.add-cart
+    with: {message: "x"}
+  - page: app.pages.results
+"""
+        + PAY_TAIL
+    )
+
+    with pytest.raises(PlaybookError, match="DIRECTLY follow"):
+        playbook.parse_playbook(text, "buy", pack)
+
+
+def test_payment_move_behind_ask_parses() -> None:
+    # The whole point of the ask: a confirmed reply falls through, so
+    # the conductor itself executes the payment move under the consent.
+    pack = _pack()
+
+    p = playbook.parse_playbook(VALID + PAY_TAIL, "buy", pack)
+
+    assert p.nodes[-1].irreversible == "payment"
+    # The derived enter (the waypoint before the ask) is what guarantees
+    # money fires on a verified app page, never blind off the IM thread.
+    assert p.nodes[-1].enter == "done"
+
+
+def test_an_agent_prompt_may_quote_its_own_returns() -> None:
+    # A step re-run by a revision re-reads its last answer; the field
+    # is declared before the prompt is checked, so the ref resolves —
+    # and only to its own fields, a later step's stay out of reach.
+    pack = _pack()
+    text = _mutate(
+        'given: {keyword: "{inputs.keyword}"}',
+        'given: {keyword: "{inputs.keyword}", last: "{choose.pick}"}',
+    ).replace("the cheapest of {keyword}", "the cheapest of {keyword} after {last}")
+
+    p = playbook.parse_playbook(text, "buy", pack)
+
+    choose = next(n for n in p.nodes if n.id == "choose")
+    assert choose.given["last"] == "{choose.pick}"
+    with pytest.raises(PlaybookError, match="no output"):
+        playbook.parse_playbook(
+            text.replace('last: "{choose.pick}"', 'last: "{choose.nope}"'),
+            "buy",
+            pack,
+        )
+
+
+def test_non_payment_ask_does_not_approve_payment() -> None:
+    # An address/handoff ask must NOT open a payment move: the class the
+    # ask approves is declared, and money keys off the declaration.
+    pack = _pack()
+    text = """\
+kind: entry
+schema: 1
+name: buy
+description: bypass probe
+inputs:
+  keyword:
+    description: what
+route:
+  - page: app.pages.home
+  - do: open
+    macro: app.macros.open-app
+    with: {message: "{inputs.keyword}"}
+  - page: app.pages.home
+  - ask: addr
+    approve: address
+    message: "address ok? reply ok or no"
+    yes: ["ok"]
+    no: ["no"]
+  - do: pay
+    macro: app.macros.add-cart
+    with: {message: "pay"}
+    irreversible: payment
+  - page: app.pages.home
+"""
+    with pytest.raises(PlaybookError, match="approve: payment"):
+        playbook.parse_playbook(text, "buy", pack)
+
+
+def test_payment_agent_episode_takes_the_ask_total() -> None:
+    # An `irreversible: payment` agent directly after its ask may quote
+    # {ask.total} — the one gate slot a payment episode reads.
+    pack = _pack()
+    text = (
+        VALID
+        + """  - agent: checkout
+    context:
+      prompt: "Pay exactly {total}"
+      given: {total: "{ask.total}"}
+    tools: [tap]
+    irreversible: payment
+    limit: {calls: 3}
+  - page: app.pages.results
+"""
+    )
+
+    p = playbook.parse_playbook(text, "buy", pack)
+
+    assert p.nodes[-1].irreversible == "payment" and p.nodes[-1].enter == "done"
+
+
+# ---------- ask templates ----------
+
+
+@pytest.mark.parametrize(
+    "old, new, fragment",
+    [
+        # The reply words are the ask's own — required, non-empty.
+        ('    yes: ["ok"]\n', "", "`yes` must be a list"),
+        ('    yes: ["ok"]\n', "    yes: []\n", "at least one reply word"),
+        ('    no: ["no"]\n', "    no: [3]\n", "must be a string"),
+        ('    yes: ["ok"]\n', '    yes: ["👍"]\n', "empty after normalization"),
+        ('    no: ["no"]\n', '    no: ["???"]\n', "empty after normalization"),
+        ('    no: ["no"]\n', '    no: ["ＯＫ！"]\n', "both `yes` and `no`"),
+    ],
+)
+def test_ask_reply_words_are_declared(old, new, fragment) -> None:
+    with pytest.raises(PlaybookError, match=fragment):
+        playbook.parse_playbook(_mutate(old, new), "buy", _pack())
+
+
+def test_inline_recovery_branches_have_distinct_dispatch_names() -> None:
+    from physiclaw.conductor.walk.recover import action
+
+    text = """kind: entry
+schema: 1
+name: flow
+description: recover home
+route:
+  - page: app.pages.home
+    recover:
+      covered: {macro: {steps: [go_back]}}
+      elsewhere: {macro: {steps: [home_screen]}}
+  - tell: done
+    message: done
+"""
+    spec = playbook.parse_playbook(text, "flow", _pack())
+    recovery = spec.recovers["home"]
+    assert recovery.covered.macro != recovery.elsewhere.macro
+    for hand, tool in (
+        (recovery.covered, "go_back"),
+        (recovery.elsewhere, "home_screen"),
+    ):
+        assert [step.tool for step in spec.inline_macros[hand.macro].steps] == [tool]
+        assert action(hand, "demo", {}) == ("run_macro", {"name": f"demo/{hand.macro}"})
+
+
+def test_agent_context_is_declared_and_checked() -> None:
+    # One field for everything the step reads: refs the walk fills and
+    # sources the engine loads, side by side under the names its prompt
+    # calls them by.
+    text = _mutate(
+        'given: {keyword: "{inputs.keyword}"}',
+        'given: {keyword: "{inputs.keyword}"}\n      memory: {shopping: true, log: 5}',
+    )
+
+    p = playbook.parse_playbook(text, "buy", _pack())
+    assert p.nodes[1].given == {"keyword": "{inputs.keyword}"}
+    assert p.nodes[1].memory == {"shopping": True, "log": 5}
+
+    with pytest.raises(PlaybookError, match="`## <slug>` heading"):
+        playbook.parse_playbook(
+            _mutate(
+                'given: {keyword: "{inputs.keyword}"}',
+                "memory: {Bad-Slug: true}",
+            ),
+            "buy",
+            _pack(),
+        )
+
+
+def test_tell_reads_no_reply() -> None:
+    # A tell is fire-and-forget: it declares no words to read a reply by
+    # (a reply is the next wake's boot to parse), so `no:` is a typo.
+    text = _mutate(
+        '    message: "Added to the cart, ordering soon"\n',
+        '    message: "Added to the cart, ordering soon"\n    no: ["stop"]\n',
+    )
+
+    with pytest.raises(PlaybookError, match="unknown key.*`tell`.*no"):
+        playbook.parse_playbook(text, "buy", _pack())
+
+
+@pytest.mark.parametrize(
+    "old, new, fragment",
+    [
+        # Messages are REQUIRED — the conductor composes no user-facing
+        # prose (only the author knows the user's language).
+        ('    message: "Added to the cart, ordering soon"\n', "", "is required"),
+        # A payment ask must quote the sheet total…
+        (
+            '    message: "Total ¥{ask.total}, reply ok to pay, or no to cancel"\n',
+            '    message: "reply ok to pay, or no to cancel"\n',
+            "must quote the sheet",
+        ),
+        # {ask.total} exists only inside a payment ask.
+        (
+            "approve: payment\n"
+            '    total_label: "Total"\n'
+            '    message: "Total ¥{ask.total}, reply ok to pay, or no to cancel"',
+            'approve: handoff\n    message: "Total ¥{ask.total}, reply ok or no"',
+            "no output 'total'",
+        ),
+        # A payment ask declares where the total sits…
+        ('    total_label: "Total"\n', "", "declares `total_label:`"),
+        # …and only a payment ask does.
+        (
+            "approve: payment\n"
+            '    total_label: "Total"\n'
+            '    message: "Total ¥{ask.total}, reply ok to pay, or no to cancel"\n',
+            'approve: handoff\n    total_label: "Total"\n    message: "reply ok or no"\n',
+            "goes with `approve: payment`",
+        ),
+        # The ask's patience is bounded by the engine's single sleep.
+        (
+            '    total_label: "Total"\n',
+            '    total_label: "Total"\n    wait: 600\n',
+            "`wait` must be",
+        ),
+    ],
+)
+def test_ask_template_lints(old, new, fragment) -> None:
+    pack = _pack()
+
+    with pytest.raises(PlaybookError, match=fragment):
+        playbook.parse_playbook(_mutate(old, new), "buy", pack)
+
+
+def test_do_missing_required_macro_input_rejected() -> None:
+    pack = _required_message_pack()
+    text = _mutate(
+        '    with: {message: "{inputs.keyword}"}\n',
+        "",
+    )
+
+    with pytest.raises(PlaybookError, match="requires input"):
+        playbook.parse_playbook(text, "buy", pack)
+
+
+# ---------- pack loading ----------
+
+
+def test_load_pack_carries_macro_errors() -> None:
+    root = write_pack()
+    (root / "macros" / "broken.yml").write_text("name: mismatch\n", encoding="utf-8")
+
+    pack = pb.load_pack("demo")
+
+    assert set(pack.macros) == {"open-app", "add-cart"}
+    assert "broken" in pack.macro_errors
+
+
+def test_load_pack_bad_pages_raises_playbook_error() -> None:
+    from conductor_fakes import compose_pack_doc
+
+    root = paths.playbooks_dir() / "demo"
+    root.mkdir(parents=True)
+    (root / "APP.yml").write_text(
+        compose_pack_doc("demo", "Bad Name:\n  anchors: ['x']"), encoding="utf-8"
+    )
+
+    # The refusal names the file that declares the page, not just the pack.
+    with pytest.raises(PlaybookError, match=r"demo/APP\.yml: page name"):
+        pb.load_pack("demo")
+
+
+def test_list_apps_finds_packs() -> None:
+    write_pack("demo")
+
+    assert pb.list_apps() == ["demo"]
+
+
+def test_scan_of_a_walkless_pack_is_empty() -> None:
+    # A pack may be infrastructure-only (channel, ios): no `playbooks:`
+    # section means no entries — never an error.
+    write_pack(playbooks={})
+
+    assert pb.scan_playbooks("demo") == []
+
+
+def test_scaffolded_ios_pack_parses_clean() -> None:
+    # The OS-state pack: declarations only — no playbooks, no macros.
+    from physiclaw.conductor.load import scaffold
+    from physiclaw.conductor.spec import conventions
+
+    root = scaffold.init_pack(conventions.IOS_APP)
+
+    assert set(pb.load_pack(conventions.IOS_APP).pages) == {"locked"}
+    assert pb.scan_playbooks(conventions.IOS_APP) == []
+    assert not (root / pb.PACK_MACROS_DIRNAME).exists()
+
+
+def test_scaffolded_pack_parses_clean() -> None:
+    from physiclaw.conductor.load import scaffold
+
+    # The real scaffold, whole: manifest, README, the example playbook
+    # folder with its README, the example pack macro.
+    root = scaffold.init_pack("newapp")
+    assert (root / "README.md").is_file()
+    assert (root / scaffold.EXAMPLE_PLAYBOOK / "README.md").is_file()
+
+    (entry,) = pb.scan_playbooks("newapp")
+
+    assert entry.name == scaffold.EXAMPLE_PLAYBOOK
+    assert entry.error is None, entry.error
+    assert entry.spec is not None and entry.spec.enabled is False
+
+
+# ---------- the manifest is a manifest: shared knowledge, never a route ----------
+
+
+def test_an_empty_manifest_is_a_pack() -> None:
+    root = paths.playbooks_dir() / "bare"
+    root.mkdir(parents=True)
+    (root / "APP.yml").write_text("", encoding="utf-8")
+    write_playbook(root, "flow", FLOW_MIN)
+
+    pack = pb.load_pack("bare")
+
+    assert pack.app == "bare" and set(pack.pages) == {"home"} and pack.landmarks == {}
+    (entry,) = pb.scan_playbooks("bare", pack)
+    assert entry.name == "flow" and entry.error is None
+
+
+def test_manifest_refuses_a_playbooks_section() -> None:
+    root = write_pack()
+    (root / "APP.yml").write_text(
+        "app: demo\nplaybooks:\n  x: {description: d, route: []}\n", encoding="utf-8"
+    )
+
+    with pytest.raises(PlaybookError, match="own <name>/PLAYBOOK.yml"):
+        pb.load_pack("demo")
+
+
+def test_a_playbook_file_that_will_not_load_is_an_invalid_entry() -> None:
+    root = write_pack(
+        pages='results:\n  description: the results\n  anchors: ["综合"]\n',
+        playbooks={"flow": FLOW_MIN},
+    )
+    write_playbook(root, "broken", "route: [\n")
+    write_playbook(root, "Bad Name", "description: d\n")
+    (root / "stray.yml").write_text("name: stray\n" + FLOW_MIN, encoding="utf-8")
+    (root / "notes").mkdir()
+
+    entries = {e.name: e for e in pb.scan_playbooks("demo")}
+
+    assert entries["flow"].spec is not None
+    assert "invalid YAML" in (entries["broken"].error or "")
+    assert entries["Bad Name"].spec is None and entries["Bad Name"].error
+    # The two strays of the folder layout read as invalid entries, never
+    # as silence: a route left at pack level, a folder with no PLAYBOOK.yml.
+    assert "move it to stray/PLAYBOOK.yml" in (entries["stray.yml"].error or "")
+    assert "no PLAYBOOK.yml" in (entries["notes"].error or "")
+
+
+def test_a_page_declared_in_two_files_is_a_pack_error() -> None:
+    write_pack(
+        pages='results:\n  description: the results\n  anchors: ["综合"]\n',
+        playbooks={"a": FLOW_MIN, "b": FLOW_MIN},
+    )
+
+    with pytest.raises(PlaybookError, match="declared twice"):
+        pb.load_pack("demo")
+
+
+# ---------- inline macros (a move's embedded body) ----------
+
+
+# VALID's `open` move with the body embedded — `with:` still feeds the
+# (now inline-declared) `message` input from the playbook's dotted ref.
+INLINE_OPEN = """\
+    macro:
+      inputs:
+        message: {description: the text}
+      steps:
+        - home_screen
+"""
+
+
+def _inline(text: str = VALID) -> str:
+    assert text.count("    macro: app.macros.open-app\n") == 1
+    return text.replace("    macro: app.macros.open-app\n", INLINE_OPEN)
+
+
+def test_do_macro_may_embed_the_body() -> None:
+    p = playbook.parse_playbook(_inline(), "buy", _pack())
+
+    node = p.nodes[0]
+    assert node.macro == "buy.open"  # synthesized: <playbook>.<move>
+    m = p.inline_macros["buy.open"]
+    assert m.enabled is True  # the playbook's own `enabled:` is the gate
+    assert [s.tool for s in m.steps] == ["home_screen"]
+
+
+def test_do_names_its_macro() -> None:
+    # `do: open-app` alone no longer runs a same-named directory macro: a
+    # reader must not need the rule to know where the hand lives.
+    text = _mutate(
+        "  - do: open\n    macro: app.macros.open-app\n", "  - do: open-app\n"
+    )
+
+    with pytest.raises(PlaybookError, match="names its `macro:`"):
+        playbook.parse_playbook(text, "buy", _pack())
+
+
+def test_inline_do_with_keys_validate_against_the_body() -> None:
+    text = _inline().replace(
+        'with: {message: "{inputs.keyword}"}\n  - page: app.pages.home',
+        'with: {wrong: "x"}\n  - page: app.pages.home',
+    )
+
+    with pytest.raises(PlaybookError, match="wrong.*not.*inputs of macro 'buy.open'"):
+        playbook.parse_playbook(text, "buy", _pack())
+
+
+def test_inline_do_missing_required_input_is_rejected() -> None:
+    text = _inline().replace('    with: {message: "{inputs.keyword}"}\n', "")
+
+    with pytest.raises(PlaybookError, match=r"requires input\(s\) message"):
+        playbook.parse_playbook(text, "buy", _pack())
+
+
+def test_inline_body_errors_are_framed_with_the_move() -> None:
+    text = _inline().replace("- home_screen", "- rm_rf")
+
+    with pytest.raises(PlaybookError, match="move 'open': inline `macro`.*step verb"):
+        playbook.parse_playbook(text, "buy", _pack())
+
+
+def test_do_macro_rejects_a_non_string_non_mapping() -> None:
+    text = VALID.replace("macro: app.macros.open-app", "macro: 3")
+
+    with pytest.raises(PlaybookError, match="macro name or an inline mapping"):
+        playbook.parse_playbook(text, "buy", _pack())
+
+
+def test_disabled_macros_skips_inline_bodies() -> None:
+    # An inline macro is not in `pack.macros` — the readiness check must
+    # neither KeyError on it nor report it (its gate is the playbook's).
+    root = write_pack()
+    mp = root / "macros" / "add-cart.yml"
+    mp.write_text(mp.read_text(encoding="utf-8") + "enabled: false\n", encoding="utf-8")
+    pack = pb.load_pack("demo")
+
+    spec = playbook.parse_playbook(_inline(), "buy", pack)
+
+    assert disabled_macros(spec, pack) == ["add-cart"]
+
+
+def test_qualified_inline_mints_dispatch_keys() -> None:
+    spec = playbook.parse_playbook(_inline(), "buy", _pack())
+
+    assert qualified_inline("demo", spec) == {
+        "demo/buy.open": spec.inline_macros["buy.open"]
+    }
+
+
+def test_pack_doc_rejects_yaml_aliases() -> None:
+    # Inline macros put clause parsing (which materializes per path — the
+    # alias-bomb ride) inside the pack file, so the pack door inherits
+    # the macro-file document-wide guard.
+    root = write_pack()
+    (root / "APP.yml").write_text(
+        "app: demo\ndescription: d\n"
+        "pages: &a {home: {anchors: [Files]}}\nplaybooks: *a\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(PlaybookError, match="aliases"):
+        pb.load_pack("demo")
+
+
+def test_ask_resume_may_embed_the_body() -> None:
+    text = _mutate(
+        "    resume: app.macros.open-app\n",
+        "    resume:\n      steps:\n        - home_screen\n",
+    )
+    pack = _pack()
+
+    spec = playbook.parse_playbook(text, "buy", pack)
+
+    ask = spec.nodes[4]
+    assert ask.resume == "buy.pay.resume"  # <playbook>.<move>.<role>
+    assert [s.tool for s in spec.inline_macros["buy.pay.resume"].steps] == [
+        "home_screen"
+    ]
+    # The readiness check must skip the role body, not KeyError on it.
+    assert disabled_macros(spec, pack) == []
+
+
+def test_inline_role_body_with_required_input_rejected() -> None:
+    # resume/recover dispatch with no arguments — a required input could
+    # only abort at run time (right after a confirmed ask), so the lint
+    # runs on the RESOLVED macro.
+    text = _mutate(
+        "    resume: app.macros.open-app\n",
+        "    resume:\n"
+        "      inputs:\n"
+        "        x: {description: d}\n"
+        "      steps:\n"
+        "        - home_screen\n",
+    )
+
+    with pytest.raises(PlaybookError, match=r"requires input\(s\) x"):
+        playbook.parse_playbook(text, "buy", _pack())
+
+
+def test_directory_role_macro_with_required_input_rejected() -> None:
+    # The same lint, directory spelling: the rule is role-shaped, not
+    # embedding-shaped — moving a body out to macros/ must not lose it.
+    with pytest.raises(PlaybookError, match=r"requires input\(s\) message"):
+        playbook.parse_playbook(VALID, "buy", _required_message_pack())
+
+
+def test_scrollable_only_waypoint_is_a_declaration_at_both_doors() -> None:
+    # `pages.route_decl` is the ONE declaration predicate: a waypoint
+    # carrying only `scrollable:` must read as a (re)declaration at the
+    # pack door AND the text door.
+    text = _mutate(
+        "route:\n  - page: app.pages.home\n",
+        "route:\n  - page: home\n    scrollable: true\n",
+    )
+    write_pack(playbooks={"buy": text})
+
+    with pytest.raises(PlaybookError, match="declared twice"):
+        pb.load_pack("demo")
+
+
+def test_text_door_validates_inplace_declarations_too() -> None:
+    # A playbook green at `parse_playbook` must not go red at the pack
+    # door: the in-place declaration's CONTENT rides the same page
+    # grammar at both (here: a single-char anchor without a region).
+    text = _mutate(
+        "  - page: app.pages.results\n",
+        '  - page: cart\n    description: the cart\n    anchors: ["x"]\n',
+    )
+
+    with pytest.raises(PlaybookError, match="single-character"):
+        playbook.parse_playbook(text, "buy", _pack())
+
+
+def test_disabled_recover_macro_is_reported_not_run() -> None:
+    # `recover:` may name a directory macro; a disabled one must surface
+    # in the readiness check (rehearse-then-enable).
+    from conductor_fakes import PACK_MACRO
+
+    root = write_pack()
+    (root / "macros" / "go-home.yml").write_text(
+        PACK_MACRO.format(name="go-home") + "enabled: false\n", encoding="utf-8"
+    )
+    pack = pb.load_pack("demo")
+    text = _mutate(
+        "route:\n  - page: app.pages.home\n",
+        "route:\n  - page: app.pages.home\n    recover: {macro: app.macros.go-home}\n",
+    )
+
+    spec = playbook.parse_playbook(text, "buy", pack)
+
+    assert spec.recovers["home"].elsewhere.macro == "go-home"
+    assert disabled_macros(spec, pack) == ["go-home"]
+
+
+# ---------- the boot: `activate`, and the locked reading ----------
+
+BOOT = """\
+kind: entry
+schema: 1
+name: boot
+description: reach the thread and read it
+route:
+  - page: app.pages.thread
+    recover:
+      locked: unlock_phone
+      elsewhere: {macro: app.macros.open}
+    tries: 4
+  - select: parse
+"""
+
+
+def _channel_pack():
+    from conductor_fakes import write_channel
+
+    write_channel(CHANNEL_OPEN)
+    return pb.load_pack("channel")
+
+
+def test_the_boot_parses_with_its_activate_step_last() -> None:
+    from physiclaw.conductor.spec.model import SelectNode
+
+    spec = playbook.parse_playbook(BOOT, "boot", _channel_pack())
+
+    node = spec.nodes[-1]
+    assert isinstance(node, SelectNode)
+    assert node.enter == "thread" and node.max_scrolls == 2
+    assert spec.recovers["thread"].locked is not None
+    assert spec.recovers["thread"].tries == 4
+
+    bounded = playbook.parse_playbook(
+        BOOT.replace(
+            "  - select: parse\n", "  - select: parse\n    limit: {scrolls: 0}\n"
+        ),
+        "boot",
+        _channel_pack(),
+    )
+    assert bounded.nodes[-1].max_scrolls == 0
+
+
+def test_activate_belongs_to_the_channel_boot_only() -> None:
+    # An app playbook cannot read the thread for a task — that is the
+    # boot's; and even in the channel pack, only the file named boot.
+    text = VALID.split("  - tell: confirm")[0] + "  - select: parse\n"
+    with pytest.raises(PlaybookError, match="channel boot's own step"):
+        playbook.parse_playbook(text, "buy", _pack())
+    with pytest.raises(PlaybookError, match="channel boot's own step"):
+        playbook.parse_playbook(
+            BOOT.replace("name: boot", "name: other"), "other", _channel_pack()
+        )
+
+
+@pytest.mark.parametrize(
+    "edit, message",
+    [
+        # activate must read the thread: the page before it is the thread
+        (
+            lambda t: t.replace(
+                "  - select: parse\n",
+                "  - do: nudge\n    macro: app.macros.open\n  - page: other\n"
+                "    description: somewhere else\n"
+                '    anchors: ["Somewhere else"]\n'
+                "  - select: parse\n",
+            ),
+            "immediately before it",
+        ),
+        # activate ends the boot
+        (
+            lambda t: (
+                t
+                + "  - do: after\n    macro: app.macros.open\n  - page: app.pages.thread\n"
+            ),
+            "must end with a `select`",
+        ),
+        # …and only one does
+        (
+            lambda t: t.replace(
+                "  - select: parse\n",
+                "  - select: first\n  - page: app.pages.thread\n  - select: parse\n",
+            ),
+            "one `select` only",
+        ),
+        # a boot must have one
+        (
+            lambda t: t.replace(
+                "  - select: parse\n",
+                "  - do: nudge\n    macro: app.macros.open\n  - page: app.pages.thread\n",
+            ),
+            "must end with a `select`",
+        ),
+        # the boot never speaks to the user
+        (
+            lambda t: t.replace(
+                "  - select: parse\n",
+                "  - tell: hi\n    message: hello\n  - select: parse\n",
+            ),
+            "messages the user",
+        ),
+        # limit takes scrolls only
+        (
+            lambda t: t.replace(
+                "  - select: parse\n", "  - select: parse\n    limit: {calls: 2}\n"
+            ),
+            "`limit`: unknown key",
+        ),
+    ],
+)
+def test_boot_shape_lints(edit, message) -> None:
+    with pytest.raises(PlaybookError, match=message):
+        playbook.parse_playbook(edit(BOOT), "boot", _channel_pack())
+
+
+def test_flat_recover_covers_the_locked_reading_too() -> None:
+    # `recover: x` is one hand for ANY deviation — the lock
+    # screen included, exactly as the docstring promises; the keyed form
+    # is where an author tells the readings apart.
+    text = VALID.replace(
+        "  - page: app.pages.home\n  - do: open",
+        "  - page: app.pages.home\n    recover: force_quit\n  - do: open",
+        1,
+    )
+    spec = playbook.parse_playbook(text, "buy", _pack())
+
+    r = spec.recovers["home"]
+    assert r.locked is r.elsewhere is r.covered
+    assert r.hand_for("locked") is r.locked
+
+
+# ---------- think: the step's word on hidden thinking ----------
+
+
+def test_agent_think_is_read_and_bounded_to_the_levels() -> None:
+    text = _mutate(
+        "    limit: {calls: 4, scrolls: 2}\n",
+        "    limit: {calls: 4, scrolls: 2}\n    think: low\n",
+    )
+    assert playbook.parse_playbook(text, "buy", _pack()).nodes[1].think == "low"
+    # YAML 1.2 keeps `off` a string — the level, not a boolean.
+    text = _mutate(
+        "    limit: {calls: 4, scrolls: 2}\n",
+        "    limit: {calls: 4, scrolls: 2}\n    think: off\n",
+    )
+    assert playbook.parse_playbook(text, "buy", _pack()).nodes[1].think == "off"
+    assert playbook.parse_playbook(VALID, "buy", _pack()).nodes[1].think is None
+
+    with pytest.raises(PlaybookError, match="`think` must be one of off, low"):
+        playbook.parse_playbook(
+            _mutate(
+                "    limit: {calls: 4, scrolls: 2}\n",
+                "    limit: {calls: 4, scrolls: 2}\n    think: max\n",
+            ),
+            "buy",
+            _pack(),
+        )
+
+
+def test_the_boot_select_takes_think_too() -> None:
+    spec = playbook.parse_playbook(
+        BOOT.replace("  - select: parse\n", "  - select: parse\n    think: off\n"),
+        "boot",
+        _channel_pack(),
+    )
+    assert spec.nodes[-1].think == "off"
+
+
+def _prompt_lints(text: str) -> list[str]:
+    from physiclaw.conductor.route import lints
+
+    pack = _pack()
+    spec = playbook.parse_playbook(text, "buy", pack)
+    return [w for w in lints.readiness_warnings(spec, pack) if "agent 'choose'" in w]
+
+
+def test_check_names_a_prompt_that_repeats_its_own_never_tap() -> None:
+    # The sharp one: `never_tap:` is withheld from the model by design,
+    # so a prompt that spells a target hands back what the guard rail
+    # was keeping. Advisory — only the author knows whether the label is
+    # there to identify a control or to forbid it.
+    text = (
+        _mutate(
+            'prompt: "Pick the cheapest of {keyword} and land on the results"',
+            'prompt: "Pick the cheapest {keyword}"',
+        )
+        .replace(
+            "    tools: [tap, scroll]",
+            '    never_tap: ["Pay Now"]\n    tools: [tap, scroll]',
+        )
+        .replace(
+            "Pick the cheapest {keyword}",
+            "Pick the cheapest {keyword}; never tap Pay Now",
+        )
+    )
+
+    (line,) = _prompt_lints(text)
+
+    assert "names 'Pay Now'" in line and "withheld from the model" in line
+
+
+def test_check_names_a_prompt_that_teaches_the_reply_format() -> None:
+    # The bare verb is the author's ("if nothing fits, escalate"); it is
+    # the envelope the legend already owns.
+    text = _mutate(
+        'prompt: "Pick the cheapest of {keyword} and land on the results"',
+        'prompt: "Pick the cheapest {keyword}, then return done with the fields"',
+    )
+
+    (line,) = _prompt_lints(text)
+
+    assert "'return done'" in line and "leave the envelope to the legend" in line
+    assert (
+        _prompt_lints(
+            _mutate(
+                'prompt: "Pick the cheapest of {keyword} and land on the results"',
+                'prompt: "Pick the cheapest {keyword}; if nothing fits, escalate"',
+            )
+        )
+        == []
+    )
+
+
+def test_check_names_a_context_entry_the_prompt_never_names() -> None:
+    # It would arrive in the Context block with nothing to attach it to.
+    text = _mutate(
+        'given: {keyword: "{inputs.keyword}"}',
+        'given: {keyword: "{inputs.keyword}"}\n      memory: {nobody: true}',
+    )
+
+    (line,) = _prompt_lints(text)
+
+    assert "`context.memory.nobody` is read for the model" in line
+
+
+def test_check_names_a_model_step_that_leaves_think_unsaid() -> None:
+    from physiclaw.conductor.route import lints
+
+    pack = _pack()
+    spec = playbook.parse_playbook(VALID, "buy", pack)
+
+    lines = [w for w in lints.readiness_warnings(spec, pack) if "`think:`" in w]
+    # Every step that may call the model: the agent, and the ask (it
+    # reads a reply its words miss).
+    assert lines == [
+        "step 'choose' declares no `think:` — the model deliberates at its "
+        "vendor default on every call there; declare off, low, medium or high",
+        "step 'pay' declares no `think:` — the model deliberates at its "
+        "vendor default on every call there; declare off, low, medium or high",
+    ]
+
+
+def test_an_ask_takes_think_too() -> None:
+    from physiclaw.conductor.spec.model import AskNode
+
+    def ask_of(text: str) -> AskNode:
+        return next(
+            n
+            for n in playbook.parse_playbook(text, "buy", _pack()).nodes
+            if isinstance(n, AskNode)
+        )
+
+    text = _mutate('    yes: ["ok"]\n', '    yes: ["ok"]\n    think: off\n')
+    assert ask_of(text).think == "off"
+    assert ask_of(VALID).think is None
+
+
+# ---------- on_fail: the ask's word on a failure past the gate ----------
+
+
+def test_on_fail_is_unsaid_everywhere_by_default() -> None:
+    spec = playbook.parse_playbook(VALID, "buy", _pack())
+    assert all(n.on_fail is None for n in spec.nodes)
+    assert all(r.on_fail is None for r in spec.recovers.values())
+
+
+@pytest.mark.parametrize(
+    "anchor, node_id, word",
+    [
+        ('    no: ["no"]\n', "pay", "stop"),  # the payment ask
+        ('    with: {message: "{choose.pick}"}\n', "to-cart", "handover"),  # a do
+        (
+            '    message: "Added to the cart, ordering soon"\n',
+            "confirm",
+            "stop",
+        ),  # a tell
+        ("    limit: {calls: 4, scrolls: 2}\n", "choose", "stop"),  # an agent
+    ],
+)
+def test_on_fail_is_read_on_every_kind_of_move(anchor, node_id, word) -> None:
+    spec = playbook.parse_playbook(
+        _mutate(anchor, f"{anchor}    on_fail: {word}\n"), "buy", _pack()
+    )
+    assert {n.id: n.on_fail for n in spec.nodes}[node_id] == word
+
+
+def test_a_pages_on_fail_rides_its_recovery() -> None:
+    # A page that says only `on_fail` gets a hand-less recovery; one that
+    # also declares a hand keeps it.
+    text = VALID.replace(
+        "  - page: app.pages.results\n",
+        "  - page: app.pages.results\n    on_fail: stop\n",
+        1,
+    )
+    spec = playbook.parse_playbook(text, "buy", _pack())
+    assert spec.recovers["results"].on_fail == "stop"
+    assert spec.recovers["results"].hands == ()
+
+    text = VALID.replace(
+        "  - page: app.pages.results\n",
+        "  - page: app.pages.results\n    recover: go_back\n    on_fail: stop\n",
+        1,
+    )
+    spec = playbook.parse_playbook(text, "buy", _pack())
+    assert spec.recovers["results"].on_fail == "stop"
+    assert spec.recovers["results"].elsewhere is not None
+
+
+def test_a_page_declares_on_fail_once() -> None:
+    # `home` is a waypoint twice in VALID: the same word twice is fine,
+    # a later waypoint may add what the earlier left unsaid, and two
+    # different words are a contradiction.
+    text = VALID.replace(
+        "  - page: app.pages.home\n", "  - page: app.pages.home\n    on_fail: stop\n"
+    )
+    assert (
+        playbook.parse_playbook(text, "buy", _pack()).recovers["home"].on_fail == "stop"
+    )
+
+    once = VALID.replace(
+        "  - page: app.pages.home\n", "  - page: app.pages.home\n    on_fail: stop\n", 1
+    )
+    assert (
+        playbook.parse_playbook(once, "buy", _pack()).recovers["home"].on_fail == "stop"
+    )
+
+    twice = text.replace(
+        "  - page: app.pages.home\n    on_fail: stop\n",
+        "  - page: app.pages.home\n    on_fail: handover\n",
+        1,
+    )
+    with pytest.raises(PlaybookError, match="declares `on_fail` twice"):
+        playbook.parse_playbook(twice, "buy", _pack())
+
+
+def test_on_fail_takes_only_its_two_words() -> None:
+    with pytest.raises(PlaybookError, match="`on_fail` must be one of handover, stop"):
+        playbook.parse_playbook(
+            _mutate('    no: ["no"]\n', '    no: ["no"]\n    on_fail: brief\n'),
+            "buy",
+            _pack(),
+        )
+
+
+def test_check_names_a_payment_ask_that_leaves_on_fail_unsaid() -> None:
+    from physiclaw.conductor.route import lints
+
+    pack = _pack()
+    unsaid = playbook.parse_playbook(VALID, "buy", pack)
+    said = playbook.parse_playbook(
+        _mutate('    no: ["no"]\n', '    no: ["no"]\n    on_fail: handover\n'),
+        "buy",
+        pack,
+    )
+
+    assert any("`on_fail:`" in w for w in lints.readiness_warnings(unsaid, pack))
+    assert not any("on_fail" in w for w in lints.readiness_warnings(said, pack))
+
+
+def test_check_names_a_payment_ask_that_leaves_denied_unsaid() -> None:
+    from physiclaw.conductor.route import lints
+
+    pack = _pack()
+    unsaid = playbook.parse_playbook(VALID, "buy", pack)
+    said = playbook.parse_playbook(
+        _mutate('    no: ["no"]\n', '    no: ["no"]\n    denied: "cancelled"\n'),
+        "buy",
+        pack,
+    )
+
+    assert any("`denied:`" in w for w in lints.readiness_warnings(unsaid, pack))
+    assert not any("denied" in w for w in lints.readiness_warnings(said, pack))
+
+
+def test_denied_is_a_message_with_the_ask_refs() -> None:
+    # The answer to a no may quote what the ask could — the total too.
+    pack = _pack()
+    node = playbook.parse_playbook(
+        _mutate(
+            '    no: ["no"]\n', '    no: ["no"]\n    denied: "no ¥{ask.total} taken"\n'
+        ),
+        "buy",
+        pack,
+    ).nodes[4]
+
+    assert node.denied == "no ¥{ask.total} taken"
+    assert playbook.parse_playbook(VALID, "buy", pack).nodes[4].denied is None
+    with pytest.raises(PlaybookError, match="`denied`"):
+        playbook.parse_playbook(
+            _mutate('    no: ["no"]\n', '    no: ["no"]\n    denied: "{nope.x}"\n'),
+            "buy",
+            pack,
+        )
+
+
+def test_only_the_payment_ask_is_told_when_on_fail_is_unsaid() -> None:
+    from physiclaw.conductor.route import lints
+
+    pack = _pack()
+    text = VALID.replace(
+        "  - page: app.pages.results\n",
+        "  - page: app.pages.results\n"
+        "  - ask: proceed\n"
+        "    approve: go\n"
+        '    message: "Continue? reply go or no"\n'
+        '    yes: ["go"]\n'
+        '    no: ["no"]\n',
+        1,
+    )
+    spec = playbook.parse_playbook(text, "buy", pack)
+
+    on_fail = [w for w in lints.readiness_warnings(spec, pack) if "on_fail" in w]
+    assert not any("'proceed'" in w for w in on_fail)
+    assert any("'pay'" in w for w in on_fail)
+
+
+def test_check_names_a_stop_once_money_may_have_moved() -> None:
+    # A stop at or after the payment move — on the move, or on the page
+    # it must land on — is legal and worth a second look.
+    from physiclaw.conductor.route import lints
+
+    pack = _pack()
+    text = (VALID + PAY_TAIL).replace(
+        "    irreversible: payment\n",
+        "    irreversible: payment\n    on_fail: stop\n",
+        1,
+    )
+    spec = playbook.parse_playbook(text, "buy", pack)
+
+    lines = [
+        w for w in lints.readiness_warnings(spec, pack) if "money may have moved" in w
+    ]
+    assert len(lines) == 1 and "'do-pay'" in lines[0]
+
+
+def test_a_granted_macro_with_a_templated_box_is_refused_under_never_tap() -> None:
+    # The runtime guard judges a macro by its recorded boxes; a box the
+    # run fills from an input default has no centre to judge, so under
+    # a never_tap the grant is refused at parse — and stays legal where
+    # nothing is declared.
+    from conductor_fakes import write_leaf, write_pack
+
+    root = write_pack()
+    write_leaf(
+        root,
+        None,
+        "macros",
+        "tmpl.yml",
+        "kind: macro\nschema: 1\nname: tmpl\ndescription: templated\ninputs:\n  x:\n"
+        '    description: left edge\n    default: "0.1"\nsteps:\n'
+        '  - tap: t\n    at: ["{x}", 0.9, 0.5, 0.95]\n',
+    )
+    pack = pb.load_pack("demo")
+
+    def spec(extra: str) -> str:
+        return _mutate(
+            "    tools: [tap, scroll]\n", f"    tools: [tap, scroll]\n{extra}"
+        )
+
+    with pytest.raises(PlaybookError, match="placeholder"):
+        playbook.parse_playbook(
+            _tools("tap, scroll, app.macros.tmpl", '    never_tap: ["Pay"]\n'),
+            "buy",
+            pack,
+        )
+    playbook.parse_playbook(_tools("tap, scroll, app.macros.tmpl"), "buy", pack)
+
+
+def test_the_same_grant_twice_is_named_without_its_body() -> None:
+    pack = _pack()
+    with pytest.raises(PlaybookError, match=r"duplicate entry 'add-cart'$"):
+        playbook.parse_playbook(
+            _mutate(
+                "    tools: [tap, scroll]\n",
+                "    tools: [tap, scroll, app.macros.add-cart, app.macros.add-cart]\n",
+            ),
+            "buy",
+            pack,
+        )
+
+
+def test_a_macro_reads_its_recorded_taps_for_the_guards() -> None:
+    # What both guards judge a macro by — its labels at parse, its boxes
+    # on the live screen — read off the one macro the walk dispatches.
+    from physiclaw.macros.model import MacroTap
+
+    pack = _pack()
+
+    assert pack.macros["add-cart"].taps() == (
+        MacroTap(label=("t",), bbox=(0.1, 0.1, 0.2, 0.2)),
+    )
+
+
+def test_never_tap_takes_a_reading_a_list_or_a_label_with_a_band() -> None:
+    from physiclaw.common.bbox import BANDS
+    from physiclaw.conductor.spec.pages import AnchorDecl
+
+    text = _mutate(
+        "    tools: [tap, scroll]\n",
+        "    tools: [tap, scroll]\n    never_tap:\n"
+        '      - "Pay Now"\n'
+        '      - ["Place Order", "Confirm Payment"]\n'
+        '      - {label: "Pay Now", within: bottom}\n'
+        "      - {label: [Buy], within: [0.0, 0.9, 1.0, 1.0]}\n",
+    )
+    node = playbook.parse_playbook(text, "buy", _pack()).nodes[1]
+
+    assert node.never_tap == (
+        AnchorDecl(text="Pay Now"),
+        AnchorDecl(text="Place Order", alts=("Confirm Payment",)),
+        AnchorDecl(text="Pay Now", within=BANDS["bottom"]),
+        AnchorDecl(text="Buy", within=(0.0, 0.9, 1.0, 1.0)),
+    )
+    assert playbook.parse_playbook(VALID, "buy", _pack()).nodes[1].never_tap == ()
+
+
+@pytest.mark.parametrize(
+    ("block", "message"),
+    [
+        ('    never_tap: "x"\n', "non-empty LIST"),
+        ("    never_tap: []\n", "non-empty LIST"),
+        ("    never_tap: [{label: a, when: b}]\n", "unknown key"),
+        ("    never_tap: [{within: bottom}]\n", "`label`"),
+        ("    never_tap: [{label: a, within: sideways}]\n", "`within`"),
+        ("    never_tap: [a, b, c, d, e, f, g, h, i]\n", "at most 8"),
+        # The text rules a page anchor has — the same row matcher reads both.
+        ('    never_tap: ["two\\nlines"]\n', "single-line"),
+        (f'    never_tap: ["{"x" * 81}"]\n', "chars > max 80"),
+        ("    never_tap: [{label: [a, a]}]\n", "duplicate `label` reading"),
+    ],
+)
+def test_never_tap_rejects_a_malformed_target(block: str, message: str) -> None:
+    with pytest.raises(PlaybookError, match=message):
+        playbook.parse_playbook(
+            _mutate("    tools: [tap, scroll]\n", f"    tools: [tap, scroll]\n{block}"),
+            "buy",
+            _pack(),
+        )
+
+
+def test_never_tap_needs_something_that_presses() -> None:
+    with pytest.raises(PlaybookError, match="neither a `tap` tool nor a granted macro"):
+        playbook.parse_playbook(
+            _mutate(
+                "    tools: [tap, scroll]\n",
+                '    tools: [scroll]\n    never_tap: ["Pay Now"]\n',
+            ),
+            "buy",
+            _pack(),
+        )
+
+
+def test_never_tap_is_allowed_on_an_episode_that_only_runs_a_macro() -> None:
+    # A granted macro presses its own recorded boxes without ever
+    # proposing a tap, so the ban has something to guard.
+    spec = playbook.parse_playbook(
+        _mutate(
+            "    tools: [tap, scroll]\n",
+            '    tools: [scroll, app.macros.add-cart]\n    never_tap: ["Pay Now"]\n',
+        ),
+        "buy",
+        _pack(),
+    )
+
+    node = next(n for n in spec.nodes if n.id == "choose")
+    assert node.never_tap and node.macros == ("add-cart",)
+
+
+def _tools(tools: str, extra: str = "") -> str:
+    """VALID with the `choose` episode's tool menu swapped, plus any
+    extra key on the step."""
+    return _mutate("    tools: [tap, scroll]\n", f"    tools: [{tools}]\n{extra}")
+
+
+def _spot(name: str, extra: str = "", tools: str = "tap, scroll") -> str:
+    """VALID with a landmark given to the episode, and written in its
+    prompt."""
+    return (
+        _tools(tools, extra)
+        .replace(
+            '      given: {keyword: "{inputs.keyword}"}',
+            f'      given: {{keyword: "{{inputs.keyword}}", {name}: app.landmarks.{name}}}',
+        )
+        .replace(
+            "the cheapest of {keyword}", f"the cheapest of {{keyword}} via {{{name}}}"
+        )
+    )
+
+
+def test_a_grant_that_walks_around_never_tap_is_refused_at_parse() -> None:
+    # Both contradictions are fully declared, so both belong at parse:
+    # only the model's OWN taps reach the runtime guard. A granted
+    # landmark is a box the model may press blind — and one with no text
+    # row leaves the runtime check nothing to find. A granted macro
+    # presses its recorded targets without proposing a tap at all.
+    from conductor_fakes import write_pack
+
+    def spec(extra: str) -> str:
+        return _mutate(
+            "    tools: [tap, scroll]\n", f"    tools: [tap, scroll]\n{extra}"
+        )
+
+    write_pack(landmarks='pay:\n  label: "t"\n  at: [0.1, 0.9, 0.9, 0.96]\n')
+    pack = pb.load_pack("demo")
+    guarded = '    never_tap: ["t"]\n'
+
+    with pytest.raises(PlaybookError, match="never_tap"):
+        playbook.parse_playbook(_spot("pay", guarded), "buy", pack)
+    # The shared fixture macro taps "t" too.
+    with pytest.raises(PlaybookError, match="presses"):
+        playbook.parse_playbook(
+            _tools("tap, scroll, app.macros.add-cart", guarded), "buy", pack
+        )
+    # The same grants, with nothing declared, stay legal.
+    playbook.parse_playbook(
+        _spot("pay", tools="tap, scroll, app.macros.add-cart"), "buy", pack
+    )

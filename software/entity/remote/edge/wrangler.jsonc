@@ -1,0 +1,21 @@
+{
+  "name": "entity-alfonsito-gateway",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-26",
+  "workers_dev": false,
+  "preview_urls": false,
+  "d1_databases": [{
+    "binding": "SESSIONS",
+    "database_name": "entity-alfonsito-sessions",
+    "database_id": "fc14a8e8-7996-4816-a976-df997cba95bd"
+  }],
+  "ratelimits": [{
+    "name": "LOGIN_LIMIT",
+    "namespace_id": "135412",
+    "simple": {"limit": 8, "period": 60}
+  }],
+  "vpc_services": [{
+    "binding": "ALFONSITO",
+    "service_id": "01a20ef3-aced-7621-81bd-10aff135ee2c"
+  }]
+}

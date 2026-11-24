@@ -1,0 +1,16 @@
+kind: macro
+schema: 1
+name: back
+description: pop from a 盒马 item page to the storefront's home by each page's own top-left arrow
+# Disabled until rehearsed on YOUR device: physiclaw macros run taobao/hema-buy.back
+enabled: false
+steps:
+  # Arrows, not go_back: the item page's gallery swallows the edge swipe.
+  # Each tap runs only while its page shows; the results' arrow lands on
+  # the storefront's home directly.
+  - tap: "the item page's top-left arrow"
+    at: [0.008, 0.064, 0.123, 0.117]
+    when: ["加入购物车"]
+  - tap: "the results page's top-left arrow"
+    at: [0.008, 0.064, 0.123, 0.117]
+    when: ["综合排序"]

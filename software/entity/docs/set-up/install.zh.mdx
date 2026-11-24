@@ -1,0 +1,62 @@
+---
+title: 安装软件
+description: 运行脚本安装 physiclaw CLI，再用 --version 和 doctor 检查安装结果。
+---
+
+PhysiClaw 的软件部分是一个命令行工具（CLI）：`physiclaw`。安装后确认版本，再运行健康检查。
+
+## 1. 运行安装脚本
+
+<Tabs syncKey="os">
+<TabItem label="macOS / Linux">
+
+```bash
+curl -fsSL https://physiclaw.ai/install.sh | bash
+```
+
+</TabItem>
+<TabItem label="Windows">
+
+```powershell
+iwr -useb https://physiclaw.ai/install.ps1 | iex
+```
+
+</TabItem>
+</Tabs>
+
+脚本会安装 [`uv`](https://docs.astral.sh/uv/)、Python 3.12 和 `physiclaw` CLI，然后下载本地视觉模型。如果模型下载失败，运行 `physiclaw setup local-vision-model` 重新下载。
+
+## 2. 确认安装成功
+
+```bash
+physiclaw --version
+```
+
+如果提示找不到命令，打开**新的终端**窗口让更新后的 `PATH` 生效，然后重试。
+
+## 3. 运行健康检查
+
+```bash
+physiclaw doctor
+```
+
+运行 `physiclaw doctor` 可查看当前版本、配置路径、本地视觉模型、检测到的硬件、已配置的大模型和已安装的技能。
+
+## 更新
+
+PhysiClaw 以 `uv` 工具的形式安装。停止服务器，再用 uv 更新：
+
+```bash
+uv tool upgrade physiclaw
+# 如果依赖版本冲突，重新安装：
+# uv tool install --force --upgrade physiclaw
+```
+
+## 卸载
+
+清除用户数据（`~/.physiclaw`），再卸载 CLI：
+
+```bash
+physiclaw uninstall
+uv tool uninstall physiclaw
+```

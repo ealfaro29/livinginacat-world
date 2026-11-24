@@ -1,0 +1,747 @@
+"""Tests for `physiclaw.agent.layout` — validate/accumulate.
+
+The agent measures the boxes off a screenshot and reports them; this module
+only sanity-checks and merges. No bridge fetch, no vision model.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+
+from physiclaw.agent import layout
+from physiclaw.agent.engine.skill import Skill
+from physiclaw.common import paths
+
+
+@pytest.fixture(autouse=True)
+def _isolate_layout(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Point the layout paths at a per-test dir."""
+    d = tmp_path / "screen-layout"
+    monkeypatch.setattr(paths, "screen_layout_dir", lambda: d)
+    monkeypatch.setattr(paths, "screen_layout_json", lambda: d / "layout.json")
+    monkeypatch.setattr(paths, "screen_layout_md", lambda: d / "layout.md")
+    return d
+
+
+def _write_layout(fields: dict) -> None:
+    d = paths.screen_layout_dir()
+    d.mkdir(parents=True, exist_ok=True)
+    paths.screen_layout_json().write_text(json.dumps(fields), encoding="utf-8")
+
+
+# Real-ish boxes that pass each field's region check.
+_SPOTLIGHT = {
+    "spotlight_input": [
+        0.020,
+        0.582,
+        0.958,
+        0.660,
+    ],  # near the bottom, above the keyboard
+    "spotlight_paste": [0.090, 0.512, 0.205, 0.560],
+    "space": [0.251, 0.868, 0.747, 0.920],
+    "backspace": [0.867, 0.809, 0.995, 0.861],
+    "return": [0.752, 0.868, 0.990, 0.918],
+}
+_CHAT_HIDDEN = {"chat_input_kb_hidden": [0.098, 0.900, 0.716, 0.950]}
+_CHAT_VISIBLE_WECHAT = {
+    "chat_input_kb_visible": [0.098, 0.586, 0.716, 0.634],
+    "send": [0.752, 0.868, 0.990, 0.918],  # keyboard bottom-right key
+    "chat_paste": [0.120, 0.520, 0.300, 0.566],
+}
+
+# Placeholder-value seeds derived from the field tables, so they track field
+# additions automatically (is_learned/missing_pages check presence, not region).
+_COMPLETE = {f: [0, 0, 1, 1] for f in layout.ALL_FIELDS}
+_SPOTLIGHT_DONE = {f: [0, 0, 1, 1] for f in layout.store._PAGE_FIELDS["spotlight"]}
+
+
+# ---------- missing_pages / is_learned ----------
+
+
+def test_missing_pages_all_when_empty() -> None:
+    assert layout.missing_pages() == list(layout.PAGES)
+    assert layout.is_learned() is False
+
+
+def test_missing_pages_shrinks_as_fields_captured() -> None:
+    _write_layout(_SPOTLIGHT_DONE)
+    assert "spotlight" not in layout.missing_pages()
+    assert "chat-no-keyboard" in layout.missing_pages()
+    assert layout.is_learned() is False
+
+
+def test_is_learned_true_when_all_fields_present() -> None:
+    _write_layout(_COMPLETE)
+    assert layout.missing_pages() == []
+    assert layout.is_learned() is True
+
+
+def test_load_layout_md_returns_content_or_empty() -> None:
+    assert layout.load_layout_md() == ""
+    d = paths.screen_layout_dir()
+    d.mkdir(parents=True, exist_ok=True)
+    paths.screen_layout_md().write_text("LAYOUT CARD\n", encoding="utf-8")
+    assert layout.load_layout_md() == "LAYOUT CARD"
+
+
+# ---------- prune_builtin_skills ----------
+
+
+def test_prune_builtin_skills_keeps_screen_layout_while_incomplete() -> None:
+    skills = {"im": object(), layout.SKILL_NAME: object()}
+    assert layout.SKILL_NAME in layout.prune_builtin_skills(skills)
+
+
+def test_prune_builtin_skills_drops_screen_layout_when_learned() -> None:
+    _write_layout(_COMPLETE)
+    skills = {"im": object(), layout.SKILL_NAME: object()}
+    out = layout.prune_builtin_skills(skills)
+
+    assert layout.SKILL_NAME not in out
+    assert "im" in out  # other built-in skills untouched
+
+
+# ---------- fill_builtin_boxes ----------
+
+
+def _im_skill() -> Skill:
+    # Prose uses the placeholders too; only the fenced sequence should fill.
+    body = (
+        "Prose: tap `{{input-hidden}}`, then `{{send}}`.\n"
+        "```python\n"
+        'sequence(step1={"arg": {{input-hidden}}}, step5={"arg": {{send}}})\n'
+        "```\n"
+    )
+    return Skill(name="im", description="d", body=body, dir=Path("/x"), flat=True)
+
+
+def test_fill_builtin_boxes_noop_while_incomplete() -> None:
+    skills = {"im": _im_skill()}
+    out = layout.fill_builtin_boxes(skills)
+
+    assert out["im"].body == skills["im"].body  # unchanged
+    assert "{{input-hidden}}" in out["im"].body  # placeholders stay
+
+
+def test_fill_builtin_boxes_fills_code_block_only_leaves_prose() -> None:
+    _write_layout(
+        {
+            **{f: [0, 0, 1, 1] for f in layout.ALL_FIELDS},
+            "chat_input_kb_hidden": [0.098, 0.900, 0.716, 0.950],
+            "send": [0.752, 0.868, 0.990, 0.918],
+        }
+    )
+    out = layout.fill_builtin_boxes({"im": _im_skill()})
+    prose, code = out["im"].body.split("```python")
+
+    # Prose keeps the readable placeholder names.
+    assert "{{input-hidden}}" in prose
+    assert "{{send}}" in prose
+    # The fenced template gets concrete bboxes, no placeholders left.
+    assert "[0.098, 0.900, 0.716, 0.950]" in code
+    assert "[0.752, 0.868, 0.990, 0.918]" in code
+    assert "{{input-hidden}}" not in code
+    assert "{{send}}" not in code
+
+
+def test_fill_builtin_boxes_leaves_unmapped_skills_untouched() -> None:
+    _write_layout(_COMPLETE)
+    other = Skill(
+        name="search-in-app",
+        description="d",
+        body="```python\n{{paste-button}}\n```",
+        dir=Path("/x"),
+    )
+    out = layout.fill_builtin_boxes({"search-in-app": other})
+
+    assert out["search-in-app"] is other  # same object, unfilled
+
+
+def test_fill_builtin_boxes_open_app_uses_spotlight_fields() -> None:
+    # {{paste-button}} is a PER-SKILL mapping: chat_paste in `im`,
+    # spotlight_paste in `open-app`.
+    _write_layout(
+        {
+            **_COMPLETE,
+            "spotlight_input": [0.005, 0.599, 0.982, 0.657],
+            "spotlight_paste": [0.082, 0.561, 0.188, 0.583],
+            "backspace": [0.864, 0.804, 0.986, 0.856],
+        }
+    )
+    skill = Skill(
+        name="open-app",
+        description="d",
+        dir=Path("/x"),
+        body=(
+            "Prose {{search-field}} stays.\n"
+            "```python\n"
+            "{{search-field}} {{backspace}} {{paste-button}}\n"
+            "```\n"
+        ),
+    )
+    out = layout.fill_builtin_boxes({"open-app": skill})
+    prose, code = out["open-app"].body.split("```python")
+
+    assert "{{search-field}}" in prose
+    assert "[0.005, 0.599, 0.982, 0.657]" in code  # spotlight_input
+    assert "[0.864, 0.804, 0.986, 0.856]" in code  # backspace
+    assert "[0.082, 0.561, 0.188, 0.583]" in code  # spotlight_paste
+    assert "{{" not in code
+
+
+# ---------- tail_reminder / inject_tail ----------
+
+
+def test_tail_reminder_lists_missing_fields_per_page_when_nothing_captured() -> None:
+    out = layout.tail_reminder()
+
+    assert "First-run setup needed" in out
+    # every page appears with its full field list, in _PAGE_FIELDS order
+    for page, fields in layout.store._PAGE_FIELDS.items():
+        assert f"{page}: {', '.join(fields)}" in out
+    assert "`screen-layout` under Built-in Skills" in out
+    assert "already loaded" in out
+    assert "load it with the Skill" not in out
+
+
+def test_tail_reminder_reports_done_and_missing_when_partial() -> None:
+    # spotlight done; a chat-keyboard field partially captured → list the
+    # specific fields still missing on each incomplete page.
+    _write_layout({**_SPOTLIGHT_DONE, "chat_input_kb_visible": [0, 0, 1, 1]})
+
+    out = layout.tail_reminder()
+
+    assert "Pages fully captured: spotlight" in out
+    assert "chat-no-keyboard: chat_input_kb_hidden" in out
+    # chat-keyboard still needs send + chat_paste (input already captured)
+    assert "chat-keyboard: send, chat_paste" in out
+
+
+def test_tail_reminder_empty_when_all_captured() -> None:
+    _write_layout(_COMPLETE)
+    assert layout.tail_reminder() == ""
+
+
+def test_inject_tail_appends_reminder_when_incomplete() -> None:
+    from physiclaw.contract.dto import UserMessage
+
+    out = layout.inject_tail([])
+
+    assert len(out) == 1
+    assert isinstance(out[0], UserMessage)
+    assert "First-run setup needed" in out[0].content
+
+
+def test_inject_tail_noop_when_complete() -> None:
+    _write_layout(_COMPLETE)
+    original = ["a", "b"]
+    assert layout.inject_tail(original) == original
+
+
+# All fields except `send`, so a single chat-keyboard `send` call completes it.
+_ALL_BUT_SEND = {
+    **_SPOTLIGHT,
+    **_CHAT_HIDDEN,
+    **{k: v for k, v in _CHAT_VISIBLE_WECHAT.items() if k != "send"},
+}
+
+
+# ---------- record: guards ----------
+
+
+def test_record_rejects_unknown_page() -> None:
+    assert "unknown page" in layout.record(
+        "bogus", "spotlight_input", [0.03, 0.08, 0.88, 0.13]
+    )
+
+
+def test_record_chat_page_needs_app() -> None:
+    out = layout.record(
+        "chat-no-keyboard", "chat_input_kb_hidden", [0.098, 0.9, 0.716, 0.95]
+    )  # no app
+    assert "needs the IM app" in out
+    assert not paths.screen_layout_json().exists()  # nothing saved
+
+
+def test_record_rejects_field_not_on_page() -> None:
+    out = layout.record("spotlight", "send", [0.75, 0.87, 0.99, 0.92])
+    assert "not a spotlight field" in out
+    assert not paths.screen_layout_json().exists()
+
+
+def test_record_rejects_empty_bbox() -> None:
+    out = layout.record("spotlight", "spotlight_input", [])
+    assert "4 numbers" in out
+    assert not paths.screen_layout_json().exists()
+
+
+def test_record_rejects_bad_geometry() -> None:
+    # left >= right.
+    out = layout.record("spotlight", "spotlight_input", [0.9, 0.08, 0.3, 0.13])
+    assert "left<right" in out
+    assert "Layout not saved" in out
+
+
+def test_record_rejects_out_of_region_box() -> None:
+    # A spotlight search field can't sit at the very bottom of the screen.
+    out = layout.record("spotlight", "spotlight_input", [0.03, 0.90, 0.88, 0.95])
+    assert "looks off" in out
+    assert not paths.screen_layout_json().exists()
+
+
+# ---------- record: happy path ----------
+
+
+def test_record_saves_one_box_and_confirms() -> None:
+    out = layout.record("spotlight", "spotlight_input", [0.02, 0.582, 0.958, 0.66])
+
+    saved = json.loads(paths.screen_layout_json().read_text(encoding="utf-8"))
+    assert saved["spotlight_input"] == [0.02, 0.582, 0.958, 0.66]  # rounded, stored
+    assert "Saved `spotlight_input`" in out
+    assert "still to capture" in out.lower()  # incomplete; count only, no field list
+    assert (
+        "space" not in out
+    )  # remaining fields NOT re-listed (tail_reminder does that)
+    assert paths.screen_layout_md().exists()  # card persisted to disk
+
+
+def test_record_saves_paste_buttons() -> None:
+    layout.record("spotlight", "spotlight_paste", [0.090, 0.512, 0.205, 0.560])
+    layout.record("chat-keyboard", "chat_paste", [0.120, 0.520, 0.300, 0.566], "wechat")
+
+    saved = json.loads(paths.screen_layout_json().read_text(encoding="utf-8"))
+    assert saved["spotlight_paste"] == [0.09, 0.512, 0.205, 0.56]
+    assert saved["chat_paste"] == [0.12, 0.52, 0.3, 0.566]
+
+
+def test_record_rejects_paste_out_of_region() -> None:
+    # A spotlight Paste callout can't sit at the very bottom (keyboard area).
+    out = layout.record("spotlight", "spotlight_paste", [0.37, 0.90, 0.55, 0.95])
+    assert "looks off" in out
+
+
+def test_render_md_includes_paste_section() -> None:
+    md = layout.store._render_md(_COMPLETE)
+    assert "### Paste buttons" in md
+
+
+def test_record_merges_without_clobber_and_labels_app() -> None:
+    _write_layout({"spotlight_input": [0.02, 0.582, 0.958, 0.66]})
+    layout.record(
+        "chat-no-keyboard", "chat_input_kb_hidden", [0.098, 0.9, 0.716, 0.95], "wechat"
+    )
+
+    saved = json.loads(paths.screen_layout_json().read_text(encoding="utf-8"))
+    assert saved["spotlight_input"] == [0.02, 0.582, 0.958, 0.66]  # preserved
+    assert saved["chat_input_kb_hidden"] == [0.098, 0.9, 0.716, 0.95]
+    assert saved["im_app"] == "WeChat"  # app labelled
+
+
+def test_record_rounds_coordinates() -> None:
+    layout.record("spotlight", "spotlight_input", [0.0201, 0.5822, 0.9578, 0.6601])
+    saved = json.loads(paths.screen_layout_json().read_text(encoding="utf-8"))
+    assert saved["spotlight_input"] == [0.02, 0.582, 0.958, 0.66]
+
+
+def test_record_ignores_app_on_spotlight() -> None:
+    layout.record("spotlight", "spotlight_input", [0.02, 0.582, 0.958, 0.66], "wechat")
+    saved = json.loads(paths.screen_layout_json().read_text(encoding="utf-8"))
+    assert "im_app" not in saved  # spotlight isn't app-specific
+
+
+def test_record_completes_setup_wechat() -> None:
+    _write_layout(_ALL_BUT_SEND)
+    out = layout.record("chat-keyboard", "send", [0.752, 0.868, 0.990, 0.918], "wechat")
+
+    assert "All boxes captured" in out
+    assert layout.is_learned() is True
+    saved = json.loads(paths.screen_layout_json().read_text(encoding="utf-8"))
+    assert saved["send"] == [0.752, 0.868, 0.99, 0.918]  # keyboard key
+    assert saved["im_app"] == "WeChat"
+    # The `layout_learned` marker is persisted for out-of-module readers (the
+    # core orchestrator reads it without importing this module).
+    assert saved["layout_learned"] is True
+
+
+def test_record_writes_learned_false_while_incomplete() -> None:
+    layout.record("spotlight", "spotlight_input", [0.02, 0.582, 0.958, 0.66])
+
+    saved = json.loads(paths.screen_layout_json().read_text(encoding="utf-8"))
+    assert saved["layout_learned"] is False
+
+
+def test_record_completes_setup_whatsapp_send_from_mic() -> None:
+    _write_layout(_ALL_BUT_SEND)
+    out = layout.record(
+        "chat-keyboard", "send", [0.850, 0.586, 0.950, 0.634], "whatsapp"
+    )
+
+    assert "All boxes captured" in out
+    saved = json.loads(paths.screen_layout_json().read_text(encoding="utf-8"))
+    assert saved["send"] == [0.85, 0.586, 0.95, 0.634]  # mic position
+    assert saved["im_app"] == "WhatsApp"
+
+
+def test_record_accepts_any_chat_app() -> None:
+    # Send is validated app-independently (right side, lower half), so an
+    # arbitrary app — here Telegram, input-bar send button — works and is
+    # labelled with the app's name.
+    _write_layout(_ALL_BUT_SEND)
+    out = layout.record("chat-keyboard", "send", [0.90, 0.586, 0.98, 0.634], "telegram")
+
+    assert "All boxes captured" in out
+    saved = json.loads(paths.screen_layout_json().read_text(encoding="utf-8"))
+    assert saved["im_app"] == "Telegram"
+
+
+def test_record_labels_unknown_app_verbatim() -> None:
+    layout.record(
+        "chat-no-keyboard",
+        "chat_input_kb_hidden",
+        [0.098, 0.9, 0.716, 0.95],
+        "SomeNewChatApp",
+    )
+    saved = json.loads(paths.screen_layout_json().read_text(encoding="utf-8"))
+    assert saved["im_app"] == "SomeNewChatApp"  # not in the nice-case map → as passed
+
+
+def test_record_rejects_send_far_from_right() -> None:
+    # A Send box on the LEFT half is clearly a mis-pick, whatever the app.
+    out = layout.record("chat-keyboard", "send", [0.10, 0.586, 0.20, 0.634], "signal")
+    assert "send: looks off" in out
+
+
+def test_record_same_field_twice_overwrites() -> None:
+    # Re-reporting a field corrects it — the second value wins, no duplication.
+    layout.record("spotlight", "spotlight_input", [0.02, 0.582, 0.958, 0.66])
+    layout.record("spotlight", "spotlight_input", [0.03, 0.585, 0.955, 0.655])
+
+    saved = json.loads(paths.screen_layout_json().read_text(encoding="utf-8"))
+    assert saved["spotlight_input"] == [
+        0.03,
+        0.585,
+        0.955,
+        0.655,
+    ]  # overwritten, not duplicated
+
+
+def test_record_completing_call_announces_restart() -> None:
+    _write_layout(_ALL_BUT_SEND)
+    out = layout.record("chat-keyboard", "send", [0.752, 0.868, 0.990, 0.918], "wechat")
+    # The completing call tells the agent setup is done and the layout is now
+    # loaded (restart if there's a task to finish, else the session just ends).
+    assert "setup is done" in out
+    assert "restarts with the layout loaded" in out
+
+
+def test_record_after_complete_says_no_restart() -> None:
+    # Layout already complete → re-reporting a box updates it but does NOT claim
+    # a restart (the handler only restarts on the call that finishes setup).
+    _write_layout(
+        {**_ALL_BUT_SEND, "send": [0.752, 0.868, 0.990, 0.918], "im_app": "WeChat"}
+    )
+    out = layout.record("chat-keyboard", "send", [0.760, 0.868, 0.995, 0.918], "wechat")
+
+    assert "No restart needed" in out
+    assert "will now restart" not in out
+    saved = json.loads(paths.screen_layout_json().read_text(encoding="utf-8"))
+    assert saved["send"] == [0.76, 0.868, 0.995, 0.918]  # correction saved
+
+
+# ---------- lint_sequence ----------
+
+_LINT_LAYOUT = {**_CHAT_HIDDEN, **_CHAT_VISIBLE_WECHAT}
+_HIDDEN_BOX = _CHAT_HIDDEN["chat_input_kb_hidden"]
+_VISIBLE_BOX = _CHAT_VISIBLE_WECHAT["chat_input_kb_visible"]
+_PASTE_BOX = _CHAT_VISIBLE_WECHAT["chat_paste"]
+_SEND_BOX = _CHAT_VISIBLE_WECHAT["send"]
+
+
+def test_lint_blocks_long_press_on_hidden_box_before_paste_tap() -> None:
+    # The classic wrong-box paste batch: with the keyboard up, the
+    # kb-hidden region is the keyboard — the popover never opens.
+    _write_layout(_LINT_LAYOUT)
+
+    msg = layout.lint_sequence(
+        [
+            {"tool_name": "long_press", "arg": _HIDDEN_BOX},
+            {"tool_name": "tap", "arg": _PASTE_BOX},
+            {"tool_name": "tap", "arg": _SEND_BOX},
+        ]
+    )
+
+    assert msg is not None and msg.startswith("BLOCKED")
+    assert "KEYBOARD-VISIBLE" in msg
+    assert str(_VISIBLE_BOX) in msg
+
+
+def test_lint_blocks_two_step_variant(  # turn 92's shape
+) -> None:
+    _write_layout(_LINT_LAYOUT)
+
+    msg = layout.lint_sequence(
+        [
+            {"tool_name": "long_press", "arg": _HIDDEN_BOX},
+            {"tool_name": "tap", "arg": _PASTE_BOX},
+        ]
+    )
+
+    assert msg is not None and msg.startswith("BLOCKED")
+
+
+def test_lint_blocks_long_press_on_hidden_after_tapping_it() -> None:
+    # Wrong-token substitution in the 5-step template: the tap raised
+    # the keyboard, so the later long_press presses the keyboard.
+    _write_layout(_LINT_LAYOUT)
+
+    msg = layout.lint_sequence(
+        [
+            {"tool_name": "tap", "arg": _HIDDEN_BOX},
+            {"tool_name": "send_to_clipboard", "arg": "hello"},
+            {"tool_name": "long_press", "arg": _HIDDEN_BOX},
+            {"tool_name": "tap", "arg": _PASTE_BOX},
+            {"tool_name": "tap", "arg": _SEND_BOX},
+        ]
+    )
+
+    assert msg is not None and "step 1 taps that box" in msg
+
+
+def test_lint_allows_the_correct_im_template() -> None:
+    _write_layout(_LINT_LAYOUT)
+
+    msg = layout.lint_sequence(
+        [
+            {"tool_name": "tap", "arg": _HIDDEN_BOX},
+            {"tool_name": "send_to_clipboard", "arg": "hello"},
+            {"tool_name": "long_press", "arg": _VISIBLE_BOX},
+            {"tool_name": "tap", "arg": _PASTE_BOX},
+            {"tool_name": "tap", "arg": _SEND_BOX},
+        ]
+    )
+
+    assert msg is None
+
+
+def test_lint_blocks_reused_chat_paste_after_foreign_long_press() -> None:
+    # The Meituan failure: copy the `im` bundled sequence into a search app —
+    # long-press THAT app's search box, then tap WeChat's learned chat_paste,
+    # then return. The Paste popover is elsewhere, so the reused coord lands on
+    # empty screen and the paste silently no-ops. Must be blocked.
+    _write_layout(_LINT_LAYOUT)
+    search_box = [0.05, 0.055, 0.9, 0.10]  # a top-of-screen search bar, not a chat box
+
+    msg = layout.lint_sequence(
+        [
+            {"tool_name": "long_press", "arg": search_box},
+            {"tool_name": "tap", "arg": _PASTE_BOX},  # WeChat's chat_paste, reused
+            {
+                "tool_name": "tap",
+                "arg": [0.86, 0.86, 0.99, 0.92],
+            },  # return / search key
+        ]
+    )
+
+    assert msg is not None and msg.startswith("BLOCKED")
+    assert "chat_paste" in msg
+
+
+def test_lint_allows_bare_long_press_near_bottom() -> None:
+    # Long-pressing a bottom message bubble (copy menu) with no paste
+    # flow in the batch is legitimate — no prior input tap, no paste tap.
+    _write_layout(_LINT_LAYOUT)
+
+    msg = layout.lint_sequence(
+        [
+            {"tool_name": "long_press", "arg": _HIDDEN_BOX},
+            {"tool_name": "tap", "arg": [0.2, 0.75, 0.35, 0.79]},
+        ]
+    )
+
+    assert msg is None
+
+
+def test_lint_fails_open_without_learned_layout() -> None:
+    assert (
+        layout.lint_sequence(
+            [
+                {"tool_name": "long_press", "arg": [0.098, 0.9, 0.716, 0.95]},
+                {"tool_name": "tap", "arg": [0.12, 0.52, 0.3, 0.566]},
+            ]
+        )
+        is None
+    )
+
+
+def test_lint_fails_open_on_malformed_actions() -> None:
+    _write_layout(_LINT_LAYOUT)
+
+    assert layout.lint_sequence("not-a-list") is None
+    assert layout.lint_sequence(None) is None
+    assert layout.lint_sequence([{"tool_name": "long_press", "arg": ["x", 1]}]) is None
+    assert layout.lint_sequence([42, {"tool_name": "tap"}]) is None
+
+
+# ---------- KeyboardTracker ----------
+
+
+def _tracker_with_layout() -> layout.KeyboardTracker:
+    _write_layout(_LINT_LAYOUT)
+    return layout.KeyboardTracker()
+
+
+def test_tracker_raising_press_with_changed_verdict_means_up() -> None:
+    kb = _tracker_with_layout()
+    kb.observe("tap", {"bbox": _HIDDEN_BOX}, True)
+    assert kb.state == "up"
+
+
+def test_tracker_raising_press_needs_camera_proof() -> None:
+    # A dead press (wire fault, silent refusal) must not claim "up".
+    kb = _tracker_with_layout()
+    kb.observe("tap", {"bbox": _HIDDEN_BOX}, False)
+    assert kb.state == "unknown"
+    kb.observe("tap", {"bbox": _HIDDEN_BOX}, None)
+    assert kb.state == "unknown"
+
+
+def test_tracker_nav_means_down_and_other_press_means_unknown() -> None:
+    kb = _tracker_with_layout()
+    kb.observe("tap", {"bbox": _HIDDEN_BOX}, True)
+    kb.observe("home_screen", {}, True)
+    assert kb.state == "down"
+
+    kb.observe("tap", {"bbox": _HIDDEN_BOX}, True)
+    kb.observe("tap", {"bbox": [0.4, 0.4, 0.5, 0.45]}, True)  # chat area
+    assert kb.state == "unknown"
+
+
+def test_tracker_no_change_nav_preserves_belief() -> None:
+    # A camera-verified no-change go_back (missed edge swipe) left the
+    # screen — keyboard included — exactly as it was; only a nav that
+    # visibly changed the screen (or has no verdict) proves "down".
+    kb = _tracker_with_layout()
+    kb.observe("tap", {"bbox": _HIDDEN_BOX}, True)
+    kb.observe("go_back", {}, False)
+    assert kb.state == "up"
+    kb.observe("go_back", {}, None)
+    assert kb.state == "down"
+
+
+def test_tracker_typing_and_views_preserve_up() -> None:
+    kb = _tracker_with_layout()
+    kb.observe("tap", {"bbox": _HIDDEN_BOX}, True)
+    kb.observe("tap", {"bbox": _SEND_BOX}, True)  # keyboard key
+    kb.observe("peek", {}, None)  # view
+    kb.observe("send_to_clipboard", {"text": "x"}, None)
+    assert kb.state == "up"
+
+
+def test_tracker_swipe_and_batch_presses_decay_to_unknown() -> None:
+    kb = _tracker_with_layout()
+    kb.observe("tap", {"bbox": _HIDDEN_BOX}, True)
+    kb.observe("swipe", {"bbox": [0.3, 0.5, 0.7, 0.6]}, True)
+    assert kb.state == "unknown"
+
+    kb.observe("tap", {"bbox": _HIDDEN_BOX}, True)
+    kb.observe(
+        "sequence",
+        {"actions": [{"tool_name": "tap", "arg": [0.4, 0.4, 0.5, 0.45]}]},
+        True,
+    )
+    assert kb.state == "unknown"
+
+    kb.observe("tap", {"bbox": _HIDDEN_BOX}, True)
+    kb.observe(
+        "sequence", {"actions": [{"tool_name": "send_to_clipboard", "arg": "x"}]}, True
+    )
+    assert kb.state == "up"  # clipboard-only batch touches nothing
+
+
+# ---------- lint_gesture (cross-call keyboard state) ----------
+
+
+def test_lint_gesture_blocks_standalone_long_press_when_keyboard_up() -> None:
+    # The cross-call shape: the raising tap happened in a PREVIOUS call.
+    _write_layout(_LINT_LAYOUT)
+
+    msg = layout.lint_gesture(
+        "long_press",
+        {"bbox": _HIDDEN_BOX},
+        keyboard_up=True,
+    )
+
+    assert msg is not None and msg.startswith("BLOCKED")
+    assert "KEYBOARD-VISIBLE" in msg
+
+
+def test_lint_gesture_allows_standalone_long_press_otherwise() -> None:
+    _write_layout(_LINT_LAYOUT)
+
+    assert (
+        layout.lint_gesture("long_press", {"bbox": _HIDDEN_BOX}, keyboard_up=False)
+        is None
+    )
+    assert (
+        layout.lint_gesture("long_press", {"bbox": _VISIBLE_BOX}, keyboard_up=True)
+        is None
+    )
+    assert layout.lint_gesture("tap", {"bbox": _HIDDEN_BOX}, keyboard_up=True) is None
+
+
+def test_lint_gesture_blocks_bare_batch_long_press_when_keyboard_up() -> None:
+    # No in-batch evidence at all — the belief carries across calls.
+    _write_layout(_LINT_LAYOUT)
+
+    msg = layout.lint_gesture(
+        "sequence",
+        {"actions": [{"tool_name": "long_press", "arg": _HIDDEN_BOX}]},
+        keyboard_up=True,
+    )
+
+    assert msg is not None and "already up" in msg
+
+
+def test_lint_gesture_fails_open_without_layout() -> None:
+    assert (
+        layout.lint_gesture(
+            "long_press",
+            {"bbox": [0.098, 0.9, 0.716, 0.95]},
+            keyboard_up=True,
+        )
+        is None
+    )
+
+
+# ---------- run_macro and the keyboard belief ----------
+
+
+@pytest.mark.parametrize("before", ["up", "down", "unknown"])
+def test_run_macro_decays_the_keyboard_belief(before: str) -> None:
+    # A macro replays real gestures behind one non-gesture name, so its
+    # verdict cannot be attributed per step — the SEQUENCE reasoning. Left
+    # to fall through as a "local tool", a pre-macro "up" survives a macro
+    # whose first step is `home_screen`, and LayoutLint then BLOCKS the
+    # agent's next long_press on the box that is now the correct one.
+    kb = layout.KeyboardTracker(state=before)
+
+    kb.observe("run_macro", {"name": "notify", "inputs": {}}, True)
+
+    assert kb.state == "unknown"
+
+
+def test_a_macro_cannot_leave_a_stale_up_belief_behind() -> None:
+    # End to end over the tracker: the raising tap is camera-verified, then
+    # a macro runs. Whatever the macro did, the belief must not still claim
+    # "up" — that is the state LayoutLint acts on.
+    kb = layout.KeyboardTracker()
+    kb.observe("tap", {"bbox": [0.1, 0.9, 0.7, 0.96]}, True)
+    raised = kb.state
+
+    kb.observe("run_macro", {"name": "go-home"}, True)
+
+    assert raised in ("up", "unknown")  # depends on the learned layout
+    assert kb.state == "unknown"

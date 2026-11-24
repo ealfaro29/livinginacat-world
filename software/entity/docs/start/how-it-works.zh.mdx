@@ -1,0 +1,45 @@
+---
+title: 工作流程
+description: PhysiClaw 的智能体如何完整处理一次请求：唤醒、查看消息、执行任务、反馈、退出。
+---
+
+与 PhysiClaw 的交互很直观。它有一部专属手机，登录了自己的微信账号。加它为好友，就能像和真人一样聊天。
+
+<svg viewBox="0 0 700 290" role="img" aria-label="用户与 PhysiClaw 通过手机进行交流" style="max-width:560px;width:100%;height:auto;margin:1.5rem auto;display:block" xmlns="http://www.w3.org/2000/svg" font-family="'Inter','Segoe UI',system-ui,sans-serif">
+  <defs>
+    <g id="iphone">
+      <rect x="0" y="0" width="90" height="190" rx="22"/>
+      <rect x="31" y="14" width="28" height="9" rx="4.5"/>
+      <path d="M27 176 L63 176" stroke-width="2.4"/>
+    </g>
+  </defs>
+  <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <use href="#iphone" x="125" y="70"/>
+    <use href="#iphone" x="485" y="70"/>
+    <path d="M240 165 L460 165" stroke-dasharray="7 7"/>
+  </g>
+  <g fill="currentColor" text-anchor="middle">
+    <text x="170" y="52" font-size="18" font-weight="600">用户</text>
+    <text x="530" y="52" font-size="18" font-weight="600">PhysiClaw</text>
+  </g>
+</svg>
+
+## 唤醒
+
+PhysiClaw 的运行时会持续检查两件事：是否有定时任务到期，以及手机屏幕是否因新通知而亮起。满足任一条件，就唤醒智能体。
+
+## 查看消息
+
+唤醒后，智能体先输入密码解锁手机，打开微信，读取用户的最新消息，确定要执行的任务。
+
+## 执行任务
+
+智能体根据用户意图选择合适的 App 执行任务。如果任务需要用户确认，则等待用户确认后再继续。
+
+## 反馈
+
+任务完成后，智能体向用户发送反馈消息。如果没有新消息，就关闭微信，返回主屏幕。
+
+## 退出
+
+智能体会更新记忆，并将新增的定时任务加入任务列表，然后结束会话，等待下一次唤醒。

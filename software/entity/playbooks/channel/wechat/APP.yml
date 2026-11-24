@@ -1,0 +1,41 @@
+# The pack MANIFEST of the WeChat channel — the thread page, how it is
+# read, and the placeholders; the hands (open/send) are recorded beside
+# it in macros/<name>.yml, and boot/ beside it is the walk every wake
+# plays first.
+kind: manifest
+schema: 1
+app: wechat
+description: >-
+  The user-channel pack for WeChat — reach YOUR user's thread by in-app
+  search (list-order independent) and send messages there. Required by
+  any pack whose playbooks ask for confirmation.
+placeholders:
+  CONTACT:
+    description: the IM contact name of YOUR user thread, exactly as the chat app shows it
+    example: QiaoQian
+
+# The ONE page the conductor must recognize: your chat thread.
+pages:
+  thread:
+    description: the <<CONTACT>> chat, open on its message list
+    anchors:
+      # The thread TITLE: the contact name centered in the top bar. The
+      # box, not the whole top band — an iOS notification banner prints
+      # the same name left-aligned at the same height, and a wake often
+      # opens on exactly that (home or lock screen, WeChat badge).
+      - {text: "<<CONTACT>>", within: [0.30, 0.03, 0.70, 0.12]}
+    # The chat LIST's title, in the same box as the thread's (an English
+    # system reads Weixin): forbidden there, not elsewhere on the page.
+    forbid:
+      - {text: ["微信", "Weixin"], within: [0.30, 0.03, 0.70, 0.12]}
+
+# Adapting to your device
+# - `open` navigates via WeChat's search, never by chat-list position,
+#   and skips the navigation when the thread already shows or WeChat
+#   resumes on it after the dock tap; `send` runs it first, then types.
+#   Both abort on a guard mismatch, and `send` refuses to type unless
+#   the thread title matches — never message the wrong chat.
+# - Recorded on an English-system WeChat (guards accept Contacts and
+#   联系人). Rehearse once; re-record the search/paste taps if yours
+#   differs, then `physiclaw playbooks pages calibrate channel` and enable
+#   both macros.

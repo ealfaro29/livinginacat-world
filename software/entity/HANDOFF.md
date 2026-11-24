@@ -1,0 +1,5 @@
+# Entity by Sentient · Continuidad / Handoff
+
+**Español.** El código de Entity, la interfaz del operador, el firmware de la MKS y las pruebas se mantienen en `software/entity/` del repositorio Living in a Cat. Para empezar en un chat nuevo, leé la guía de continuidad y consultá el estado del equipo con el MCP `alfonsito`. [Guía para Codex](https://github.com/ealfaro29/livinginacat-world/blob/main/docs/CONTINUITY.md) · [Operación y despliegue](guides/operaciones.md#español) · [MCP del operador](remote/mcp/README.md#español) · [Tareas y cola](https://entity.livinginacat.world/tareas?lang=es)
+
+**English.** The Entity source, operator interface, MKS firmware and tests live under `software/entity/` in the Living in a Cat repository. For a new chat, open the project handoff and read live status through the `alfonsito` MCP. [Codex handoff](https://github.com/ealfaro29/livinginacat-world/blob/main/docs/CONTINUITY.md) · [Operation and deployment](guides/operaciones.md#english) · [Operator MCP](remote/mcp/README.md#english) · [Tasks and queue](https://entity.livinginacat.world/tareas?lang=en)

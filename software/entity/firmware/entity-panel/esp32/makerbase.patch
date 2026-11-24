@@ -1,0 +1,302 @@
+diff --git a/Firmware/Grbl_Esp32/src/GCode.cpp b/Firmware/Grbl_Esp32/src/GCode.cpp
+index d55eb1e..5531371 100644
+--- a/Firmware/Grbl_Esp32/src/GCode.cpp
++++ b/Firmware/Grbl_Esp32/src/GCode.cpp
+@@ -1230,6 +1230,7 @@ Error gc_execute_line(char* line, uint8_t client) {
+                     if ((gc_block.modal.motion == Motion::ProbeAway) || (gc_block.modal.motion == Motion::ProbeAwayNoError)) {
+                         gc_parser_flags |= GCParserProbeIsAway;
+                     }
++                    if (!probe_enabled->get()) FAIL(Error::SettingDisabled);
+                     // [G38 Errors]: Target is same current. No axis words. Cutter compensation is enabled. Feed rate
+                     //   is undefined. Probe is triggered. NOTE: Probe check moved to probe cycle. Instead of returning
+                     //   an error, it issues an alarm to prevent further motion to the probe. It's also done there to
+diff --git a/Firmware/Grbl_Esp32/src/Grbl.cpp b/Firmware/Grbl_Esp32/src/Grbl.cpp
+index 85b2e1c..6b1ba46 100644
+--- a/Firmware/Grbl_Esp32/src/Grbl.cpp
++++ b/Firmware/Grbl_Esp32/src/Grbl.cpp
+@@ -121,7 +121,7 @@ void _mc_task_init(void) {
+     ts35_beep_init();
+     bsp_led_init();
+     tft_TS35_init();
+-    test_cfg_find_init();
++    // Operator tasks come over USB. Do not run factory tests from an SD card.
+     disp_task_init();
+ }
+ 
+@@ -153,7 +153,7 @@ static void reset_variables() {
+     // client_reset_read_buffer(CLIENT_ALL);
+     gc_init();  // Set g-code parser to default state
+ 
+-    test_cfg_find_init();
++    // Operator tasks come over USB. Do not run factory tests from an SD card.
+ 
+     spindle->stop();
+ 
+diff --git a/Firmware/Grbl_Esp32/src/Machines/i2s_out_corexy_mks_dlc32.h b/Firmware/Grbl_Esp32/src/Machines/i2s_out_corexy_mks_dlc32.h
+index 4dcf548..2523f20 100644
+--- a/Firmware/Grbl_Esp32/src/Machines/i2s_out_corexy_mks_dlc32.h
++++ b/Firmware/Grbl_Esp32/src/Machines/i2s_out_corexy_mks_dlc32.h
+@@ -21,15 +21,15 @@
+ */
+ 
+ 
+-#define USE_LCD_DMA
++// Synchronous writes keep the single LVGL draw buffer valid.
+ #define USR_Z_MOTOR
+ 
+ #define MACHINE_NAME            "MKS DLC32"
+ 
+ #define USE_BOARD_V2_0
+ 
+-#define BOARD_NAME              "Board:MKS CoreXY DLC32 V1.1"
+-#define FW_NAME                 "Firmware:DLC32 V1.2.001(DLC32.8M.H35.0911)"
++#define BOARD_NAME              "Board:MKS DLC32 CoreXY V2.x"
++#define FW_NAME                 "Firmware:Entity TS24-R 1.0 (CoreXY)"
+ 
+ 
+ // I2S (steppers & other output-only pins)
+diff --git a/Firmware/Grbl_Esp32/src/Probe.cpp b/Firmware/Grbl_Esp32/src/Probe.cpp
+index 382f050..40456af 100644
+--- a/Firmware/Grbl_Esp32/src/Probe.cpp
++++ b/Firmware/Grbl_Esp32/src/Probe.cpp
+@@ -53,7 +53,7 @@ void set_probe_direction(bool is_away) {
+ 
+ // Returns the probe pin state. Triggered = true. Called by gcode parser and probe state monitor.
+ bool probe_get_state() {
+-    return (PROBE_PIN == UNDEFINED_PIN) ? false : digitalRead(PROBE_PIN) ^ probe_invert->get();
++    return probe_enabled->get() && PROBE_PIN != UNDEFINED_PIN && (digitalRead(PROBE_PIN) ^ probe_invert->get());
+ }
+ 
+ // Monitors probe pin state and records the system position when detected. Called by the
+diff --git a/Firmware/Grbl_Esp32/src/Protocol.cpp b/Firmware/Grbl_Esp32/src/Protocol.cpp
+index 57e8a8b..cdf289b 100644
+--- a/Firmware/Grbl_Esp32/src/Protocol.cpp
++++ b/Firmware/Grbl_Esp32/src/Protocol.cpp
+@@ -23,6 +23,7 @@
+ */
+ 
+ #include "Grbl.h"
++#include "entity/device.h"
+ #include "mks/MKS_TS35.h"
+ #include "lvgl.h"
+ #include "mks/MKS_draw_print.h"
+@@ -84,6 +85,8 @@ Error execute_line(char* line, uint8_t client, WebUI::AuthenticationLevel auth_l
+     if (line[0] == 0) {
+         return Error::Ok;
+     }
++    if (client == CLIENT_SERIAL && strncmp(line, "$EP", 3) == 0)
++        return entity_panel_command(line+3,client) ? Error::Ok : Error::InvalidStatement;
+     // Grbl '$' or WebUI '[ESPxxx]' system command
+     if (line[0] == '$' || line[0] == '[') {
+         return system_execute_line(line, client, auth_level);
+diff --git a/Firmware/Grbl_Esp32/src/SettingsDefinitions.cpp b/Firmware/Grbl_Esp32/src/SettingsDefinitions.cpp
+index 6ea33d4..29aac9d 100644
+--- a/Firmware/Grbl_Esp32/src/SettingsDefinitions.cpp
++++ b/Firmware/Grbl_Esp32/src/SettingsDefinitions.cpp
+@@ -29,6 +29,7 @@ FlagSetting* beep_status; // mks-fix
+ FlagSetting* step_enable_invert;
+ FlagSetting* limit_invert;
+ FlagSetting* probe_invert;
++FlagSetting* probe_enabled;
+ FlagSetting* report_inches;
+ FlagSetting* soft_limits;
+ // TODO Settings - need to check for HOMING_ENABLE
+@@ -340,6 +341,7 @@ void make_settings() {
+         axis_settings[axis]->steps_per_mm = setting;
+     }
+ 
++    probe_enabled = new FlagSetting(GRBL, WG, "37", "Probe/Enable", true);
+     language_select              = new IntSetting(GRBL, WG, "40", "Language", DEFAULT_LANGUAGE_STATUS, 0, 2);
+     beep_status                  = new FlagSetting(GRBL, WG, "38", "beep_status", DEFAULT_BEEP_STATUS);
+     
+diff --git a/Firmware/Grbl_Esp32/src/SettingsDefinitions.h b/Firmware/Grbl_Esp32/src/SettingsDefinitions.h
+index 38a2ff4..bb5fc49 100644
+--- a/Firmware/Grbl_Esp32/src/SettingsDefinitions.h
++++ b/Firmware/Grbl_Esp32/src/SettingsDefinitions.h
+@@ -33,6 +33,7 @@ extern FlagSetting* beep_status;
+ extern FlagSetting* step_enable_invert;
+ extern FlagSetting* limit_invert;
+ extern FlagSetting* probe_invert;
++extern FlagSetting* probe_enabled;
+ extern FlagSetting* report_inches;
+ extern FlagSetting* soft_limits;
+ extern FlagSetting* hard_limits;
+diff --git a/Firmware/Grbl_Esp32/src/mks/MKS_FREERTOS_TASK.cpp b/Firmware/Grbl_Esp32/src/mks/MKS_FREERTOS_TASK.cpp
+index a6dac87..f2eec28 100644
+--- a/Firmware/Grbl_Esp32/src/mks/MKS_FREERTOS_TASK.cpp
++++ b/Firmware/Grbl_Esp32/src/mks/MKS_FREERTOS_TASK.cpp
+@@ -15,63 +15,8 @@ TaskHandle_t frame_task_tcb = NULL;
+ 
+ static void mks_page_data_updata(void);
+ 
+-IRAM_ATTR void lvgl_disp_task(void *parg) { 
+-
+-#if defined(USE_DelayUntil)
+-    TickType_t       xLastWakeTime;
+-    const TickType_t xDisplayFrequency = 5;                  
+-    xLastWakeTime = xTaskGetTickCount();   
+-#endif
+-
+-    bool logo_flag = true;   
+-    uint16_t logo_flag_count = 0; 
+-    mks_lvgl_init();
+-
+-    mks_global_style_init();
+-
+-    mks_draw_logo();
+-
+-    // 创建二值量
+-    is_fram_need = xSemaphoreCreateBinary();
+-    frame_task_init();
+-    mks_grbl.wifi_connect_enable = true;
+-
+-    while(1) {
+-
+-        if(logo_flag == true) {
+-            lv_task_handler();
+-            logo_flag_count++;
+-
+-            if(logo_flag_count == 100) {
+-                 LCD_BLK_ON;
+-            }
+-
+-            if(logo_flag_count == 400) {
+-                mks_lv_clean_ui();
+-
+-                if(mks_updata.updata_flag == UD_HAD_FILE) {
+-                    mks_draw_updata();
+-                }else {
+-                    if(mks_grbl.is_test_mode == true) {
+-                        mks_draw_test_ui();
+-                    }else{
+-                        mks_draw_ready();
+-                    }
+-                }
+-                logo_flag = false;
+-            }
+-        }else {
+-            lv_task_handler();
+-            mks_page_data_updata();
+-        }
+-
+-#if defined(USE_DelayUntil)
+-    vTaskDelayUntil(&xLastWakeTime, xDisplayFrequency); //使用相对延时，保证时间精准
+-#else
+-        vTaskDelay(5); // 5ms 绝对延时
+-#endif   
+-    }
+-}
++#include "../entity/device.h"
++void lvgl_disp_task(void *) { entity_screen_task(); }
+ 
+ uint8_t count_updata = 0;
+ uint8_t fram_count = 0;
+diff --git a/Firmware/Grbl_Esp32/src/mks/MKS_LVGL.cpp b/Firmware/Grbl_Esp32/src/mks/MKS_LVGL.cpp
+index bab393c..86f8abc 100644
+--- a/Firmware/Grbl_Esp32/src/mks/MKS_LVGL.cpp
++++ b/Firmware/Grbl_Esp32/src/mks/MKS_LVGL.cpp
+@@ -1,5 +1,6 @@
+ #include "MKS_LVGL.h"
+ #include "TFT_eSPI.h"
++#include "../entity/device.h"
+ 
+ #define LV_BUF_SIZE              10 * LV_HOR_RES_MAX
+ GRBL_CRTL mks_grbl;
+@@ -35,11 +36,7 @@ void mks_lvgl_init(void) {
+     disp_drv.buffer = &disp_buf;
+     lv_disp_drv_register(&disp_drv);
+ 
+-    lv_indev_drv_t indev_drv;
+-    lv_indev_drv_init(&indev_drv);  
+-    indev_drv.type = LV_INDEV_TYPE_POINTER;
+-    indev_drv.read_cb = my_indev_touch;
+-    lv_indev_drv_register(&indev_drv);
++    // Entity handles XPT2046 navigation on the same display task.
+ }
+ 
+ void my_disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
+@@ -58,6 +55,7 @@ void my_disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * co
+     
+ 
+     tft.endWrite();
++    entity_flush_complete();
+     lv_disp_flush_ready(disp);
+ }
+ 
+diff --git a/Firmware/Grbl_Esp32/src/mks/MKS_TS35.cpp b/Firmware/Grbl_Esp32/src/mks/MKS_TS35.cpp
+index 3b534e3..33b35e6 100644
+--- a/Firmware/Grbl_Esp32/src/mks/MKS_TS35.cpp
++++ b/Firmware/Grbl_Esp32/src/mks/MKS_TS35.cpp
+@@ -10,7 +10,8 @@ void tft_TS35_init() {
+     tft.begin();
+     tft.setRotation(1);
+     // tft.fillScreen(tft.color565(0X1A, 0X1A, 0X1A));
+-    tft.initDMA();
++    pinMode(LCD_EN, OUTPUT);
++    LCD_BLK_OFF;
+     delay_ms(100);
+ }   
+ 
+diff --git a/Firmware/libraries/TFT_eSPI/TFT_eSPI.h b/Firmware/libraries/TFT_eSPI/TFT_eSPI.h
+index 6a7cf69..1c32697 100644
+--- a/Firmware/libraries/TFT_eSPI/TFT_eSPI.h
++++ b/Firmware/libraries/TFT_eSPI/TFT_eSPI.h
+@@ -91,7 +91,9 @@
+ #endif
+ 
+ // Some ST7789 boards do not work with Mode 0
+-#if defined(ST7789_DRIVER) || defined(ST7789_2_DRIVER)
++#if defined(ST7789_DRIVER)
++  #define TFT_SPI_MODE SPI_MODE2
++#elif defined(ST7789_2_DRIVER)
+   #define TFT_SPI_MODE SPI_MODE3
+ #else
+   #define TFT_SPI_MODE SPI_MODE0
+diff --git a/Firmware/libraries/TFT_eSPI/User_Setup.h b/Firmware/libraries/TFT_eSPI/User_Setup.h
+index d5d0d01..68e7c22 100644
+--- a/Firmware/libraries/TFT_eSPI/User_Setup.h
++++ b/Firmware/libraries/TFT_eSPI/User_Setup.h
+@@ -50,7 +50,9 @@
+ //#define ST7789_2_DRIVER    // Minimal configuration option, define additional parameters below for this display
+ //#define R61581_DRIVER
+ //#define RM68140_DRIVER
+-#define ST7796_DRIVER
++#define ST7789_DRIVER
++#define TFT_RGB_ORDER TFT_BGR
++#define TFT_INVERSION_OFF
+ //#define SSD1351_DRIVER
+ //#define SSD1963_480_DRIVER
+ //#define SSD1963_800_DRIVER
+@@ -75,7 +77,7 @@
+ // #define M5STACK
+ 
+ // For ST7789, ST7735, ILI9163 and GC9A01 ONLY, define the pixel width and height in portrait orientation
+-#define TFT_WIDTH  480
++#define TFT_WIDTH  240
+ // #define TFT_WIDTH  128
+ // #define TFT_WIDTH  240 // ST7789 240 x 240 and 240 x 320
+ #define TFT_HEIGHT 320
+@@ -322,7 +324,7 @@
+ // #define SPI_FREQUENCY  10000000
+ // #define SPI_FREQUENCY  20000000
+ // #define SPI_FREQUENCY  27000000
+-#define SPI_FREQUENCY  40000000
++#define SPI_FREQUENCY  16000000
+ // #define SPI_FREQUENCY  55000000 // STM32 SPI1 only (SPI2 maximum is 27MHz)
+ // #define SPI_FREQUENCY  80000000
+ 
+diff --git a/Firmware/libraries/lvgl/lv_conf.h b/Firmware/libraries/lvgl/lv_conf.h
+index 425f1ea..5a7ede5 100644
+--- a/Firmware/libraries/lvgl/lv_conf.h
++++ b/Firmware/libraries/lvgl/lv_conf.h
+@@ -20,8 +20,8 @@
+  *====================*/
+ 
+ /* Maximal horizontal and vertical resolution to support by the library.*/
+-#define LV_HOR_RES_MAX          (480)
+-#define LV_VER_RES_MAX          (320)
++#define LV_HOR_RES_MAX          (320)
++#define LV_VER_RES_MAX          (240)
+ 
+ /* Color depth:
+  * - 1:  1 byte per pixel

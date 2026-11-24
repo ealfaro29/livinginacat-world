@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#11150f">
+<title>Entity by Sentient</title>
+<link rel="icon" href="sentient.svg" type="image/svg+xml">
+<style>
+@font-face{font-family:Space;src:url(space-grotesk.ttf) format("truetype");font-weight:500;font-display:swap}
+:root{color-scheme:dark;--base:#10130f;--panel:#151a14;--line:#353c31;--ink:#f3f5e9;--mute:#acb4a5;--acid:#d0ff00;font-family:Space,"Helvetica Neue",sans-serif;font-weight:500;color:var(--ink);background:var(--base)}
+*{box-sizing:border-box}body{margin:0}button,a{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible{outline:2px solid var(--acid);outline-offset:2px}[hidden]{display:none!important}
+.shellbar{display:flex;align-items:center;justify-content:space-between;padding:22px max(6vw,18px);border-bottom:1px solid var(--line)}
+.signature{display:flex;align-items:center;gap:10px}.signature img{width:30px;height:30px}.signature strong{font-size:25px;font-weight:500;letter-spacing:-.065em}.signature span{font-size:13px;color:var(--mute);border-left:1px solid var(--line);padding-left:12px;margin-left:3px}
+.mode{font:11px ui-monospace,monospace;color:var(--mute)}.mode::before{content:"";display:inline-block;width:6px;height:6px;background:var(--acid);margin-right:7px}
+.workspace{max-width:1220px;min-height:75vh;margin:auto;display:grid;grid-template-columns:minmax(300px,1.6fr) minmax(240px,1fr);align-items:center;gap:clamp(28px,6vw,88px);padding:clamp(40px,9vh,95px) max(6vw,20px)}
+.bevel{padding:clamp(8px,1.6vw,18px);border:1px solid #414639;border-radius:23px;background:#23271f;box-shadow:0 18px 43px #0004}
+.viewport{position:relative;width:100%;aspect-ratio:4/3;container-type:inline-size;overflow:hidden;background:#171c15}
+.lcd{position:absolute;inset:0;display:flex;flex-direction:column;padding:4.1cqw 5cqw 0;overflow:hidden}
+.lcd-top{display:flex;align-items:center;justify-content:space-between;height:9cqw;flex:none;border-bottom:1px solid var(--line);padding-bottom:2.4cqw}
+.lcd-sign{display:flex;gap:1.8cqw;align-items:center;font-size:5.8cqw;letter-spacing:-.065em}.lcd-sign img{width:5.7cqw;height:5.7cqw}
+.tag{display:flex;align-items:center;gap:1.3cqw;color:#c4cdbb;font:500 3.2cqw Space,sans-serif}.dot{height:1.5cqw;width:1.5cqw;border-radius:50%;background:#909886}.dot.ready{background:var(--acid)}.dot.off{background:#ffaf82}
+.view{flex:1;min-height:0;padding-top:4.2cqw}.caption{margin:0;font:500 3.1cqw/1.2 ui-monospace,monospace;letter-spacing:.09em;color:var(--mute);text-transform:uppercase}
+.task-content{height:100%;display:flex;flex-direction:column}.task-title{max-width:99%;margin:2.8cqw 0 0;font-size:8.3cqw;line-height:1.02;font-weight:500;letter-spacing:-.06em;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.task-title.long{font-size:6.4cqw}.activity{font-size:3.9cqw;line-height:1.15;color:#c1c9b9;margin:auto 0 3.3cqw;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.lcd.in-repose .lcd-sign { display: none; }
+.lcd.in-repose .tag { width: 100%; }
+.lcd.in-repose .lcd-lang { margin-left: auto; }
+.lcd.in-repose #task-view { padding: 0; }
+.idle-brand { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.idle-mark { width: 20cqw; height: 18.75cqw; object-fit: contain; filter: sepia(1) saturate(10000%) hue-rotate(7deg); }
+.idle-brand strong { margin-top: 2.2cqw; font: 500 10.7cqw/1 Space,sans-serif; letter-spacing: -.065em; }
+.idle-brand small { margin-top: .9cqw; font: 500 5.2cqw/1.1 Space,sans-serif; color: var(--mute); }
+.queue-top{display:flex;align-items:center;justify-content:space-between}.page-buttons{display:flex;gap:1.2cqw}.page-buttons button{color:var(--ink);background:transparent;border:1px solid var(--line);font-size:4.4cqw;line-height:1;padding:.7cqw 2.6cqw}.page-buttons button:disabled{opacity:.35}
+.queue-list{list-style:none;margin:1.5cqw 0 0;padding:0}.queue-list li{display:flex;align-items:center;gap:2.8cqw;min-height:9.8cqw;border-bottom:1px solid var(--line);font-size:4.4cqw;line-height:1.15}
+.queue-list .slot{color:var(--acid);font:3.1cqw ui-monospace,monospace}.queue-list .title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.empty{margin:5cqw 0;font-size:5.5cqw;color:var(--mute)}
+.tabs{display:flex;border-top:1px solid #41483c;flex:none;height:13cqw}.tabs button{appearance:none;border:0;border-bottom:1cqw solid transparent;color:var(--mute);background:transparent;min-width:0;flex:1;font-size:4.3cqw;display:flex;justify-content:center;gap:2cqw;align-items:center}.tabs button[aria-pressed="true"]{color:var(--acid);border-bottom-color:var(--acid)}.num{font:3.4cqw ui-monospace,monospace}
+.boot{position:absolute;inset:0;background:var(--acid);color:#11160e;display:flex;align-items:center;justify-content:center;flex-direction:column}.boot img{width:20cqw;height:19cqw;filter:brightness(0)}.boot strong{font-size:16cqw;line-height:1;letter-spacing:-.078em;margin:2.5cqw 0 1.4cqw;font-weight:500}.boot small{font-size:4.2cqw;letter-spacing:-.02em}
+.details{min-width:0}.details .over{font:11px ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--acid)}.details h1{font-size:clamp(37px,4.3vw,62px);line-height:1;letter-spacing:-.068em;font-weight:500;margin:13px 0 8px}.details p{font-size:15px;line-height:1.45;color:var(--mute);margin:0}
+.scenarios{border:0;padding:0;margin:30px 0 0}.scenarios legend{padding:0 0 9px;color:var(--ink);font-size:13px}.scenario-grid{display:flex;gap:6px;flex-wrap:wrap}.scenario-grid button,.enlarge{background:transparent;border:1px solid #495141;color:var(--ink);padding:8px 12px;font-size:13px;border-radius:5px}.scenario-grid button[aria-pressed="true"]{border-color:var(--acid);color:var(--acid)}.enlarge{display:inline-block;text-decoration:none;margin-top:20px}.enlarge:hover{border-color:var(--acid)}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.lcd-lang{margin-left:1.4cqw;min-width:9cqw;min-height:7cqw;padding:0 1.3cqw;border:1px solid #526048;border-radius:3px;color:var(--ink);background:transparent;font:500 3.4cqw Space,sans-serif}.lcd-lang:hover{border-color:var(--acid)}
+body.kiosk{width:100vw;height:100dvh;background:#171c15;overflow:hidden}body.kiosk .workspace{padding:0;margin:0;width:100%;height:100%;min-height:0;display:grid;place-items:center}body.kiosk .bevel{width:min(100vw,133.3333dvh);border:0;padding:0;border-radius:0;box-shadow:none}body.kiosk .shellbar,body.kiosk .details{display:none}
+@media(max-width:719px){.workspace{grid-template-columns:1fr;min-height:0;max-width:600px;gap:28px}.details h1{font-size:36px}.shellbar{padding:16px 20px}.scenarios{margin-top:18px}}
+</style>
+</head>
+<body>
+<header class="shellbar"><div class="signature"><img src="sentient.svg" alt=""><strong>Entity</strong><span>by Sentient</span></div><span class="mode" id="mode"></span></header>
+<main class="workspace">
+  <div class="bevel"><section class="viewport" aria-label="Pantalla Entity">
+    <div class="lcd" id="screens"><header class="lcd-top"><div class="lcd-sign"><img src="sentient.svg" alt="Sentient">Entity</div><div class="tag"><i class="dot" id="dot"></i><span id="connection"></span><button class="lcd-lang" id="language" type="button" aria-label="Switch to English">EN</button></div></header>
+    <section class="view" id="task-view">
+      <div class="idle-brand" id="idle-brand" hidden>
+        <img class="idle-mark" src="sentient.svg" alt="">
+        <strong>Entity</strong><small>by Sentient</small>
+      </div>
+      <div class="task-content" id="task-content"><p class="caption" id="eyebrow">Tarea actual</p><h2 class="task-title" id="title">Conectando</h2><p class="activity" id="activity"></p></div>
+    </section>
+    <section class="view" id="queue-view" hidden><div class="queue-top"><p class="caption" id="queue-label">En cola</p><div class="page-buttons" id="pager" hidden><button id="prev" aria-label="Página anterior">‹</button><button id="next" aria-label="Página siguiente">›</button></div></div><ol class="queue-list" id="queue-list"></ol><p class="empty" id="empty"></p></section>
+    <nav class="tabs" aria-label="Vistas de la pantalla"><button id="task-tab" aria-pressed="true">Tarea</button><button id="queue-tab" aria-pressed="false"><span id="queue-tab-name">Cola</span><span class="num" id="count">—</span></button></nav></div>
+    <div class="boot" id="boot"><img src="sentient.svg" alt="Logo de Sentient"><strong>Entity</strong><small>by Sentient</small></div>
+  </section></div>
+  <aside class="details"><div class="over">MKS TS24-R · 320 × 240</div><h1 id="heading">Panel de Entity</h1><p id="explanation"></p>
+    <fieldset class="scenarios" id="scenarios" hidden><legend id="legend">Probar un estado</legend><div class="scenario-grid">
+      <button data-case="boot">Arranque</button><button data-case="idle">En espera</button><button data-case="running">En tarea</button><button data-case="offline">Sin conexión</button>
+    </div></fieldset><a class="enlarge" id="travelLink" href="travel?lang=es">Marcar recorrido</a><a class="enlarge" id="large">Ver solo la pantalla ↗</a>
+  </aside>
+</main>
+<script>
+'use strict';
+const el=id=>document.getElementById(id);
+const params=new URLSearchParams(location.search);
+const demo=location.protocol==='file:' || params.get('demo')==='1';
+const kiosk=params.get('lcd')==='1';
+document.body.classList.toggle('kiosk',kiosk);
+el('scenarios').hidden=!demo;
+const copy={
+ es:{
+  heading:'Panel de Entity',preview:'Vista previa local',live:'Panel del operador',demoText:'Explorá cómo se muestran las tareas en la pantalla del equipo.',liveText:'La Raspberry muestra la tarea actual y las que esperan. Al terminar una, la siguiente espera tu orden.',
+  legend:'Probar un estado',boot:'Arranque',idle:'En espera',running:'En tarea',offline:'Sin conexión',large:'Ver solo la pantalla ↗',display:'Pantalla Entity',tabs:'Vistas',prev:'Página anterior',next:'Página siguiente',
+  demo:'Demostración',ready:'Equipo listo',setup:'Falta calibrar',task:'Tarea',queue:'Cola',current:'Tarea actual',status:'Estado',pending:'En cola',waiting:'Esperando conexión con Entity',active:'En curso',first:'La primera tarea espera tu orden',clear:'Sin tareas pendientes',empty:'La cola está vacía.',reconnect:'Esperando conexión.',
+  sample:['Calcular 89 × 90','Abrir el calendario','Consultar la hora'],actions:{peek:'Observando la pantalla',screenshot:'Capturando la pantalla',tap:'Toque en pantalla',double_tap:'Toque doble',long_press:'Pulsación larga',swipe:'Deslizando',home_screen:'Abriendo el inicio',go_back:'Volviendo atrás',force_quit:'Cerrando la aplicación',unlock_phone:'Desbloqueando',send_to_clipboard:'Preparando el portapapeles',sequence:'Ejecutando una secuencia'},outcomes:{done:'Completada',failed:'Fallida',cancelled:'Cancelada',interrupted:'Interrumpida'}
+ },
+ en:{
+  heading:'Entity panel',preview:'Local preview',live:'Operator panel',demoText:'Explore how tasks appear on the device display.',liveText:'The Raspberry Pi shows the current task and the queue. The next task waits for your command.',
+  legend:'Preview a state',boot:'Startup',idle:'Idle',running:'Task in progress',offline:'Offline',large:'Open display only ↗',display:'Entity display',tabs:'Display views',prev:'Previous page',next:'Next page',
+  demo:'Demo',ready:'Rig ready',setup:'Setup required',task:'Task',queue:'Queue',current:'Current task',status:'Status',pending:'In queue',waiting:'Waiting for Entity to connect',active:'In progress',first:'First task awaits your command',clear:'No pending tasks',empty:'The queue is empty.',reconnect:'Waiting for connection.',
+  sample:['Calculate 89 × 90','Open the calendar','Check the time'],actions:{peek:'Observing screen',screenshot:'Taking a screenshot',tap:'Tapping the screen',double_tap:'Double tap',long_press:'Long press',swipe:'Swiping',home_screen:'Opening Home Screen',go_back:'Going back',force_quit:'Closing app',unlock_phone:'Unlocking',send_to_clipboard:'Preparing clipboard',sequence:'Running a sequence'},outcomes:{done:'Completed',failed:'Failed',cancelled:'Cancelled',interrupted:'Interrupted'}
+ }
+};
+const languageKey='entity-language';let stored;
+try{stored=localStorage.getItem(languageKey)}catch{}
+let lang=(params.get('lang')||stored||navigator.language||'es').toLowerCase().startsWith('en')?'en':'es';
+function sample(which){
+ const titles=copy[lang].sample;
+ if(which==='idle')return {current:null,queue:[],action:null,last:null,hardware:{ready:true}};
+ if(which==='running')return {current:{id:1,title:titles[0]},queue:titles.slice(1).map((title,i)=>({id:i+2,title})),action:'tap',last:null,hardware:{ready:true}};
+ return null;
+}
+function setLanguage(){
+ const c=copy[lang];document.documentElement.lang=lang;
+ for(const [key,value] of Object.entries({heading:c.heading,legend:c.legend,mode:demo?c.preview:c.live,explanation:demo?c.demoText:c.liveText,large:c.large,'task-tab':c.task,'queue-tab-name':c.queue}))el(key).textContent=value;
+ el('travelLink').href='travel?lang='+lang;el('travelLink').textContent=lang==='en'?'Measure travel':'Marcar recorrido';
+ const expand=new URL(location.href);expand.searchParams.set('lcd','1');expand.searchParams.set('lang',lang);el('large').href=expand.href;
+ el('language').textContent=lang==='es'?'EN':'ES';el('language').setAttribute('aria-label',lang==='es'?'Switch to English':'Cambiar a español');
+ el('prev').setAttribute('aria-label',c.prev);el('next').setAttribute('aria-label',c.next);
+ document.querySelector('.viewport').setAttribute('aria-label',c.display);document.querySelector('.tabs').setAttribute('aria-label',c.tabs);
+ document.querySelector('.boot img').alt='Sentient';
+ document.querySelectorAll('[data-case]').forEach(b=>b.textContent=c[b.dataset.case]);
+ if(demo)state=sample(example);
+}
+let state=null, tab='task', page=0, boot=true, example='running', timer=0;
+let lastObservedTaskId;
+el('language').onclick=()=>{lang=lang==='es'?'en':'es';try{localStorage.setItem(languageKey,lang)}catch{}const link=new URL(location.href);link.searchParams.set('lang',lang);try{history.replaceState(null,'',link)}catch{}setLanguage();render()};
+function render(){
+  const c=copy[lang];
+  el('boot').hidden=!boot;el('screens').hidden=boot;
+  el('task-view').hidden=tab!=='task';el('queue-view').hidden=tab!=='queue';
+  el('task-tab').setAttribute('aria-pressed',String(tab==='task'));el('queue-tab').setAttribute('aria-pressed',String(tab==='queue'));
+  const current=state && state.current, queue=state && state.queue;
+  const idle = Boolean(state?.hardware.ready && !current);
+  const showIdle = idle && tab === 'task';
+  el('idle-brand').hidden = !idle;
+  el('task-content').hidden = idle;
+  el('screens').classList.toggle('in-repose', showIdle);
+  el('connection').textContent=!state?c.offline:showIdle?c.idle:demo?c.demo:(state.hardware.ready?c.ready:c.setup);
+  el('dot').className='dot '+(!state?'off':(demo||state.hardware.ready?'ready':''));
+  el('count').textContent=queue?String(queue.length):'—';
+  el('eyebrow').textContent=current?c.current:c.status;
+  const title=!state?c.offline:current?current.title:idle?c.idle:c.setup;
+  el('title').textContent=title;el('title').classList.toggle('long',title.length>37);el('title').title=title;
+  const last = state?.last;
+  el('activity').textContent=!state?c.waiting:current?(c.actions[state.action]||c.active):!idle&&last?(c.outcomes[last.state]+' · '+last.title):queue.length?c.first:c.clear;
+  const pages=queue?Math.max(1,Math.ceil(queue.length/3)):1;
+  page=Math.max(0,Math.min(page,pages-1));el('pager').hidden=pages<=1;
+  el('prev').disabled=page===0;el('next').disabled=page+1>=pages;
+  el('queue-label').textContent=pages>1?c.pending+' · '+(page+1)+' / '+pages:c.pending;
+  const list=el('queue-list');list.replaceChildren();
+  if(queue)queue.slice(page*3,page*3+3).forEach((item,i)=>{
+    const li=document.createElement('li'),slot=document.createElement('span'),name=document.createElement('span');
+    slot.className='slot';slot.textContent=String(page*3+i+1).padStart(2,'0');name.className='title';name.textContent=item.title;name.title=item.title;li.append(slot,name);list.append(li);
+  });
+  el('empty').hidden=Boolean(queue && queue.length);
+  el('empty').textContent=state?c.empty:c.reconnect;
+  document.querySelectorAll('[data-case]').forEach(b=>b.setAttribute('aria-pressed',String((boot?'boot':example)===b.dataset.case)));
+}
+function select(which){tab=which;page=0;render();}
+el('task-tab').onclick=()=>select('task');el('queue-tab').onclick=()=>select('queue');
+el('prev').onclick=()=>{page--;render()};el('next').onclick=()=>{page++;render()};
+function splash(){clearTimeout(timer);boot=true;render();timer=setTimeout(()=>{boot=false;render()},1500)}
+function showExample(which){
+  clearTimeout(timer);
+  if(which==='boot'){splash();return;}
+  example=which;state=sample(which);boot=false;select('task');
+}
+document.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>showExample(b.dataset.case));
+async function poll(){
+  try{
+    const response=await fetch('state',{cache:'no-store',signal:AbortSignal.timeout(3500)});
+    if(!response.ok)throw new Error('offline');
+    const data=await response.json();
+    if(!Array.isArray(data.queue)||typeof data.hardware?.ready!=='boolean')throw new Error('status');
+    const nextTaskId = data.current?.id ?? null;
+    if (lastObservedTaskId !== undefined && lastObservedTaskId !== nextTaskId) {
+      tab = 'task';
+      page = 0;
+    }
+    lastObservedTaskId = nextTaskId;
+    state=data;
+  }catch{state=null}
+  render();setTimeout(poll,1000);
+}
+setLanguage();splash();if(!demo)poll();
+</script>
+</body></html>

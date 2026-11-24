@@ -1,0 +1,246 @@
+"""Jog GRBL through four phases — confirms X/Y wiring on a fresh board.
+
+Phases run in order:
+
+    1. X-only         X+ then X-
+    2. Y-only         Y+ then Y-
+    3. diagonal       (X+,Y+) then (X-,Y-)
+    4. anti-diagonal  (X+,Y-) then (X-,Y+)
+
+Each phase loops --loops times. Forward + back leaves the machine back
+at origin before the next phase, so the run ends at WPos 0,0,0.
+
+Only external dependency: pyserial. Uses the repository logging contract.
+
+Usage:
+    .venv/bin/python scripts/grbl_jog.py
+    .venv/bin/python scripts/grbl_jog.py --dist 15 --loops 2
+    .venv/bin/python scripts/grbl_jog.py --port /dev/tty.usbserial-XXXX
+"""
+
+import argparse
+import logging
+import math
+import sys
+import time
+from pathlib import Path
+
+# Run directly from a checkout without requiring the full application install.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from physiclaw.common.log_style import (
+    add_log_arguments,
+    configure_console,
+    report_error,
+    run_diagnostic,
+)
+
+log = logging.getLogger("physiclaw.scripts.grbl_jog")
+
+try:
+    import serial
+    import serial.tools.list_ports
+except ImportError:
+    report_error(
+        "pyserial not installed; install pyserial to run this diagnostic.",
+        tag="diagnostic",
+    )
+    raise SystemExit(1) from None
+
+
+# Support both `python scripts/...py` and package imports from tests/tools.
+if __package__:
+    from scripts import grbl_protocol
+else:
+    import grbl_protocol
+
+
+# ─── GRBL connection helpers ───────────────────────────────────────
+
+BAUD = 115200
+_SKIP = ("bluetooth", "bt-", "debug", "wlan", "wifi", "airpods")
+_LIKELY = (
+    "ch340",
+    "cp210",
+    "ftdi",
+    "usbserial",
+    "usbmodem",
+    "wch",
+    "arduino",
+    "prolific",
+)
+
+
+def find_port() -> str | None:
+    """Probe likely USB-serial ports for a GRBL board, return first hit."""
+    candidates = []
+    for p in serial.tools.list_ports.comports():
+        name = (p.device + " " + (p.description or "")).lower()
+        if any(k in name for k in _SKIP):
+            continue
+        priority = 0 if any(k in name for k in _LIKELY) else 1
+        candidates.append((priority, p.device))
+    candidates.sort()
+
+    for _, dev in candidates:
+        log.debug("Probing %s", dev)
+        try:
+            with serial.Serial(dev, BAUD, timeout=2, write_timeout=2) as ser:
+                time.sleep(2)
+                ser.reset_input_buffer()
+                ser.write(b"$I\n")
+                time.sleep(0.5)
+                resp = ser.read(ser.in_waiting or 256).decode("utf-8", "ignore")
+                if "grbl" in resp.lower() or "[VER:" in resp:
+                    first = resp.strip().splitlines()[0] if resp.strip() else "ok"
+                    log.debug("GRBL detected on %s: %s", dev, first)
+                    return dev
+                log.debug("No GRBL response on %s", dev)
+        except (serial.SerialException, OSError) as e:
+            log.debug("Cannot open %s: %s", dev, e)
+    return None
+
+
+def connect(port: str | None) -> serial.Serial:
+    """Resolve port (auto-detect if None), open, drain the reset banner."""
+    if port is None:
+        log.info("Scanning serial ports for a GRBL board")
+        port = find_port()
+        if port is None:
+            raise SystemExit("No GRBL device found. Pass --port explicitly.")
+    log.info("Opening %s at %d baud", port, BAUD)
+    ser = serial.Serial(port, BAUD, timeout=3, write_timeout=3)
+    try:
+        time.sleep(2)  # wait for board reset (DTR pulse on open)
+        banner = (
+            ser.read(min(ser.in_waiting or 256, 4096)).decode("utf-8", "ignore").strip()
+        )
+        if banner:
+            log.debug("Reset banner: %r", banner)
+        ser.reset_input_buffer()
+    except BaseException:
+        ser.close()
+        raise
+    return ser
+
+
+RESPONSE_TIMEOUT_SECONDS = grbl_protocol.RESPONSE_TIMEOUT_SECONDS
+
+
+def send(
+    ser: serial.Serial,
+    cmd: str,
+    *,
+    optional: bool = False,
+    timeout: float = RESPONSE_TIMEOUT_SECONDS,
+) -> None:
+    """Send a command through the shared protocol with this diagnostic's logger."""
+    grbl_protocol.send(ser, cmd, log=log, optional=optional, timeout=timeout)
+
+
+def query_status(ser: serial.Serial, *, timeout: float = 3.0) -> str:
+    """Send '?' and return the first complete status line."""
+    return grbl_protocol.query_status(ser, timeout=timeout)
+
+
+def unlock_if_alarmed(ser: serial.Serial) -> None:
+    """Print status; if Alarm, send $X to clear it."""
+    status = query_status(ser)
+    log.debug("Status: %s", status)
+    if "Alarm" in status:
+        log.warning("Board alarm — sending $X to unlock")
+        send(ser, "$X")
+
+
+# ─── Script-specific helpers ─────────────────────────────────────────
+
+
+def wait_idle(ser: serial.Serial, timeout: float = 10.0) -> None:
+    """Poll '?' until status reports 'Idle', or raise."""
+    time.sleep(0.05)  # let GRBL transition Idle→Run after buffering
+    deadline = time.monotonic() + timeout
+    while (remaining := deadline - time.monotonic()) > 0:
+        status = query_status(ser, timeout=min(3.0, remaining))
+        if status == "<Idle>" or status.startswith("<Idle|"):
+            return
+        time.sleep(min(0.1, max(0.0, deadline - time.monotonic())))
+    raise RuntimeError(f"not idle after {timeout}s")
+
+
+# Phase table: (name, (x_sign, y_sign)). Forward jog = signs × dist,
+# back jog = -forward. Signs are -1 / 0 / +1.
+PHASES: tuple[tuple[str, tuple[int, int]], ...] = (
+    ("X-only", (+1, 0)),
+    ("Y-only", (0, +1)),
+    ("diagonal", (+1, +1)),
+    ("anti-diagonal", (+1, -1)),
+)
+
+
+# ─── Main ────────────────────────────────────────────────────────────
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(
+        description="Jog GRBL through X, Y, and diagonal phases."
+    )
+    ap.add_argument("--port", help="serial device (default: auto-detect)")
+    ap.add_argument(
+        "--dist", type=float, default=15.0, help="distance in mm (default: 15)"
+    )
+    ap.add_argument(
+        "--feed", type=int, default=1000, help="feed rate mm/min (default: 1000)"
+    )
+    ap.add_argument(
+        "--loops",
+        type=int,
+        default=2,
+        help="forward/back cycles per phase (default: 2)",
+    )
+    add_log_arguments(ap)
+    args = ap.parse_args()
+    if not math.isfinite(args.dist) or args.dist <= 0:
+        ap.error("--dist must be finite and positive")
+    if args.feed <= 0:
+        ap.error("--feed must be positive")
+    if args.loops <= 0:
+        ap.error("--loops must be positive")
+    configure_console("diagnostic", verbose=args.verbose, log_format=args.log_format)
+
+    with connect(args.port) as ser:
+        send(ser, "$I")
+        unlock_if_alarmed(ser)
+        send(ser, "G21")  # mm
+        send(ser, "G94")  # feed is mm/min even after a prior G93 job
+        send(ser, "G90")  # absolute
+        send(ser, "G92 X0 Y0 Z0")  # zero work coords here
+        send(ser, "$10=0")  # report WPos in '?'
+
+        def jog(dx: float, dy: float) -> None:
+            parts = []
+            if dx:
+                parts.append(f"X{dx:.3f}")
+            if dy:
+                parts.append(f"Y{dy:.3f}")
+            move = " ".join(parts)
+            log.debug("Jog %s at F%d", move, args.feed)
+            # G0 ignores F and moves at the controller's rapid rate.
+            send(ser, f"G91 G1 {move} F{args.feed}")
+            send(ser, "G90")
+            travel_seconds = math.hypot(dx, dy) * 60 / args.feed
+            wait_idle(ser, timeout=max(15.0, travel_seconds + 5.0))
+
+        for name, (sx, sy) in PHASES:
+            fx, fy = sx * args.dist, sy * args.dist
+            log.info("Phase: %s", name)
+            for i in range(args.loops):
+                log.info("Cycle %d/%d (%s)", i + 1, args.loops, name)
+                jog(+fx, +fy)
+                jog(-fx, -fy)
+
+        log.info("Final status: %s", query_status(ser))
+    log.info("Diagnostic completed", extra={"event": "diagnostic.completed"})
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(run_diagnostic(main))

@@ -1,0 +1,242 @@
+[
+  {
+    "type": "opener",
+    "page": "phone",
+    "secnum": {
+      "en": "SECTION 07",
+      "zh": "第 07 节"
+    },
+    "h1": {
+      "en": "Phone bed",
+      "zh": "手机托架"
+    },
+    "lede": {
+      "en": "Two crossbeams beneath the frame support the phone bed. Position the phone with its top-left corner against the bed's inner corner.",
+      "zh": "两根横梁装在框架底面，支撑手机托架。放入手机时，让手机左上角抵住托架内角。"
+    }
+  },
+  {
+    "type": "wide-top",
+    "page": "phone_10",
+    "head": {
+      "title": {
+        "en": "PHONE BED",
+        "zh": "手机托架"
+      },
+      "small": "phone_10"
+    },
+    "figures": [
+      {
+        "src": "phone_10_extrusion_exploded_cam1_annotated_phone_beam_fasteners.svg"
+      },
+      {
+        "src": "phone_10_extrusion_assembled_cam1.svg"
+      }
+    ],
+    "notes": [
+      {
+        "h3": {
+          "en": "Build two cross-beams",
+          "zh": "装配两根横梁"
+        },
+        "body": {
+          "en": "Build two identical cross-beams for the bed.",
+          "zh": "为托架装配两根相同横梁。"
+        },
+        "classes": "note overlay sm",
+        "style": "left:150mm; top:108mm; width:90mm;"
+      }
+    ],
+    "bom": {
+      "label": {
+        "en": "Bill of materials",
+        "zh": "物料清单"
+      },
+      "rows": [
+        {
+          "component": {
+            "en": "Extrusion 1020",
+            "zh": "1020 铝型材"
+          },
+          "spec": {
+            "en": "{PHONE_BED_BEAM_LENGTH} mm, M5 through-holes",
+            "zh": "{PHONE_BED_BEAM_LENGTH} mm，M5 通孔"
+          },
+          "qty": "2"
+        },
+        {
+          "component": {
+            "en": "BHCS",
+            "zh": "半圆头螺栓"
+          },
+          "spec": "M5×16",
+          "qty": "4"
+        },
+        {
+          "component": {
+            "en": "T-nut",
+            "zh": "T 型螺母"
+          },
+          "spec": {
+            "en": "Drop-In M5",
+            "zh": "船形螺母 M5"
+          },
+          "qty": "4"
+        }
+      ]
+    }
+  },
+  {
+    "type": "tall-left",
+    "page": "phone_20",
+    "head": {
+      "title": {
+        "en": "PHONE BED",
+        "zh": "手机托架"
+      },
+      "small": "phone_20"
+    },
+    "variant": "hero",
+    "figures": [
+      {
+        "src": "phone_20_bed_tnut_exploded_cam1_annotated_phone_bed_fasteners.svg"
+      },
+      {
+        "src": "phone_20_bed_tnut_assembled_cam0.svg",
+        "style": "width:70%; height:70%; margin:auto;"
+      }
+    ],
+    "bom": {
+      "label": {
+        "en": "Bill of materials",
+        "zh": "物料清单"
+      },
+      "rows": [
+        {
+          "component": {
+            "en": "Phone bed",
+            "zh": "手机托架"
+          },
+          "spec": {
+            "en": "SLS/MJF 3D Print",
+            "zh": "SLS/MJF 3D 打印"
+          },
+          "qty": "1"
+        },
+        {
+          "component": {
+            "en": "FHCS",
+            "zh": "沉头螺栓"
+          },
+          "spec": "M3×8",
+          "qty": "4"
+        },
+        {
+          "component": {
+            "en": "T-nut",
+            "zh": "T 型螺母"
+          },
+          "spec": {
+            "en": "Drop-In M3",
+            "zh": "船形螺母 M3"
+          },
+          "qty": "4"
+        }
+      ]
+    }
+  },
+  {
+    "type": "main-inset-br",
+    "page": "phone_30",
+    "head": {
+      "title": {
+        "en": "PHONE BED",
+        "zh": "手机托架"
+      },
+      "small": "phone_30"
+    },
+    "main": {
+      "src": "phone_30_bed_extrusion_assembled_cam0.svg"
+    },
+    "notes": [
+      {
+        "h3": {
+          "en": "Seat the bed on the beams",
+          "zh": "把托架放到横梁上"
+        },
+        "body": {
+          "en": "1. Lay the two cross-beams parallel, slotted faces up. 2. Lower the hanging T-nuts of the bed into the slots. 3. Tighten the screws.",
+          "zh": "1. 把两根横梁平行摆放，开槽面朝上。2. 把托架的 T 型螺母放入槽内。3. 拧紧螺栓。"
+        },
+        "classes": "note overlay sm",
+        "style": "right:42mm; top:140mm; width:60mm;"
+      }
+    ]
+  },
+  {
+    "type": "main-inset-br",
+    "page": "phone_40",
+    "head": {
+      "title": {
+        "en": "PHONE BED",
+        "zh": "手机托架"
+      },
+      "small": "phone_40"
+    },
+    "main": {
+      "src": "phone_40_bed_frame_assembled_cam0.svg",
+      "style": "transform: translateX(-50mm);"
+    },
+    "notes": [
+      {
+        "h3": {
+          "en": "Install the phone bed",
+          "zh": "安装手机托架"
+        },
+        "body": {
+          "en": "It is far easier with the frame upside down. 1. Turn the frame over, underside up. 2. Place the T-nuts of each beam into the slots under the frame. 3. Tighten the screws.",
+          "zh": "把框架翻转过来操作更方便。1. 把框架翻转过来，底面朝上。2. 把每根横梁的 T 型螺母放入框架底面的型材槽。3. 拧紧螺栓。"
+        },
+        "classes": "note overlay sm",
+        "style": "right:30mm; top:22mm; width:90mm;"
+      },
+      {
+        "h3": {
+          "en": "Put the phone in place",
+          "zh": "放置手机"
+        },
+        "body": {
+          "en": "Put a phone on the bed, against the top-left corner. Slide the X carriage over the whole screen. Make sure that the stylus tip reaches every part of the screen.",
+          "zh": "把手机放到托架上，抵住左上角。在整个屏幕范围内推动 X 滑座，确认触控笔尖能触及屏幕的每个位置。"
+        },
+        "classes": "note overlay sm",
+        "style": "right:30mm; top:50mm; width:90mm;"
+      },
+      {
+        "h3": {
+          "en": "Set the solenoid height",
+          "zh": "调整电磁铁高度"
+        },
+        "body": {
+          "en": "Set the solenoid height so that, when the solenoid is fully pulled in, the stylus tip just touches the screen and maintains stable contact. If the solenoid is too low, it cannot pull in fully. The magnetic force is then too weak to hold the tip down. The tip springs back. If the solenoid is too high, the tip cannot reach the screen, or the contact patch is too small.",
+          "zh": "调整电磁铁的安装高度，使电磁铁完全吸合后，触控笔尖刚好触及屏幕，并能保持稳定接触。电磁铁过低时无法完全吸合，吸力不足以压住笔尖，笔尖弹回。电磁铁过高时，笔尖够不到屏幕，或接触面太小。"
+        },
+        "classes": "note overlay sm",
+        "style": "right:30mm; top:80mm; width:90mm;"
+      },
+      {
+        "h3": {
+          "en": "Keep the screen flat",
+          "zh": "让屏幕保持水平"
+        },
+        "body": {
+          "en": "The rear camera bump lifts one corner, so the phone does not lie flat. Put a piece of thin card or a few sheets of paper under the low edge. Add more until the screen is level. Make sure that the phone cannot rock or shift when the stylus taps.",
+          "zh": "后置摄像头的凸起会顶起手机一角，手机无法放平。在较低的一边垫几张纸或一片薄卡纸，垫到屏幕水平为止。确认触控笔点击时手机不晃动、不移位。"
+        },
+        "classes": "note overlay sm",
+        "style": "right:30mm; top:135mm; width:90mm; display:flex; gap:4mm; align-items:flex-start;",
+        "icon": "info"
+      }
+    ]
+  }
+]

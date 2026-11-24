@@ -1,0 +1,59 @@
+# taobao/tmall-buy.add — one item into the 天猫超市 store cart; run by
+# `tmall-buy`, once per item, after it opens the store. Starts and ends
+# on the store's page, so the rounds chain without a relaunch.
+kind: playbook
+schema: 1
+name: add
+description: put one item in the 天猫超市 (Tmall Supermarket) store cart inside Taobao, nothing paid
+enabled: false  # rehearse on YOUR device, then enable
+inputs:
+  item:
+    description: one product, name + spec + quantity, as the buyer named it
+returns:
+  line: "{pick.title} ×{pick.qty}  ¥{pick.price}"
+
+route:
+  - agent: parse
+    context:
+      prompt: app.prompts.item-keyword  # the product words, no quantity or unit
+      given: {item: inputs.item}
+    returns:
+      keyword: the search keyword, exactly as it should be typed
+    think: off
+
+  - page: app.pages.tmall-home
+
+  - do: find                      # type the keyword into the store's search, run it
+    with: {keyword: "{parse.keyword}"}
+    macro: app.macros.store-search
+
+  - page: app.pages.store-results
+
+  - agent: pick
+    context:
+      prompt: app.prompts.store-pick  # rows to an item, one add, the sheets that follow
+      given:
+        item: inputs.item
+        keyword: parse.keyword
+        close: app.landmarks.close                    # a promo ✕
+        pairing_close: app.landmarks.pairing-close    # a 推荐搭配 sheet's ✕
+    tools: [tap, scroll]
+    never_tap:
+      - {label: ["去结算", "领券结算", "立即购买"], within: bottom}   # one target: the checkout button
+      - {label: ["提交订单", "立即支付", "免密支付"], within: bottom}   # one target: the pay button
+      - "凑单"
+      - "换购"
+    returns:
+      title: the item title exactly as its page shows it
+      qty: the quantity set, a number
+      price: the unit price shown, a number
+    limit: {calls: 12, scrolls: 4}
+    think: low
+    on_fail: stop
+
+  - page: app.pages.store-detail
+
+  - do: back-to-store             # the item page's arrow while it shows, an edge swipe,
+    macro: app.macros.store-back  # the search page's arrow while it shows
+
+  - page: app.pages.tmall-home

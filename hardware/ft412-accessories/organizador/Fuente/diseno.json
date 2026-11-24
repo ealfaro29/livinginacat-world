@@ -1,0 +1,1025 @@
+{
+  "version": 1,
+  "units": "mm",
+  "materialPreparation": "PLA",
+  "nozzleMM": 0.4,
+  "bodyMM": [
+    212.0,
+    180.0
+  ],
+  "maximumFootprintMM": [
+    216.0,
+    184.0
+  ],
+  "stackPitchMM": [
+    22,
+    22,
+    36
+  ],
+  "closedHeightMM": 87.2,
+  "radialStackClearanceMM": 0.35,
+  "floorMM": 2.0,
+  "dividerMM": 1.6,
+  "outerWallMM": 2.0,
+  "rimHeightMM": 2.4,
+  "compartments": 38,
+  "trays": [
+    {
+      "file": "01_Tornillos",
+      "name": "01 TORNILLOS",
+      "height": 22,
+      "cols": 4,
+      "rows": 4,
+      "cells": [
+        {
+          "code": "A01",
+          "title": "M3x6",
+          "detail": "BOTON",
+          "col": 0,
+          "row": 0,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            42.8,
+            20.0
+          ],
+          "pocketXY": [
+            -104.0,
+            -88.0,
+            50.8,
+            42.8
+          ],
+          "clearLengthBeyondLabelMM": 33.8
+        },
+        {
+          "code": "A02",
+          "title": "M3x8",
+          "detail": "BOTON",
+          "col": 1,
+          "row": 0,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            42.8,
+            20.0
+          ],
+          "pocketXY": [
+            -51.6,
+            -88.0,
+            50.8,
+            42.8
+          ],
+          "clearLengthBeyondLabelMM": 33.8
+        },
+        {
+          "code": "A03",
+          "title": "M3x10",
+          "detail": "BOTON",
+          "col": 2,
+          "row": 0,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            42.8,
+            20.0
+          ],
+          "pocketXY": [
+            0.7999999999999972,
+            -88.0,
+            50.8,
+            42.8
+          ],
+          "clearLengthBeyondLabelMM": 33.8
+        },
+        {
+          "code": "A04",
+          "title": "M3x16",
+          "detail": "BOTON",
+          "col": 3,
+          "row": 0,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            42.8,
+            20.0
+          ],
+          "pocketXY": [
+            53.19999999999999,
+            -88.0,
+            50.8,
+            42.8
+          ],
+          "clearLengthBeyondLabelMM": 33.8
+        },
+        {
+          "code": "A05",
+          "title": "M3x25",
+          "detail": "BOTON",
+          "col": 0,
+          "row": 1,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            42.8,
+            20.0
+          ],
+          "pocketXY": [
+            -104.0,
+            -43.6,
+            50.8,
+            42.8
+          ],
+          "clearLengthBeyondLabelMM": 33.8
+        },
+        {
+          "code": "A06",
+          "title": "M5x10",
+          "detail": "BOTON",
+          "col": 1,
+          "row": 1,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            42.8,
+            20.0
+          ],
+          "pocketXY": [
+            -51.6,
+            -43.6,
+            50.8,
+            42.8
+          ],
+          "clearLengthBeyondLabelMM": 33.8
+        },
+        {
+          "code": "A07",
+          "title": "M5x12",
+          "detail": "BOTON",
+          "col": 2,
+          "row": 1,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            42.8,
+            20.0
+          ],
+          "pocketXY": [
+            0.7999999999999972,
+            -43.6,
+            50.8,
+            42.8
+          ],
+          "clearLengthBeyondLabelMM": 33.8
+        },
+        {
+          "code": "A08",
+          "title": "M5x16",
+          "detail": "BOTON",
+          "col": 3,
+          "row": 1,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            42.8,
+            20.0
+          ],
+          "pocketXY": [
+            53.19999999999999,
+            -43.6,
+            50.8,
+            42.8
+          ],
+          "clearLengthBeyondLabelMM": 33.8
+        },
+        {
+          "code": "A09",
+          "title": "M5x20",
+          "detail": "BOTON",
+          "col": 0,
+          "row": 2,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            42.8,
+            20.0
+          ],
+          "pocketXY": [
+            -104.0,
+            0.7999999999999972,
+            50.8,
+            42.8
+          ],
+          "clearLengthBeyondLabelMM": 33.8
+        },
+        {
+          "code": "A10",
+          "title": "M3x8",
+          "detail": "AVELLANADO",
+          "col": 1,
+          "row": 2,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            42.8,
+            20.0
+          ],
+          "pocketXY": [
+            -51.6,
+            0.7999999999999972,
+            50.8,
+            42.8
+          ],
+          "clearLengthBeyondLabelMM": 33.8
+        },
+        {
+          "code": "A11",
+          "title": "M3x10",
+          "detail": "AVELLANADO",
+          "col": 2,
+          "row": 2,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            42.8,
+            20.0
+          ],
+          "pocketXY": [
+            0.7999999999999972,
+            0.7999999999999972,
+            50.8,
+            42.8
+          ],
+          "clearLengthBeyondLabelMM": 33.8
+        },
+        {
+          "code": "A12",
+          "title": "M5x12",
+          "detail": "AVELLANADO",
+          "col": 3,
+          "row": 2,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            42.8,
+            20.0
+          ],
+          "pocketXY": [
+            53.19999999999999,
+            0.7999999999999972,
+            50.8,
+            42.8
+          ],
+          "clearLengthBeyondLabelMM": 33.8
+        },
+        {
+          "code": "A13",
+          "title": "M4x8",
+          "detail": "ESCUADRA",
+          "col": 0,
+          "row": 3,
+          "colspan": 1,
+          "rowspan": 1,
+          "customXMM": 0,
+          "customWidthMM": 36,
+          "insideMM": [
+            36,
+            42.8,
+            20.0
+          ],
+          "pocketXY": [
+            -104.0,
+            45.19999999999999,
+            36,
+            42.8
+          ],
+          "clearLengthBeyondLabelMM": 33.8
+        },
+        {
+          "code": "A14",
+          "title": "EJE 5x10",
+          "detail": "ROSCA M4",
+          "col": 1,
+          "row": 3,
+          "colspan": 1,
+          "rowspan": 1,
+          "customXMM": 37.6,
+          "customWidthMM": 40,
+          "insideMM": [
+            40,
+            42.8,
+            20.0
+          ],
+          "pocketXY": [
+            -66.4,
+            45.19999999999999,
+            40,
+            42.8
+          ],
+          "clearLengthBeyondLabelMM": 33.8
+        },
+        {
+          "code": "A15",
+          "title": "EJE 5x20",
+          "detail": "ROSCA M4",
+          "col": 2,
+          "row": 3,
+          "colspan": 1,
+          "rowspan": 1,
+          "customXMM": 79.2,
+          "customWidthMM": 84,
+          "insideMM": [
+            84,
+            42.8,
+            20.0
+          ],
+          "pocketXY": [
+            -24.799999999999997,
+            45.19999999999999,
+            84,
+            42.8
+          ],
+          "clearLengthBeyondLabelMM": 33.8
+        },
+        {
+          "code": "A16",
+          "title": "RESERVA",
+          "detail": "TORNILLOS",
+          "col": 3,
+          "row": 3,
+          "colspan": 1,
+          "rowspan": 1,
+          "customXMM": 164.8,
+          "customWidthMM": 43.2,
+          "insideMM": [
+            43.2,
+            42.8,
+            20.0
+          ],
+          "pocketXY": [
+            60.80000000000001,
+            45.19999999999999,
+            43.2,
+            42.8
+          ],
+          "clearLengthBeyondLabelMM": 33.8
+        }
+      ]
+    },
+    {
+      "file": "02_Tuercas_y_Arandelas",
+      "name": "02 TUERCAS Y ARANDELAS",
+      "height": 22,
+      "cols": 4,
+      "rows": 3,
+      "cells": [
+        {
+          "code": "B01",
+          "title": "M3",
+          "detail": "CUADRADA",
+          "col": 0,
+          "row": 0,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            20.0
+          ],
+          "pocketXY": [
+            -104.0,
+            -88.0,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "B02",
+          "title": "M4",
+          "detail": "CUADRADA",
+          "col": 1,
+          "row": 0,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            20.0
+          ],
+          "pocketXY": [
+            -51.6,
+            -88.0,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "B03",
+          "title": "M5",
+          "detail": "CUADRADA",
+          "col": 2,
+          "row": 0,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            20.0
+          ],
+          "pocketXY": [
+            0.7999999999999972,
+            -88.0,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "B04",
+          "title": "M4 PERFIL",
+          "detail": "KIT ESCUADRA",
+          "col": 3,
+          "row": 0,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            20.0
+          ],
+          "pocketXY": [
+            53.19999999999999,
+            -88.0,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "B05",
+          "title": "M3 PERFIL",
+          "detail": "RN05BM3",
+          "col": 0,
+          "row": 1,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            20.0
+          ],
+          "pocketXY": [
+            -104.0,
+            -28.800000000000004,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "B06",
+          "title": "M5 PERFIL",
+          "detail": "RN05BM5",
+          "col": 1,
+          "row": 1,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            20.0
+          ],
+          "pocketXY": [
+            -51.6,
+            -28.800000000000004,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "B07",
+          "title": "M5 PLANA",
+          "detail": "DIN 125",
+          "col": 2,
+          "row": 1,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            20.0
+          ],
+          "pocketXY": [
+            0.7999999999999972,
+            -28.800000000000004,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "B08",
+          "title": "5 / 10 x 9",
+          "detail": "SEPARADOR",
+          "col": 3,
+          "row": 1,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            20.0
+          ],
+          "pocketXY": [
+            53.19999999999999,
+            -28.800000000000004,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "B09",
+          "title": "0.1 mm",
+          "detail": "SHIM 5 / 8",
+          "col": 0,
+          "row": 2,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            20.0
+          ],
+          "pocketXY": [
+            -104.0,
+            30.39999999999999,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "B10",
+          "title": "0.2 mm",
+          "detail": "SHIM 5 / 8",
+          "col": 1,
+          "row": 2,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            20.0
+          ],
+          "pocketXY": [
+            -51.6,
+            30.39999999999999,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "B11",
+          "title": "0.3 mm",
+          "detail": "SHIM 5 / 8",
+          "col": 2,
+          "row": 2,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            20.0
+          ],
+          "pocketXY": [
+            0.7999999999999972,
+            30.39999999999999,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "B12",
+          "title": "0.5 mm",
+          "detail": "SHIM 5 / 8",
+          "col": 3,
+          "row": 2,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            20.0
+          ],
+          "pocketXY": [
+            53.19999999999999,
+            30.39999999999999,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        }
+      ]
+    },
+    {
+      "file": "03_Piezas_Pequenas",
+      "name": "03 PIEZAS PEQUENAS",
+      "height": 36,
+      "cols": 4,
+      "rows": 3,
+      "cells": [
+        {
+          "code": "C01",
+          "title": "ESCUADRAS",
+          "detail": "GS20-05W",
+          "col": 0,
+          "row": 0,
+          "colspan": 2,
+          "rowspan": 1,
+          "insideMM": [
+            103.2,
+            57.6,
+            34.0
+          ],
+          "pocketXY": [
+            -104.0,
+            -88.0,
+            103.2,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "C02",
+          "title": "SOLENOIDE",
+          "detail": "ADAFRUIT 412",
+          "col": 2,
+          "row": 0,
+          "colspan": 2,
+          "rowspan": 1,
+          "insideMM": [
+            103.2,
+            57.6,
+            34.0
+          ],
+          "pocketXY": [
+            0.7999999999999972,
+            -88.0,
+            103.2,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "C03",
+          "title": "PLACAS",
+          "detail": "40 x 18",
+          "col": 0,
+          "row": 1,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            34.0
+          ],
+          "pocketXY": [
+            -104.0,
+            -28.800000000000004,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "C04",
+          "title": "POLEAS LISAS",
+          "detail": "AGUJERO 5",
+          "col": 1,
+          "row": 1,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            34.0
+          ],
+          "pocketXY": [
+            -51.6,
+            -28.800000000000004,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "C05",
+          "title": "DENTADAS",
+          "detail": "POLEAS LOCAS",
+          "col": 2,
+          "row": 1,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            34.0
+          ],
+          "pocketXY": [
+            0.7999999999999972,
+            -28.800000000000004,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "C06",
+          "title": "POLEAS MOTOR",
+          "detail": "GT2 20T",
+          "col": 3,
+          "row": 1,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            34.0
+          ],
+          "pocketXY": [
+            53.19999999999999,
+            -28.800000000000004,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "C07",
+          "title": "PUNTAS",
+          "detail": "MALLA 7 mm",
+          "col": 0,
+          "row": 2,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            34.0
+          ],
+          "pocketXY": [
+            -104.0,
+            30.39999999999999,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "C08",
+          "title": "S301T / FUSIBLE",
+          "detail": "Y PORTAFUSIBLE",
+          "col": 1,
+          "row": 2,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            34.0
+          ],
+          "pocketXY": [
+            -51.6,
+            30.39999999999999,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "C09",
+          "title": "CABLES JST",
+          "detail": "PH3 / XH3",
+          "col": 2,
+          "row": 2,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            34.0
+          ],
+          "pocketXY": [
+            0.7999999999999972,
+            30.39999999999999,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        },
+        {
+          "code": "C10",
+          "title": "DRIVERS",
+          "detail": "EN BOLSA ESD",
+          "col": 3,
+          "row": 2,
+          "colspan": 1,
+          "rowspan": 1,
+          "insideMM": [
+            50.8,
+            57.6,
+            34.0
+          ],
+          "pocketXY": [
+            53.19999999999999,
+            30.39999999999999,
+            50.8,
+            57.599999999999994
+          ],
+          "clearLengthBeyondLabelMM": 48.6
+        }
+      ]
+    }
+  ],
+  "models": [
+    {
+      "file": "01_Tornillos.stl",
+      "sha256": "97b52f1df4f9458a45aa96071f433904a49ef0d7724b03df974e860fff48fe41",
+      "triangles": 25034,
+      "boundsMM": [
+        [
+          -108.0,
+          -92.0,
+          0.0
+        ],
+        [
+          108.0,
+          92.0,
+          24.4
+        ]
+      ],
+      "sizeMM": [
+        216.0,
+        184.0,
+        24.4
+      ],
+      "volumeCM3": 186.634,
+      "watertight": true,
+      "consistentNormals": true,
+      "connectedComponents": 1
+    },
+    {
+      "file": "02_Tuercas_y_Arandelas.stl",
+      "sha256": "ce3c09c0b5dbd5f1070cf6bbb1456d59cf28436d36772d26fc0f4669cec4b03d",
+      "triangles": 21564,
+      "boundsMM": [
+        [
+          -108.0,
+          -92.0,
+          0.0
+        ],
+        [
+          108.0,
+          92.0,
+          24.4
+        ]
+      ],
+      "sizeMM": [
+        216.0,
+        184.0,
+        24.4
+      ],
+      "volumeCM3": 171.064,
+      "watertight": true,
+      "consistentNormals": true,
+      "connectedComponents": 1
+    },
+    {
+      "file": "03_Piezas_Pequenas.stl",
+      "sha256": "0a1f3220f7314477ec99aa7fd95ac5fa3afa42d6dbfa8c03f2c2864a6dac4131",
+      "triangles": 22410,
+      "boundsMM": [
+        [
+          -108.0,
+          -92.0,
+          0.0
+        ],
+        [
+          108.0,
+          92.0,
+          38.4
+        ]
+      ],
+      "sizeMM": [
+        216.0,
+        184.0,
+        38.4
+      ],
+      "volumeCM3": 207.987,
+      "watertight": true,
+      "consistentNormals": true,
+      "connectedComponents": 1
+    },
+    {
+      "file": "04_Tapa.stl",
+      "sha256": "d9c9d6f2cf340468d525d7a3b5974e84ecf151c3524af1c06987adc04a3d5514",
+      "triangles": 1218,
+      "boundsMM": [
+        [
+          -106.0,
+          -90.0,
+          0.0
+        ],
+        [
+          106.0,
+          90.0,
+          7.2
+        ]
+      ],
+      "sizeMM": [
+        212.0,
+        180.0,
+        7.2
+      ],
+      "volumeCM3": 97.691,
+      "watertight": true,
+      "consistentNormals": true,
+      "connectedComponents": 1
+    },
+    {
+      "file": "00_Prueba_Encaje_Base.stl",
+      "sha256": "eaaa262a686324beeb32e4b839ae60dd563d7b91eeba865e2a35385cbec2a037",
+      "triangles": 224,
+      "boundsMM": [
+        [
+          1.0,
+          1.0602557831560375,
+          0.0
+        ],
+        [
+          32.0,
+          32.0,
+          7.399999999999999
+        ]
+      ],
+      "sizeMM": [
+        31.0,
+        30.939744216843962,
+        7.399999999999999
+      ],
+      "volumeCM3": 0.875,
+      "watertight": true,
+      "consistentNormals": true,
+      "connectedComponents": 1
+    },
+    {
+      "file": "00_Prueba_Encaje_Esquina.stl",
+      "sha256": "cd98031eac7750696c753bbea318449e4fbb5dd4019dc53f0f4c811d84416fbf",
+      "triangles": 56,
+      "boundsMM": [
+        [
+          45.0,
+          0.04550625009140674,
+          0.0
+        ],
+        [
+          73.0,
+          28.0,
+          2.4
+        ]
+      ],
+      "sizeMM": [
+        28.0,
+        27.954493749908593,
+        2.4
+      ],
+      "volumeCM3": 1.86,
+      "watertight": true,
+      "consistentNormals": true,
+      "connectedComponents": 1
+    }
+  ],
+  "nominalStackIntersectionVolumeMM3": [
+    0.0,
+    -0.0,
+    0.0
+  ],
+  "physicalFitTested": false
+}

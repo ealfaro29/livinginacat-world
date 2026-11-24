@@ -1,0 +1,62 @@
+---
+title: Install the software
+description: Install the physiclaw CLI with one script, then verify it with --version and doctor.
+---
+
+The software half is a single CLI, `physiclaw`. Install it, check the version, then run the health check.
+
+## 1. Run the install script
+
+<Tabs syncKey="os">
+<TabItem label="macOS / Linux">
+
+```bash
+curl -fsSL https://physiclaw.ai/install.sh | bash
+```
+
+</TabItem>
+<TabItem label="Windows">
+
+```powershell
+iwr -useb https://physiclaw.ai/install.ps1 | iex
+```
+
+</TabItem>
+</Tabs>
+
+This installs [`uv`](https://docs.astral.sh/uv/), Python 3.12, and the `physiclaw` CLI, then downloads the local vision model. If the model download fails, re-run it with `physiclaw setup local-vision-model`.
+
+## 2. Check it installed
+
+```bash
+physiclaw --version
+```
+
+If the shell can't find the command, open a **new terminal** so the updated `PATH` loads, then try again.
+
+## 3. Run the health check
+
+```bash
+physiclaw doctor
+```
+
+`doctor` reports current version, config path, the on-device vision model, detected hardware, the configured model, and installed skills.
+
+## Updating
+
+PhysiClaw is installed as a `uv` tool. Stop the server, then update it with uv:
+
+```bash
+uv tool upgrade physiclaw
+# If dependencies conflict, reinstall:
+# uv tool install --force --upgrade physiclaw
+```
+
+## Uninstall
+
+Clear user data (`~/.physiclaw`), then remove the CLI:
+
+```bash
+physiclaw uninstall
+uv tool uninstall physiclaw
+```

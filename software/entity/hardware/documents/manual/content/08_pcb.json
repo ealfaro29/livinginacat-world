@@ -1,0 +1,378 @@
+[
+  {
+    "type": "opener",
+    "page": "pcb",
+    "secnum": {
+      "en": "SECTION 08",
+      "zh": "第 08 节"
+    },
+    "h1": {
+      "en": "Control board",
+      "zh": "控制板"
+    },
+    "lede": {
+      "en": "The control board mounts on the top extrusion's outer face and drives the motors and solenoid. A Teflon tube supports the solenoid leads, keeping them clear of motors and belts as the X carriage moves.",
+      "zh": "控制板装在框架顶部型材的外侧，驱动电机和电磁铁。特氟龙管支撑电磁铁引线，让线束随 X 滑座移动时避开电机和同步带。"
+    }
+  },
+  {
+    "type": "tall-left",
+    "page": "board_10",
+    "head": {
+      "title": {
+        "en": "CONTROL BOARD",
+        "zh": "控制板"
+      },
+      "small": "board_10"
+    },
+    "variant": "hero",
+    "figures": [
+      {
+        "src": "board_10_holder_tnut_exploded_cam1_annotated_holder_fasteners.svg"
+      },
+      {
+        "src": "board_10_holder_tnut_assembled_cam0.svg"
+      }
+    ],
+    "notes": [
+      {
+        "h3": {
+          "en": "Install the T-nuts",
+          "zh": "装上 T 型螺母"
+        },
+        "body": {
+          "en": "Thread 2 M5 FHCS into the T-nuts.",
+          "zh": "把 2 颗 M5 沉头螺栓拧入 T 型螺母。"
+        },
+        "classes": "note overlay sm",
+        "style": "left:160mm; top:116mm; width:80mm;"
+      }
+    ],
+    "bom": {
+      "label": {
+        "en": "Bill of materials",
+        "zh": "物料清单"
+      },
+      "rows": [
+        {
+          "component": {
+            "en": "Control board holder",
+            "zh": "控制板支架"
+          },
+          "spec": {
+            "en": "SLS/MJF 3D Print",
+            "zh": "SLS/MJF 3D 打印"
+          },
+          "qty": "1"
+        },
+        {
+          "component": {
+            "en": "FHCS",
+            "zh": "沉头螺栓"
+          },
+          "spec": "M5×12",
+          "qty": "2"
+        },
+        {
+          "component": {
+            "en": "T-nut",
+            "zh": "T 型螺母"
+          },
+          "spec": {
+            "en": "Drop-In M5",
+            "zh": "船形螺母 M5"
+          },
+          "qty": "2"
+        }
+      ]
+    }
+  },
+  {
+    "type": "tall-left",
+    "page": "board_20",
+    "head": {
+      "title": {
+        "en": "CONTROL BOARD",
+        "zh": "控制板"
+      },
+      "small": "board_20"
+    },
+    "variant": "hero",
+    "figures": [
+      {
+        "src": "board_20_frame_assembled_cam1_annotated_pcb_holder_mount_cam1.svg",
+        "alt": "board_20_frame assembled"
+      },
+      {
+        "src": "board_20_frame_assembled_cam0_annotated_pcb_holder_mount_cam0.svg"
+      }
+    ],
+    "notes": [
+      {
+        "h3": {
+          "en": "Install the control board holder",
+          "zh": "安装控制板支架"
+        },
+        "body": {
+          "en": "Install it on the outer face of the top extrusion.",
+          "zh": "装在顶部型材的外侧面。"
+        },
+        "classes": "note overlay sm",
+        "style": "left:180mm; top:130mm; width:80mm;"
+      }
+    ]
+  },
+  {
+    "type": "tall-left",
+    "page": "board_30",
+    "head": {
+      "title": {
+        "en": "CONTROL BOARD",
+        "zh": "控制板"
+      },
+      "small": "board_30"
+    },
+    "variant": "hero",
+    "figures": [
+      {
+        "src": "board_30_pcb_exploded_cam1_annotated_pcb_fasteners.svg"
+      },
+      {
+        "src": "board_30_pcb_assembled_cam0_annotated_pcb_face.svg"
+      }
+    ],
+    "notes": [
+      {
+        "h3": {
+          "en": "Install the control board",
+          "zh": "安装控制板"
+        },
+        "body": {
+          "en": "Use 4 screws with nuts. The figure does not show the 2 lower nuts.",
+          "zh": "用 4 组螺栓和螺母固定控制板。下方 2 颗螺母被遮挡，图中未画出。"
+        },
+        "classes": "note overlay sm",
+        "style": "left:150mm; top:120mm; width:90mm;"
+      }
+    ],
+    "bom": {
+      "label": {
+        "en": "Bill of materials",
+        "zh": "物料清单"
+      },
+      "rows": [
+        {
+          "component": {
+            "en": "Control board",
+            "zh": "控制板"
+          },
+          "spec": "MKS DLC32 V2.1",
+          "qty": "1"
+        },
+        {
+          "component": {
+            "en": "BHCS",
+            "zh": "半圆头螺栓"
+          },
+          "spec": "M3×10",
+          "qty": "4"
+        },
+        {
+          "component": {
+            "en": "Square nut",
+            "zh": "四方螺母"
+          },
+          "spec": "M3",
+          "qty": "4"
+        }
+      ]
+    }
+  },
+  {
+    "type": "tall-left",
+    "page": "board_31",
+    "head": {
+      "title": {
+        "en": "CONTROL BOARD",
+        "zh": "控制板"
+      },
+      "small": "board_31"
+    },
+    "variant": "hero",
+    "figures": [
+      {
+        "src": "board_31_tube_tnut_exploded_cam1.svg"
+      },
+      {
+        "src": "board_31_tube_tnut_assembled_cam0.svg"
+      }
+    ],
+    "notes": [
+      {
+        "h3": {
+          "en": "Install the T-nuts",
+          "zh": "装上 T 型螺母"
+        },
+        "body": {
+          "en": "Thread 2 M5 FHCS into the T-nuts.",
+          "zh": "把 2 颗 M5 沉头螺栓拧入 T 型螺母。"
+        },
+        "classes": "note overlay sm",
+        "style": "left:160mm; top:120mm; width:80mm;"
+      }
+    ],
+    "bom": {
+      "label": {
+        "en": "Bill of materials",
+        "zh": "物料清单"
+      },
+      "rows": [
+        {
+          "component": {
+            "en": "Tube holder",
+            "zh": "导管支架"
+          },
+          "spec": {
+            "en": "SLS/MJF 3D Print",
+            "zh": "SLS/MJF 3D 打印"
+          },
+          "qty": "1"
+        },
+        {
+          "component": {
+            "en": "FHCS",
+            "zh": "沉头螺栓"
+          },
+          "spec": "M5×12",
+          "qty": "2"
+        },
+        {
+          "component": {
+            "en": "T-nut",
+            "zh": "T 型螺母"
+          },
+          "spec": {
+            "en": "Drop-In M5",
+            "zh": "船形螺母 M5"
+          },
+          "qty": "2"
+        }
+      ]
+    }
+  },
+  {
+    "type": "tall-left",
+    "page": "board_32",
+    "head": {
+      "title": {
+        "en": "CONTROL BOARD",
+        "zh": "控制板"
+      },
+      "small": "board_32"
+    },
+    "variant": "hero",
+    "figures": [
+      {
+        "src": "board_32_tube_holder_assembled_cam1_annotated_tube_holder.svg",
+        "alt": "board_32_tube_holder assembled"
+      },
+      {
+        "src": "board_32_tube_holder_assembled_cam0_annotated_tube_holder_mount.svg"
+      }
+    ],
+    "notes": [
+      {
+        "h3": {
+          "en": "Install the tube holder",
+          "zh": "安装导管支架"
+        },
+        "body": {
+          "en": "Install it on the top extrusion, beside the control board. Its 4 mm hole holds the fixed end of the Teflon tube.",
+          "zh": "装在顶部型材上，紧邻控制板。特氟龙管的固定端插入支架的 4 mm 孔。"
+        },
+        "classes": "note overlay sm",
+        "style": "left:180mm; top:130mm; width:80mm;"
+      }
+    ]
+  },
+  {
+    "type": "main-inset-br",
+    "page": "board_40",
+    "head": {
+      "title": {
+        "en": "CONTROL BOARD",
+        "zh": "控制板"
+      },
+      "small": "board_40"
+    },
+    "main": {
+      "src": "board_40_teflon_assembled_cam0_annotated_teflon_tube.svg",
+      "style": "transform: translateX(-50mm);"
+    },
+    "notes": [
+      {
+        "h3": {
+          "en": "Rough length",
+          "zh": "大致长度"
+        },
+        "body": {
+          "en": "Cut the tube to about 400 mm. It must reach from the tube holder to the X carriage at its farthest position.",
+          "zh": "将特氟龙管截成约 400 mm 长。确保 X 滑座移动到最远位置时，管子仍能连接滑座与导管支架。"
+        },
+        "classes": "note overlay sm",
+        "style": "right:30mm; top:30mm; width:100mm; max-width:100mm;"
+      },
+      {
+        "h3": {
+          "en": "Anchor the solenoid leads",
+          "zh": "固定电磁铁引线"
+        },
+        "body": {
+          "en": "Tie the solenoid leads to the tube holder with a cable tie. Otherwise, movement of the X carriage shakes the lead wires at the control board terminals. Constant shaking works the contact loose, and then the solenoid no longer taps the screen.",
+          "zh": "用捆扎带把电磁铁引线固定在导管支架上，否则 X 滑座移动时会带动控制板端子处的引线晃动。引线反复晃动会导致端子处的接线松动，使触控笔无法正常点击屏幕。"
+        },
+        "classes": "note overlay sm",
+        "style": "right:30mm; top:60mm; width:100mm; max-width:100mm;"
+      },
+      {
+        "h3": {
+          "en": "Bind the wires with spiral wrap",
+          "zh": "螺旋缠绕成束"
+        },
+        "body": {
+          "en": "Bind the solenoid's lead wires to the Teflon tube with spiral wrap along its full length. Do not put the wires inside the tube.",
+          "zh": "沿特氟龙管全长，用螺旋缠绕带将电磁铁引线与管子缠绕固定成一束。不要把引线穿入管内。"
+        },
+        "classes": "note overlay sm",
+        "style": "right:30mm; top:105mm; width:100mm; max-width:100mm;"
+      }
+    ],
+    "bom": {
+      "label": {
+        "en": "Bill of materials",
+        "zh": "物料清单"
+      },
+      "rows": [
+        {
+          "component": {
+            "en": "Teflon tube",
+            "zh": "特氟龙管"
+          },
+          "spec": "Ø4/2, 400 mm",
+          "qty": "1"
+        },
+        {
+          "component": {
+            "en": "Spiral wrap",
+            "zh": "螺旋缠绕带"
+          },
+          "spec": {
+            "en": "Ø4, ~400 mm",
+            "zh": "Ø4，约 400 mm"
+          },
+          "qty": "1"
+        }
+      ]
+    }
+  }
+]

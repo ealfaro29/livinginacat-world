@@ -1,0 +1,20 @@
+kind: macro
+schema: 1
+name: open-cart
+description: open the 盒马 cart from the storefront's tab bar, snapped to its top
+# Disabled until rehearsed on YOUR device: physiclaw macros run taobao/hema-buy.open-cart
+enabled: false
+steps:
+  - tap: "购物车"                             # the storefront's own tab bar
+    at: [0.55, 0.925, 0.72, 0.965]
+  - wait: 3
+    expect: ["去结算", "领券结算", "起送"]       # the footer's button, whatever it reads
+  # The cart keeps its scroll between visits, so it can open with 全选
+  # and 清空 above the header: a stroke down snaps the list to the top,
+  # run only while 全选 is off the screen. It starts low, inside the
+  # list — a stroke that begins over the header would not scroll it.
+  - swipe: down
+    at: [0.30, 0.55, 0.70, 0.85]
+    size: m
+    skip_when: ["全选"]
+  - wait: 1

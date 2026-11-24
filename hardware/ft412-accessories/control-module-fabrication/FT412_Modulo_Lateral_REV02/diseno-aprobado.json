@@ -1,0 +1,1374 @@
+{
+  "schema": "ft412-control-layout",
+  "version": 2,
+  "units": "mm",
+  "box": {
+    "length": 280,
+    "width": 130,
+    "height": 85,
+    "wall": 3,
+    "offset": 15,
+    "profileBase": 0,
+    "frontRun": 50,
+    "frontAngle": 45,
+    "screenZone": 55,
+    "split": 135,
+    "bed": 256,
+    "anchors": [
+      78,
+      231
+    ],
+    "innerVent": true,
+    "automaticPortOpenings": false,
+    "mountSide": "left",
+    "floorMounts": true
+  },
+  "parts": [
+    {
+      "id": "lcd",
+      "type": "lcd",
+      "name": "Pantalla TS24-R V2.1",
+      "size": [
+        80,
+        50,
+        15
+      ],
+      "x": 27,
+      "y": 64,
+      "z": 57.757359312880716,
+      "rotation": 0,
+      "face": "ramp",
+      "visible": true,
+      "locked": false,
+      "parent": null,
+      "verified": false,
+      "aperture": [
+        65,
+        48
+      ]
+    },
+    {
+      "id": "pi",
+      "type": "pi",
+      "name": "Raspberry Pi 5",
+      "size": [
+        85,
+        56,
+        20
+      ],
+      "x": 95,
+      "y": 51,
+      "z": 8,
+      "rotation": 90,
+      "face": "floor",
+      "visible": true,
+      "locked": false,
+      "parent": null,
+      "verified": false
+    },
+    {
+      "id": "cooler",
+      "type": "cooler",
+      "name": "Disipador CanaKit",
+      "size": [
+        60,
+        48,
+        18
+      ],
+      "x": 98,
+      "y": 50,
+      "z": 11,
+      "rotation": 90,
+      "face": "floor",
+      "visible": true,
+      "locked": false,
+      "parent": "pi",
+      "verified": false
+    },
+    {
+      "id": "fan",
+      "type": "fan",
+      "name": "Ventilador CanaKit",
+      "size": [
+        40,
+        40,
+        10
+      ],
+      "x": 91,
+      "y": 49,
+      "z": 29,
+      "rotation": 0,
+      "face": "floor",
+      "visible": true,
+      "locked": false,
+      "parent": "pi",
+      "verified": false
+    },
+    {
+      "id": "mks",
+      "type": "mks",
+      "name": "MKS DLC32 V2.2",
+      "size": [
+        90,
+        70,
+        20
+      ],
+      "x": 187,
+      "y": 48,
+      "z": 8,
+      "rotation": 180,
+      "face": "floor",
+      "visible": true,
+      "locked": false,
+      "parent": null,
+      "verified": false
+    },
+    {
+      "id": "driver-x",
+      "type": "driver",
+      "name": "TMC2209 · X",
+      "size": [
+        15.24,
+        20.32,
+        16
+      ],
+      "x": 216,
+      "y": 36,
+      "z": 18,
+      "rotation": 180,
+      "face": "floor",
+      "visible": true,
+      "locked": false,
+      "parent": "mks",
+      "verified": false
+    },
+    {
+      "id": "driver-y",
+      "type": "driver",
+      "name": "TMC2209 · Y",
+      "size": [
+        15.24,
+        20.32,
+        16
+      ],
+      "x": 198,
+      "y": 36,
+      "z": 18,
+      "rotation": 180,
+      "face": "floor",
+      "visible": true,
+      "locked": false,
+      "parent": "mks",
+      "verified": false
+    },
+    {
+      "id": "mosfet",
+      "type": "mosfet",
+      "name": "Adafruit 5648",
+      "size": [
+        25.4,
+        17.78,
+        13
+      ],
+      "x": 249,
+      "y": 35,
+      "z": 8,
+      "rotation": 270,
+      "face": "floor",
+      "visible": true,
+      "locked": false,
+      "parent": null,
+      "verified": false
+    },
+    {
+      "id": "fuse",
+      "type": "fuse",
+      "name": "Portafusible ATO + 3 A",
+      "size": [
+        48,
+        28,
+        26
+      ],
+      "x": 253,
+      "y": 93,
+      "z": 8,
+      "rotation": 270,
+      "face": "floor",
+      "visible": true,
+      "locked": false,
+      "parent": null,
+      "verified": false
+    },
+    {
+      "id": "switch",
+      "type": "switch",
+      "name": "Interruptor NKK S301T",
+      "size": [
+        17,
+        17,
+        32
+      ],
+      "x": 277,
+      "y": 116,
+      "z": 71,
+      "rotation": 0,
+      "face": "back",
+      "visible": true,
+      "locked": false,
+      "parent": null,
+      "verified": false
+    },
+    {
+      "id": "clip-inner-1",
+      "type": "clip",
+      "name": "Clip · pared del perfil 1",
+      "size": [
+        14,
+        16,
+        10
+      ],
+      "x": 80,
+      "y": 3,
+      "z": 58,
+      "rotation": 0,
+      "face": "inner",
+      "visible": true,
+      "locked": false,
+      "parent": null,
+      "verified": false
+    },
+    {
+      "id": "clip-inner-2",
+      "type": "clip",
+      "name": "Clip · pared del perfil 2",
+      "size": [
+        14,
+        16,
+        10
+      ],
+      "x": 232,
+      "y": 3,
+      "z": 57,
+      "rotation": 0,
+      "face": "inner",
+      "visible": true,
+      "locked": false,
+      "parent": null,
+      "verified": false
+    },
+    {
+      "id": "clip-outer-1",
+      "type": "clip",
+      "name": "Clip · pared exterior 1",
+      "size": [
+        14,
+        16,
+        10
+      ],
+      "x": 133,
+      "y": 127,
+      "z": 70,
+      "rotation": 0,
+      "face": "outer",
+      "visible": true,
+      "locked": false,
+      "parent": null,
+      "verified": false
+    },
+    {
+      "id": "clip-outer-2",
+      "type": "clip",
+      "name": "Clip · pared exterior 2",
+      "size": [
+        14,
+        16,
+        10
+      ],
+      "x": 174,
+      "y": 127,
+      "z": 69,
+      "rotation": 0,
+      "face": "outer",
+      "visible": true,
+      "locked": false,
+      "parent": null,
+      "verified": false
+    },
+    {
+      "id": "clip-lid-1",
+      "type": "clip",
+      "name": "Clip · tapa 1",
+      "size": [
+        14,
+        16,
+        10
+      ],
+      "x": 122,
+      "y": 64,
+      "z": 82,
+      "rotation": 300,
+      "face": "lid",
+      "visible": true,
+      "locked": false,
+      "parent": null,
+      "verified": false
+    },
+    {
+      "id": "clip-lid-2",
+      "type": "clip",
+      "name": "Clip · tapa 2",
+      "size": [
+        14,
+        16,
+        10
+      ],
+      "x": 217,
+      "y": 65,
+      "z": 82,
+      "rotation": 60,
+      "face": "lid",
+      "visible": true,
+      "locked": false,
+      "parent": null,
+      "verified": false
+    }
+  ],
+  "cutouts": [
+    {
+      "id": "rear-power",
+      "name": "Paso de corriente",
+      "face": "back",
+      "center": [
+        280,
+        30,
+        23
+      ],
+      "size": [
+        16,
+        16
+      ],
+      "kind": "circle",
+      "draft": true
+    }
+  ],
+  "apertureSchedule": [
+    {
+      "owner": "lcd",
+      "name": "Ventana pantalla",
+      "face": "ramp",
+      "size": [
+        65,
+        48
+      ],
+      "kind": "rect",
+      "rotation": 0,
+      "draft": true,
+      "center": [
+        24.878679656440355,
+        64,
+        59.878679656440355
+      ]
+    },
+    {
+      "owner": "fan",
+      "name": "Abertura ventilador",
+      "face": "lid",
+      "size": [
+        32,
+        32
+      ],
+      "kind": "circle",
+      "rotation": 0,
+      "draft": true,
+      "center": [
+        91,
+        49,
+        85
+      ]
+    },
+    {
+      "owner": "switch",
+      "name": "Interruptor",
+      "face": "back",
+      "size": [
+        12.7,
+        12.7
+      ],
+      "kind": "circle",
+      "rotation": 0,
+      "draft": true,
+      "center": [
+        280,
+        116,
+        71
+      ]
+    },
+    {
+      "id": "rear-power",
+      "name": "Paso de corriente",
+      "face": "back",
+      "center": [
+        280,
+        30,
+        23
+      ],
+      "size": [
+        16,
+        16
+      ],
+      "kind": "circle",
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        13,
+        0,
+        17
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        28.12435565298214,
+        0,
+        17
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        43.24871130596428,
+        0,
+        17
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        58.37306695894642,
+        0,
+        17
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        103.74613391789285,
+        0,
+        17
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        118.870489570875,
+        0,
+        17
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        149.11920087683927,
+        0,
+        17
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        164.2435565298214,
+        0,
+        17
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        179.36791218280354,
+        0,
+        17
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        194.49226783578567,
+        0,
+        17
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        209.6166234887678,
+        0,
+        17
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        254.9896904477142,
+        0,
+        17
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        20.56217782649107,
+        0,
+        30.098076211353316
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        35.68653347947321,
+        0,
+        30.098076211353316
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        50.81088913245535,
+        0,
+        30.098076211353316
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        111.30831174438393,
+        0,
+        30.098076211353316
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        156.68137870333035,
+        0,
+        30.098076211353316
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        171.80573435631248,
+        0,
+        30.098076211353316
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        186.93009000929462,
+        0,
+        30.098076211353316
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        202.05444566227675,
+        0,
+        30.098076211353316
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        262.5518682742053,
+        0,
+        30.098076211353316
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        28.12435565298214,
+        0,
+        43.19615242270663
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        43.24871130596428,
+        0,
+        43.19615242270663
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        58.37306695894642,
+        0,
+        43.19615242270663
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        103.74613391789285,
+        0,
+        43.19615242270663
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        118.870489570875,
+        0,
+        43.19615242270663
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        149.11920087683927,
+        0,
+        43.19615242270663
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        164.2435565298214,
+        0,
+        43.19615242270663
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        179.36791218280354,
+        0,
+        43.19615242270663
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        194.49226783578567,
+        0,
+        43.19615242270663
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        209.6166234887678,
+        0,
+        43.19615242270663
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        254.9896904477142,
+        0,
+        43.19615242270663
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        50.81088913245535,
+        0,
+        56.29422863405995
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        111.30831174438393,
+        0,
+        56.29422863405995
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        156.68137870333035,
+        0,
+        56.29422863405995
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        171.80573435631248,
+        0,
+        56.29422863405995
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        186.93009000929462,
+        0,
+        56.29422863405995
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        202.05444566227675,
+        0,
+        56.29422863405995
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        262.5518682742053,
+        0,
+        56.29422863405995
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        58.37306695894642,
+        0,
+        69.39230484541326
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        103.74613391789285,
+        0,
+        69.39230484541326
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        118.870489570875,
+        0,
+        69.39230484541326
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        149.11920087683927,
+        0,
+        69.39230484541326
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        164.2435565298214,
+        0,
+        69.39230484541326
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        179.36791218280354,
+        0,
+        69.39230484541326
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        194.49226783578567,
+        0,
+        69.39230484541326
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        209.6166234887678,
+        0,
+        69.39230484541326
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    },
+    {
+      "name": "Panal de ventilación",
+      "face": "inner",
+      "center": [
+        254.9896904477142,
+        0,
+        69.39230484541326
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "kind": "hexagon",
+      "rotation": 30,
+      "draft": true
+    }
+  ],
+  "floorBases": [
+    {
+      "owner": "pi",
+      "kind": "standoffs",
+      "rotation": 90,
+      "center": [
+        95,
+        51,
+        3
+      ],
+      "cradleSizeMM": null,
+      "heightMM": 5,
+      "seats": [
+        {
+          "center": [
+            119.5,
+            12,
+            3
+          ],
+          "outsideDiameterMM": 7.6,
+          "boreDiameterMM": 2.7
+        },
+        {
+          "center": [
+            119.5,
+            70,
+            3
+          ],
+          "outsideDiameterMM": 7.6,
+          "boreDiameterMM": 2.7
+        },
+        {
+          "center": [
+            70.5,
+            12,
+            3
+          ],
+          "outsideDiameterMM": 7.6,
+          "boreDiameterMM": 2.7
+        },
+        {
+          "center": [
+            70.5,
+            70,
+            3
+          ],
+          "outsideDiameterMM": 7.6,
+          "boreDiameterMM": 2.7
+        }
+      ],
+      "draft": true
+    },
+    {
+      "owner": "mks",
+      "kind": "standoffs",
+      "rotation": 180,
+      "center": [
+        187,
+        48,
+        3
+      ],
+      "cradleSizeMM": null,
+      "heightMM": 5,
+      "seats": [
+        {
+          "center": [
+            228,
+            79,
+            3
+          ],
+          "outsideDiameterMM": 9,
+          "boreDiameterMM": 3.2
+        },
+        {
+          "center": [
+            228,
+            16.999999999999996,
+            3
+          ],
+          "outsideDiameterMM": 9,
+          "boreDiameterMM": 3.2
+        },
+        {
+          "center": [
+            146,
+            79,
+            3
+          ],
+          "outsideDiameterMM": 9,
+          "boreDiameterMM": 3.2
+        },
+        {
+          "center": [
+            146,
+            17.000000000000004,
+            3
+          ],
+          "outsideDiameterMM": 9,
+          "boreDiameterMM": 3.2
+        }
+      ],
+      "draft": true
+    },
+    {
+      "owner": "mosfet",
+      "kind": "standoffs",
+      "rotation": 270,
+      "center": [
+        249,
+        35,
+        3
+      ],
+      "cradleSizeMM": null,
+      "heightMM": 5,
+      "seats": [
+        {
+          "center": [
+            242.65,
+            24.840000000000003,
+            3
+          ],
+          "outsideDiameterMM": 6.4,
+          "boreDiameterMM": 2.5
+        },
+        {
+          "center": [
+            255.35,
+            24.839999999999996,
+            3
+          ],
+          "outsideDiameterMM": 6.4,
+          "boreDiameterMM": 2.5
+        }
+      ],
+      "draft": true
+    },
+    {
+      "owner": "fuse",
+      "kind": "cradle",
+      "rotation": 270,
+      "center": [
+        253,
+        93,
+        3
+      ],
+      "cradleSizeMM": [
+        63,
+        33
+      ],
+      "heightMM": 5,
+      "seats": [
+        {
+          "center": [
+            253,
+            121,
+            3
+          ],
+          "outsideDiameterMM": 7,
+          "boreDiameterMM": 3.2
+        },
+        {
+          "center": [
+            253,
+            65,
+            3
+          ],
+          "outsideDiameterMM": 7,
+          "boreDiameterMM": 3.2
+        }
+      ],
+      "draft": true
+    }
+  ],
+  "ui": {
+    "selected": "lcd",
+    "view": "3d",
+    "grid": true,
+    "snap": 1,
+    "ports": true,
+    "lid": true,
+    "robot": true,
+    "electronics": true
+  }
+}

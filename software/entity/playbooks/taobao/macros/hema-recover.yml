@@ -1,0 +1,17 @@
+kind: macro
+schema: 1
+name: hema-recover
+description: back to the 盒马 storefront home — close the promo card it opens under, else pop one screen
+# Disabled until rehearsed on YOUR device: physiclaw macros run taobao/hema-recover
+enabled: false
+steps:
+  # The card's ✕ is an icon under its button (开心收下 / 立即抢购); the
+  # texts on the card are the guard, so a screen without one is popped.
+  - tap: "the ✕ under a 盒马 promo card"
+    at: [0.44, 0.68, 0.56, 0.75]
+    when: ["开心收下", "立即抢购", "天天特惠"]
+  - if_page: app.pages.hema-home
+    goto: back
+  - go_back
+  - wait: 2
+  - mark: back

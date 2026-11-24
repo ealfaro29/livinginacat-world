@@ -1,0 +1,83 @@
+"""Run wiring — the settings and per-session context dataclasses shared
+by `engine` (session lifecycle), `loop` (turn driver), `dispatch`
+(tool-call execution), and `plugins` (the dotted-path loaders).
+
+Leaf of the engine's internal split: the sibling modules all depend on
+this one, never on each other through it, so it must not import any of
+them.
+"""
+
+from collections.abc import Callable
+from dataclasses import dataclass
+
+from physiclaw.agent.engine.builtin_tool import LocalTool
+from physiclaw.agent.engine.mcp_tool import McpClient
+from physiclaw.agent.engine.policy import Policies
+from physiclaw.agent.engine.provenance import PluginBinding
+from physiclaw.agent.trace import RawLog, Trace
+from physiclaw.common.config import CONFIG
+from physiclaw.contract.dto import ToolCall
+
+# The debug harness's result transformer (one spelling here; the loader
+# in `plugins.py` returns it): (call that RAN for real, the host-selected producer ID, the real result blocks) → replacement blocks or None.
+DebugIntercept = Callable[[ToolCall, str | None, list[dict]], "list[dict] | None"]
+
+
+@dataclass(frozen=True, slots=True)
+class Settings:
+    """Engine knobs, read from CONFIG at `run()` time — not import time —
+    so tests construct them explicitly and a config write between wakes
+    takes effect without a process restart.
+
+    `max_turns` is a runaway-loop backstop, not a context-safety limit.
+    Prompt tokens grow ~624·t + 13k empirically (R²=0.97); at 1M context
+    (Qwen3.6-plus) the hard wall is ~1,580 turns, so 300 leaves ample
+    headroom. `max_session_attempts` is session-level STUCK retries;
+    `provider_retry_attempts` is per-call transient-error retries — two
+    different knobs, deliberately not shared.
+
+    `max_session_seconds` is the wall-clock counterpart of `max_turns`:
+    the turn cap can't bound time (one hung MCP call holds a turn for
+    minutes), so the loop also watches the clock. 0 disables.
+    """
+
+    max_turns: int
+    max_session_attempts: int
+    provider_retry_attempts: int
+    retry_backoff_seconds: float
+    wait_default_minutes: int
+    max_session_seconds: int
+
+    @classmethod
+    def from_config(cls) -> "Settings":
+        e = CONFIG.engine
+        return cls(
+            max_turns=e.max_turns,
+            max_session_attempts=e.max_attempts,
+            provider_retry_attempts=e.provider_retry_attempts,
+            retry_backoff_seconds=e.retry_backoff_seconds,
+            wait_default_minutes=e.wait_default_minutes,
+            max_session_seconds=e.max_session_seconds,
+        )
+
+
+@dataclass(slots=True)
+class EngineRun:
+    """Runtime wiring shared by the generic producer loop and dispatcher."""
+
+    plugins: tuple[PluginBinding, ...]
+    mcp: McpClient
+    schema_by_name: dict[str, dict]
+    local_registry: dict[str, LocalTool]
+    tr: Trace
+    rlog: RawLog
+    settings: Settings
+    policies: Policies
+    # Wall-clock cutoff (time.monotonic() value) for this session, or None
+    # when `settings.max_session_seconds` is 0 — see `loop.drive`.
+    deadline: float | None = None
+    # The e2e debug harness's result transformer (debug mode —
+    # `physiclaw debug`, env-only; loaded by dotted path like the turn
+    # plugins). The producer ID comes from the host-selected binding.
+    # None here (production) leaves dispatch untouched.
+    debug_intercept: DebugIntercept | None = None

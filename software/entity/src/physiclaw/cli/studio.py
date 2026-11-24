@@ -1,0 +1,222 @@
+"""`physiclaw studio` — the browser skin over the same drivers the CLI
+wraps: drive the phone by hand, and step a playbook node by node.
+
+A frontend only. It drives a running `physiclaw mcp` (the live
+server's own record wins, else the configured address) and never
+starts one — the same "start it first" rule every rehearsal command
+follows, so one server is shared by whoever is at the desk and
+whatever agent is at the terminal. `--session` puts a recorded
+session's frames behind the same page instead of hardware.
+"""
+
+import logging
+import threading
+import webbrowser
+from pathlib import Path
+from typing import Annotated
+
+import typer
+
+from physiclaw.cli._format import exit_error
+from physiclaw.common.ready import START_HINT
+from physiclaw.studio.session import Session
+
+log = logging.getLogger(__name__)
+
+
+def studio(
+    mcp_url: Annotated[
+        str | None,
+        typer.Option(
+            "--mcp-url",
+            help="MCP server to drive. Default: the live server, else the "
+            "configured address.",
+        ),
+    ] = None,
+    port: Annotated[
+        int,
+        typer.Option("--port", min=1, max=65535, help="Studio port (loopback only)."),
+    ] = 8058,
+    open_browser: Annotated[
+        bool, typer.Option("--open/--no-open", help="Open the browser.")
+    ] = True,
+    session: Annotated[
+        str | None,
+        typer.Option(
+            "--session",
+            help="Drive a recorded session's frames instead of hardware "
+            "(session id, a unique suffix, or a session directory). Views "
+            "show the current frame; gestures step to the next.",
+        ),
+    ] = None,
+    review: Annotated[
+        bool,
+        typer.Option(
+            "--review",
+            help="Open the session viewer instead of the driver: every "
+            "request, reply, tool result, frame and decision of a recorded "
+            "session, in order — the one --session names, else the newest. "
+            "Needs no MCP server.",
+        ),
+    ] = False,
+) -> None:
+    """Drive the phone by hand from the browser, and step playbooks.
+
+    Every gesture is one standard MCP tool call: draw a box on the
+    camera frame or pick an element on the virtual screen, then tap,
+    long-press, or swipe it. The playbook panel steps a pack one node
+    at a time — the same core as `physiclaw playbooks step`, the same
+    position file, so a terminal and the page can take turns. A
+    frontend only: it needs `physiclaw mcp` already running — except
+    to review a recorded session, which reads only the session dir.
+    """
+    import uvicorn
+
+    from physiclaw.common import paths
+    from physiclaw.common.logger import setup_logging
+    from physiclaw.studio.server import REVIEW_PATH, build_app
+    from physiclaw.studio.session import StudioSession
+
+    setup_logging(
+        "studio",
+        file_dir=paths.LOG_DIR,
+        file_level=logging.DEBUG,
+        force=False,
+    )
+
+    driven: Session
+    review_dir = None
+    url = f"http://127.0.0.1:{port}/"
+    if review:
+        # The viewer reads the session dir; the driver behind the page's
+        # studio link dials the rig only when used, so no probe here.
+        driven = StudioSession(mcp_url or _server_address()[0])
+        if session is not None:
+            review_dir = _session_dir(session)
+        url += REVIEW_PATH.lstrip("/") if review_dir is not None else "sessions/"
+    elif session is not None:
+        recorded = _recorded_session(session)
+        log.info(
+            "Recorded session %s | frames=%d",
+            recorded.label,
+            len(recorded.frames),
+            extra={"event": "studio.recording_loaded", "console": True},
+        )
+        driven = recorded
+    else:
+        driven = StudioSession(mcp_url or _server_base())
+        log.info(
+            "Hardware connection: %s",
+            driven.mcp_url,
+            extra={"event": "studio.hardware_selected", "console": True},
+        )
+    log.info("Open Studio: %s", url, extra={"event": "studio.started", "console": True})
+    server = uvicorn.Server(
+        uvicorn.Config(
+            build_app(driven, review_dir=review_dir),
+            host="127.0.0.1",
+            port=port,
+            log_level="warning",
+            log_config=None,
+            access_log=False,
+        )
+    )
+    stopped = threading.Event()
+
+    def open_when_ready() -> None:
+        while not stopped.wait(0.05):
+            if server.started:
+                try:
+                    webbrowser.open(url)
+                except (OSError, webbrowser.Error) as e:
+                    log.warning(
+                        "Could not open browser: %s — open %s manually",
+                        e,
+                        url,
+                        extra={"event": "studio.browser_failed"},
+                    )
+                return
+
+    opener = None
+    if open_browser:
+        opener = threading.Thread(target=open_when_ready, daemon=True)
+        opener.start()
+    try:
+        server.run()
+    except OSError as e:
+        exit_error(f"could not start Studio: {e}")
+    finally:
+        stopped.set()
+        if opener is not None:
+            opener.join(timeout=1)
+
+
+def _session_dir(ref: str) -> Path:
+    """The session directory `--session` names — a path, or an id
+    resolved the `logs <suffix>` way (a miss exits here)."""
+    from physiclaw.cli._sessions import resolve_sid
+    from physiclaw.common import paths
+
+    try:
+        d = Path(ref).expanduser()
+        if d.is_dir():
+            return d.resolve()
+    except (OSError, RuntimeError, ValueError) as e:
+        raise typer.BadParameter(str(e), param_hint="--session") from e
+    return paths.sessions_dir() / resolve_sid(ref)
+
+
+def _recorded_session(ref: str):
+    """A `MockSession` over a session directory."""
+    from physiclaw.studio.mock import MockSession, session_frames
+
+    d = _session_dir(ref)
+    try:
+        return MockSession(session_frames(d), d.name)
+    except (OSError, ValueError) as e:
+        raise typer.BadParameter(str(e), param_hint="--session") from e
+
+
+def _server_address() -> tuple[str, bool]:
+    """The server's address, and whether it is the live server's own
+    record (`runtime_state`, the pid-checked answer every CLI shares — a
+    server on a non-default port is found, never doubled); otherwise
+    the configured address, unverified."""
+    from physiclaw.common import runtime_state
+    from physiclaw.common.config import server_url, url_host
+
+    live = runtime_state.read_live()
+    if live:
+        base = f"http://{url_host(live['host'])}:{live['port']}"
+        log.debug(
+            "Using live MCP server at %s",
+            base,
+            extra={"event": "studio.server_selected"},
+        )
+        return base, True
+    return server_url().rstrip("/"), False
+
+
+def _server_base() -> str:
+    """The server to drive: its address, which must already answer."""
+    base, live = _server_address()
+    if not live and not _listening(base):
+        exit_error(f"no MCP server at {base}. {START_HINT}")
+    return base
+
+
+def _listening(base: str) -> bool:
+    """Whether anything answers at `base` — a refused or timed-out
+    connect is the only "nothing there"; any HTTP answer, ready or
+    not, is a server (the first action's banner reports the rest)."""
+    import httpx
+
+    from physiclaw.common.ready import check_ready_once
+
+    try:
+        check_ready_once(base, timeout=1.0)
+    except (httpx.ConnectError, httpx.ConnectTimeout):
+        return False
+    except Exception:
+        pass
+    return True

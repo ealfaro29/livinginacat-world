@@ -1,0 +1,88 @@
+{
+  "$schema": "./docs.schema.json",
+  "sidebar": [
+    {
+      "label": "Start here",
+      "translations": {
+        "zh-CN": "从这里开始"
+      },
+      "items": [
+        "start/introduction",
+        "start/why-a-body",
+        "start/how-it-works"
+      ]
+    },
+    {
+      "label": "Build the hardware",
+      "translations": {
+        "zh-CN": "搭建硬件"
+      },
+      "items": [
+        "hardware/assembly",
+        "hardware/sourcing"
+      ]
+    },
+    {
+      "label": "Set up",
+      "translations": {
+        "zh-CN": "配置"
+      },
+      "items": [
+        "set-up/install",
+        "set-up/firmware",
+        "set-up/prepare-the-phone",
+        "set-up/provider",
+        "set-up/calibrate"
+      ]
+    },
+    {
+      "label": "Run it",
+      "translations": {
+        "zh-CN": "运行起来"
+      },
+      "items": [
+        "run/first-task"
+      ]
+    },
+    {
+      "label": "Best practices",
+      "translations": {
+        "zh-CN": "最佳实践"
+      },
+      "items": [
+        "best-practices/best-practice"
+      ]
+    },
+    {
+      "label": "Custom",
+      "translations": {
+        "zh-CN": "定制"
+      },
+      "items": [
+        "custom/memory",
+        "custom/skills",
+        "custom/macros",
+        "custom/playbooks",
+        "custom/mcp"
+      ]
+    },
+    {
+      "label": "How it works inside",
+      "translations": {
+        "zh-CN": "工作原理"
+      },
+      "items": [
+        "concepts/architecture"
+      ]
+    },
+    {
+      "label": "Troubleshooting",
+      "translations": {
+        "zh-CN": "故障排查"
+      },
+      "items": [
+        "troubleshooting"
+      ]
+    }
+  ]
+}

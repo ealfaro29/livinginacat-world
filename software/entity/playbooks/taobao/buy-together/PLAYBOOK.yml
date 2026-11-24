@@ -1,0 +1,58 @@
+# taobao/buy-together — several marketplace items in ONE order: `add`
+# once per item, then one `checkout`. Starts anywhere (each round cold
+# launches). Ends on the paid page, the buyer told.
+kind: entry
+schema: 1
+name: buy-together
+description: buy several items on 淘宝 (Taobao) in ONE order by courier — the default for a list of products naming no store
+enabled: false  # rehearse on YOUR device, then enable
+inputs:
+  user_said:
+    description: what the user said, verbatim — the original message the task came from
+
+route:
+  # The list the whole errand runs on. On a revision (a reply to the
+  # confirmation that is neither yes nor no) this same step runs again
+  # with the replies and what is already in the cart — the slots below
+  # are empty on the first pass.
+  - agent: parse
+    context:
+      prompt: |
+        The buyer said: "{buyer_said}"
+        Later replies, if any: {replies}
+        The list as it stood before those replies: {earlier_list}
+        Already in the cart from this errand: {already_in_cart}
+        Return the FULL list the buyer wants now, one product per line as
+        name + spec + quantity (e.g. 五常大米 5kg ×2); leave out anything
+        they no longer want. Keep the buyer's language. Keep every line
+        of the earlier list the buyer did not change WORD FOR WORD — that
+        line is how the cart knows the item is already in it.
+        If the message names no concrete product, escalate.
+      given:
+        buyer_said: inputs.user_said
+        replies: ask.replies
+        earlier_list: parse.items
+        already_in_cart: add.line
+    returns:
+      items: the full list now, one per line
+    think: off
+
+  - tell: ack
+    message: "收到，正在淘宝为你挑选：\n{parse.items}"
+
+  - run: add                      # search, pick, 加入购物车; one round per item, each from
+    each: {item: parse.items}     # add's own cold start; a line already in the cart is
+    miss: skip                    # not re-added, an item not found is skipped
+    limit: {rounds: 4}
+
+  - page: app.pages.detail        # the item page the last round ended on
+
+  - run: checkout                 # the cart, tick, 结算, confirm, pay
+    with: {lines: "{add.line}"}   # every done round's line; a missed item has none
+    revise: parse                 # a reply the words miss re-plans from `parse`
+    limit: {revisions: 2}
+
+  - page: app.pages.paid
+
+  - tell: report
+    message: "已下单并完成支付：\n{add.line}"

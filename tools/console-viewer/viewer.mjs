@@ -7,6 +7,10 @@ const buttons=selector=>Array.from(document.querySelectorAll(selector));
 const views=buttons('[data-view]');
 const angles=buttons('[data-angle]');
 const parameters=new URLSearchParams(location.search);
+if (parameters.get("home")==="en") {
+  const landing=document.querySelector("[data-landing]");
+  if(landing){landing.href="/";landing.textContent="← Back to home";}
+}
 const ids={conjunto:'outside',herrajes:'hardware',recorrido:'travel',interruptor:'switch',camara:'optics',electronica:'electronics'};
 const embedded=page.classList.contains('embed');
 const requested=parameters.get('vista');

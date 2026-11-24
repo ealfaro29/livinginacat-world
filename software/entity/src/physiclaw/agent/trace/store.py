@@ -1,0 +1,405 @@
+"""Where a session's artifacts live, how a session is named, and how
+long its artifacts are kept.
+
+Dir resolution delegates to `common.paths` per call — the same live
+seam the CLI reads through, so every sink (`Trace`, `RawLog`, the
+retention sweep) and every test re-point agrees on one source of
+truth. `SESSIONS_README` is the format documentation shipped WITH the
+data: written once to sessions/README.md and embedded in every
+``physiclaw logs --save`` zip, so an analyst — human or AI agent — can
+bootstrap from the artifacts alone, no source access needed. Update
+alongside any schema change.
+"""
+
+import datetime as dt
+import hashlib
+import logging
+import secrets
+from pathlib import Path
+from typing import Any
+
+from physiclaw.common import paths
+from physiclaw.common.config import CONFIG
+from physiclaw.common.logger import save_image
+from physiclaw.common.logger.retention import purge_old_sessions
+from physiclaw.common.text import json_object, read_text
+
+log = logging.getLogger(__name__)
+
+
+def _session_dir(sid: str) -> Path:
+    return paths.sessions_dir() / sid
+
+
+class Images:
+    """One file per distinct frame in `images/`, named by the turn that
+    first filed it; "" for a frame that cannot be written (the wire
+    keeps a byte-count stub), never a crash. Both session sinks hold
+    the same store, so the trace files a frame at its tool result and
+    the wire log references that file."""
+
+    def __init__(self, sid: str):
+        self.dir = _session_dir(sid) / "images"
+        self.dir.mkdir(parents=True, exist_ok=True)
+        self._seen: dict[str, str] = {}
+
+    def put(self, turn: int, mime: str, b64: str) -> str:
+        """The session-relative path of this frame, writing it on first
+        sight."""
+        key = hashlib.sha256(b64.encode()).hexdigest()
+        known = self._seen.get(key)
+        if known is not None:
+            return known
+        try:
+            name = save_image(self.dir, turn, mime, b64)
+        except OSError:
+            log.warning("session image write failed", exc_info=True)
+            return ""
+        if not name:
+            return ""
+        self._seen[key] = rel = f"images/{name}"
+        return rel
+
+
+def new_sid() -> str:
+    """Mint a session id: `YYYYMMDD-HHMMSS-<6 hex digits>`.
+
+    The timestamp prefix keeps ids human-readable and lexicographically
+    chronological; the random suffix (16^6 ≈ 16.7M) makes them unique —
+    the STUCK-retry loop can start a new session within the same
+    wall-clock second as an instantly-crashed one, and a bare-timestamp
+    id would silently merge the two sessions' artifacts. The suffix
+    doubles as a short handle: `physiclaw logs <suffix>` resolves a
+    session by it.
+    """
+    return f"{dt.datetime.now():%Y%m%d-%H%M%S}-{secrets.token_hex(3)}"
+
+
+# Purge session dirs older than this on session
+# bootstrap: the `[retention]` window, a month by default — long enough
+# to post-mortem a run noticed late, bounded for long-running operators.
+_RETENTION_DAYS = CONFIG.retention.trace_days
+
+
+def _purge_old(*, days: int = _RETENTION_DAYS) -> None:
+    """Expire session dirs by their newest file's mtime. Fail-open."""
+    removed = purge_old_sessions(paths.sessions_dir(), days=days)
+    if removed:
+        log.info("purged %d session dir(s) older than %d days", removed, days)
+
+
+SESSIONS_README = """\
+# PhysiClaw agent session logs
+
+One directory per agent session, named `YYYYMMDD-HHMMSS-<6 hex digits>`
+(sorts chronologically; the id suffix is a unique short handle). All
+files are UTF-8 with LF newlines on every platform. Timestamps (`t`)
+are LOCAL time with millisecond precision — the session's UTC offset is
+in the `env` event / `summary.json.env.utc_offset`.
+
+## Files per session
+
+- `summary.json` — start here. Session metrics derived from the event
+  stream (schema v1): sid, started_at/ended_at (local ISO), duration_s,
+  model_ref ("provider/model"), provider, prompt_hash, triggers,
+  outcome {sentinel: DONE|WAIT|IDLE|STUCK|FAIL, recap, crashed},
+  turns, provider_calls, conductor_turns (turns the conductor
+  synthesized from an armed playbook — no provider request sent),
+  plugin_turns (other host-bound plugin turns), micro_calls (the
+  conductor's scoped chat calls; their tokens fold into usage),
+  decision_calls and decision_time_ms (native decision attempts;
+  their usage remains in decision_call events, separate from chat
+  usage, with unknown values preserved), provider_time_ms, tool_time_ms, usage
+  {input_tokens, new_tokens, output_tokens, cache_read_tokens,
+  cache_creation_tokens, cache_hit_pct, by_model {model: {calls,
+  failed, input, input_new, cache_read, cache_write, output,
+  reasoning}}} — every bucket
+  a bill needs; multiply each by the model's rate, tool_calls {name: count},
+  verdicts {changed/unchanged/no_verdict}, walks [{app, playbook,
+  outcome completed|suspended|handover|crashed|abandoned, node, idx,
+  nodes, reason, micros, rescues, total} — every conductor walk in
+  order, the boot's hand-on first; absent when no playbook ran, and
+  the runtime log's `Plain model session: <reason>` line
+  says why], errors {blocked_plan,
+  blocked_layout, blocked_stuck, invalid_args, unknown_tool,
+  tool_errors, correctives, provider_failures}, stuck_events, images,
+  env {physiclaw/python versions, os, platform, host, utc_offset,
+  config.camera, config.vision, config.compact, config.engine}. Missing
+  summary.json = the session was killed or is still running.
+
+- `events.jsonl` — the engine's decision stream, one JSON object per
+  line: `{"t": iso-ms, "event": <type>, "turn": <int, when turn-scoped>,
+  ...event fields}`. First line is always `env`. Key event types:
+  `wake` (triggers), `response` (finish_reason, tool_calls requested,
+  elapsed_ms for the selected producer, arbitration_elapsed_ms including
+  earlier declines, response_model/response_id when supplied,
+  host-stamped producer {plugin_id},
+  presentation: model|plugin|playbook), `plugin_bound` (registered name/id,
+  granted private macros and model-guard exemptions), `plugin_macro_collision`
+  (conflicting registration skipped), `decision_call` (one native
+  decision attempt, its elapsed_ms and native usage; no chat token fold),
+  `decision_projection` (local-only preparation: copied task/active step,
+  recent action receipts, same-frame OCR/icons, image identity/hash and
+  conservative review instructions; `mode`, `limits` and `evaluation`
+  scheduling/skip status link exact questions to a request ID). Scheduled
+  projections also carry `image {path, sha256}` for the exact decision input
+  bytes, independently of chat image resizing; a missing file stays unknown.
+  `decision_call` records original turn/observation, answers, raw
+  `interpretation`, a separate uncalibrated `threshold_gate`, `view_issue`,
+  timings and reported usage. Active proposals include `proposal_call_id`
+  for joining the host's response/tool-result events; a proposal is not
+  evidence of execution or task completion. Unknown usage stays null,
+  including failures whose provider returned no usable usage. Scheduled work
+  cancelled before it starts has no API-attempt event. `decision_skipped`
+  records expired work or client construction failure; `decision_disabled`
+  records missing or invalid model configuration. With `[decision] mode = "off"`,
+  the plugin bypasses projection and inference. Shadow always yields; active
+  waits for its own current request and proposes only a locally bound tap.
+  Both use the same probability and view-age gates. Active also requires
+  evidence of change after its previous action and yields after three
+  consecutive proposals. Failed trace writes disable decision calls for the
+  session and leave the turn to the next producer. Permanent provider failures
+  also disable this session; temporary failures impose a five-second cooldown.
+  Request-specific rejection only yields that request. A failed `decision_call`
+  records `suppression` as `session`, `cooldown` or `request`.
+  Active proposals carry a monotonic `expires_at`, checked at acceptance and
+  before each local handler or MCP SDK invocation, including after reconnect.
+  Expiry refuses unstarted calls (`tool_blocked_expired`); started calls finish.
+  This is a host dispatch limit, not a deadline enforced inside the device.
+  The view-age bound includes
+  tool/detection latency and the camera reader's accepted cache age; it is not
+  sensor exposure time or proof that the UI stayed unchanged. Shadow calls add
+  cost; they do not establish actual savings, calibrated accuracy or
+  counterfactual recovery,
+  `micro_call` (one conductor decision call: call, node,
+  rows the decision saw, out or null when it escalated, confidence,
+  detail, attempts, elapsed_ms), `walk` (a conductor walk's terminal moment — the
+  fields `summary.walks` lists),
+  `usage` (ONE per model call, answered or failed, written by the
+  provider itself so no caller can skip it — call: turn|micro|curate,
+  model (requested, provider/model), response_model and response_id
+  (as the reply named them — reconcile against the provider's bill),
+  elapsed_ms, input, input_new, cache_read, cache_write, output,
+  reasoning (the part of output spent thinking), error (exception
+  class of a failed call, else null); all-zero counts = the provider
+  reported no usage; the field names follow the OpenTelemetry GenAI
+  conventions' token buckets;
+  `physiclaw logs <sid> --usage` tabulates both chat usage and native
+  decision_call usage, keeping API kinds and unknown counts separate),
+  `tool_result` (id, name, arguments, elapsed_ms, is_error — the tool reply's
+  error flag, not proof of action success — and `text` — the result as
+  the model received it, whole, a screen's listing included — and
+  `images`, the session-relative paths of the frames it carried;
+  gesture results also carry `changed`: true/false/null, the camera
+  verdict as data),
+  `walk_read` (one conductor screen reading, beside the tool result
+  that carried it: app, playbook, after — the action read after —,
+  node, verdict — the prose line —, and the same reading as fields:
+  kind (match / unknown / ambiguous / occluded) and page),
+  `tool_error` (id, name, arguments, elapsed_ms, error),
+  `tool_blocked_no_plan|_layout|_stuck` (engine refused the call),
+  `stuck_warning` (loop detector fired), `bad_turn_shape` /
+  `*_checkpoint` (turn rejected, corrective sent), `done`
+  (sentinel + recap), `crashed`.
+
+- `model.jsonl` — the provider round-trips: `session_start` (provider,
+  model, prompt_hash, output_schema) once, then per turn `request`
+  (native body and a message projection) and `response` (raw provider reply,
+  elapsed_ms, producer and presentation; a plugin-composed turn has
+  no main-LLM request record before it, but may have its own inference
+  records). Inline
+  base64 images are replaced by relative paths into
+  `images/` — the file the frame's own `tool_result` wrote. `micro`
+  records carry one conductor decision call whole: `call` and `node`,
+  `thinking` (the step's level), `allowed` (the answers the caller
+  accepted), `request` (every message — role and text, the caller's
+  own shape rather than the provider's wire — an episode's replayed
+  history included), `raw` (the reply), and `answer`/`confidence`/
+  `reason` as the caller read them — `physiclaw playbooks micro <sid>` re-asks
+  them. Post-session lesson consolidation also writes `request`/`response`
+  records, marked `call: "curate"`, with its full prompt, raw reply and timing.
+
+- `images/<HHMMSS>_<mmm>_t<turn>.<ext>` — every frame a tool result
+  or exact decision attachment carried (typically .jpg), written once: the
+  frames the model saw and the frames a conductor walk read without
+  ever sending them to a model. The name is the local file-write time
+  (hour-minute-second `_` milliseconds) plus `_t<turn>` = the turn
+  whose event carried the frame, so `ls` sorts them in file-write
+  order and each links back to its `tool_result` in `events.jsonl`
+  (its `images` field) and to any `model.jsonl` request that carried
+  it. Example: `104542_123_t20.jpg` = 10:45:42.123, turn 20.
+
+- `session.html` — the session viewer page (`agent/trace/viewer.py`):
+  every record of both streams, by turn, with the frames from `images/`
+  beside it. Written by `physiclaw logs <sid> --save` so the zip reviews
+  itself; the studio serves the same page live (`physiclaw studio
+  --review --session <sid>`). Absent until a `--save`.
+
+- `notes.md` — the agent's own turn-by-turn narration: one line per
+  `note(summary=...)`, `- turn N — <summary>`. The fastest human read
+  of what the agent thought it was doing, in order.
+
+- `runtime.log` — a mirror of the runtime process's log stream for
+  this session (uncolored, full DEBUG for `physiclaw.*` plus INFO+
+  from other loggers): the turn-by-turn engine log, provider timings,
+  warnings, and full tracebacks that the structured events only record
+  as an error string. Capture stays open through provider, plugin, wire-log
+  and artifact cleanup, so setup and close failures remain in the session.
+  Service-log size rotation never trims this session file.
+
+- `server.log` — the MCP-server process's log for this session (camera,
+  exposure/tune, gesture execution), written live by the server: the
+  runtime publishes the active session id to a marker and the server
+  resolves it to this dir and tees its log there. This is where to look
+  when a view came back wrong (blur, glare, bad exposure). Absent if the
+  server logged nothing, was not running, or predates this feature.
+
+## Analysis tips
+
+Decision review is offline; these commands do not call a model or touch the phone:
+
+```
+physiclaw logs <sid> --usage --json
+physiclaw logs <sid> --decisions --label-template > labels.json
+physiclaw logs <sid> --decisions --labels labels.json --json
+physiclaw logs <sid> --decisions --labels labels.json --rates rates.json --baseline <other-sid> --json
+```
+
+Label from the exported projection and its exact image before inspecting model
+answers. Set each label's `expected` to `tap`, `yield`, or `unknown`; for `tap`,
+list all acceptable original bN IDs in `acceptable_targets`. Null is unlabelled.
+Keep identity, hashes and evidence unchanged. Missing images are unreviewable;
+duplicate/orphan records, missing calls and API failures never become correct
+yields. Raw accuracy, gated action precision and useful tap coverage have separate
+denominators. Execution results and later LLM turns do not prove task success or
+causal recovery. Baselines are side-by-side observed totals, not inferred savings.
+
+Optional rates are supplied by the reviewer, in USD per million tokens:
+`{"chat":{"provider/model":{"input_new":rate,"cache_read":rate,"cache_write":rate,"output":rate}},
+"decision":{"provider/model":{"input":rate,"output":rate}}}`.
+Replace `rate` with the applicable numeric price; no catalog prices are assumed.
+Use the recorded requested model reference and check response_model for aliases.
+Do not add total chat input or reasoning again: they overlap billed buckets.
+`--usage --rates rates.json` also estimates cost. Unknown counts, missing rates
+or incomplete decision traces leave total cost unknown while retaining a known
+subtotal. The live summary's existing usage totals remain chat-only; the offline
+usage/decision reports read both API event types directly.
+
+- Underperforming session? Check `images/` first — bad runs usually
+  trace to what the model actually saw, not how it reasoned. Look for
+  blur, glare, or a cropped/off-frame screen before blaming the
+  prompt or the model. A conductor walk's turns read the same way:
+  each `tool_result` has the listing (`text`) and the frame
+  (`images`), and the `walk_read` right after it says what the walk
+  took the screen for.
+- Failure post-mortem: `summary.json` outcome + errors first, then grep
+  `events.jsonl` for `tool_blocked`/`stuck_warning`/`bad_turn_shape`
+  around the last turns, then view the matching `images/`.
+- Cross-session stats: every summary is one JSON file —
+  `jq .usage.cache_hit_pct sessions/*/summary.json`. For trends past
+  the retention window, `log/session-stats.jsonl` (one summary line per
+  session at close) survives the session-dir purge.
+- Turn timeline: events with the same `turn` value tell one
+  turn's story: usage → response → tool_result(s) (the provider writes
+  `usage` as the call returns, before the engine records `response`; a
+  `usage` with a `turn` but `call: micro`/`curate` is a side call made
+  while that turn was in progress — curation at close carries the last
+  turn's number).
+- Cost: `physiclaw logs <sid> --usage [--json]` lists every model
+  call's token buckets and per-model totals; cost is each bucket times
+  the model's rate, summed — no price table is kept here.
+
+Privacy: model.jsonl carries full prompts (including the user profile /
+memory) and images/ are phone screenshots. Treat a session dir as
+sensitive.
+"""
+
+
+def load_summary(d: Path) -> dict[str, Any] | None:
+    """A session dir's summary.json, or None when it has none (killed or
+    still running) or it is not a finite JSON object."""
+
+    try:
+        path = (d / "summary.json").resolve()
+        if not path.is_relative_to(d.resolve()):
+            return None
+        return json_object(read_text(path))
+    except (OSError, ValueError, RuntimeError):  # UTF-8, path or symlink errors
+        return None
+
+
+def stub_summary(d: Path) -> dict[str, Any]:
+    """The row for a session dir without a summary.json — visible rather
+    than silently missing."""
+    return {
+        "sid": d.name,
+        "outcome": {"sentinel": "?", "recap": "(no summary — killed or still running)"},
+    }
+
+
+def _is_session_dir(d: Path, root: Path) -> bool:
+    """Only immediate children of the session root, including resolved aliases."""
+    try:
+        return d.resolve().parent == root.resolve() and d.is_dir()
+    except (OSError, ValueError, RuntimeError):  # unreadable paths or symlink loops
+        return False
+
+
+def recent_sessions(root: Path, n: int) -> list[dict[str, Any]]:
+    """The newest `n` sessions' summaries (a stub for a dir without one),
+    newest first. mtime, not name: dirs from before the `-` sid format
+    sort ABOVE newer `-` dirs lexicographically ('_' > '-'), which would
+    list stale sessions as most recent. Equal mtimes (two sessions
+    within one tick of a coarse-stamped filesystem) break by name, so
+    the order is the same on every run and platform."""
+
+    def newest(d: Path) -> tuple[float, str]:
+        try:
+            return (d.stat().st_mtime, d.name)
+        except OSError:
+            return (0.0, d.name)
+
+    try:
+        dirs = sorted(
+            (d for d in root.iterdir() if _is_session_dir(d, root)),
+            key=newest,
+            reverse=True,
+        )
+    except OSError:
+        return []
+    return [{**(load_summary(d) or stub_summary(d)), "sid": d.name} for d in dirs[:n]]
+
+
+def resolve_session(root: Path, ref: str) -> Path:
+    """The one session dir `ref` names — a full id or a unique trailing
+    fragment — or a LookupError saying why not, worded once for every
+    reader (the CLI exits with it, the studio answers 404 with it)."""
+    matches = find_session_dirs(root, ref)
+    if len(matches) == 1:
+        return matches[0]
+    if not matches:
+        raise LookupError(f"no session matches {ref!r}")
+    raise LookupError(
+        f"ambiguous session {ref!r}: {', '.join(m.name for m in matches)}"
+    )
+
+
+def find_session_dirs(root: Path, query: str) -> list[Path]:
+    """Session dirs matching a full id or any trailing fragment — the
+    `physiclaw logs <suffix>` short-handle convention (the sid's 6-hex
+    random suffix is the intended handle), shared by every CLI consumer
+    so the resolution rule exists once. Exact hit wins outright. A reference
+    is a name, never a path; directory aliases must stay inside the root."""
+    if not query or query in {".", ".."} or any(c in query for c in "/\\:\0"):
+        return []
+    exact = root / query
+    if _is_session_dir(exact, root):
+        return [exact]
+    try:
+        return sorted(
+            d
+            for d in root.iterdir()
+            if d.name.endswith(query) and _is_session_dir(d, root)
+        )
+    except OSError:
+        return []

@@ -1,0 +1,311 @@
+"""Element-listing grammar — the shared element shape between core and agent.
+
+One canonical shape, `Element`, with both codecs beside it: text via
+`format_elements` / `decode_elements` (the listing an agent reads), JSON
+via `Element.to_dict` / `from_dict` (`elements_to_json`, snapshot files).
+Core composes through `format_elements` (`orchestration.perception`);
+`agent.engine.compact._stub_body` parses rows back out with `parse_row`
+when stubbing superseded views. Defining every side here means the shape
+exists once — a formatter change and its parser change are the same
+edit.
+
+Two doc surfaces quote `LISTING_HEADER` verbatim for a model to read:
+the doctrine (`agent/context/PHYSICLAW.md` § Element listing) and the
+`peek` tool docstring (`core/server/tools.py`). Those copies stay literal;
+`tests/common/test_listing.py` pins both against this constant.
+
+Dependency-free on purpose: core composes, engine parses, and neither
+should drag the other's imports (cv2 on one side, provider stack on the
+other) into a string format.
+"""
+
+import math
+import re
+from collections.abc import Iterable
+from dataclasses import dataclass
+
+from physiclaw.common.bbox import Bbox, format_bbox
+
+# Column header, first line of every listing.
+LISTING_HEADER = 'id [kind] "label" [left,top,right,bottom] conf'
+
+
+def is_header(line: str) -> bool:
+    """The column header, whitespace-tolerant — the one spelling of
+    "this line names columns, it is not a row". `parse_row` returns
+    None for it like any non-row; consumers that must tell the header
+    apart from prose (drop it vs keep it) go through this predicate."""
+    return line.strip() == LISTING_HEADER
+
+
+# The closed element-kind vocabulary. `Element` rejects anything else,
+# so adding a kind forces this tuple (and its shape pin in
+# tests/common/test_listing.py) to grow in the same edit — the composer
+# can never emit a row shape the parsers silently miss.
+KINDS = ("icon", "text")
+
+
+def format_row(id: int, kind: str, label: str, bbox, conf: float) -> str:
+    """One element as a listing row: `id [kind] "label" [l,t,r,b] conf`.
+
+    `bbox` is the 0-1 `[left, top, right, bottom]` list; coordinates
+    render at 3 decimals, confidence at 2 — agent-visible bytes tests
+    pin. Convenience over `Element(...).row()`, so loose arguments pass
+    the same validation as every other composer path — one home for the
+    grammar's rules, no back door.
+    """
+    return Element(id=id, kind=kind, label=label, bbox=tuple(bbox), conf=conf).row()
+
+
+# Prefix matcher — "is this line an element row?" (either kind).
+# `Screen.read` gates on it so a row-SHAPED line that fails `parse_row`
+# is dropped rather than kept as matchable prose; test strategies use it
+# to generate non-row lines. Derives from KINDS so it can't drift.
+ROW_RE = re.compile(rf"^\d+ \[({'|'.join(KINDS)})\] ")
+
+# All five fields, for `parse_row` — the one row parser production code
+# uses. The greedy `.*` label plus a `]`-free bbox class lets a label
+# carry quotes and brackets (`He said "hi" [ok]`) yet still peel off
+# the trailing bbox + confidence. Derives from KINDS so a new kind
+# can't be silently unparseable.
+_DECODE_ROW_RE = re.compile(
+    rf'^(\d+) \[({"|".join(KINDS)})\] "(.*)" \[([^\]]*)\] ([0-9.]+)\s*$'
+)
+
+
+@dataclass(frozen=True)
+class Element:
+    """One detected screen element (icon detection or OCR) in its
+    canonical shape — the same shape on every surface: `to_dict` /
+    `from_dict` are the JSON side, `row` / `parse_row` the text side.
+
+    Canonical by construction: bbox rounds to 3 decimals and conf to 2,
+    exactly the precision the text side renders, so text ↔ Element ↔
+    dict conversions are identities rather than approximations — the
+    round-trip is testable as one. The constraints the row grammar
+    implies are enforced here instead of trusted: `kind` is closed over
+    KINDS, a label is single-line (rows are lines), and an icon's label
+    is empty — a labelled icon row would fail `parse_row` and silently
+    survive `compact._stub_body` as prose."""
+
+    id: int
+    kind: str
+    label: str
+    bbox: Bbox
+    conf: float
+
+    def __post_init__(self) -> None:
+        # The label constraints below close the character-level grammar;
+        # these two close the NUMERIC side: a negative id fails the row
+        # regexes' `^\d+`, and a negative or non-finite conf fails
+        # `[0-9.]+` — either would compose a row no parser matches.
+        if not isinstance(self.id, int) or isinstance(self.id, bool) or self.id < 0:
+            raise ValueError(
+                f"Element: id must be a non-negative integer (got {self.id!r}) — "
+                "the row grammar renders it as bare digits"
+            )
+        if self.kind not in KINDS:
+            raise ValueError(
+                f"Element: unknown kind {self.kind!r} — expected one of {KINDS}"
+            )
+        # `splitlines`-clean, not merely \n-free: a listing is consumed
+        # line-wise, and splitlines also breaks on \x0b/\x0c/\x1c-\x1e/
+        # \x85/\u2028/\u2029 — any of them would tear the row in two.
+        if "".join(self.label.splitlines()) != self.label:
+            raise ValueError(
+                f"Element: label must be single-line (rows are lines): {self.label!r}"
+            )
+        if self.kind == "icon" and self.label:
+            raise ValueError(
+                f"Element: an icon's label must be empty (got {self.label!r}) — "
+                'labelled elements are kind "text"'
+            )
+        if len(self.bbox) != 4:
+            raise ValueError(
+                "Element: bbox must be [left, top, right, bottom] "
+                f"(got {list(self.bbox)!r})"
+            )
+        bbox = tuple(round(float(v), 3) for v in self.bbox)
+        conf = round(float(self.conf), 2)
+        if not all(math.isfinite(v) for v in bbox):
+            raise ValueError(
+                f"Element: bbox coords must be finite (got {list(self.bbox)!r})"
+            )
+        if not (math.isfinite(conf) and conf >= 0):
+            raise ValueError(
+                f"Element: conf must be finite and ≥ 0 (got {self.conf!r})"
+            )
+        # Frozen, so canonicalization writes through object.__setattr__.
+        object.__setattr__(self, "bbox", bbox)
+        object.__setattr__(self, "conf", conf)
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "Element":
+        """The `elements_to_json` shape in. `label` may be absent or None
+        (icons) — both read as empty, as the composer always has."""
+        return cls(
+            id=d["id"],
+            kind=d["kind"],
+            label=d.get("label") or "",
+            bbox=tuple(d["bbox"]),
+            conf=d["conf"],
+        )
+
+    def to_dict(self) -> dict:
+        """The JSON shape out — `UIElement.to_dict` delegates here, so
+        the producer's dicts can't drift from this one."""
+        return {
+            "id": self.id,
+            "kind": self.kind,
+            "label": self.label,
+            "bbox": list(self.bbox),
+            "conf": self.conf,
+        }
+
+    def row(self) -> str:
+        """This element as a listing row — the fields are validated and
+        rounded already, so this is pure rendering."""
+        box = format_bbox(self.bbox)
+        return f'{self.id} [{self.kind}] "{self.label}" {box} {self.conf:.2f}'
+
+
+def parse_row(line: str) -> Element | None:
+    """One listing line → Element, or None when the line is not a
+    well-formed row (the header, prose, a malformed bbox, a labelled
+    icon). Lenient on purpose: consumers read screen text that
+    legitimately mixes rows with non-listing lines, and only they know
+    what the rest means. `decode_elements` is the strict form."""
+    m = _DECODE_ROW_RE.match(line)
+    if m is None:
+        return None
+    try:
+        # Unpacking raises ValueError on a wrong coord count, exactly
+        # like a non-numeric coord or an `Element` constraint would.
+        left, top, right, bottom = (float(v) for v in m.group(4).split(","))
+        return Element(
+            id=int(m.group(1)),
+            kind=m.group(2),
+            label=m.group(3),
+            bbox=(left, top, right, bottom),
+            conf=float(m.group(5)),
+        )
+    except ValueError:
+        return None
+
+
+def decode_elements(text: str) -> list[Element]:
+    """A whole listing back to elements — the strict inverse of
+    `format_elements`. The first line must be the header and every
+    following non-blank line must parse as a row; anything else raises
+    ValueError naming the line. For screen text that mixes rows with
+    prose, use `parse_row` per line instead."""
+    lines = text.splitlines()
+    if not lines or not is_header(lines[0]):
+        raise ValueError(
+            f"decode_elements: first line must be the listing header {LISTING_HEADER!r}"
+        )
+    out: list[Element] = []
+    for n, line in enumerate(lines[1:], start=2):
+        if not line.strip():
+            continue  # a trailing blank line is not a grammar violation
+        el = parse_row(line)
+        if el is None:
+            raise ValueError(
+                f"decode_elements: line {n} is not an element row: {line!r}"
+            )
+        out.append(el)
+    return out
+
+
+def format_elements(items: Iterable[Element]) -> str:
+    """Human/agent-friendly element list — the header plus one row per
+    element. Lives beside its inverse (`decode_elements`) so the two
+    change in the same edit."""
+    return "\n".join([LISTING_HEADER, *(e.row() for e in items)])
+
+
+def label_hit(needle: str, label: str) -> bool:
+    """The base text-match rule every listing consumer shares: substring
+    for normal needles, WHOLE-label equality for single characters.
+    Keyboard keys OCR as standalone one-letter elements, while a single
+    char as a substring would match inside almost any label — exact
+    matching is what makes letter-key anchors usable. One home (macro
+    guards and the page matcher both build on it) so the two can never
+    drift."""
+    if len(needle) == 1:
+        return label.strip() == needle
+    return needle in label
+
+
+@dataclass(frozen=True)
+class Screen:
+    """One reading of the phone screen, parsed once and asked many times.
+
+    Built from the element listing. Three readings fall out of it, and
+    the distinction is load-bearing:
+
+    `content` is what a WHOLE-SCREEN check matches — labels only, with the
+    listing's own syntax removed. Matching the raw listing meant
+    `require: "conf"` hit the header on every screen and `forbid: "12"`
+    tripped on the coordinate `0.128`; both directions are silent, and a
+    guard that always passes reads exactly like a guard that passed.
+
+    `rows` is what an ELEMENT-granular check matches — the parsed
+    `Element` per row, so a match can be required to sit where it was
+    rehearsed (macro region clauses) or learned (page anchors).
+
+    `labels_text` is what a MODEL CALL reads — the row labels alone,
+    without the plain prose a macro result puts ahead of its view."""
+
+    text: str
+    content: str
+    rows: tuple[Element, ...]
+
+    @classmethod
+    def read(cls, text: str) -> "Screen":
+        content: list[str] = []
+        rows: list[Element] = []
+        for line in text.splitlines():
+            el = parse_row(line)
+            if el is not None:
+                content.append(el.label)
+                rows.append(el)
+            elif line.strip() and not is_header(line) and not ROW_RE.match(line):
+                # A plain text block: keep it whole, or a check could never
+                # match non-listing content. A row-SHAPED line that failed
+                # `parse_row` is dropped instead — its coordinate text in the
+                # haystack is the `forbid: "12"` trap `content` exists to
+                # kill.
+                content.append(line)
+        return cls(text=text, content="\n".join(content), rows=tuple(rows))
+
+    @property
+    def labels_text(self) -> str:
+        """The row labels as one block, top to bottom — what a model call
+        reads (`content` keeps a result's plain prose for guards; a call
+        must not)."""
+        return "\n".join(self.labels)
+
+    @property
+    def labels(self) -> list[str]:
+        """The non-blank row labels, top to bottom."""
+        return [r.label for r in self.rows if r.label.strip()]
+
+    @property
+    def readable(self) -> bool:
+        """False for a failed camera read. Every consumer must decide what
+        an unreadable screen means BEFORE evaluating, because `not` is
+        satisfied by an empty haystack."""
+        return bool(self.text)
+
+
+BLANK_SCREEN = Screen(text="", content="", rows=())
+
+
+def is_screen(text: str) -> bool:
+    """Whether a wire text is a screen: the listing header plus at least
+    one line that parses as a real element row — a header quoted in
+    prose (or a superseded labels-only stub) is not a screen."""
+    return LISTING_HEADER in text and any(
+        parse_row(line) is not None for line in text.splitlines()
+    )

@@ -1,0 +1,369 @@
+"""Exercise the shared output contract through real CLI entry points."""
+
+from __future__ import annotations
+
+import json
+import os
+import re
+import subprocess
+import sys
+from argparse import Namespace
+from importlib.util import find_spec
+
+import pytest
+
+from hardware import buildlog, scheme
+from tests.timing_helpers import PROCESS_TIMEOUT
+
+
+def invoke(tmp_path, *args, input=None, timeout=60):
+    if args[0] == "manual":
+        # Supply isolated figure fixtures; this test exercises the real CLI
+        # without requiring an entire generated CAD assembly tree.
+        figures = tmp_path / "svg"
+        figures.mkdir(exist_ok=True)
+        for content in (scheme.REPO_ROOT / "hardware/documents/manual/content").glob(
+            "*.json"
+        ):
+            for name in re.findall(
+                r'"(?:src|render)"\s*:\s*"([^"/]+\.svg)"',
+                content.read_text(encoding="utf-8"),
+            ):
+                (figures / name).write_text(
+                    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"/>',
+                    encoding="utf-8",
+                )
+    return subprocess.run(
+        [sys.executable, "-m", "hardware", *args],
+        cwd=scheme.REPO_ROOT,
+        env={
+            **os.environ,
+            "PHYSICLAW_HW_OUTPUT": str(tmp_path),
+            "NO_COLOR": "",
+            "COLUMNS": "60",
+        },
+        input=input,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+    )
+
+
+@pytest.mark.parametrize("command", ["check", "manual", "sourcing", "drawing"])
+def test_document_and_check_clis_emit_only_saved_json_events(tmp_path, command):
+    result = invoke(tmp_path, command, "--log-format", "json")
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert result.stderr == ""
+    events = [json.loads(line) for line in result.stdout.splitlines()]
+    assert events[0]["event"] == "command_started"
+    assert events[-1]["event"] == "command_finished"
+    assert events[-1]["status"] == "success"
+    assert events[-1]["exit_code"] == 0
+    assert {event["schema_version"] for event in events} == {1}
+    assert len({event["command"] for event in events}) == 1
+    assert [event["sequence"] for event in events] == list(range(1, len(events) + 1))
+    saved = [
+        json.loads(line)
+        for line in next((tmp_path / "logs").glob("*.jsonl"))
+        .read_text(encoding="utf-8")
+        .splitlines()
+    ]
+    assert saved == events
+    assert any(event["event"] == "task_finished" for event in events)
+
+
+@pytest.mark.parametrize("command", ["check", "manual", "sourcing", "drawing"])
+def test_human_output_has_one_result_and_aligned_elapsed_column(tmp_path, command):
+    result = invoke(tmp_path, command)
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert result.stderr == ""
+    assert result.stdout.startswith("Hardware ")
+    assert result.stdout.endswith("\n\n")
+    assert result.stdout.count("SUCCESS") == 1
+    assert "INFO" not in result.stdout
+    assert "warning:" not in result.stdout.lower()
+    assert "\x1b" not in result.stdout
+    lines = result.stdout.splitlines()
+    heading = next(line for line in lines if "Elapsed" in line)
+    timed = [line for line in lines if re.search(r"\d+\.\ds$", line)]
+    assert len(timed) >= 2
+    assert {len(line) for line in timed} == {len(heading)}
+    assert all(len(line) <= 60 for line in lines)
+
+
+def test_failed_cli_saves_traceback_and_ends_with_json_failure(tmp_path):
+    result = invoke(
+        tmp_path, "release", "verify", "--version", "invalid", "--log-format", "json"
+    )
+    assert result.returncode != 0
+    assert result.stderr == ""
+    events = [json.loads(line) for line in result.stdout.splitlines()]
+    assert events[-1]["event"] == "command_finished"
+    assert events[-1]["status"] == "failed"
+    assert events[-1]["exit_code"] != 0
+    assert any(event.get("traceback") for event in events)
+
+
+@pytest.mark.parametrize("command", ["annotate", "mark", "replay", "refit", "camera"])
+def test_removed_commands_are_rejected(tmp_path, command):
+    result = invoke(tmp_path, command)
+    assert result.returncode == 2
+    assert f"unknown command {command!r}" in result.stderr
+
+
+@pytest.mark.parametrize("interrupted", [False, True])
+def test_shared_lifecycle_saves_failure_and_cancellation_without_terminal_traceback(
+    tmp_path, monkeypatch, capsys, interrupted
+):
+    monkeypatch.setattr(scheme, "OUTPUT_DIR", tmp_path)
+
+    def run_operation():
+        buildlog.event("warning", "Hidden warning", level="warning")
+        if interrupted:
+            raise KeyboardInterrupt
+        raise ValueError("Missing source")
+
+    with (
+        pytest.raises(SystemExit) as stopped,
+        buildlog.command("Hardware test"),
+        buildlog.step("Render HTML"),
+    ):
+        run_operation()
+    assert stopped.value.code == (130 if interrupted else 1)
+    output = capsys.readouterr().out
+    assert ("CANCELLED" if interrupted else "FAILED") in output
+    assert "Traceback" not in output
+    assert "Hidden warning" not in output
+    assert "Details:" in output
+    events = [
+        json.loads(line)
+        for line in next((tmp_path / "logs").glob("*.jsonl"))
+        .read_text(encoding="utf-8")
+        .splitlines()
+    ]
+    assert events[-1]["status"] == ("cancelled" if interrupted else "failed")
+    assert any(event.get("traceback") for event in events)
+
+
+def test_subprocess_stdout_and_stderr_are_saved_without_corrupting_json(
+    tmp_path, monkeypatch, capsys
+):
+    monkeypatch.setattr(scheme, "OUTPUT_DIR", tmp_path)
+    args = Namespace(log_format="json", verbose=False)
+    child = (
+        "import sys\n"
+        'print(\'{"event":"task_finished","schema_version":1,"message":"Child complete"}\')\n'
+        "print('native warning', file=sys.stderr)\n"
+    )
+    with buildlog.command("Hardware subprocess", args):
+        output = buildlog.run_process([sys.executable, "-c", child], merge_stderr=False)
+    assert json.loads(output)["event"] == "task_finished"
+    events = [json.loads(line) for line in capsys.readouterr().out.splitlines()]
+    assert any(
+        event.get("child_event", {}).get("event") == "task_finished" for event in events
+    )
+    assert any(
+        event["message"] == "native warning" and event["stream"] == "stderr"
+        for event in events
+    )
+    assert events[-1]["status"] == "success"
+
+
+@pytest.mark.parametrize("cancellable", [False, True])
+def test_subprocess_timeout_retains_partial_diagnostics(
+    tmp_path, monkeypatch, cancellable
+):
+    import time
+    from contextlib import contextmanager
+    from threading import Event
+
+    from hardware.port import processes
+
+    ready = tmp_path / "diagnostics-written"
+    owned_process = processes.owned_process
+
+    @contextmanager
+    def started_process(*args, **kwargs):
+        with owned_process(*args, **kwargs) as owner:
+            deadline = time.monotonic() + PROCESS_TIMEOUT
+            while not ready.exists():
+                assert owner.process.poll() is None, "child exited before writing"
+                assert time.monotonic() < deadline, "child did not write diagnostics"
+                time.sleep(0.01)
+            yield owner
+
+    # Python startup (including coverage imports) must not consume the timeout
+    # intended to interrupt a child that has already produced partial output.
+    monkeypatch.setattr(processes, "owned_process", started_process)
+    monkeypatch.setattr(scheme, "OUTPUT_DIR", tmp_path)
+    with pytest.raises(SystemExit, match="1"):
+        with buildlog.command("Hardware subprocess"):
+            buildlog.run_process(
+                [
+                    sys.executable,
+                    "-u",
+                    "-c",
+                    "from threading import Event; from pathlib import Path; "
+                    "print('partial diagnostics', flush=True); "
+                    f"Path({str(ready)!r}).touch(); Event().wait()",
+                ],
+                timeout=0.5,
+                cancelled=Event() if cancellable else None,
+            )
+    events = [
+        json.loads(line)
+        for line in next((tmp_path / "logs").glob("*.jsonl"))
+        .read_text(encoding="utf-8")
+        .splitlines()
+    ]
+    assert any(event["message"] == "partial diagnostics" for event in events)
+    exited = next(event for event in events if event["event"] == "subprocess_exited")
+    assert exited["returncode"] != 0
+    assert events[-1]["status"] == "failed"
+
+
+def test_subprocess_collector_failure_stops_child_and_fails_run(
+    tmp_path, monkeypatch, capsys
+):
+    monkeypatch.setattr(scheme, "OUTPUT_DIR", tmp_path)
+    original_emit = buildlog.BuildLog.emit
+
+    def fail_output(log, event, message, **fields):
+        if event == "subprocess_output":
+            raise OSError("Cannot save child output")
+        original_emit(log, event, message, **fields)
+
+    monkeypatch.setattr(buildlog.BuildLog, "emit", fail_output)
+    with pytest.raises(SystemExit, match="1"):
+        with buildlog.command("Hardware collector"):
+            buildlog.run_process(
+                [
+                    sys.executable,
+                    "-u",
+                    "-c",
+                    "from threading import Event; print('diagnostic'); Event().wait()",
+                ],
+                timeout=5,
+            )
+    output = capsys.readouterr()
+    assert output.err == ""
+    assert "FAILED" in output.out and "SUCCESS" not in output.out
+    events = [
+        json.loads(line)
+        for line in next((tmp_path / "logs").glob("*.jsonl"))
+        .read_text(encoding="utf-8")
+        .splitlines()
+    ]
+    assert any(
+        "Cannot save child output" in event.get("traceback", "") for event in events
+    )
+    assert (
+        next(event for event in events if event["event"] == "subprocess_exited")[
+            "returncode"
+        ]
+        != 0
+    )
+
+
+@pytest.mark.parametrize(
+    "child",
+    ["raise SystemExit(130)", "import signal; signal.raise_signal(signal.SIGINT)"],
+)
+def test_interrupted_child_produces_cancelled_parent_result(
+    tmp_path, monkeypatch, capsys, child
+):
+    monkeypatch.setattr(scheme, "OUTPUT_DIR", tmp_path)
+    with pytest.raises(SystemExit) as stopped:
+        with buildlog.command("Hardware child"):
+            buildlog.run_process([sys.executable, "-c", child])
+    assert stopped.value.code == 130
+    output = capsys.readouterr().out
+    assert "CANCELLED" in output and "FAILED" not in output
+    events = [
+        json.loads(line)
+        for line in next((tmp_path / "logs").glob("*.jsonl"))
+        .read_text(encoding="utf-8")
+        .splitlines()
+    ]
+    assert events[-1]["status"] == "cancelled"
+
+
+@pytest.mark.parametrize("command", ["parts", "print"])
+def test_cad_exports_share_json_contract_with_real_geometry(tmp_path, command):
+    if command == "parts":
+        script = (
+            "from hardware.parts import export_custom\n"
+            "export_custom.ALL_PARTS = export_custom.ALL_PARTS[:1]\n"
+            "from hardware.__main__ import main\n"
+            "raise SystemExit(main(['parts', '--custom', '--log-format', 'json']))\n"
+        )
+    else:
+        script = (
+            "from hardware.parts import build_custom_parts as printing\n"
+            "printing.CUSTOM_PARTS = printing.CUSTOM_PARTS[:1]\n"
+            "raise SystemExit(printing.main(['--log-format', 'json']))\n"
+        )
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        cwd=scheme.REPO_ROOT,
+        env={**os.environ, "PHYSICLAW_HW_OUTPUT": str(tmp_path)},
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert result.stderr == ""
+    events = [json.loads(line) for line in result.stdout.splitlines()]
+    assert {event["command"] for event in events} == {command}
+    assert any(event["event"] == "task_finished" for event in events)
+    assert events[-1]["status"] == "success"
+    assert events[-1]["exit_code"] == 0
+    if command == "parts":
+        assert list((tmp_path / "step").glob("*.step"))
+    else:
+        assert list((tmp_path / "print_3d").glob("*.zip"))
+
+
+def test_make_check_forwards_format_flags_without_recipe_noise(tmp_path):
+    result = subprocess.run(
+        [
+            "make",
+            "--no-print-directory",
+            "hw-check",
+            f"HW_DOC={sys.executable} -m hardware",
+            "ARGS=--log-format json",
+        ],
+        cwd=scheme.REPO_ROOT,
+        env={**os.environ, "PHYSICLAW_HW_OUTPUT": str(tmp_path)},
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert result.returncode == 0, result.stderr + result.stdout
+    events = [json.loads(line) for line in result.stdout.splitlines()]
+    assert events[0]["event"] == "command_started"
+    assert events[-1]["status"] == "success"
+
+
+@pytest.mark.parametrize("flag", ["-h", "--help"])
+def test_make_step_help_without_positional_or_stdin(tmp_path, flag):
+    if find_spec("build123d") is None:
+        pytest.skip("CAD group not installed")
+    result = subprocess.run(
+        [
+            "make",
+            "--no-print-directory",
+            "hw-step",
+            f"HW={sys.executable} -m hardware",
+            f"ARGS={flag}",
+        ],
+        cwd=scheme.REPO_ROOT,
+        env={**os.environ, "PHYSICLAW_HW_OUTPUT": str(tmp_path)},
+        stdin=subprocess.DEVNULL,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "usage:" in result.stdout
+    assert result.stderr == ""

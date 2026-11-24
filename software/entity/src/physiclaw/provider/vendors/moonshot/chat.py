@@ -1,0 +1,57 @@
+"""Moonshot — OpenAI-compatible endpoint. Pure declaration. Provider id
+is the API surface (`moonshot`), not the brand (`kimi`).
+
+Auth: `MOONSHOT_API_KEY` env, or `[provider] moonshot_api_key` in
+`~/.physiclaw/config.toml`. `BASE_URL` defaults to the China endpoint;
+override via `[providers.moonshot] base_url = "https://api.moonshot.ai/v1"`
+in user config (a key minted for one domain returns 401 on the other).
+
+Caching: on K2, markers looked load-bearing (A/B: user-message change
+hit 0% without markers, 100% with). On K3 a three-arm session replay
+(logged bytes / byte-stable stub shapes / markers stripped) returned
+token-identical cached counts — the cache is content-based and ignores
+both `cache_control` and text-block vs bare-string shape, so the
+inherited `OpenAICacheMarkers` are harmless uniformity, not
+load-bearing. K3's hit collapses (~95% → ~75% on screen turns) are
+`compact.drop_stale_screens` rewriting the previous screen to its stub
+— the compaction trade-off, not a serialization bug. Entries take
+~60–120s to materialize in that older replay. Current K3/K3.1 API docs
+specify an automatic 5-minute TTL by default, refreshed on hits, with
+an optional 1-hour TTL. Do not infer a guaranteed materialization delay
+from the old measurements. Cache writes and reads are disjoint input
+buckets, reported in `prompt_tokens_details`:
+https://platform.kimi.ai/docs/guide/context-caching
+
+K2's occasional top-level `usage.cached_tokens` placement is handled
+by the base `_parse_usage` fallback in `openai_compat.py`.
+
+Thinking: K2.x thinks by default and has one switch — `thinking:
+{type: disabled | enabled}` — so the two low levels turn it off and
+the two high levels leave it on. K3 always thinks and scales with
+`reasoning_effort` (low / high / max; the `thinking` block is rejected
+there), so "off" gets its floor. Neither `reasoning_effort` on K2.x
+nor a `max_tokens` cap reduces K2.x's thinking: the first is ignored,
+the second truncates the reply before the answer. Any other model id
+gets nothing extra.
+"""
+
+from typing import Any
+
+from physiclaw.contract.dto import Thinking
+from physiclaw.provider.chat.openai_compat import OpenAICompatibleProvider
+
+
+class MoonshotChatProvider(OpenAICompatibleProvider):
+    PROVIDER_ID = "moonshot"
+    BASE_URL = "https://api.moonshot.cn/v1"
+    # https://platform.kimi.ai/docs/guide/use-thinking-models
+    REPLAY_REASONING_CONTENT = True
+
+    def thinking_params(self, thinking: Thinking) -> dict[str, Any]:
+        if self.model.startswith("kimi-k2"):
+            off = thinking in ("off", "low")
+            return {"thinking": {"type": "disabled" if off else "enabled"}}
+        if self.model.startswith("kimi-k3"):
+            effort = {"off": "low", "low": "low", "medium": "high", "high": "max"}
+            return {"reasoning_effort": effort[thinking]}
+        return {}

@@ -1,0 +1,301 @@
+"""Detect UI elements via icon detection + OCR.
+
+Two element kinds — icon (label="") and text (label=content):
+
+    [
+      {"id": 0, "kind": "icon", "label": "",      "bbox": [0.02, 0.06, 0.11, 0.10], "conf": 0.64},
+      {"id": 1, "kind": "text", "label": "$29.9", "bbox": [0.37, 0.54, 0.51, 0.56], "conf": 0.91}
+    ]
+"""
+
+import logging
+import time
+from dataclasses import dataclass
+
+import numpy as np
+
+from physiclaw.common import paths
+from physiclaw.common.bbox import validate_bbox
+from physiclaw.common.listing import Element
+from physiclaw.common.log_style import FailureState
+from physiclaw.common.text import write_text
+from physiclaw.core.vision.render import annotate_elements
+
+log = logging.getLogger(__name__)
+_icon_failure = FailureState()
+_ocr_failure = FailureState()
+
+
+@dataclass
+class UIElement:
+    """Mutable detection staging — ids are reassigned after sorting and
+    bboxes are built up in place. Converts to the canonical shared shape
+    (`common.listing.Element`, which owns rounding and the row-grammar
+    constraints) at the boundary via `to_element`."""
+
+    id: int
+    kind: str  # "icon" | "text"
+    label: str  # "" for icon, OCR content for text
+    bbox: list[float]  # [left, top, right, bottom] 0-1
+    conf: float
+
+    def to_element(self) -> Element:
+        left, top, right, bottom = self.bbox
+        return Element(
+            id=self.id,
+            kind=self.kind,
+            label=self.label,
+            bbox=(left, top, right, bottom),
+            conf=self.conf,
+        )
+
+    def to_dict(self) -> dict:
+        return self.to_element().to_dict()
+
+
+# ── Detection ─────────────────────────────────
+
+
+def detect_ui_elements(
+    frame: np.ndarray,
+    icon_detector=None,
+    ocr_reader=None,
+    icon_confidence: float = 0.2,
+    min_icon_conf: float = 0.3,
+    min_text_conf: float = 0.7,
+) -> tuple[list[UIElement], np.ndarray]:
+    """Run icon detection + OCR → structured elements + annotated image.
+
+    Args:
+        frame: BGR numpy array. Use `cv2.imread(path)` for a file.
+    """
+    h, w = frame.shape[:2]
+
+    # Icons then text, deliberately SEQUENTIAL. They're independent, so
+    # threading looks free — but cv2.dnn and onnxruntime each already use
+    # every core. On an 8-core macOS box, running both at once measured only
+    # ≈1.05× with no memory win: cores are the limit, not the GIL (more
+    # cores could help). The icon pass (≈920ms) dominates the ≈1485ms total;
+    # both models warmed hold ≈1.5GB resident.
+    t0 = time.perf_counter()
+    icons = _detect_icons(frame, w, h, icon_detector, icon_confidence)
+    t1 = time.perf_counter()
+    texts = _detect_texts(frame, w, h, ocr_reader)
+    t2 = time.perf_counter()
+    elements = _clean(icons + texts, min_icon_conf, min_text_conf)
+
+    elements.sort(key=lambda e: (e.bbox[1], e.bbox[0]))
+    for i, e in enumerate(elements):
+        e.id = i
+
+    annotated = annotate_elements(frame, elements_to_json(elements), w, h)
+    n_ico = sum(1 for e in elements if e.kind == "icon")
+    log.info(
+        "detected %d UI elements (%d icons, %d text) — input %dx%d, "
+        "icon %.2fs, ocr %.2fs",
+        len(elements),
+        n_ico,
+        len(elements) - n_ico,
+        w,
+        h,
+        t1 - t0,
+        t2 - t1,
+    )
+    return elements, annotated
+
+
+def _detect_icons(frame, w, h, detector, confidence) -> list[UIElement]:
+    try:
+        from physiclaw.core.vision.icon_detect import IconDetector
+
+        det = detector or IconDetector()
+        elements = [
+            UIElement(
+                0,
+                "icon",
+                "",
+                [e.bbox[0] / w, e.bbox[1] / h, e.bbox[2] / w, e.bbox[3] / h],
+                e.confidence,
+            )
+            for e in det.detect(frame, confidence=confidence)
+        ]
+    except (ImportError, FileNotFoundError) as ex:
+        log.log(
+            _icon_failure.level(ex),
+            "icon detection unavailable: %s",
+            ex,
+            exc_info=True,
+            extra={
+                "console_message": "Icon detection unavailable — continuing with screen text"
+            },
+        )
+        return []
+    if _icon_failure.recovered():
+        log.info("Icon detection restored", extra={"console": True})
+    return elements
+
+
+def _single_line(text: str) -> str:
+    """OCR emits one detected line per result, but nothing upstream
+    guarantees the string is `splitlines`-clean — and `Element` refuses
+    labels that are not, so one stray control character must not crash
+    the whole detection pass. Collapse any line boundary to a space."""
+    return " ".join(text.splitlines())
+
+
+def _detect_texts(frame, w, h, reader) -> list[UIElement]:
+    try:
+        from physiclaw.core.vision.ocr import OCRReader
+
+        rdr = reader or OCRReader()
+        # Full frame in (no max_edge), but RapidOCR caps detection itself
+        # (limit_side_len=736, max_side_len=2000), so only the recognition
+        # crops use full resolution. Capping max_edge here is a small lever:
+        # ≈17% off OCR time at 1566, no memory change, slight recall shift.
+        elements = [
+            UIElement(
+                0,
+                "text",
+                _single_line(t.text),
+                [t.bbox[0] / w, t.bbox[1] / h, t.bbox[2] / w, t.bbox[3] / h],
+                t.confidence,
+            )
+            for t in rdr.read(frame)
+        ]
+    except Exception as ex:
+        # Degrade to "no text" like icons degrade to "no icons": a broken
+        # RapidOCR install fails at read() time (missing/corrupt bundled
+        # models raise runtime errors, not ImportError) and must not take
+        # the whole detection pass — and the icons — down with it.
+        log.log(
+            _ocr_failure.level(ex),
+            "OCR unavailable: %s",
+            ex,
+            exc_info=True,
+            extra={
+                "console_message": "Screen text unavailable — continuing with icons"
+            },
+        )
+        return []
+    if _ocr_failure.recovered():
+        log.info("Screen text detection restored", extra={"console": True})
+    return elements
+
+
+# ── Filtering ─────────────────────────────────
+
+
+def _clean(
+    elements: list[UIElement], min_icon_conf: float = 0.3, min_text_conf: float = 0.7
+) -> list[UIElement]:
+    """Drop noise, then dedupe by IoU."""
+    out = []
+    for e in elements:
+        try:
+            validate_bbox(e.bbox)
+            # Listing precision can collapse an otherwise usable box.
+            validate_bbox(list(e.to_element().bbox))
+        except (TypeError, ValueError):
+            continue
+        w = e.bbox[2] - e.bbox[0]
+        h = e.bbox[3] - e.bbox[1]
+        if w * h < 1e-4:
+            continue
+        if e.kind == "icon" and e.conf < min_icon_conf:
+            continue
+        if e.kind == "text" and e.conf < min_text_conf:
+            continue
+        if e.kind == "icon" and w > 0.95 and h > 0.95:
+            continue
+        out.append(e)
+    return _dedupe(out)
+
+
+def _dedupe(elements: list[UIElement], iou_thresh: float = 0.7) -> list[UIElement]:
+    """Remove near-duplicate boxes by IoU, keeping higher confidence."""
+    elements = sorted(elements, key=lambda e: -e.conf)
+    keep: list[UIElement] = []
+    for e in elements:
+        if any(_iou(e.bbox, k.bbox) > iou_thresh for k in keep):
+            continue
+        keep.append(e)
+    return keep
+
+
+def _iou(a: list[float], b: list[float]) -> float:
+    x1, y1 = max(a[0], b[0]), max(a[1], b[1])
+    x2, y2 = min(a[2], b[2]), min(a[3], b[3])
+    inter = max(0, x2 - x1) * max(0, y2 - y1)
+    if inter == 0:
+        return 0.0
+    return inter / (
+        (a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - inter
+    )
+
+
+def elements_to_json(elements: list[UIElement]) -> list[dict]:
+    """Convert a list of UIElement objects to dicts."""
+    return [e.to_dict() for e in elements]
+
+
+# ── CLI ───────────────────────────────────────
+
+if __name__ == "__main__":
+    import argparse
+    from pathlib import Path
+
+    import cv2
+
+    from physiclaw.common.log_style import (
+        add_log_arguments,
+        configure_console,
+        report_error,
+    )
+    from physiclaw.core.vision.util import compact_json
+
+    p = argparse.ArgumentParser(description="Detect UI elements (icons + OCR)")
+    p.add_argument("image")
+    p.add_argument("-c", "--confidence", type=float, default=0.2)
+    p.add_argument("--min-icon-conf", type=float, default=0.3)
+    p.add_argument("--min-text-conf", type=float, default=0.7)
+    p.add_argument("-o", "--output", help="Output path for annotated image")
+    p.add_argument("--json", action="store_true", help="Output JSON only")
+    add_log_arguments(p)
+    args = p.parse_args()
+
+    configure_console("vision", verbose=args.verbose, log_format=args.log_format)
+
+    frame = cv2.imread(args.image)
+    if frame is None:
+        report_error(f"Cannot read image: {args.image}", tag="vision")
+        raise SystemExit(1)
+
+    elements, annotated = detect_ui_elements(
+        frame,
+        icon_confidence=args.confidence,
+        min_icon_conf=args.min_icon_conf,
+        min_text_conf=args.min_text_conf,
+    )
+
+    if args.json:
+        print(compact_json(elements_to_json(elements)))
+    else:
+        print(f"{len(elements)} elements detected:")
+        for e in elements:
+            print(
+                f"  [{e.id:3d}] {e.label:30s}  bbox={[round(v, 3) for v in e.bbox]}  conf={e.conf:.2f}"
+            )
+
+    out_path = (
+        Path(args.output)
+        if args.output
+        else paths.snapshots_dir() / (Path(args.image).stem + "_ui_elements.jpg")
+    )
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(str(out_path), annotated)
+
+    json_path = out_path.with_suffix(".json")
+    write_text(json_path, compact_json(elements_to_json(elements)))
+
+    print(f"image: {out_path}")
+    print(f"json:  {json_path}")

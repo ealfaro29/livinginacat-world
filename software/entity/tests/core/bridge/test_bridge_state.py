@@ -1,0 +1,749 @@
+"""Tests for `physiclaw.core.bridge.state` — thread-safe LAN bridge.
+
+The class wraps shared state behind a `threading.Lock` and uses two
+`threading.Event` instances for the clipboard / screenshot signals.
+Tests drive state changes via the public methods on a single thread —
+race conditions aren't validated, only the post-condition state.
+
+`time.time` and `time.monotonic` are mocked when needed; `time.sleep`
+gets stubbed so waits return immediately. `save_screenshot` is patched
+to a no-op so writes don't hit disk.
+
+Accepted equivalent / unreachable mutmut survivors:
+
+  - `module.log = logging.getLogger(__name__)` ↔ `log = None` — the
+    module body never invokes the logger; the import is reserved for
+    future debug use.
+  - Local-variable type annotations `Type | None` ↔ `Type & None` —
+    annotations are not evaluated at runtime.
+  - Multi-line `_screenshot_data` declaration collapsed to one line —
+    formatting only, no behavior change.
+  - Inside `wait_for_connection`, `time.monotonic() - stable_since`
+    ↔ `time.monotonic() + stable_since` — both expressions cross
+    `settle_seconds` for any monotonically increasing time stream;
+    the sign affects WHEN (not WHETHER) the helper returns True, and
+    asserting iteration count via sleep-call-count would be a
+    brittle implementation test.
+  - Loop deadline check `time.monotonic() < deadline` ↔ `<= deadline`
+    — discriminator only fires when monotonic equals deadline to the
+    nanosecond, which the time-mocking harness can't reliably hit.
+"""
+
+from __future__ import annotations
+
+import itertools
+from types import SimpleNamespace
+
+import pytest
+
+from physiclaw.core.bridge import state as state_mod
+from physiclaw.core.bridge.state import BridgeState
+from tests.timing_helpers import WAIT_TIMEOUT
+
+
+@pytest.fixture(autouse=True)
+def _no_real_screenshot_writes(mocker) -> None:
+    mocker.patch.object(state_mod, "save_screenshot")
+
+
+@pytest.fixture
+def bs() -> BridgeState:
+    return BridgeState()
+
+
+# ---------- init ----------
+
+
+def test_init_starts_with_no_text_and_no_screenshot(bs: BridgeState) -> None:
+    assert bs.current_text() is None
+    assert bs._screenshot_data is None
+    assert bs.last_seen == 0
+
+
+def test_init_clipboard_and_screenshot_events_start_unset(bs: BridgeState) -> None:
+    assert bs._clipboard_copied.is_set() is False
+    assert bs._screenshot_ready.is_set() is False
+
+
+# ---------- connected property ----------
+
+
+def test_connected_false_at_init() -> None:
+    bs = BridgeState()  # last_seen = 0; time.time() far in the future
+
+    assert bs.connected is False
+
+
+def test_connectivity_hint_suggests_wifi_when_page_is_silent() -> None:
+    bs = BridgeState()  # last_seen = 0 — no poll ever seen
+
+    hint = bs.connectivity_hint()
+
+    assert hint is not None
+    # Worded as a possibility ("may"), never a diagnosis: a silent page is
+    # the NORMAL mid-task state (backgrounded Safari), not proof of a
+    # network problem. And no /bridge-page advice — both Shortcut channels
+    # hit the server directly without the page.
+    assert "may be off Wi-Fi" in hint
+    assert "different Wi-Fi" in hint
+    assert "/bridge" not in hint
+
+
+def test_connectivity_hint_none_while_phone_is_polling(bs: BridgeState, mocker) -> None:
+    fake_time = mocker.patch.object(state_mod.time, "monotonic")
+    fake_time.return_value = 1000.0
+    bs.poll()
+
+    assert bs.connectivity_hint() is None
+
+
+def test_connected_true_when_polled_within_500ms(bs: BridgeState, mocker) -> None:
+    fake_time = mocker.patch.object(state_mod.time, "monotonic")
+    fake_time.return_value = 1000.0
+    bs.poll()  # writes last_seen = 1000.0
+    fake_time.return_value = 1000.4  # 400ms later
+
+    assert bs.connected is True
+
+
+def test_connected_false_when_last_poll_was_over_500ms_ago(
+    bs: BridgeState, mocker
+) -> None:
+    fake_time = mocker.patch.object(state_mod.time, "monotonic")
+    fake_time.return_value = 1000.0
+    bs.poll()
+    fake_time.return_value = 1000.6  # 600ms later — over the 500ms cutoff
+
+    assert bs.connected is False
+
+
+def test_connected_false_at_exactly_500ms_boundary(bs: BridgeState, mocker) -> None:
+    # `< 0.5` (strict). Exactly 0.5s difference must NOT count as
+    # connected — mutating to `<= 0.5` would flip this case.
+    fake_time = mocker.patch.object(state_mod.time, "monotonic")
+    fake_time.return_value = 1000.0
+    bs.poll()
+    fake_time.return_value = 1000.5  # exactly 500ms
+
+    assert bs.connected is False
+
+
+# ---------- wait_for_connection ----------
+
+
+def test_wait_for_connection_returns_true_after_settle_period(
+    bs: BridgeState, mocker
+) -> None:
+    # Fake time advances 0.1s per call (an infinite stream). With
+    # connected=True always and settle_seconds=0.5, the running stable
+    # interval crosses the threshold within a few iterations.
+    mocker.patch.object(state_mod.time, "sleep")  # no real sleep
+    mocker.patch.object(BridgeState, "connected", new=True)
+    counter = itertools.count(start=0.0, step=0.1)
+    mocker.patch.object(state_mod.time, "monotonic", side_effect=lambda: next(counter))
+
+    assert bs.wait_for_connection(timeout=10.0, settle_seconds=0.5) is True
+
+
+def test_wait_for_connection_returns_false_when_timeout_elapses_disconnected(
+    bs: BridgeState, mocker
+) -> None:
+    mocker.patch.object(state_mod.time, "sleep")
+    mocker.patch.object(BridgeState, "connected", new=False)
+    counter = itertools.count(start=0.0, step=0.3)
+    mocker.patch.object(state_mod.time, "monotonic", side_effect=lambda: next(counter))
+
+    assert bs.wait_for_connection(timeout=0.5, settle_seconds=10.0) is False
+
+
+def test_wait_for_connection_resets_settle_timer_on_dropout(
+    bs: BridgeState, mocker
+) -> None:
+    # connected sequence: True, False (drops), True, True, True...
+    # With dropout, stable_since resets to None — settle timer restarts.
+    mocker.patch.object(state_mod.time, "sleep")
+    connected_seq = itertools.chain([True, False], itertools.repeat(True))
+
+    class _Prop:
+        def __get__(self, instance, owner=None):
+            return next(connected_seq)
+
+    mocker.patch.object(BridgeState, "connected", new=_Prop())
+    counter = itertools.count(start=0.0, step=0.2)
+    mocker.patch.object(state_mod.time, "monotonic", side_effect=lambda: next(counter))
+
+    # settle_seconds=0.5, timeout=10 — eventually the long True-stretch
+    # accumulates 0.5s of stable time and the helper returns True.
+    assert bs.wait_for_connection(timeout=10.0, settle_seconds=0.5) is True
+
+
+def test_wait_for_connection_sleeps_with_200ms_polling_interval(
+    bs: BridgeState, mocker
+) -> None:
+    # The sleep-between-iterations interval is 0.2s; mutating it would
+    # change the polling cadence noticeably.
+    sleep = mocker.patch.object(state_mod.time, "sleep")
+    mocker.patch.object(BridgeState, "connected", new=False)
+    counter = itertools.count(start=0.0, step=0.5)
+    mocker.patch.object(state_mod.time, "monotonic", side_effect=lambda: next(counter))
+
+    bs.wait_for_connection(timeout=1.0, settle_seconds=10.0)
+
+    sleep.assert_called_with(0.2)
+
+
+def test_wait_for_connection_default_settle_seconds_is_one() -> None:
+    import inspect
+
+    sig = inspect.signature(BridgeState.wait_for_connection)
+    assert sig.parameters["settle_seconds"].default == 1.0
+
+
+def test_wait_for_connection_returns_true_at_exact_settle_boundary(
+    bs: BridgeState, mocker
+) -> None:
+    # `>= settle_seconds` (inclusive). Crafted timeline:
+    #   call 1: deadline   = 0.0 + 10 = 10.0
+    #   iter 1 while       = 0.1  (in deadline)
+    #   iter 1 stable_since= 0.2
+    #   sleep ×1
+    #   iter 2 while       = 0.3
+    #   iter 2 elif        = 0.4   →  0.4 − 0.2 = 0.2 == settle_seconds
+    # Original `>=` returns True here. Mutating to `>` requires a 3rd
+    # iteration — at least one extra sleep call would land.
+    sleep = mocker.patch.object(state_mod.time, "sleep")
+    mocker.patch.object(BridgeState, "connected", new=True)
+    times = iter([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7])
+    mocker.patch.object(state_mod.time, "monotonic", side_effect=lambda: next(times))
+
+    bs.wait_for_connection(timeout=10.0, settle_seconds=0.2)
+
+    # Original returns at exact-equal boundary after one sleep. A `>`
+    # mutation would force at least a 2nd sleep before passing.
+    assert sleep.call_count == 1
+
+
+# ---------- send_text / clear_text / current_text ----------
+
+
+def test_send_text_stores_value_and_clears_clipboard_event(bs: BridgeState) -> None:
+    bs._clipboard_copied.set()  # simulate stale signal
+
+    bs.send_text("hello")
+
+    assert bs.current_text() == "hello"
+    assert bs._clipboard_copied.is_set() is False
+
+
+def test_clear_text_resets_text_to_none_and_clears_event(bs: BridgeState) -> None:
+    bs.send_text("hello")
+    bs._clipboard_copied.set()
+
+    bs.clear_text()
+
+    assert bs.current_text() is None
+    assert bs._clipboard_copied.is_set() is False
+
+
+# ---------- fetch_text ----------
+
+
+def test_fetch_text_returns_text_and_marks_clipboard_copied(bs: BridgeState) -> None:
+    bs.send_text("payload")
+
+    text = bs.fetch_text()
+
+    assert text == "payload"
+    assert bs._clipboard_copied.is_set() is True
+
+
+def test_fetch_text_when_no_text_returns_none_and_does_not_set_event(
+    bs: BridgeState,
+) -> None:
+    text = bs.fetch_text()
+
+    assert text is None
+    assert bs._clipboard_copied.is_set() is False
+
+
+# ---------- expire_text ----------
+
+
+def test_expire_text_clears_unfetched_text(bs: BridgeState) -> None:
+    bs.send_text("payload")
+
+    assert bs.expire_text() is False
+    assert bs.current_text() is None
+    assert bs.is_copied() is False
+
+
+def test_expire_text_after_fetch_reports_late_success(bs: BridgeState) -> None:
+    # The Shortcut fetched in the gap between the caller's wait timing out
+    # and the expiry — the phone HAS the text, so the sync must count as a
+    # (late) success, and the state must match the confirmed path (text
+    # still queued, copied set), never "copied set with nothing queued".
+    bs.send_text("payload")
+    bs.fetch_text()
+
+    assert bs.expire_text() is True
+    assert bs.current_text() == "payload"
+    assert bs.is_copied() is True
+
+
+def test_expire_text_with_nothing_queued_returns_false(bs: BridgeState) -> None:
+    assert bs.expire_text() is False
+    assert bs.is_copied() is False
+
+
+# ---------- is_copied ----------
+
+
+def test_is_copied_false_before_any_copy(bs: BridgeState) -> None:
+    bs.send_text("payload")
+
+    assert bs.is_copied() is False
+
+
+def test_is_copied_true_after_fetch(bs: BridgeState) -> None:
+    bs.send_text("payload")
+    bs.fetch_text()
+
+    assert bs.is_copied() is True
+
+
+def test_is_copied_true_after_tap_confirmation(bs: BridgeState) -> None:
+    bs.send_text("old")
+    bs.mark_clipboard_copied(bs.clipboard_state()["text_id"])
+
+    assert bs.is_copied() is True
+
+
+def test_is_copied_resets_when_new_text_queued(bs: BridgeState) -> None:
+    # New text hasn't been copied yet — the flag must not linger from the
+    # previous copy, or the phone would falsely show a stale confirmation.
+    bs.send_text("old")
+    bs.mark_clipboard_copied(bs.clipboard_state()["text_id"])
+    bs.send_text("fresh")
+
+    assert bs.is_copied() is False
+
+
+def test_is_copied_resets_when_text_cleared(bs: BridgeState) -> None:
+    bs.send_text("old")
+    bs.mark_clipboard_copied(bs.clipboard_state()["text_id"])
+    bs.clear_text()
+
+    assert bs.is_copied() is False
+
+
+# ---------- mark_clipboard_copied / wait_clipboard ----------
+
+
+def test_mark_clipboard_copied_sets_the_event(bs: BridgeState) -> None:
+    bs.send_text("old")
+    bs.mark_clipboard_copied(bs.clipboard_state()["text_id"])
+
+    assert bs._clipboard_copied.is_set() is True
+
+
+def test_wait_clipboard_returns_true_when_signal_already_set(
+    bs: BridgeState,
+) -> None:
+    bs.send_text("old")
+    bs.mark_clipboard_copied(bs.clipboard_state()["text_id"])
+
+    assert bs.wait_clipboard(timeout=0.01) is True
+
+
+def test_wait_clipboard_returns_false_when_timeout_elapses(
+    bs: BridgeState,
+) -> None:
+    assert bs.wait_clipboard(timeout=0.01) is False
+
+
+def test_wait_clipboard_default_timeout_is_30_seconds() -> None:
+    import inspect
+
+    sig = inspect.signature(BridgeState.wait_clipboard)
+    assert sig.parameters["timeout"].default == 30.0
+
+
+# ---------- poll ----------
+
+
+def test_poll_updates_last_seen_to_current_time(bs: BridgeState, mocker) -> None:
+    mocker.patch.object(state_mod.time, "time", return_value=12345.0)
+
+    bs.poll()
+
+    assert bs.last_seen == 12345.0
+
+
+# ---------- screenshot ----------
+
+
+def test_receive_screenshot_stores_bytes_and_signals_waiters(
+    bs: BridgeState,
+) -> None:
+    payload = b"\x89PNG fake bytes"
+
+    bs.receive_screenshot(payload)
+
+    assert bs._screenshot_data == payload
+    assert bs._screenshot_ready.is_set() is True
+
+
+def test_receive_screenshot_persists_via_save_screenshot(
+    bs: BridgeState, mocker
+) -> None:
+    save = mocker.patch.object(state_mod, "save_screenshot")
+
+    bs.receive_screenshot(b"x")
+
+    save.assert_called_once_with(b"x")
+
+
+def test_clear_screenshot_resets_data_and_event(bs: BridgeState) -> None:
+    bs.receive_screenshot(b"first")
+
+    bs.clear_screenshot()
+
+    assert bs._screenshot_data is None
+    assert bs._screenshot_ready.is_set() is False
+
+
+# ─── recent-screenshots ring ──────────────────────────────────
+
+
+def test_recent_screenshots_empty_at_init(bs: BridgeState) -> None:
+    assert bs.recent_screenshots() == []
+
+
+def test_recent_screenshots_returns_uploads_oldest_to_newest(
+    bs: BridgeState,
+) -> None:
+    for p in (b"a", b"b", b"c"):
+        bs.receive_screenshot(p)
+
+    assert bs.recent_screenshots() == [b"a", b"b", b"c"]
+
+
+def test_recent_screenshots_caps_at_max(bs: BridgeState) -> None:
+    for i in range(state_mod.RECENT_SCREENSHOTS_MAX + 5):
+        bs.receive_screenshot(bytes([i]))
+
+    shots = bs.recent_screenshots()
+    assert len(shots) == state_mod.RECENT_SCREENSHOTS_MAX
+    # Oldest 5 evicted; newest retained.
+    assert shots[-1] == bytes([state_mod.RECENT_SCREENSHOTS_MAX + 4])
+
+
+def test_recent_screenshots_honours_n(bs: BridgeState) -> None:
+    for p in (b"a", b"b", b"c", b"d"):
+        bs.receive_screenshot(p)
+
+    assert bs.recent_screenshots(2) == [b"c", b"d"]
+
+
+def test_clear_screenshot_does_not_touch_ring(bs: BridgeState) -> None:
+    # The MCP consume path must not disturb the ring the layout tool reads.
+    bs.receive_screenshot(b"first")
+    bs.clear_screenshot()
+    bs.wait_screenshot(timeout=0.01)
+
+    assert bs.recent_screenshots() == [b"first"]
+
+
+def test_wait_screenshot_returns_data_when_already_received(
+    bs: BridgeState,
+) -> None:
+    bs.receive_screenshot(b"image-bytes")
+
+    out = bs.wait_screenshot(timeout=0.01)
+
+    assert out == b"image-bytes"
+
+
+def test_wait_screenshot_clears_event_after_returning(bs: BridgeState) -> None:
+    # Once consumed, a subsequent wait should block again — the event
+    # gets cleared inside wait_screenshot so the next caller doesn't
+    # see a stale signal.
+    bs.receive_screenshot(b"first")
+    bs.wait_screenshot(timeout=0.01)
+
+    assert bs._screenshot_ready.is_set() is False
+
+
+def test_wait_screenshot_returns_none_when_timeout_elapses(
+    bs: BridgeState,
+) -> None:
+    assert bs.wait_screenshot(timeout=0.01) is None
+
+
+def test_wait_screenshot_default_timeout_is_10_seconds() -> None:
+    import inspect
+
+    sig = inspect.signature(BridgeState.wait_screenshot)
+    assert sig.parameters["timeout"].default == 10.0
+
+
+# ---------- upload arming + phone IP pin ----------
+
+
+def test_clear_screenshot_arms_and_receive_consumes(bs: BridgeState) -> None:
+    assert not bs.upload_armed()
+    bs.clear_screenshot()
+    assert bs.upload_armed()
+    bs.receive_screenshot(b"png")
+    assert not bs.upload_armed()  # one window, one upload
+
+
+def test_arm_upload_opens_window_without_touching_pending(bs: BridgeState) -> None:
+    # Calibrate steps arm ahead of the user's manual tap; a pending
+    # screenshot must survive (arming is not a consume/clear).
+    bs.receive_screenshot(b"pending")
+    bs.arm_upload()
+    assert bs.upload_armed()
+    assert bs._screenshot_data == b"pending"
+    assert bs._screenshot_ready.is_set()
+
+
+def test_arm_upload_extends_never_shrinks(bs: BridgeState) -> None:
+    bs.arm_upload(100.0)
+    deadline = bs._upload_armed_until
+    bs.arm_upload(1.0)
+    assert bs._upload_armed_until == deadline
+
+
+def test_take_pending_screenshot_returns_none_when_nothing_pending(
+    bs: BridgeState,
+) -> None:
+    assert bs.take_pending_screenshot() is None
+
+
+def test_take_pending_screenshot_consumes_recent_upload(
+    bs: BridgeState, mocker
+) -> None:
+    mocker.patch.object(state_mod, "time", SimpleNamespace(monotonic=lambda: 11.0))
+    cutoff = 10.0
+    bs.receive_screenshot(b"early-upload")
+
+    assert bs.take_pending_screenshot(received_after=cutoff) == b"early-upload"
+    # Consumed — a second take (or a wait) must not see it again.
+    assert bs.take_pending_screenshot(received_after=cutoff) is None
+    assert bs._screenshot_ready.is_set() is False
+
+
+def test_take_pending_screenshot_rejects_upload_before_cutoff(
+    bs: BridgeState,
+    mocker,
+) -> None:
+    mocker.patch.object(state_mod, "time", SimpleNamespace(monotonic=lambda: 9.0))
+    bs.receive_screenshot(b"stale")
+    cutoff = 10.0
+
+    # Received before the cutoff (e.g. before the square was shown) —
+    # left pending, not consumed.
+    assert bs.take_pending_screenshot(received_after=cutoff) is None
+    assert bs._screenshot_ready.is_set() is True
+
+
+def test_wait_screenshot_arms_for_its_own_duration(bs: BridgeState) -> None:
+    # Manual flows (viewport pre-cal) wait without a prior clear — the
+    # wait itself must open the window.
+    bs.wait_screenshot(timeout=0.0)
+    assert bs.upload_armed()
+
+
+def test_upload_ip_gate_tofu_then_match(bs: BridgeState) -> None:
+    assert bs.upload_ip_allowed("192.168.1.30")  # nothing fresh → admitted
+    assert not bs.upload_ip_allowed("192.168.1.66")  # fresh sender known → reject
+    assert bs.upload_ip_allowed("192.168.1.30")  # admitted IP stays fine
+
+
+def test_upload_ip_gate_always_allows_loopback(bs: BridgeState) -> None:
+    assert bs.upload_ip_allowed("127.0.0.1")
+    assert bs.upload_ip_allowed(None)
+
+
+def test_upload_ip_gate_readmits_when_everyone_expires(
+    bs: BridgeState, monkeypatch: pytest.MonkeyPatch, mocker
+) -> None:
+    mocker.patch.object(state_mod.time, "monotonic", side_effect=[10.0, 11.0])
+    # DHCP heal: every known IP aging past the TTL lets the next sender in
+    # trust-on-first-use instead of being locked out until restart.
+    assert bs.upload_ip_allowed("192.168.1.30")
+    monkeypatch.setattr(state_mod, "PHONE_IP_TTL_SECONDS", 0.0)
+    assert bs.upload_ip_allowed("192.168.1.66")
+
+
+def test_upload_ip_gate_expires_quiet_ips(bs: BridgeState, mocker) -> None:
+    # A poller that goes quiet past the TTL loses eligibility while a
+    # fresh one keeps it — expiry is per-IP, not all-or-nothing.
+    fake = mocker.patch.object(state_mod.time, "monotonic")
+    fake.return_value = 1000.0
+    bs.note_phone_ip("192.168.1.30")
+    fake.return_value = 1000.0 + state_mod.PHONE_IP_TTL_SECONDS + 1.0
+    bs.note_phone_ip("192.168.1.40")
+
+    assert not bs.upload_ip_allowed("192.168.1.30")
+    assert bs.upload_ip_allowed("192.168.1.40")
+
+
+def test_note_phone_ip_admits_poller_immediately(bs: BridgeState) -> None:
+    # A live bridge-page poll IS the phone — its IP is upload-eligible at
+    # once, no TTL wait (the page reload right after a DHCP change).
+    bs.note_phone_ip("192.168.1.66")
+    assert bs.upload_ip_allowed("192.168.1.66")
+    assert not bs.upload_ip_allowed("192.168.1.99")
+
+
+def test_two_live_pollers_are_both_upload_eligible(bs: BridgeState) -> None:
+    # Regression: a single last-poller-wins pin flip-flopped when a second
+    # /bridge tab (a leftover laptop tab) polled alongside the phone, and
+    # 403'd the real phone's screenshot roughly every other upload (the
+    # Shortcut doesn't retry → 60s screenshot timeouts). Every recently-
+    # seen poller must be eligible simultaneously, whichever polled last.
+    for _ in range(3):
+        bs.note_phone_ip("192.168.1.30")  # the phone
+        bs.note_phone_ip("192.168.1.40")  # the leftover laptop tab
+    assert bs.upload_ip_allowed("192.168.1.30")
+    assert bs.upload_ip_allowed("192.168.1.40")
+    # The gate survives the fix: off-path senders are still rejected.
+    assert not bs.upload_ip_allowed("192.168.1.99")
+
+
+def test_regression_consuming_existing_screenshot_does_not_rearm_upload(bs):
+    bs.clear_screenshot()
+    bs.receive_screenshot(b"early")
+
+    result = bs.wait_screenshot(timeout=0)
+
+    assert result == b"early"
+    assert not bs.upload_armed()
+    assert bs.take_pending_screenshot() is None
+
+
+@pytest.mark.parametrize("retire", ["clear", "expire"])
+def test_retired_text_cannot_be_acknowledged(bs, retire):
+    bs.send_text("old")
+    identity = bs.clipboard_state()["text_id"]
+    actions = {"clear": bs.clear_text, "expire": bs.expire_text}
+    actions[retire]()
+
+    accepted = bs.mark_clipboard_copied(identity)
+
+    assert not accepted
+    assert not bs.is_copied()
+    assert bs.current_text() is None
+
+
+def test_upload_token_expires_without_losing_new_window(bs, mocker):
+    clock = mocker.patch.object(state_mod.time, "monotonic", return_value=10.0)
+    bs.arm_upload(1)
+    old = bs.screenshot_upload_token()
+    clock.return_value = 12
+    bs.arm_upload(1)
+
+    accepted = bs.receive_screenshot(b"old", upload_token=old)
+
+    assert accepted is False
+    assert bs.upload_armed()
+    assert bs.recent_screenshots() == []
+
+
+def test_upload_token_expired_at_commit_is_rejected(bs, mocker):
+    clock = mocker.patch.object(state_mod.time, "monotonic", return_value=10.0)
+    bs.arm_upload(1)
+    old = bs.screenshot_upload_token()
+    clock.return_value = 11
+
+    accepted = bs.receive_screenshot(b"old", upload_token=old)
+
+    assert accepted is False
+    assert not bs.upload_armed()
+    assert bs.recent_screenshots() == []
+
+
+def test_regression_backward_wall_clock_does_not_keep_phone_connected(bs, mocker):
+    wall = mocker.patch.object(state_mod.time, "time", return_value=1000.0)
+    monotonic = mocker.patch.object(state_mod.time, "monotonic", return_value=100.0)
+    bs.poll()
+    wall.return_value = 900.0
+    monotonic.return_value = 101.0
+
+    connected = bs.connected
+
+    assert connected is False
+
+
+def test_simultaneous_screenshot_consumers_receive_image_only_once(bs):
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+
+    bs.receive_screenshot(b"one")
+    original = bs.lock
+    barrier = threading.Barrier(2)
+
+    class ArrivalLock:
+        def __enter__(self):
+            barrier.wait(timeout=WAIT_TIMEOUT)
+            original.acquire()
+
+        def __exit__(self, *_):
+            original.release()
+
+    bs.lock = ArrivalLock()
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        first = pool.submit(bs.take_pending_screenshot)
+        second = pool.submit(bs.take_pending_screenshot)
+        results = [
+            first.result(timeout=WAIT_TIMEOUT),
+            second.result(timeout=WAIT_TIMEOUT),
+        ]
+
+    assert results.count(b"one") == 1
+    assert results.count(None) == 1
+
+
+def test_wait_screenshot_keeps_waiting_after_another_consumer_wins(bs, mocker):
+    wait = bs._screenshot_ready.wait
+    arrivals = iter([b"first", b"second"])
+    stolen = []
+
+    def competing_upload(timeout):
+        data = next(arrivals)
+        bs.receive_screenshot(data)
+        woke = wait(timeout=0)
+        if data == b"first":
+            stolen.append(bs.take_pending_screenshot())
+        return woke
+
+    mocker.patch.object(bs._screenshot_ready, "wait", side_effect=competing_upload)
+
+    result = bs.wait_screenshot(timeout=1)
+
+    assert result == b"second"
+    assert stolen == [b"first"]
+    assert not bs.upload_armed()
+
+
+def test_wait_screenshot_racing_consumer_cannot_extend_original_deadline(bs, mocker):
+    clock = mocker.patch.object(state_mod.time, "monotonic", return_value=10.0)
+    original_wait = bs._screenshot_ready.wait
+
+    def consume_at_deadline(timeout):
+        assert timeout > 0, "wait must stop at its original deadline"
+        bs.receive_screenshot(b"first")
+        woke = original_wait(timeout=0)
+        bs.take_pending_screenshot()
+        clock.return_value = 11.0
+        return woke
+
+    mocker.patch.object(bs._screenshot_ready, "wait", side_effect=consume_at_deadline)
+
+    result = bs.wait_screenshot(timeout=1)
+
+    assert result is None
+    assert not bs.upload_armed()

@@ -1,0 +1,450 @@
+const assert = require('node:assert/strict');
+const {test} = require('node:test');
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
+const {setImmediate} = require('node:timers/promises');
+const {documentFrom} = require('../studio/ui_fixture.cjs');
+const qrcode = require('../../src/physiclaw/static/vendor/qrcode-1.4.4.min.js');
+
+async function createTestPage(initialSequence = 0, sharedState = null, reducedMotion = false, phonePage = false) {
+  const filename = path.join(__dirname, '../../src/physiclaw/static/assistive-touch/test-assistive-touch.html');
+  const html = fs.readFileSync(filename, 'utf8');
+  const document = documentFrom(html), timers = new Map(), events = new Map();
+  document.body = document.querySelector('body');
+  document.body.dataset.phoneView = String(phonePage);
+  const layout = {matches: false, addEventListener: (_, fn) => { layout.change = fn; }};
+  const dialog = document.getElementById('qr-dialog');
+  dialog.showModal = () => { dialog.open = true; };
+  dialog.close = () => { dialog.open = false; };
+  const image = document.getElementById('screenshot');
+  image.removeAttribute = name => { delete image[name]; };
+  const animations = [];
+  for (const id of ['code-panel', 'screenshot-panel']) {
+    const panel = document.getElementById(id);
+    let active;
+    panel.getAnimations = () => active ? [active] : [];
+    panel.animate = (frames, options) => {
+      active = {id, frames, options, cancelled: false, cancel() { this.cancelled = true; }};
+      animations.push(active);
+      return active;
+    };
+  }
+  const state = sharedState || {
+    instance_id: 'first', screenshot: {sequence: initialSequence, received_at: 1234},
+    clipboard: {text_id: 0, text: 'PhysiClaw-A01-B02', read_sequence: 0},
+    connection: {hostname: 'test-mac.local', ip: '192.168.1.42', port: 18124},
+  };
+  const network = {failed: false, clipboardFailed: false, responseLost: false, holdRead: null, holdWrite: null};
+  const codeRequests = [];
+  const clipboard = {text: '', denied: false, legacy: false};
+  const createElement = document.createElement;
+  document.createElement = tag => {
+    const element = createElement(tag);
+    element.focus = () => { document.activeElement = element; };
+    element.select = () => {};
+    element.setSelectionRange = () => {};
+    return element;
+  };
+  document.execCommand = command => {
+    assert.equal(command, 'copy');
+    if (!clipboard.legacy) return false;
+    clipboard.text = document.activeElement.value;
+    return true;
+  };
+  const navigator = {clipboard: {writeText: async text => {
+    if (clipboard.denied) throw new Error('clipboard denied');
+    clipboard.text = text;
+  }}};
+  const context = vm.createContext({
+    document, window: {
+      addEventListener: (name, fn) => events.set(name, fn),
+      matchMedia: query => query.includes('max-width') ? layout : {
+        matches: query.includes('reduced-motion') && reducedMotion,
+        addEventListener() {},
+      },
+    },
+    navigator, qrcode,
+    localStorage: {getItem: () => null, setItem() {}}, console, AbortSignal,
+    setTimeout: callback => { const id = Symbol(); timers.set(id, callback); return id; },
+    clearTimeout: id => timers.delete(id),
+    fetch: async (url, options) => {
+      if (network.failed) throw new Error('offline');
+      if (url.endsWith('/clipboard')) {
+        assert.equal(options.method, 'POST');
+        if (network.clipboardFailed) throw new Error('clipboard unavailable');
+        const body = JSON.parse(options.body);
+        assert.deepEqual(body, {});
+        codeRequests.push(body);
+        state.clipboard.text_id++;
+        state.clipboard.text = `PhysiClaw-000-${state.clipboard.text_id.toString(16).toUpperCase().padStart(3, '0')}`;
+        const snapshot = structuredClone(state);
+        if (network.holdWrite) await network.holdWrite;
+        if (network.responseLost) throw new Error('response lost after commit');
+        return {ok: true, json: async () => snapshot};
+      }
+      assert.equal(url, '/api/test-assistive-touch');
+      assert.equal(options.method ?? 'GET', 'GET');
+      assert.equal(options.body, undefined);
+      const snapshot = structuredClone(state);
+      if (network.holdRead) {
+        const pending = network.holdRead;
+        network.holdRead = null;
+        await pending;
+      }
+      return {ok: true, json: async () => snapshot};
+    },
+  });
+  vm.runInContext(html.match(/<script>([\s\S]*?)<\/script>/)[1], context, {filename});
+  await setImmediate();
+  return {
+    state, network, image, events, timers, codeRequests, clipboard, animations, layout, document, navigator,
+    el: id => document.getElementById(id),
+    poll: async () => {
+      const callbacks = [...timers.values()]; timers.clear();
+      for (const callback of callbacks) await callback();
+    },
+    newCode: () => document.getElementById('test-code').onclick(),
+  };
+}
+
+test('ignores old uploads on open and displays the next portrait image', async () => {
+  const ui = await createTestPage(7);
+  assert.equal(ui.image.src, undefined);
+  assert.equal(ui.image.hidden, true);
+  await ui.poll();
+  assert.equal(ui.image.src, undefined);
+  ui.state.screenshot.sequence = 8;
+  await ui.poll();
+  assert.match(ui.image.src, /screenshot\/8\?/);
+  assert.equal(ui.animations.length, 0);
+  ui.image.naturalWidth = 1170; ui.image.naturalHeight = 2532;
+  ui.image.onload();
+  assert.equal(ui.image.hidden, false);
+  assert.equal(ui.el('empty').hidden, true);
+  assert.equal(ui.el('image-meta').hidden, true);
+  assert.deepEqual(ui.animations.map(animation => animation.id), ['screenshot-panel']);
+  await ui.poll();
+  assert.equal(ui.animations.length, 1);
+  ui.state.screenshot.sequence++;
+  await ui.poll();
+  ui.image.onerror();
+  assert.equal(ui.animations.length, 1);
+});
+
+test('highlights each phone clipboard fetch without replaying old activity', async () => {
+  const ui = await createTestPage();
+  await ui.newCode();
+  assert.equal(ui.animations.length, 0);
+  ui.state.clipboard.read_sequence++;
+  await ui.poll();
+  assert.deepEqual(ui.animations.map(animation => animation.id), ['code-panel']);
+  await ui.poll();
+  assert.equal(ui.animations.length, 1);
+  ui.state.clipboard.read_sequence++;
+  await ui.poll();
+  assert.equal(ui.animations.length, 2);
+  assert.equal(ui.animations[0].cancelled, true);
+  const reopened = await createTestPage(0, ui.state);
+  assert.equal(reopened.animations.length, 0);
+  ui.state.instance_id = 'restarted';
+  ui.state.clipboard.read_sequence = 0;
+  await ui.poll();
+  assert.equal(ui.animations.length, 2);
+  ui.state.clipboard.read_sequence++;
+  await ui.poll();
+  assert.equal(ui.animations.length, 3);
+});
+
+test('reduced motion uses a steady highlight instead of a pulse', async () => {
+  const ui = await createTestPage(0, null, true);
+  ui.state.clipboard.read_sequence++;
+  await ui.poll();
+  const animation = ui.animations[0];
+  assert.deepEqual(animation.frames[0], animation.frames[1]);
+  assert.equal(animation.options.duration, 700);
+});
+
+test('reads the existing server code on open and requests a new code only on click', async () => {
+  const ui = await createTestPage();
+  const first = ui.el('test-code').textContent;
+  assert.match(first, /^PhysiClaw-[0-9A-F]{3}-[0-9A-F]{3}$/);
+  assert.equal(first, ui.state.clipboard.text);
+  assert.equal(ui.codeRequests.length, 0);
+  await ui.poll();
+  assert.equal(ui.codeRequests.length, 0);
+  assert.equal(ui.el('test-code').textContent, first);
+  await ui.newCode();
+  await ui.poll();
+  assert.notEqual(ui.el('test-code').textContent, first);
+  assert.equal(ui.el('test-code').textContent, ui.state.clipboard.text);
+  assert.equal(ui.codeRequests.length, 1);
+  const reopened = await createTestPage(0, ui.state);
+  assert.equal(reopened.el('test-code').textContent, ui.state.clipboard.text);
+  assert.equal(reopened.codeRequests.length, 0);
+});
+
+test('automatically follows code changes from another tab without a refresh reminder', async () => {
+  const ui = await createTestPage();
+  const other = await createTestPage(0, ui.state);
+  await other.newCode();
+  await ui.poll();
+  assert.equal(ui.el('test-code').textContent, other.el('test-code').textContent);
+  assert.equal(ui.el('test-code').textContent, ui.state.clipboard.text);
+  assert.equal(ui.el('code-error'), null);
+  assert.equal(ui.codeRequests.length, 0);
+});
+
+test('server restart resets the preview and displays the new server code', async () => {
+  const ui = await createTestPage(7);
+  const first = ui.el('test-code').textContent;
+  ui.state.instance_id = 'second';
+  ui.state.screenshot.sequence = 0;
+  ui.state.clipboard = {text_id: 0, text: 'PhysiClaw-ABC-DEF', read_sequence: 0};
+  await ui.poll();
+  assert.equal(ui.image.hidden, true);
+  assert.notEqual(ui.el('test-code').textContent, first);
+  assert.equal(ui.el('test-code').textContent, ui.state.clipboard.text);
+  assert.equal(ui.codeRequests.length, 0);
+  ui.state.screenshot.sequence = 1;
+  await ui.poll();
+  assert.match(ui.image.src, /screenshot\/1\?instance=second/);
+});
+
+test('network failure is visible and recovers; closing the page stops polling', async () => {
+  const ui = await createTestPage();
+  ui.network.failed = true;
+  await ui.poll();
+  assert.equal(ui.el('offline').hidden, false);
+  assert.equal(ui.el('test-code').disabled, true);
+  assert.equal(ui.el('test-code').textContent, 'PhysiClaw-···-···');
+  ui.network.failed = false;
+  ui.state.clipboard = {text_id: 1, text: 'PhysiClaw-CCC-DDD', read_sequence: 0};
+  await ui.poll();
+  assert.equal(ui.el('offline').hidden, true);
+  assert.equal(ui.el('test-code').disabled, false);
+  assert.equal(ui.el('test-code').textContent, ui.state.clipboard.text);
+  ui.events.get('pagehide')();
+  assert.equal(ui.timers.size, 0);
+});
+
+test('failed code changes automatically recover the server value', async () => {
+  const ui = await createTestPage();
+  const previous = ui.el('test-code').textContent;
+  ui.network.clipboardFailed = true;
+  await ui.newCode();
+  assert.equal(ui.el('offline').hidden, false);
+  assert.equal(ui.el('test-code').textContent, 'PhysiClaw-···-···');
+  ui.network.clipboardFailed = false;
+  await ui.poll();
+  assert.equal(ui.el('test-code').textContent, previous);
+  await ui.newCode();
+  assert.equal(ui.el('test-code').textContent, ui.state.clipboard.text);
+  assert.equal(ui.el('offline').hidden, true);
+});
+
+test('a committed code change with a lost response is recovered without another write', async () => {
+  const ui = await createTestPage();
+  ui.network.responseLost = true;
+  await ui.newCode();
+  assert.equal(ui.el('test-code').textContent, 'PhysiClaw-···-···');
+  await ui.poll();
+  assert.equal(ui.el('test-code').textContent, ui.state.clipboard.text);
+  assert.equal(ui.codeRequests.length, 1);
+});
+
+test('the old code is hidden while a new server value is pending', async () => {
+  const ui = await createTestPage();
+  let release;
+  ui.network.holdWrite = new Promise(resolve => { release = resolve; });
+  const pending = ui.newCode();
+  assert.equal(ui.el('test-code').textContent, 'PhysiClaw-···-···');
+  assert.equal(ui.el('test-code').disabled, true);
+  release();
+  await pending;
+  assert.equal(ui.el('test-code').textContent, ui.state.clipboard.text);
+});
+
+test('restoring a page resumes polling while a previous code change is pending', async () => {
+  const ui = await createTestPage();
+  let releasePrevious, releaseCurrent;
+  ui.network.holdWrite = new Promise(resolve => { releasePrevious = resolve; });
+  const previous = ui.newCode();
+  ui.events.get('pagehide')();
+  ui.events.get('pageshow')({persisted: true});
+  await setImmediate();
+  assert.equal(ui.el('test-code').textContent, ui.state.clipboard.text);
+  assert.equal(ui.el('test-code').disabled, false);
+  assert.equal(ui.timers.size, 1);
+
+  ui.network.holdWrite = new Promise(resolve => { releaseCurrent = resolve; });
+  const current = ui.newCode();
+  releasePrevious();
+  await previous;
+  assert.equal(ui.el('test-code').disabled, true);
+  assert.equal(ui.el('test-code').textContent, 'PhysiClaw-···-···');
+  assert.equal(ui.timers.size, 0);
+  releaseCurrent();
+  await current;
+  assert.equal(ui.el('test-code').textContent, ui.state.clipboard.text);
+  assert.equal(ui.el('test-code').disabled, false);
+  assert.equal(ui.timers.size, 1);
+});
+
+for (const restart of [false, true]) {
+  test(`a delayed poll cannot undo a confirmed code change${restart ? ' across restart' : ''}`, async () => {
+    const ui = await createTestPage();
+    let release;
+    ui.network.holdRead = new Promise(resolve => { release = resolve; });
+    const pending = ui.poll();
+    await setImmediate();
+    if (restart) ui.state.instance_id = 'second';
+    await ui.newCode();
+    const confirmed = ui.el('test-code').textContent;
+    release();
+    await pending;
+    assert.equal(ui.el('test-code').textContent, confirmed);
+    assert.equal(confirmed, ui.state.clipboard.text);
+    assert.equal(ui.timers.size, 1);
+  });
+}
+
+test('shows both shortcut URLs using the phone port and updates after restart', async () => {
+  const ui = await createTestPage();
+  assert.equal(ui.el('shortcut-addresses').hidden, false);
+  assert.equal(ui.el('lan-address').textContent, '192.168.1.42');
+  assert.equal(ui.el('lan-port').textContent, '18124');
+  assert.equal(ui.el('upload-hostname').textContent, 'http://test-mac.local:18124/api/bridge/screenshot');
+  assert.equal(ui.el('clipboard-hostname').textContent, 'http://test-mac.local:18124/api/bridge/clipboard');
+  ui.state.instance_id = 'second';
+  ui.state.connection = {hostname: 'new-mac.local', ip: '192.168.1.43', port: 8049};
+  await ui.poll();
+  assert.equal(ui.el('lan-address').textContent, '192.168.1.43');
+  assert.equal(ui.el('lan-port').textContent, '8049');
+  assert.equal(ui.el('clipboard-hostname').textContent, 'http://new-mac.local:8049/api/bridge/clipboard');
+});
+
+test('LAN IP URLs remain usable when the hostname is unavailable', async () => {
+  const ui = await createTestPage();
+  ui.state.instance_id = 'second';
+  ui.state.connection = {hostname: null, ip: '192.168.1.42', port: 8049};
+  await ui.poll();
+  for (const [kind, endpoint] of [['upload', 'screenshot'], ['clipboard', 'clipboard']]) {
+    const url = `http://192.168.1.42:8049/api/bridge/${endpoint}`;
+    assert.equal(ui.el(kind + '-hostname').textContent, url);
+    assert.equal(ui.el(kind + '-copy').disabled, false);
+    await ui.el(kind + '-copy').onclick();
+    assert.equal(ui.clipboard.text, url);
+  }
+});
+
+test('unavailable addresses are not replaced with a misleading local URL', async () => {
+  const ui = await createTestPage();
+  ui.state.instance_id = 'second';
+  ui.state.connection = {hostname: null, ip: null, port: 8049};
+  await ui.poll();
+  assert.equal(ui.el('upload-hostname').textContent, 'Unavailable');
+  assert.equal(ui.el('lan-address').textContent, 'Unavailable');
+  assert.equal(ui.el('upload-copy').disabled, true);
+  assert.equal(ui.el('clipboard-copy').disabled, true);
+  ui.state.instance_id = 'third';
+  ui.state.connection = null;
+  await ui.poll();
+  assert.equal(ui.el('shortcut-addresses').hidden, true);
+});
+
+test('copy icons copy complete URLs and reset their confirmation', async () => {
+  const ui = await createTestPage();
+  for (const [kind, endpoint] of [['upload', 'screenshot'], ['clipboard', 'clipboard']]) {
+    const button = ui.el(kind + '-copy');
+    assert.equal(button.disabled, false);
+    await button.onclick();
+    assert.equal(ui.clipboard.text, `http://test-mac.local:18124/api/bridge/${endpoint}`);
+    assert.equal(button.querySelector('.copy-feedback').textContent, 'Copied');
+    assert.equal(button.classList.contains('copied'), true);
+    await ui.poll();
+    assert.equal(button.querySelector('.copy-feedback').textContent, '');
+    assert.equal(button.classList.contains('copied'), false);
+  }
+});
+
+test('copy failure does not claim success and allows retry', async () => {
+  const ui = await createTestPage(), button = ui.el('upload-copy');
+  ui.clipboard.denied = true;
+  await button.onclick();
+  assert.equal(button.querySelector('.copy-feedback').textContent, 'Select URL to copy');
+  assert.equal(button.classList.contains('copied'), false);
+  assert.equal(ui.clipboard.text, '');
+  ui.clipboard.denied = false;
+  await button.onclick();
+  assert.equal(button.querySelector('.copy-feedback').textContent, 'Copied');
+});
+
+test('QR opens the phone page using the LAN port, follows restart, and closes', async () => {
+  const ui = await createTestPage();
+  const qrImage = url => {
+    const qr = qrcode(0, 'M');
+    qr.addData(url);
+    qr.make();
+    return qr.createDataURL(6, 24);
+  };
+  const dialog = ui.el('qr-dialog');
+  ui.el('qr-toggle').onclick();
+  assert.equal(dialog.open, true);
+  assert.equal(ui.el('qr-image').src, qrImage('http://192.168.1.42:18124/test-assistive-touch'));
+  assert.match(ui.el('qr-image').src, /^data:image\/gif;base64,/);
+  assert.equal(ui.el('qr-error').hidden, true);
+  ui.state.instance_id = 'restarted';
+  ui.state.connection = {hostname: 'new-mac.local', ip: null, port: 8049};
+  await ui.poll();
+  assert.equal(ui.el('qr-image').src, qrImage('http://new-mac.local:8049/test-assistive-touch'));
+  dialog.onclick({target: dialog, clientX: -1, clientY: -1});
+  assert.equal(dialog.open, false);
+  ui.state.instance_id = 'unavailable';
+  ui.state.connection = null;
+  await ui.poll();
+  assert.equal(ui.el('qr-toggle').disabled, true);
+  ui.el('qr-toggle').onclick();
+  assert.equal(dialog.open, false);
+});
+
+test('phone page keeps code controls live without downloading screenshots or opening QR', async () => {
+  const ui = await createTestPage(0, null, false, true);
+  assert.equal(ui.document.body.classList.contains('phone-view'), true);
+  ui.state.screenshot.sequence++;
+  await ui.poll();
+  assert.equal(ui.image.src, undefined);
+  ui.el('qr-toggle').onclick();
+  assert.notEqual(ui.el('qr-dialog').open, true);
+  await ui.newCode();
+  assert.equal(ui.el('test-code').textContent, ui.state.clipboard.text);
+});
+
+test('switching to a compact viewport closes an open QR dialog', async () => {
+  const ui = await createTestPage();
+  ui.el('qr-toggle').onclick();
+  ui.layout.matches = true;
+  ui.layout.change();
+  assert.equal(ui.el('qr-dialog').open, false);
+  assert.equal(ui.document.body.classList.contains('phone-view'), true);
+  ui.state.screenshot.sequence++;
+  await ui.poll();
+  assert.equal(ui.image.src, undefined);
+});
+
+for (const unavailable of [true, false]) {
+  test(`LAN copy falls back when the Clipboard API is ${unavailable ? 'missing' : 'denied'}`, async () => {
+    const ui = await createTestPage();
+    if (unavailable) ui.navigator.clipboard = undefined;
+    else ui.clipboard.denied = true;
+    ui.clipboard.legacy = true;
+    const button = ui.el('upload-copy');
+    button.focus = () => { ui.document.activeElement = button; };
+    button.focus();
+    await button.onclick();
+    assert.equal(ui.clipboard.text, 'http://test-mac.local:18124/api/bridge/screenshot');
+    assert.equal(button.classList.contains('copied'), true);
+    assert.equal(ui.document.activeElement, button);
+    assert.equal(ui.document.querySelector('textarea'), null);
+  });
+}

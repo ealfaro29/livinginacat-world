@@ -1,0 +1,191 @@
+"""One turn-producer protocol for plugins and the default LLM.
+
+Each turn, the engine asks plugins in registration order with one neutral,
+immutable TurnInput and TurnMetadata. Each plugin builds its own context and
+returns a ProposedTurn or None. The first accepted result wins.
+This is arbitration: a plugin produces the turn or returns None to let
+the engine ask the next slot. With no plugins at all (config
+`[agent] plugins = "none"`), only the default LLM producer remains, which
+is the rollback switch.
+
+Each registration declares its display name and stable instance ID.
+The engine snapshots that identity and assigns execution grants to the slot.
+Qualified macros contributed at setup (`SessionSetup.gated_macros`) resolve
+only for their registering plugin. Raw response metadata and call IDs
+cannot grant authority or identify another plugin.
+
+Plugins are loaded from dotted `module:factory` paths in
+`[agent] plugins` (comma-separated). Config registration is deliberate:
+we own every plugin today, so a config string the engine loads blindly
+is the whole discovery story. The upgrade trigger to entry-point
+discovery is a plugin shipping as a separately installed distribution —
+do not build it before then.
+
+The host supplies the same in-process services and runtime input to every
+plugin. No plugin receives another producer's conversation or reasoning.
+"""
+
+from __future__ import annotations
+
+import math
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass, field
+from types import MappingProxyType
+from typing import Protocol, runtime_checkable
+from uuid import uuid4
+
+from physiclaw.contract.chat import SessionChatProvider
+from physiclaw.contract.decision import ActionCandidate, DecisionProvider, decision_json
+from physiclaw.contract.dto import (
+    AssistantMessage,
+    FinishReason,
+    MicroRecord,
+    ToolCall,
+)
+from physiclaw.contract.turn import TurnInput, TurnMetadata
+from physiclaw.macros.model import Macro
+
+
+class EventSink(Protocol):
+    """Persist one structured event and its attachments; acknowledge success.
+
+    A false result leaves persistence unknown or incomplete. Ordinary callers
+    may ignore the acknowledgement; consumers requiring evidence must check it.
+    """
+
+    def write(self, event: dict) -> bool: ...
+
+
+class WireSink(Protocol):
+    """`RawLog.write_micro`-shaped: one scoped LLM round-trip, whole."""
+
+    def write_micro(self, rec: MicroRecord) -> None: ...
+
+
+class DecisionProviderFactory(Protocol):
+    """Create an owned decision transport without sharing any model context."""
+
+    def __call__(
+        self, provider_id: str, model_id: str, *, require_images: bool = False
+    ) -> DecisionProvider: ...
+
+
+@dataclass(frozen=True, slots=True)
+class PluginServices:
+    """Wake-time services shared by all plugins, without a model context.
+
+    The chat provider accepts caller-owned messages and holds no conversation.
+    Its lifecycle stays with the host; each plugin owns its own context.
+    A client created through the decision factory belongs to its caller.
+    """
+
+    session_provider: SessionChatProvider
+    events: EventSink | None = None
+    wire: WireSink | None = None
+    decision_provider_factory: DecisionProviderFactory | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class SessionSetup:
+    """A plugin's wake-time contribution. `gated_macros` are qualified
+    `app/name` macros dispatchable ONLY while the registering plugin's turn is
+    executing — they join the prompt bundle's macro surface but never
+    its model-visible list."""
+
+    gated_macros: dict[str, Macro] = field(default_factory=dict)
+
+
+@dataclass(frozen=True, slots=True)
+class TurnProducer:
+    """Host-stamped identity; presentation and execution grants are separate."""
+
+    plugin_id: str
+
+
+@runtime_checkable
+class TurnPlugin(Protocol):
+    """One neutral invocation contract for every plugin."""
+
+    async def session_setup(self, ctx: PluginServices) -> SessionSetup | None: ...
+
+    async def advance(
+        self, turn: TurnInput, *, metadata: TurnMetadata
+    ) -> ProposedTurn | None: ...
+
+    async def aclose(self) -> None: ...
+
+
+@dataclass(frozen=True, slots=True)
+class ProposedTurn:
+    """Tool calls with optional evidence and a host-monotonic start deadline.
+
+    ``expires_at`` limits when each tool call may start. It does not cancel an
+    action already in progress. Unset expiry leaves normal execution unchanged.
+    """
+
+    message: AssistantMessage
+    observation_id: str | None = None
+    targets: Mapping[str, str] = field(default_factory=dict)
+    expires_at: float | None = None
+
+    def __post_init__(self) -> None:
+        if self.observation_id is not None and (
+            not isinstance(self.observation_id, str) or not self.observation_id
+        ):
+            raise ValueError("a bound proposal must reference its observation")
+        if self.expires_at is not None and (
+            type(self.expires_at) not in (int, float)
+            or not math.isfinite(self.expires_at)
+        ):
+            raise ValueError("proposal expiry must be finite monotonic time")
+        object.__setattr__(self, "targets", MappingProxyType(dict(self.targets)))
+
+    @classmethod
+    def from_action(
+        cls,
+        action: ActionCandidate,
+        observation_id: str,
+        *,
+        expires_at: float | None = None,
+    ) -> ProposedTurn:
+        """Bind one selected action to a fresh local tool-call ID."""
+        if action.tool is None:
+            raise ValueError("a proposal must contain an executable action")
+        call_id = f"call_{uuid4().hex}"
+        arguments = decision_json(action.arguments)
+        assert isinstance(arguments, dict)
+        return cls(
+            message=AssistantMessage(
+                content="",
+                finish_reason=FinishReason.TOOL_CALLS,
+                tool_calls=[ToolCall(call_id, action.tool, arguments)],
+            ),
+            observation_id=observation_id,
+            targets={call_id: action.target_ref}
+            if action.target_ref is not None
+            else {},
+            expires_at=expires_at,
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class PluginRegistration:
+    """A named pipeline entry, separate from its implementation and order.
+
+    IDs are explicit registry keys, such as ``physiclaw.playbook``.
+    Validate identity before creating a plugin or granting it any authority.
+    ``create`` returns a fresh session instance for this registration.
+    """
+
+    id: str
+    name: str
+    create: Callable[[], TurnPlugin]
+
+    def __post_init__(self) -> None:
+        if any(
+            not isinstance(value, str) or not value or value != value.strip()
+            for value in (self.name, self.id)
+        ):
+            raise ValueError("plugin name and id must be nonblank, trimmed strings")
+        if not callable(self.create):
+            raise TypeError("plugin registration must provide a factory")

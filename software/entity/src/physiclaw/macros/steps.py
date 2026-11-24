@@ -1,0 +1,590 @@
+"""The executable step hierarchy — one class per kind of thing a macro
+does, each answering `execute`.
+
+This is where the DSL stops being data and starts touching the rig, so it
+sits above `model` (pure clause algebra) and below `runner` (which owns
+the loop and the run-wide state). The split is what keeps `model`
+importable from anywhere.
+
+Five kinds, and the difference is not cosmetic:
+
+    GestureStep   one MCP call — the rehearsed physical action
+    WaitStep      an in-process sleep, then one assertion
+    GotoStep      a jump: reads a page, and either skips forward to its
+                  mark or walks on
+    MarkStep      where the jump lands; walked to, its guard (the goto's
+                  page) checks the span reached it
+    RunStep       another macro of the same folder, run as one step —
+                  the runner walks its steps in the same run context
+
+`expect` lives on `WaitStep` alone, as a field rather than a validation
+rule, so "expect is wait-only" is a fact about the type instead of a
+check someone could forget to run. It is wait-only because a gesture's
+own view is captured ~2s after the touch and is the SAME frame the next
+step's guard reads for free — an `expect` there would assert nothing new.
+
+Every `execute` returns a `StepOutcome` rather than raising, because a
+mid-run failure is a substantive result the agent must read (with the
+screen to work from), not an error to retry.
+"""
+
+import asyncio
+import logging
+import time
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field, replace
+from typing import Any, Protocol
+
+from physiclaw.common import gesture_vocab, verdict
+from physiclaw.macros.inputs import substitute
+from physiclaw.macros.model import (
+    BLANK_SCREEN,
+    GOTO,
+    MARK,
+    OBJECT_ARG,
+    REASON_EXPECT_FAILED,
+    REASON_GUARD_FAILED,
+    REASON_TOOL_ERROR,
+    RUN,
+    TARGET_LABEL,
+    WAIT,
+    Clause,
+    Macro,
+    MacroGuard,
+    Screen,
+    label_readings,
+    sub,
+)
+from physiclaw.macros.template import fill
+
+log = logging.getLogger(__name__)
+
+
+class McpCaller(Protocol):
+    async def call_tool(
+        self, name: str, args: dict[str, Any] | None = None
+    ) -> list[dict]: ...
+
+
+@dataclass
+class RunContext:
+    """Everything one run carries between steps.
+
+    The mutable half of the runner, kept in one object so a step's
+    `execute` can read and update it without the loop threading eight
+    locals through every call. Two invariants live here and nowhere else.
+
+    `screen` is the most recent reading, or BLANK when we hold none — every
+    check is keyed on "do we know the screen", never on the step index, so
+    a check never rules on an empty haystack.
+
+    `view_stale` says whether `last_view` still depicts the CURRENT screen.
+    A `wait` sleeps precisely because the screen is expected to change, so
+    the frame held afterwards is out of date by construction; shipping it
+    under "the view below is the current screen" would hand the agent — and
+    through dispatch's screen supersede, its whole notion of "now" — a
+    frame that is `seconds` old."""
+
+    mcp: McpCaller
+    deadline: float
+    screen: Screen = BLANK_SCREEN
+    last_view: list[dict] = field(default_factory=list)
+    view_stale: bool = False
+    last_verdict: bool | None = None
+    reads: int = 0  # camera cycles this step spent, whatever the outcome
+    ran: int = 0  # steps the loop judged (a jump's span is not among them)
+    gestures: int = 0  # attempted actuating calls, including uncertain failures
+
+    def adopt_view(self, blocks: list[dict], *, touched_screen: bool = True) -> None:
+        """Take a step's fused view as the current screen."""
+        self.last_view = blocks
+        self.view_stale = False
+        if verdict.has_image(blocks):
+            self.screen = Screen.read(verdict.screen_text(blocks))
+        elif touched_screen:
+            # A gesture that came back without a view still actuated, so the
+            # retained listing is now stale — drop it and let the next check
+            # read. A step that never touches the screen keeps it, which is
+            # what makes the documented paste flow's next check free.
+            self.screen = BLANK_SCREEN
+
+    def invalidate_screen(self) -> None:
+        """The held listing is no longer trustworthy, and neither is the
+        view we would otherwise ship as current."""
+        self.screen = BLANK_SCREEN
+        self.view_stale = True
+
+    async def read_screen(self, *, retry: bool = False) -> Screen:
+        """The screen — free when we already hold one, else one camera read.
+
+        `retry` gives a failed READ a second chance: a camera hiccup is not
+        a failed check, and reporting one as `… not on screen` sends the
+        agent to fix a screen nobody managed to look at."""
+        if self.screen.readable:
+            return self.screen
+        for _ in range(2 if retry else 1):
+            self.reads += 1
+            try:
+                view = await self.mcp.call_tool(gesture_vocab.PEEK, {})
+            except Exception as e:
+                log.warning(
+                    "macro peek failed: %s",
+                    e,
+                    exc_info=True,
+                    extra={"console_message": "Macro screen check failed"},
+                )
+                continue
+            self.adopt_view(view)
+            if self.screen.readable:
+                return self.screen
+        return BLANK_SCREEN
+
+    @property
+    def has_view(self) -> bool:
+        """Whether the held view carries an image worth shipping."""
+        return verdict.has_image(self.last_view)
+
+    @property
+    def out_of_time(self) -> bool:
+        return time.monotonic() > self.deadline
+
+
+# The two outcomes that do not stop the run; everything else is a REASON_*.
+_CONTINUES = frozenset({"ok", "skipped"})
+
+
+@dataclass(frozen=True)
+class StepOutcome:
+    """What one step did. `reason` is set iff the run must stop here."""
+
+    log_line: str
+    # The run-log verb, and — for a stopping outcome — the abort reason.
+    # They were two fields set to the same string at every site; one name
+    # for one value means they cannot disagree.
+    outcome: str  # ok | skipped | REASON_*
+    detail: str = ""
+    verdict: bool | None = None
+    view: list[dict] | None = None  # blocks worth logging for this step
+    screen_text: str = ""  # the haystack a failed check actually saw
+    # A taken jump: the 1-based index of the mark the loop continues
+    # past. Only a `GotoStep` sets it.
+    jump_to: int | None = None
+
+    @property
+    def reason(self) -> str | None:
+        return None if self.outcome in _CONTINUES else self.outcome
+
+    @property
+    def stop(self) -> bool:
+        return self.reason is not None
+
+
+@dataclass(frozen=True)
+class Step(ABC):
+    """One step with its optional checks.
+
+    `guard` runs BEFORE the step (a precondition); `skip_when` / `when`
+    run before that (idempotence — a step whose postcondition already
+    holds, or whose condition does not, is not needed). Each is one
+    clause; see `model.Clause`."""
+
+    # The handle `model.step_handle` derives at parse (`idx3-tap-paste`):
+    # what `start_at` / `stop_after` address and the run log records.
+    name: str
+    guard: MacroGuard | None = None
+    # Idempotence, the Ansible creates/unless model, NOT general branching:
+    # `skip_when: X` skips the step while X shows, because executing it
+    # would be redundant or harmful (tapping the keyboard-hidden input-box
+    # position while the keyboard is up hits the keys); `when: X` runs it
+    # ONLY while X shows. Two fields, not one clause and a negation: they
+    # part company on a screen nobody could read. Skipping is an
+    # optimisation, so an unreadable screen runs a `skip_when` step;
+    # running is what `when` withholds, so an unreadable screen skips it —
+    # firing a rehearsed box because nothing could be read is the step
+    # doing more than its author declared. Author contract for both: skip
+    # state == post-execution state, so later bboxes stay synchronized.
+    skip_when: Clause | None = None
+    when: Clause | None = None
+
+    @property
+    @abstractmethod
+    def tool(self) -> str:
+        """The name shown in logs and reports. For a gesture it is the MCP
+        tool; `wait` never reaches the server."""
+
+    @abstractmethod
+    async def execute(self, ctx: RunContext) -> StepOutcome:
+        """Do the thing, having already passed `guard`."""
+
+    @abstractmethod
+    def substituted(self, values: dict[str, str]) -> "Step":
+        """A copy with `{name}` resolved everywhere — args AND checks. A
+        check about an input is the whole point of parameterizing: a macro
+        that pastes to `{contact}` wants to verify it landed in
+        `{contact}`'s chat."""
+
+    def display(self) -> str:
+        """How the step reads in the step log: the verb and its object
+        (`tap "Paste"`, `swipe up`, `wait 2s`, `home_screen`)."""
+        obj = self.object
+        return f"{self.tool} {obj}" if obj else self.tool
+
+    @property
+    def object(self) -> str:
+        """The verb's object as the author wrote it, "" for an argless
+        verb — the one thing worth showing beside a step."""
+        return ""
+
+    @property
+    def log_args(self) -> dict[str, Any]:
+        """What the run log records for this step. A step with no wire
+        arguments records none — the loop must not reach into a subclass."""
+        return {}
+
+    @property
+    def declared_seconds(self) -> int:
+        """Sleep this step promises up front, summed by `parse` against the
+        run budget. A future sleeping step kind is counted automatically."""
+        return 0
+
+    @property
+    def actuates(self) -> bool:
+        """Whether calling this step may actuate the phone or clipboard."""
+        return False
+
+    @property
+    def runs(self) -> Macro | None:
+        """The macro this step runs — only a `RunStep` has one. The
+        model's readers (`Macro.taps`, `Macro.callees`) reach through
+        it without naming the step kind."""
+        return None
+
+
+@dataclass(frozen=True)
+class GestureStep(Step):
+    """One rehearsed physical action: exactly one MCP call, whose fused
+    view (image + listing) becomes the screen the next check reads."""
+
+    mcp_tool: str = ""
+    # The wire arguments: the object under its server name (`label` for
+    # a press, `direction` for a swipe, `text` for the clipboard) and
+    # `bbox` for the step's `at:`.
+    args: dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def tool(self) -> str:
+        return self.mcp_tool
+
+    @property
+    def object(self) -> str:
+        key = OBJECT_ARG.get(self.mcp_tool)
+        return (
+            " / ".join(repr(r) for r in label_readings(self.args, key)) if key else ""
+        )
+
+    @property
+    def log_args(self) -> dict[str, Any]:
+        return self.args
+
+    async def execute(self, ctx: RunContext) -> StepOutcome:
+        args = self._lowered()
+        # Count at dispatch, after the gate: a tool error may have actuated,
+        # but a timeout or failed guard before this call touched nothing.
+        if self.actuates:
+            ctx.gestures += 1
+        try:
+            blocks = await ctx.mcp.call_tool(self.mcp_tool, args)
+        except Exception as e:
+            log.warning(
+                "macro step %s (%s) failed: %s",
+                self.name,
+                self.tool,
+                e,
+                exc_info=True,
+                extra={
+                    "console_message": f"Macro step {self.name} failed ({self.tool})"
+                },
+            )
+            return StepOutcome(
+                log_line=f"✗ {self.display()} — {e}",
+                outcome=REASON_TOOL_ERROR,
+                detail=str(e),
+            )
+        # Verdict only from the first text block (`verdict.action_text`) —
+        # core-composed action text, the one haystack on-screen content
+        # cannot forge.
+        changed = verdict.parse(verdict.action_text(blocks))
+        ctx.adopt_view(blocks, touched_screen=self.touches_screen)
+        return StepOutcome(
+            log_line=f"✓ {self.display()}{_verdict_note(changed)}",
+            outcome="ok",
+            verdict=changed,
+            view=blocks,
+        )
+
+    def _lowered(self) -> dict[str, Any]:
+        """The wire arguments: the step's args without `label`. The label
+        is the author's half of the target — what the coordinates ARE —
+        and the server knows only `bbox`, so it is stripped. Nothing else
+        changes: the step fires exactly the coordinates the macro
+        declares (a miss shows on the next screen and in the run log,
+        where a person can see and fix it; a silent correction would
+        sometimes land right and sometimes wrong, and read the same)."""
+        args = dict(self.args)
+        args.pop(TARGET_LABEL, None)
+        return args
+
+    @property
+    def actuates(self) -> bool:
+        # `peek` is the one step here that only LOOKS. Counting it as a
+        # gesture tells the engine's burn rule the phone moved, so a run
+        # that aborts on its very next guard reports "do NOT re-run" and
+        # the macro is refused for the rest of the session — over a
+        # camera read.
+        return self.mcp_tool != gesture_vocab.PEEK
+
+    @property
+    def touches_screen(self) -> bool:
+        """`send_to_clipboard` writes the pasteboard and nothing else, so
+        the listing already held stays valid across it — that is what makes
+        the documented paste flow's next check free."""
+        return self.mcp_tool != gesture_vocab.SEND_TO_CLIPBOARD
+
+    def substituted(self, values: dict[str, str]) -> "Step":
+        return replace(
+            self,
+            args=substitute(self.args, values),
+            guard=sub(self.guard, values),
+            skip_when=sub(self.skip_when, values),
+            when=sub(self.when, values),
+        )
+
+
+@dataclass(frozen=True)
+class WaitStep(Step):
+    """A settle: sleep exactly `seconds`, then optionally confirm what
+    arrived.
+
+    Waiting used to live inside the guard as `wait_seconds`, which polled
+    `ceil(n/2)` times at one camera cycle each — so the number was a poll
+    budget wearing a duration's name (8 meant ~15s on the reference rig)
+    and odd values aliased to even ones. Splitting them made both honest.
+
+    `seconds: 0` is legal only WITH an `expect`, where it reads as "check
+    now"; a wait that neither sleeps nor checks does nothing at all."""
+
+    seconds: int = 0
+    expect: Clause | None = None
+    hint: str = ""
+
+    @property
+    def tool(self) -> str:
+        return WAIT
+
+    @property
+    def object(self) -> str:
+        return f"{self.seconds}s"
+
+    @property
+    def declared_seconds(self) -> int:
+        return self.seconds
+
+    async def execute(self, ctx: RunContext) -> StepOutcome:
+        await asyncio.sleep(self.seconds)
+        # The held listing is now `seconds` out of date BY CONSTRUCTION —
+        # waiting exists precisely because the screen is expected to change.
+        # Keeping it would hand the next check the very screen this step was
+        # written to move past.
+        ctx.invalidate_screen()
+        waited = f"✓ {self.display()} — waited {self.seconds}s"
+        if self.expect is None:
+            return StepOutcome(log_line=waited, outcome="ok")
+
+        screen = await ctx.read_screen(retry=True)
+        if not screen.readable:
+            # An unreadable screen is never a satisfied assertion: `not` is
+            # satisfied by an empty haystack, so a camera hiccup would
+            # otherwise "confirm" an absence nobody saw.
+            detail = "could not read the screen (`peek` failed)"
+        elif self.expect.holds(screen):
+            return StepOutcome(
+                log_line=f"{waited}, expect ok", outcome="ok", view=ctx.last_view
+            )
+        else:
+            detail = f"expected {self.expect.display()} — not on screen"
+            if self.hint:
+                detail = f"{detail} (hint: {self.hint})"
+        # Replace the step's ✓ rather than adding a ✗ beside it: the step
+        # DID run, but one step gets one verdict.
+        return StepOutcome(
+            log_line=f"✗ {self.display()} — {detail}",
+            outcome=REASON_EXPECT_FAILED,
+            detail=detail,
+            view=ctx.last_view,
+            screen_text=screen.text,
+        )
+
+    def substituted(self, values: dict[str, str]) -> "Step":
+        return replace(
+            self,
+            expect=sub(self.expect, values),
+            hint=fill(self.hint, values),
+            guard=sub(self.guard, values),
+            skip_when=sub(self.skip_when, values),
+            when=sub(self.when, values),
+        )
+
+
+@dataclass(frozen=True)
+class GotoStep(Step):
+    """A jump: `- if_page: <name>` / `goto: <mark>`.
+
+    Reads the page off the view the runner holds (the previous step's,
+    or one peek at the top of a run) and, when it reads, skips forward
+    to the mark — the span between is the navigation that REACHES that
+    page, and it is never replayed onto the page itself. A view that
+    cannot be read never reads as a page, so the span is walked: the
+    straight line is the rehearsed path, and walking it is safe by the
+    same idempotence the jump relies on. Nothing here ever aborts.
+
+    The page clause comes from the pack the macro belongs to (the
+    parser's page resolver); this module knows only that it is a
+    `Clause`, and reads its name off `Clause.display`."""
+
+    page: Clause | None = None
+    mark: str = ""
+    target: int = 0  # the mark's 1-based step index, resolved at parse
+
+    @property
+    def tool(self) -> str:
+        return GOTO
+
+    @property
+    def object(self) -> str:
+        return self.mark
+
+    def display(self) -> str:
+        assert self.page is not None
+        return f"if {self.page.display()} → goto {self.mark}"
+
+    async def execute(self, ctx: RunContext) -> StepOutcome:
+        assert self.page is not None
+        screen = await ctx.read_screen()
+        taken = screen.readable and self.page.holds(screen)
+        if taken:
+            why = f"goto {self.mark} — {self.page.display()} shows"
+        elif screen.readable:
+            why = "not on it, walking on"
+        else:
+            why = "view unreadable, walking on"
+        return StepOutcome(
+            log_line=f"{'↷' if taken else '·'} {self.display()} — {why}",
+            outcome="ok",
+            detail=why if taken else "",
+            view=ctx.last_view or None,
+            jump_to=self.target if taken else None,
+        )
+
+    def substituted(self, values: dict[str, str]) -> "Step":
+        return self  # a page has no placeholders
+
+
+@dataclass(frozen=True)
+class MarkStep(Step):
+    """Where a jump lands: `- mark: <name>`. Runs nothing.
+
+    Reached by WALKING (the jump was not taken), it is the meeting
+    point of two paths, and its `guard` — the goto's page as a
+    `require`, wired at parse — checks that the walked span did what
+    the jump assumes it does, the same way any step's precondition is
+    checked: one retried read, unreadable fails closed, the abort
+    names the span in its hint. Reached by the jump, the loop lands
+    past it: the read that took the jump was that same check."""
+
+    mark: str = ""
+
+    @property
+    def tool(self) -> str:
+        return MARK
+
+    @property
+    def object(self) -> str:
+        return self.mark
+
+    async def execute(self, ctx: RunContext) -> StepOutcome:
+        assert self.guard is not None and self.guard.require is not None
+        return StepOutcome(
+            log_line=f"· {self.display()} — {self.guard.require.display()} shows",
+            outcome="ok",
+            view=ctx.last_view or None,
+        )
+
+    def substituted(self, values: dict[str, str]) -> "Step":
+        return replace(self, guard=sub(self.guard, values))
+
+
+@dataclass(frozen=True)
+class RunStep(Step):
+    """Another macro as one step: `- run: <name>` with its inputs under
+    `with:`. The callee is bound at parse, so the runner never looks a
+    name up mid-run; the runner walks its steps itself, in this run's
+    context (`runner._run_callee`), so `execute` is never reached.
+
+    `values` are the `with:` texts as written, `{name}` placeholders
+    of the CALLER's inputs included; `substituted` fills them as it
+    fills a gesture's arguments, and the runner resolves the result
+    against the callee's declared inputs — its defaults applied
+    verbatim, never filled — as a top-level run resolves its own."""
+
+    macro: Macro | None = None
+    values: dict[str, str] = field(default_factory=dict)
+
+    @property
+    def tool(self) -> str:
+        return RUN
+
+    @property
+    def object(self) -> str:
+        assert self.macro is not None
+        return self.macro.name
+
+    @property
+    def runs(self) -> Macro | None:
+        return self.macro
+
+    @property
+    def log_args(self) -> dict[str, Any]:
+        return self.values
+
+    @property
+    def declared_seconds(self) -> int:
+        assert self.macro is not None
+        return sum(s.declared_seconds for s in self.macro.steps)
+
+    async def execute(self, ctx: RunContext) -> StepOutcome:
+        raise AssertionError("the runner walks a run step's macro itself")
+
+    def substituted(self, values: dict[str, str]) -> "Step":
+        return replace(
+            self,
+            values=substitute(self.values, values),
+            skip_when=sub(self.skip_when, values),
+            when=sub(self.when, values),
+        )
+
+
+def guard_outcome(step: Step, detail: str, screen_text: str) -> StepOutcome:
+    """The shared shape of a failed precondition, so the two callers (the
+    guard check and its report) cannot word it differently."""
+    return StepOutcome(
+        log_line=f"✗ {step.display()} — guard: {detail}",
+        outcome=REASON_GUARD_FAILED,
+        detail=detail,
+        screen_text=screen_text,
+    )
+
+
+def _verdict_note(changed: bool | None) -> str:
+    if changed is None:
+        return ""
+    return " (changed)" if changed else " (no change)"

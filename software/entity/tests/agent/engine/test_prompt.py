@@ -1,0 +1,640 @@
+"""Tests for `physiclaw.agent.engine.prompt` — system prompt assembly.
+
+Module-level `CONTEXT_DIR` points at `agent/context/` in the repo;
+tests redirect it to a per-test tmp dir so doctrine slot rendering
+is deterministic.
+
+Accepted mutation survivors change unknown-provider defaults or placeholder
+wording, or include a separator space that is immediately stripped. Public
+snapshots and boundary tests cover the prompt bytes that carry behavior.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+from hypothesis import HealthCheck, example, given, settings
+from hypothesis import strategies as st
+
+from physiclaw.agent import layout
+from physiclaw.agent.engine import memory, prompt
+
+_DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "agent"
+
+
+@pytest.fixture
+def doctrine_default_dir() -> Path:
+    return prompt.CONTEXT_DIR
+
+
+@pytest.fixture(autouse=True)
+def _isolate_context_dir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, doctrine_default_dir
+) -> Path:
+    ctx = tmp_path / "context"
+    ctx.mkdir()
+    monkeypatch.setattr(prompt, "CONTEXT_DIR", ctx)
+    return ctx
+
+
+@pytest.fixture(autouse=True)
+def _stub_memory_user(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Default: empty USER.md unless a test overrides."""
+    monkeypatch.setattr(memory, "load_user", lambda: "")
+
+
+@pytest.fixture(autouse=True)
+def _stub_layout(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Default: setup incomplete → screen-layout section absent, so unrelated
+    prompt tests stay hermetic. Tests exercising the section override this."""
+
+    monkeypatch.setattr(layout, "is_learned", lambda: False)
+    monkeypatch.setattr(layout, "load_layout_md", lambda: "")
+
+
+@pytest.fixture
+def full_prompt_case(_isolate_context_dir, monkeypatch):
+    from physiclaw.agent.llm.context_policy import ContextPolicy
+
+    case = json.loads((_DATA_DIR / "prompt_case.json").read_text(encoding="utf-8"))
+    for name, body in case["doctrine"].items():
+        (_isolate_context_dir / name).write_text(body, encoding="utf-8")
+
+    monkeypatch.setattr(
+        prompt, "context_policy_for", lambda provider_id: ContextPolicy()
+    )
+    monkeypatch.setattr(memory, "load_user", lambda: case["user_profile"])
+    monkeypatch.setattr(layout, "is_learned", lambda: True)
+    monkeypatch.setattr(layout, "load_layout_md", lambda: case["screen_layout"])
+    return {
+        **case["inputs"],
+        "action_catalog": case["mcp_tools"] + case["inputs"]["action_catalog"],
+    }
+
+
+@pytest.mark.parametrize("render", [prompt.render_system_prompts, prompt.dump])
+def test_complete_prompt_matches_reviewed_snapshot(full_prompt_case, render) -> None:
+    # Full layout/text changes alter the cache prefix and should be deliberate.
+    expected = (
+        (_DATA_DIR / "prompt_system.txt").read_text(encoding="utf-8").removesuffix("\n")
+    )
+
+    rendered = render(**full_prompt_case)
+
+    assert rendered == expected
+
+
+# ---------- DOCTRINE_FILE_ORDER ----------
+
+
+@pytest.mark.parametrize("separator", ["\n", "\r", "\r\n", "\u2028", "\u2029"])
+def test_regression_tool_index_keeps_only_first_description_line(separator) -> None:
+    schemas = [
+        {"name": "probe", "description": f"First line{separator}SECOND_LINE_SENTINEL"}
+    ]
+
+    rendered = prompt.dump(action_catalog=schemas)
+
+    assert "- **probe** — First line" in rendered.splitlines()
+    assert "SECOND_LINE_SENTINEL" not in rendered
+
+
+@settings(max_examples=40, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(
+    text=st.text(
+        alphabet=st.characters(whitelist_categories=("L", "N")),
+        min_size=1,
+        max_size=100,
+    ),
+    separator=st.sampled_from(["\n", "\r", "\r\n", "\u2028", "\u2029"]),
+)
+def test_tool_index_preserves_unicode_first_line_without_following_lines(
+    text, separator
+) -> None:
+    schemas = [
+        {"name": "probe", "description": f"{text}{separator}SECOND_LINE_SENTINEL"}
+    ]
+
+    rendered = prompt.render_system_prompts(action_catalog=schemas)
+
+    assert f"- **probe** — {text}" in rendered.splitlines()
+    assert "SECOND_LINE_SENTINEL" not in rendered
+
+
+def test_public_render_has_no_free_text_reasoning_instructions():
+    rendered = prompt.render_system_prompts(provider_id="qwen", memory_ctx="fact")
+
+    assert "Reasoning Format" not in rendered
+    assert "<think>" not in rendered
+    assert rendered == "## memory.md\n\nfact"
+
+
+def test_public_render_rereads_doctrine_between_sessions(_isolate_context_dir) -> None:
+    identity = _isolate_context_dir / "IDENTITY.md"
+    identity.write_text("Original identity", encoding="utf-8")
+    first = prompt.dump()
+    identity.write_text("Updated identity", encoding="utf-8")
+
+    second = prompt.dump()
+
+    assert "Original identity" in first
+    assert "Original identity" not in second
+    assert "Updated identity" in second
+    assert prompt.prefix_hash(first) != prompt.prefix_hash(second)
+
+
+@settings(max_examples=40, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@given(
+    memory=st.text(alphabet=st.characters(blacklist_categories=("Cs",)), max_size=250)
+)
+@example(memory="")
+@example(memory="\n")
+@example(memory="X\n")
+def test_public_render_preserves_memory_and_stable_cache_prefix(memory) -> None:
+    memory_ctx = "MEMORY_MARKER: " + memory
+
+    rendered = prompt.render_system_prompts(memory_ctx=memory_ctx)
+    dumped = prompt.dump(memory_ctx=memory_ctx)
+
+    assert rendered == dumped
+    assert rendered.endswith(memory_ctx.rstrip("\n"))
+    assert not rendered.endswith("\n")
+    assert prompt.prefix_hash(rendered) == prompt.prefix_hash(dumped)
+
+
+def test_prefix_hash_matches_sha256_utf8_vector() -> None:
+    hashed = prompt.prefix_hash("abc")
+
+    assert hashed == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+
+
+def test_disabled_macro_doctrine_keeps_later_convention_slot(
+    _isolate_context_dir,
+) -> None:
+    (_isolate_context_dir / "MACRO.md").write_text(
+        "Macro instructions", encoding="utf-8"
+    )
+    (_isolate_context_dir / "CONVENTION.md").write_text(
+        "Always follow the convention", encoding="utf-8"
+    )
+
+    rendered = prompt.dump()
+
+    assert "## MACRO.md" not in rendered
+    assert "## CONVENTION.md\n\nAlways follow the convention" in rendered
+
+
+@pytest.mark.parametrize("unnamed", [{}, {"name": ""}, {"name": None}])
+def test_tool_index_keeps_named_tools_after_unnamed_entry(unnamed) -> None:
+    schemas = [unnamed, {"name": "healthy"}]
+
+    rendered = prompt.dump(action_catalog=schemas)
+
+    assert "- **healthy**" in rendered.splitlines()
+
+
+@pytest.mark.parametrize(
+    ("description", "summary"),
+    [
+        ("A. Next sentence.", "A."),
+        (". Leading punctuation", ". Leading punctuation"),
+        ("x" * 199 + ". Next sentence.", "x" * 199 + "."),
+        ("x" * 200 + ". Next sentence.", "x" * 200),
+        ("x" * 201 + ". Next sentence.", "x" * 200),
+    ],
+)
+def test_tool_index_respects_sentence_and_length_boundaries(
+    description, summary
+) -> None:
+    schemas = [{"name": "probe", "description": description}]
+
+    rendered = prompt.dump(action_catalog=schemas)
+
+    assert f"- **probe** — {summary}" in rendered.splitlines()
+
+
+def test_dump_defaults_match_render_defaults_without_memory() -> None:
+    rendered = prompt.render_system_prompts()
+
+    dumped = prompt.dump()
+
+    assert dumped == rendered
+    assert "## memory.md" not in dumped
+
+
+def test_doctrine_file_order_pinned() -> None:
+    assert prompt.DOCTRINE_FILE_ORDER == (
+        "IDENTITY.md",
+        "USER.md",
+        "SOUL.md",
+        "AGENT.md",
+        "PHYSICLAW.md",
+        "TOOLS.md",
+        "PERSISTENCE.md",
+        "JOBS.md",
+        "MACRO.md",
+        "CONVENTION.md",
+    )
+
+
+# ---------- _render_doctrine ----------
+
+
+def test_render_doctrine_empty_when_no_files_exist(_isolate_context_dir) -> None:
+    assert prompt._render_doctrine() == []
+
+
+def test_render_doctrine_emits_section_per_existing_file(
+    _isolate_context_dir: Path,
+) -> None:
+    (_isolate_context_dir / "IDENTITY.md").write_text(
+        "I am PhysiClaw.\n", encoding="utf-8"
+    )
+    (_isolate_context_dir / "AGENT.md").write_text("Be helpful.\n\n", encoding="utf-8")
+
+    out = prompt._render_doctrine()
+
+    text = "\n".join(out)
+    assert text.startswith("# Doctrine")
+    assert "## IDENTITY.md" in text
+    assert "I am PhysiClaw." in text
+    assert "## AGENT.md" in text
+    assert "Be helpful." in text
+
+
+def test_render_doctrine_emits_files_in_pinned_order(
+    _isolate_context_dir: Path,
+) -> None:
+    (_isolate_context_dir / "AGENT.md").write_text("agent body", encoding="utf-8")
+    (_isolate_context_dir / "IDENTITY.md").write_text("identity body", encoding="utf-8")
+
+    out = "\n".join(prompt._render_doctrine())
+
+    # IDENTITY appears before AGENT in DOCTRINE_FILE_ORDER.
+    assert out.index("## IDENTITY.md") < out.index("## AGENT.md")
+
+
+def test_render_doctrine_user_md_loads_via_memory(
+    _isolate_context_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(memory, "load_user", lambda: "User profile here")
+
+    out = "\n".join(prompt._render_doctrine())
+
+    assert "## USER.md" in out
+    assert "User profile here" in out
+
+
+def test_render_doctrine_substitutes_config_tokens(
+    _isolate_context_dir: Path,
+) -> None:
+    # Doctrine quotes engine-enforced thresholds via {{token}} placeholders
+    # so the prompt can never drift from the config the engine enforces.
+    from physiclaw.common.config import CONFIG
+
+    (_isolate_context_dir / "CONVENTION.md").write_text(
+        "Blocked after {{plan_required_after}} turns; "
+        "warn at press #{{same_target_warn}}.",
+        encoding="utf-8",
+    )
+
+    out = "\n".join(prompt._render_doctrine())
+
+    assert f"after {CONFIG.engine.plan_required_after} turns" in out
+    assert f"press #{CONFIG.engine.same_target_warn}" in out
+    assert "{{" not in out
+
+
+def test_shipped_doctrine_has_no_unresolved_tokens(
+    monkeypatch: pytest.MonkeyPatch,
+    doctrine_default_dir,
+) -> None:
+    # Integration guard against the REAL context/ files (undoing the
+    # autouse isolation): a typo'd {{token}} in shipped doctrine must
+    # fail CI, not just log at runtime. Also pins that the substituted
+    # thresholds actually appear where doctrine quotes them.
+    from physiclaw.common.config import CONFIG
+
+    monkeypatch.setattr(prompt, "CONTEXT_DIR", doctrine_default_dir)
+
+    out = prompt.dump()
+
+    assert "{{" not in out
+    assert f"press #{CONFIG.engine.same_target_block}" in out
+    assert f"after {CONFIG.engine.plan_required_after} turns" in out
+
+
+def test_render_doctrine_warns_on_unresolved_token(
+    _isolate_context_dir: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    import logging
+
+    (_isolate_context_dir / "AGENT.md").write_text(
+        "Cap: {{no_such_token}}.", encoding="utf-8"
+    )
+
+    with caplog.at_level(logging.WARNING, logger="physiclaw.agent.engine.prompt"):
+        prompt._render_doctrine()
+
+    assert any("unresolved" in r.getMessage() for r in caplog.records)
+
+
+def test_render_doctrine_skips_empty_files(_isolate_context_dir: Path) -> None:
+    (_isolate_context_dir / "IDENTITY.md").write_text("", encoding="utf-8")
+    (_isolate_context_dir / "AGENT.md").write_text("body", encoding="utf-8")
+
+    out = "\n".join(prompt._render_doctrine())
+
+    assert "## IDENTITY.md" not in out
+    assert "## AGENT.md" in out
+
+
+# ---------- _render_tooling ----------
+
+
+def test_render_tooling_empty_when_no_tools(_isolate_context_dir) -> None:
+    assert prompt._render_tooling([]) == []
+
+
+def test_render_tooling_lists_local_tool_with_first_sentence(
+    _isolate_context_dir,
+) -> None:
+    schemas = [{"name": "tap", "description": "Tap a coordinate. Then peek."}]
+
+    out = prompt._render_tooling(schemas)
+
+    text = "\n".join(out)
+    assert "## Tooling" in text
+    assert "- **tap** — Tap a coordinate." in text
+
+
+def test_render_tooling_skips_tools_without_a_name(_isolate_context_dir) -> None:
+    out = prompt._render_tooling([{"description": "anonymous"}])
+
+    text = "\n".join(out)
+    # Header still emitted because list is non-empty, but the tool has no name.
+    assert "anonymous" not in text
+
+
+def test_render_tooling_handles_tool_without_description() -> None:
+    out = prompt._render_tooling([{"name": "noop"}])
+
+    text = "\n".join(out)
+    assert "- **noop**" in text
+    assert "—" not in text.split("- **noop**")[1].split("\n")[0]
+
+
+def test_render_tooling_skipped_for_provider_that_opts_out(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from physiclaw.agent.llm.context_policy import ContextPolicy
+
+    monkeypatch.setattr(
+        prompt, "context_policy_for", lambda pid: ContextPolicy(inline_tool_index=False)
+    )
+
+    assert prompt._render_tooling([{"name": "tap", "description": "Tap."}], "x") == []
+
+
+def test_render_tooling_kept_for_unknown_provider() -> None:
+    out = "\n".join(
+        prompt._render_tooling([{"name": "tap", "description": "Tap."}], "mystery")
+    )
+
+    assert "## Tooling" in out
+
+
+def test_anthropic_omits_duplicate_tool_index() -> None:
+    out = "\n".join(
+        prompt._render_tooling([{"name": "tap", "description": "Tap."}], "anthropic")
+    )
+
+    assert out == ""
+
+
+def test_deepseek_retains_tool_index_after_replay_review() -> None:
+    out = "\n".join(
+        prompt._render_tooling([{"name": "tap", "description": "Tap."}], "deepseek")
+    )
+
+    assert "- **tap** — Tap." in out
+
+
+def test_tool_index_uses_only_supplied_catalog(monkeypatch):
+    from physiclaw.agent.engine import mcp_inventory
+
+    monkeypatch.setattr(
+        mcp_inventory, "discover_mcp_tools", lambda: pytest.fail("AST fallback")
+    )
+    rendered = prompt.render_system_prompts(
+        action_catalog=[{"name": "peek", "description": "Look."}]
+    )
+
+    assert "- **peek** — Look." in rendered
+    assert "TurnOutput.action" in rendered
+    assert "tap" not in rendered
+
+
+# ---------- _render_section ----------
+
+
+def test_render_section_empty_when_no_context() -> None:
+    assert prompt._render_section("") == []
+
+
+def test_render_section_passes_prerendered_block_through() -> None:
+    # The skill module already emits the `##` header + framing; the prompt
+    # just drops it in with a trailing blank line.
+    assert prompt._render_section("## Skills\n\nbody") == ["## Skills\n\nbody", ""]
+
+
+# ---------- _render_screen_layout ----------
+# The first-run nudge is a tail message (layout.inject_tail), not this
+# section — here we only cover loading the layout once all pages are captured.
+
+
+def test_render_screen_layout_loads_md_when_complete(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+
+    monkeypatch.setattr(layout, "is_learned", lambda: True)
+    monkeypatch.setattr(layout, "load_layout_md", lambda: "LAYOUT TABLE")
+    out = "\n".join(prompt._render_screen_layout())
+
+    assert "## Screen layout" in out
+    assert "LAYOUT TABLE" in out
+
+
+def test_render_screen_layout_empty_while_incomplete(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+
+    # Even with a partial layout on disk, nothing shows until complete.
+    monkeypatch.setattr(layout, "is_learned", lambda: False)
+    monkeypatch.setattr(layout, "load_layout_md", lambda: "PARTIAL")
+    assert prompt._render_screen_layout() == []
+
+
+def test_render_screen_layout_says_not_set_when_learned_but_md_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+
+    # Edge case: complete per json but the md file is gone — still show the
+    # section, with a placeholder rather than hiding it.
+    monkeypatch.setattr(layout, "is_learned", lambda: True)
+    monkeypatch.setattr(layout, "load_layout_md", lambda: "")
+    out = "\n".join(prompt._render_screen_layout())
+
+    assert "## Screen layout" in out
+    assert "not set yet" in out
+
+
+# ---------- _render_memory ----------
+
+
+def test_render_memory_empty_when_no_context() -> None:
+    assert prompt._render_memory("") == []
+
+
+def test_render_memory_wraps_context_with_header() -> None:
+    out = "\n".join(prompt._render_memory("user prefers metric"))
+
+    assert out.startswith("## memory.md")
+    assert "user prefers metric" in out
+
+
+# ---------- _first_sentence ----------
+
+
+def test_first_sentence_takes_first_line() -> None:
+    assert prompt._first_sentence("first\nsecond") == "first"
+
+
+def test_first_sentence_cuts_at_period_space() -> None:
+    assert prompt._first_sentence("Tap a coord. Then peek.") == "Tap a coord."
+
+
+def test_first_sentence_cuts_at_semicolon_space() -> None:
+    assert prompt._first_sentence("Foo; bar") == "Foo;"
+
+
+def test_first_sentence_returns_empty_for_blank_input() -> None:
+    assert prompt._first_sentence("") == ""
+    assert prompt._first_sentence("   ") == ""
+
+
+def test_first_sentence_truncates_at_200_chars_when_no_separator() -> None:
+    long = "x" * 250
+    assert len(prompt._first_sentence(long)) == 200
+
+
+# ---------- prefix_hash ----------
+
+
+def test_prefix_hash_returns_64_char_hex_string() -> None:
+    h = prompt.prefix_hash("hello")
+
+    assert len(h) == 64
+    assert all(c in "0123456789abcdef" for c in h)
+
+
+def test_prefix_hash_deterministic_for_same_input() -> None:
+    assert prompt.prefix_hash("hello") == prompt.prefix_hash("hello")
+
+
+def test_prefix_hash_different_for_different_inputs() -> None:
+    assert prompt.prefix_hash("a") != prompt.prefix_hash("b")
+
+
+def test_prefix_hash_raises_on_non_string_input() -> None:
+    with pytest.raises(
+        ValueError, match=r"^prefix_hash: system_prompt must be str, got int$"
+    ):
+        prompt.prefix_hash(42)  # type: ignore[arg-type]
+
+
+# ---------- render_system_prompts / dump (integration) ----------
+
+
+def test_render_system_assembles_all_present_sections(
+    _isolate_context_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (_isolate_context_dir / "IDENTITY.md").write_text("ID body", encoding="utf-8")
+    monkeypatch.setattr(memory, "load_user", lambda: "user profile")
+
+    out = prompt.render_system_prompts(
+        action_catalog=[{"name": "tap", "description": "Tap."}],
+        memory_ctx="recent fact",
+        builtin_skills_ctx="## Built-in Skills\n\n### im\n\nim body",
+        user_skills_ctx="## Available skills\n\n- **taobao** — shop",
+        provider_id="",
+    )
+
+    assert "# Doctrine" in out
+    assert "## IDENTITY.md" in out
+    assert "## USER.md" in out
+    assert "user profile" in out
+    assert "## Tooling" in out
+    assert "## Built-in Skills" in out
+    assert "im body" in out  # built-in body inlined
+    assert "## Available skills" in out
+    assert "**taobao** — shop" in out  # user index entry
+    assert "## Examples" not in out
+    assert "## memory.md" in out
+    assert "recent fact" in out
+
+
+def test_render_system_places_macros_between_skills_and_memory(
+    _isolate_context_dir,
+) -> None:
+    out = prompt.render_system_prompts(
+        user_skills_ctx="## Available skills\n\n- **taobao** — shop",
+        macros_ctx="## Available Macros\n\n- **notify-user** — ping (2 steps)",
+        memory_ctx="Persistent facts",
+    )
+
+    assert "- **notify-user** — ping (2 steps)" in out
+    assert (
+        out.index("## Available skills")
+        < out.index("## Available Macros")
+        < out.index("## memory.md")
+    )
+
+
+def test_render_system_omits_macros_section_when_empty(_isolate_context_dir) -> None:
+    out = prompt.render_system_prompts(macros_ctx="")
+
+    assert "## Available Macros" not in out
+
+
+def test_macro_doctrine_renders_only_with_macros(_isolate_context_dir) -> None:
+    # Pay only for what's used: the MACRO.md slot is keyed on the same
+    # condition as the `## Available Macros` section.
+    (_isolate_context_dir / "MACRO.md").write_text(
+        "macro doctrine body", encoding="utf-8"
+    )
+
+    with_macros = prompt.render_system_prompts(macros_ctx="## Available Macros\n\n- x")
+    without = prompt.render_system_prompts(macros_ctx="")
+
+    assert "macro doctrine body" in with_macros
+    assert "macro doctrine body" not in without
+
+
+def test_render_system_returns_empty_when_all_sections_disabled(
+    _isolate_context_dir,
+) -> None:
+    out = prompt.render_system_prompts()
+
+    assert out == ""
+
+
+def test_dump_delegates_to_render_system_with_same_args(
+    _isolate_context_dir: Path,
+) -> None:
+    a = prompt.dump(memory_ctx="x")
+    b = prompt.render_system_prompts(memory_ctx="x")
+
+    assert a == b

@@ -63,7 +63,7 @@ for (const lang of ["en", "es"]) {
     const model = v2Page(lang, v2Catalog);
     assert.match(model, /data-src="\/assets\/v2\/visor\/\?embed=1"/);
     assert.match(model, /href="\/assets\/v2\/visor\/ft412-v2-step.zip"/);
-    assert.match(model, /href="\/assets\/v2\/visor\/"/);
+    assert.ok(model.includes(`href="/assets/v2/visor/?home=${lang}"`));
     assert.ok(homePage(lang).includes(`href="${lang === "es" ? "/es" : ""}/v2/#budget"`));
     assert.ok(model.includes(`/downloads/v2-${lang}.csv`));
     assert.ok(model.includes(lang === "es" ? "US$1.017,44" : "US$1,017.44"));

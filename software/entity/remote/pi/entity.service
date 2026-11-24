@@ -1,0 +1,15 @@
+[Unit]
+Description=Entity by Sentient · Alfonsito
+After=network-online.target
+
+[Service]
+Type=simple
+Environment=PHYSICLAW_HOME=%h/.local/share/entity/active-profile
+Environment=ENTITY_MKS_PANEL=1
+Environment=PYTHONUNBUFFERED=1
+ExecStart=%h/.local/share/entity/current/venv/bin/entity mcp --port 8048
+Restart=on-failure
+TimeoutStopSec=25
+
+[Install]
+WantedBy=default.target

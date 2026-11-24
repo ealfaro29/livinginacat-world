@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="theme-color" content="#10130f" />
+    <title>Pulso · Entity by Sentient</title>
+    <link rel="icon" href="../sentient.svg" />
+    <link rel="stylesheet" href="pulse.css" />
+  </head>
+  <body>
+    <main class="shell game" id="game" data-phase="ready">
+      <header class="brandbar">
+        <div class="brand">
+          <img src="../sentient.svg" alt="" /><strong>Entity</strong><span>by Sentient</span>
+        </div>
+        <button id="lang" class="quiet" lang="en">EN</button>
+      </header>
+      <section class="heading">
+        <div>
+          <h1 id="title">Pulso</h1>
+          <p id="instruction">Tocá los cinco blancos al encenderse.</p>
+        </div>
+        <div id="progress" class="progress" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i>
+        </div>
+      </section>
+      <section id="arena" aria-label="Tablero">
+        <div class="field">
+          <div id="pins" aria-hidden="true"></div>
+          <button id="target" aria-label="Blanco" tabindex="-1"><i class="orb"></i></button
+          ><i id="echo" aria-hidden="true"></i>
+        </div>
+        <div class="result" id="overlay" hidden>
+          <span id="overlayLabel"></span><strong id="overlayNumber"></strong
+          ><small id="overlayDetail"></small>
+        </div>
+      </section>
+      <section class="readout" aria-live="off">
+        <div>
+          <span id="hitsLabel">Aciertos</span><strong id="hits">00<small> / 05</small></strong>
+        </div>
+        <div><span id="timeLabel">Tiempo</span><strong id="clock">00:00</strong></div>
+      </section>
+      <footer>
+        <span id="status" role="status">Listo para jugar</span
+        ><button id="play" class="primary">Jugar a mano</button>
+      </footer>
+    </main>
+    <script type="module" src="pulse.js"></script>
+  </body>
+</html>

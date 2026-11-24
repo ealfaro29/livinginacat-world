@@ -1,0 +1,29 @@
+---
+title: 获取 API Key
+description: 选择模型提供商，申请 API Key 并添加到 PhysiClaw。
+---
+
+PhysiClaw 支持多家模型提供商。任选一家，注册账号并申请 API Key，然后把 Key 添加到 PhysiClaw 并指定 `provider/model`。
+
+| 提供商 | 申请地址 |
+| --- | --- |
+| openai | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
+| anthropic | [platform.claude.com/settings/keys](https://platform.claude.com/settings/keys) |
+| google | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
+| openrouter | [openrouter.ai/keys](https://openrouter.ai/keys) |
+| qwen | [bailian.console.aliyun.com](https://bailian.console.aliyun.com) |
+| moonshot | [platform.moonshot.cn](https://platform.moonshot.cn/console/api-keys) |
+| deepseek | [platform.deepseek.com](https://platform.deepseek.com/api_keys) |
+
+获取 API Key 后，把 Key 添加到 PhysiClaw，再选择模型：
+
+```bash
+physiclaw models key <provider>      # 出现提示时粘贴你的 Key
+physiclaw models use <provider/model>
+```
+
+:::tip[需要多模态模型]
+PhysiClaw 每一步都要查看手机屏幕，因此必须使用**支持图像和文字输入的多模态模型**。仅支持文本输入的模型不适用。
+:::
+
+例如，运行 `physiclaw models key deepseek` 并粘贴 API Key，再运行 `physiclaw models use deepseek/deepseek-flash`，即可使用 `deepseek-flash`。

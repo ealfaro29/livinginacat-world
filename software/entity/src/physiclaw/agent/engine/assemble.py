@@ -1,0 +1,188 @@
+"""Request assembly — the offline half of a session's setup.
+
+Everything here runs without an MCP connection or a provider: discover
+skills, build the local tool registry, render the SYSTEM prompt, compose
+the wake user-message, and pin the per-turn tail slots. Shared by the
+engine (`engine._run_session` / `LLMProducer._prepare_request`) and the
+`physiclaw prompt` dump (`cli/prompt.py`). Both share logical context and
+the action catalog; exact provider wire is available in native request logs.
+"""
+
+import datetime as dt
+from copy import deepcopy
+from dataclasses import dataclass
+
+from physiclaw.agent import layout
+from physiclaw.agent.engine import (
+    builtin_tool,
+    compact,
+    jobs,
+    memory,
+    pitfalls,
+    plan,
+    prompt,
+    scratchpad,
+    skill,
+)
+from physiclaw.agent.engine.builtin_tool import LocalTool
+from physiclaw.agent.engine.output import ActionCatalog
+from physiclaw.agent.engine.session import Session
+from physiclaw.agent.runtime.hook import Trigger
+from physiclaw.common import gesture_vocab
+from physiclaw.common.config import CONFIG
+from physiclaw.contract.dto import Message, SystemMessage, UserMessage
+from physiclaw.macros import store as macro_store
+from physiclaw.macros.model import Macro
+
+
+@dataclass(slots=True)
+class PromptBundle:
+    """The turn-0 request pieces assembled offline — no MCP or provider needed.
+    Shared by `engine._run_session` and the `physiclaw prompt` dump; providers
+    add their own wire formatting and request options. `local_registry` contains all dispatchable local
+    tools; `local_schemas` advertises only the model-visible ones.
+    `layout_incomplete` gates the first-run reminder; the skill counts are for
+    the session's tools-loaded log line."""
+
+    system_prompt: str
+    local_registry: dict[str, LocalTool]
+    local_schemas: list[dict]
+    layout_incomplete: bool
+    builtin_skill_count: int
+    user_skill_count: int
+    catalog: ActionCatalog
+    pitfall_count: int = 0
+    macro_count: int = 0
+
+
+def build_prompt_bundle(
+    provider_id: str,
+    pack_macros: dict[str, Macro] | None = None,
+    *,
+    mcp_schemas: list[dict],
+) -> PromptBundle:
+    """Discover skills, build the local tool registry, and render the SYSTEM
+    prompt for a session — the offline half of `engine._run_session`'s setup.
+
+    `pack_macros` (the armed playbook pack's private macros, qualified
+    `app/name` keys) wire into the run_macro handler only — they never
+    enter the SYSTEM prompt, the macros card, or the tool description, so
+    an armed pack changes zero model-visible bytes."""
+    layout_incomplete = not layout.is_learned()
+    builtin_skills = layout.prune_builtin_skills(skill.discover_builtin_skills())
+    # Inline the learned bboxes into the skill bodies (e.g. im's send sequence)
+    # so the agent uses coordinates directly instead of cross-referencing.
+    builtin_skills = layout.fill_builtin_boxes(builtin_skills)
+    user_skills = skill.discover_user_skills()
+    macros = macro_store.discover_enabled()
+    local_registry = builtin_tool.build_registry(user_skills, macros, pack_macros)
+    # A private hand still needs run_macro for dispatch, but without public
+    # macros the model has nothing it can call through that tool.
+    local_schemas = [
+        schema
+        for schema in builtin_tool.schemas(local_registry)
+        if macros or schema["name"] != gesture_vocab.RUN_MACRO
+    ]
+    local_schemas = deepcopy(local_schemas)
+    for tool in local_schemas:
+        if tool["name"] == gesture_vocab.RUN_MACRO:
+            tool["input_schema"]["properties"]["name"]["enum"] = sorted(macros)
+        elif tool["name"] == "Skill":
+            tool["input_schema"]["properties"]["name"]["enum"] = sorted(user_skills)
+    visible_local = {tool["name"] for tool in local_schemas}
+    # A hidden local handler still shadows an MCP name at dispatch. Do not
+    # advertise a remote schema that would actually invoke that handler.
+    visible_mcp = [
+        tool
+        for tool in mcp_schemas
+        if tool["name"] not in local_registry or tool["name"] in visible_local
+    ]
+    catalog = ActionCatalog.compile(
+        visible_mcp, local_schemas, max_scratchpad=scratchpad.MAX_CHARS
+    )
+    pitfall_items = pitfalls.read() if CONFIG.pitfalls.enabled else []
+    system_prompt = prompt.render_system_prompts(
+        memory_ctx=memory.load_persistent(),
+        builtin_skills_ctx=skill.render_builtin(builtin_skills),
+        user_skills_ctx=skill.render_section(user_skills),
+        macros_ctx=macro_store.render_section(macros),
+        pitfalls_ctx=pitfalls.render_section(pitfall_items),
+        provider_id=provider_id,
+        action_catalog=catalog.tools,
+    )
+    return PromptBundle(
+        system_prompt=system_prompt,
+        catalog=catalog,
+        local_registry=local_registry,
+        local_schemas=local_schemas,
+        layout_incomplete=layout_incomplete,
+        builtin_skill_count=len(builtin_skills),
+        user_skill_count=len(user_skills),
+        pitfall_count=len(pitfall_items),
+        macro_count=len(macros),
+    )
+
+
+def build_initial_messages(
+    triggers: list[Trigger], system_prompt: str
+) -> list[Message]:
+    """The message array a session starts with: cached SYSTEM prompt, the
+    wake-trigger user message (date anchor + fired-job context), and the three
+    pre-allocated compaction slots (summary / memory / skills)."""
+    return [
+        SystemMessage(content=system_prompt),
+        UserMessage(
+            content=format_triggers(
+                triggers,
+                cron_ctx=jobs.format_fired(triggers),
+            )
+        ),
+        compact.new_summary_placeholder(),
+        compact.new_memory_placeholder(),
+        compact.new_skills_placeholder(),
+    ]
+
+
+def apply_request_tails(
+    messages: list[Message],
+    session: Session,
+    *,
+    layout_incomplete: bool,
+    compaction_keep: int | None = None,
+) -> list[Message]:
+    """Pin the per-turn tail slots to the request — scratchpad, plan, the
+    pre-compression checkpoint notice (`compaction_keep` set = this is a
+    `collapse_pending` turn), and (while first-run setup is pending) the
+    layout reminder — the LAST things the model sees. Shared by
+    `LLMProducer._prepare_request` and the `prompt` dump so a turn-0 dump matches
+    the wire the engine sends. Does not mutate `messages`."""
+    out = compact.omit_repeated_scratchpads(messages)
+    out = scratchpad.inject_tail(out, session.scratchpad)
+    out = plan.inject_tail(out, session.plan)
+    if compaction_keep is not None:
+        out = compact.inject_checkpoint_tail(out, keep=compaction_keep)
+    if layout_incomplete:
+        out = layout.inject_tail(out)
+    return out
+
+
+def format_triggers(triggers: list[Trigger], *, cron_ctx: str = "") -> str:
+    # Leading `Now:` line is the absolute-date anchor — memory logs use
+    # relative dates, and the model burns turns triangulating today without
+    # it. Each trigger then uses a uniform `[stamp] source: body` envelope.
+    # cron_ctx (jobs firing now) rides in this user message, not the system,
+    # so the system stays byte-stable across wakes for cross-session caching.
+    now = dt.datetime.now()
+    stamp = now.strftime("%Y-%m-%d %a %H:%M")
+    lines = [
+        f"Now: {stamp}",
+        "",
+        "[Current wake — act on this]",
+    ]
+    for t in triggers:
+        source = t.source or "manual"
+        lines.append(f"[{stamp}] {source}: {t.description}")
+    text = "\n".join(lines)
+    if cron_ctx:
+        text += "\n\n" + cron_ctx
+    return text

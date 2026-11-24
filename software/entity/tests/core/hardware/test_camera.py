@@ -1,0 +1,1736 @@
+"""Tests for `physiclaw.core.hardware.camera` — hardware fakes.
+
+`cv2.VideoCapture` is faked via attribute patches so the real
+AVFoundation / V4L stack never opens. The background reader (a composed
+`FrameReader`) is stopped immediately after construction; the reader
+loop itself is unit-tested with scripted callables in
+`test_frame_reader.py`.
+"""
+
+from __future__ import annotations
+
+import importlib
+import logging
+import os
+import threading
+from types import SimpleNamespace
+from unittest.mock import MagicMock
+
+import cv2
+import numpy as np
+import pytest
+
+from physiclaw.core.hardware import camera as camera_mod
+from physiclaw.core.hardware import frame_reader as fr_mod
+from physiclaw.core.hardware.camera import (
+    Camera,
+    silenced_stderr,
+)
+
+
+@pytest.fixture(autouse=True)
+def fixed_frame_clock(monkeypatch):
+    monkeypatch.setattr(
+        fr_mod, "time", SimpleNamespace(monotonic=lambda: 100.0, time=lambda: 1100.0)
+    )
+
+
+# ---------- silenced_stderr ----------
+
+
+def test_silenced_stderr_swallows_block_output(capfd: pytest.CaptureFixture) -> None:
+    # Print to fd 2 directly via os.write so the redirect catches it.
+    with silenced_stderr():
+        os.write(2, b"silenced\n")
+    # Outside the block, fd 2 is restored.
+    os.write(2, b"audible\n")
+
+    captured = capfd.readouterr()
+    assert "silenced" not in captured.err
+    assert "audible" in captured.err
+
+
+def test_silenced_stderr_serializes_concurrent_redirects() -> None:
+    """Two threads redirecting fd 2 at once can save each other's
+    /dev/null as the "real" stderr and leave it permanently silenced —
+    the whole save/redirect/restore window must run under the module
+    lock. Asserted directly: the lock is held inside the block, so a
+    second thread can't be juggling fd 2 concurrently, and fd 2 is
+    restored afterwards."""
+    stat_before = os.fstat(2)
+
+    with silenced_stderr():
+        assert camera_mod._STDERR_REDIRECT_LOCK.locked()
+
+    stat_after = os.fstat(2)
+    assert (stat_after.st_dev, stat_after.st_ino) == (
+        stat_before.st_dev,
+        stat_before.st_ino,
+    )
+
+
+# ---------- FakeVideoCapture ----------
+
+
+class FakeVideoCapture:
+    """In-memory fake of cv2.VideoCapture.
+
+    `read_results` is a list/iterator of (ok, frame) pairs returned by
+    successive `read()` calls. After exhaustion, returns `(False, None)`
+    forever. `is_open` controls `isOpened()`.
+    """
+
+    def __init__(
+        self,
+        index,
+        *,
+        is_open: bool = True,
+        read_results=None,
+        raise_on_read: bool = False,
+    ):
+        self.index = index
+        self._is_open = is_open
+        self._reads = list(read_results or [])
+        self._raise_on_read = raise_on_read
+        self.released = False
+        self.set_calls: list[tuple[int, float]] = []
+        self._properties: dict[int, float] = {}
+
+    def isOpened(self) -> bool:  # Match the OpenCV capture API.
+        return self._is_open and not self.released
+
+    def read(self):
+        if self._raise_on_read:
+            raise RuntimeError("hardware error")
+        if not self._reads:
+            return (False, None)
+        return self._reads.pop(0)
+
+    def set(self, prop, value):
+        self.set_calls.append((prop, value))
+        self._properties[prop] = float(value)
+        return True
+
+    def get(self, prop):
+        if prop == cv2.CAP_PROP_AUTOFOCUS and getattr(self, "dshow_controls", False):
+            return 1 if self._properties.get(prop, 0) else 2
+        return self._properties.get(prop, 0.0)
+
+    def release(self):
+        self.released = True
+
+
+def _frame(h: int = 480, w: int = 640) -> np.ndarray:
+    return np.full((h, w, 3), 127, dtype=np.uint8)
+
+
+def _open_camera_no_thread(mocker, *, vc: FakeVideoCapture) -> Camera:
+    """Construct a Camera with VideoCapture stubbed, then immediately
+    stop its reader thread so tests don't race with it."""
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc)
+    cam = Camera(index=0)
+    # Halt the background reader so subsequent attribute pokes are stable.
+    cam._reader.stop()
+    return cam
+
+
+@pytest.mark.parametrize(
+    "frame",
+    [None, np.empty((0, 0, 3), dtype=np.uint8), np.zeros((8, 8, 3), dtype=np.uint8)],
+)
+def test_successful_read_with_no_image_is_rejected_for_stream_recovery(mocker, frame):
+    cam, cap = _ready_camera(mocker)
+    cap._reads = [(True, frame)]
+
+    with pytest.raises(camera_mod.DeviceTimeout, match="empty or all-zero"):
+        cam._locked_read()
+
+
+def test_dim_frame_with_one_nonzero_pixel_is_preserved(mocker):
+    cam, cap = _ready_camera(mocker)
+    frame = np.zeros((8, 8, 3), dtype=np.uint8)
+    frame[4, 4, 0] = 1
+    cap._reads = [(True, frame)]
+
+    ok, received = cam._locked_read()
+
+    assert ok and received is frame
+
+
+@pytest.fixture(params=["native", "linux", "windows"])
+def capture_controls(request, mocker):
+    """Exercise property-based controls even when the host uses macOS UVC."""
+    if request.param == "native":
+        return
+    backend = importlib.import_module(f"physiclaw.port.backends.{request.param}")
+    if request.param == "windows":
+        mocker.patch.object(FakeVideoCapture, "dshow_controls", True, create=True)
+    for name in (
+        "camera_set_auto_exposure",
+        "camera_set_manual_exposure",
+        "camera_lock_focus",
+        "camera_unlock_focus",
+        "camera_read_focus",
+        "camera_apply_focus",
+    ):
+        mocker.patch.object(camera_mod.platform, name, getattr(backend, name))
+
+
+# ---------- Camera construction ----------
+
+
+@pytest.mark.parametrize("size", [(3840, 2160), (2560, 1440), (1920, 1080)])
+@pytest.mark.parametrize("exposure_auto", [False, True])
+@pytest.mark.parametrize("focus_value", [None, 555.0])
+def test_directshow_negotiation_preserves_mjpg_and_controls(
+    mocker, size, exposure_auto, focus_value
+):
+    """Model Ugreen's size-induced YUY2 switch and negotiation control resets."""
+    from physiclaw.port.backends import windows
+
+    mjpg = cv2.VideoWriter.fourcc(*"MJPG")
+    yuy2 = cv2.VideoWriter.fourcc(*"YUY2")
+
+    class NegotiatingCapture(FakeVideoCapture):
+        dshow_controls = True
+
+        def get(self, prop):
+            if prop == cv2.CAP_PROP_BACKEND:
+                return cv2.CAP_DSHOW
+            return super().get(prop)
+
+        def set(self, prop, value):
+            assert prop != cv2.CAP_PROP_MODE, "V4L2 mode command sent to DirectShow"
+            accepted = super().set(prop, value)
+            if prop in (cv2.CAP_PROP_FRAME_WIDTH, cv2.CAP_PROP_FRAME_HEIGHT):
+                self._properties[cv2.CAP_PROP_FOURCC] = yuy2
+            if prop == cv2.CAP_PROP_FOURCC:
+                self._properties[cv2.CAP_PROP_EXPOSURE] = -7
+                self._properties[cv2.CAP_PROP_AUTO_EXPOSURE] = 0
+                self._properties[cv2.CAP_PROP_FOCUS] = 0
+                self._properties[cv2.CAP_PROP_AUTOFOCUS] = 0
+            return accepted
+
+        def read(self):
+            frame = _frame(8, 8)
+            if self.get(cv2.CAP_PROP_FOURCC) != mjpg:
+                frame.fill(0)
+            return True, frame
+
+    for name in (
+        "camera_set_auto_exposure",
+        "camera_set_manual_exposure",
+        "camera_apply_focus",
+        "camera_unlock_focus",
+    ):
+        mocker.patch.object(camera_mod.platform, name, getattr(windows, name))
+    mocker.patch.object(camera_mod.CONFIG.camera, "fourcc", "MJPG")
+    cap = NegotiatingCapture(0)
+
+    pinned = camera_mod.configure_capture(
+        cap,
+        size=size,
+        exposure_auto=exposure_auto,
+        exposure=-6,
+        focus_value=focus_value,
+    )
+
+    assert cap.read()[1].any()
+    assert cap.get(cv2.CAP_PROP_FOURCC) == mjpg
+    assert cap.get(cv2.CAP_PROP_FRAME_WIDTH) == size[0]
+    assert cap.get(cv2.CAP_PROP_FRAME_HEIGHT) == size[1]
+    assert cap.get(cv2.CAP_PROP_AUTO_EXPOSURE) == int(exposure_auto)
+    if not exposure_auto:
+        assert cap.get(cv2.CAP_PROP_EXPOSURE) == -6
+    assert cap.get(cv2.CAP_PROP_AUTOFOCUS) == (1 if focus_value is None else 2)
+    assert pinned == (focus_value is not None)
+    if focus_value is not None:
+        assert cap.get(cv2.CAP_PROP_FOCUS) == focus_value
+
+
+@pytest.mark.parametrize("capture_controls", ["linux"], indirect=True)
+@pytest.mark.parametrize("exposure_auto", [False, True])
+@pytest.mark.parametrize("focus_value", [None, 0.0, 137.0, 1023.0])
+def test_v4l2_configuration_uses_native_control_units(
+    capture_controls, exposure_auto, focus_value
+):
+    """Model OpenCV's optional V4L2 scaling of focus and exposure controls."""
+    ranges = {
+        cv2.CAP_PROP_FOCUS: (0, 1023),
+        cv2.CAP_PROP_EXPOSURE: (1, 5000),
+        cv2.CAP_PROP_AUTO_EXPOSURE: (0, 4),
+    }
+
+    class NormalizedCapture(FakeVideoCapture):
+        normalized = True
+
+        def get(self, prop):
+            if prop == cv2.CAP_PROP_BACKEND:
+                return cv2.CAP_V4L2
+            value = super().get(prop)
+            if self.normalized and prop in ranges:
+                low, high = ranges[prop]
+                return (value - low) / (high - low)
+            return value
+
+        def set(self, prop, value):
+            if prop == cv2.CAP_PROP_MODE:
+                self.normalized = bool(value)
+            elif self.normalized and prop in ranges:
+                low, high = ranges[prop]
+                value = max(low, min(high, round(low + value * (high - low))))
+            return super().set(prop, value)
+
+    cap = NormalizedCapture(0)
+    pinned = camera_mod.configure_capture(
+        cap, exposure_auto=exposure_auto, exposure=-6, focus_value=focus_value
+    )
+
+    assert cap._properties[cv2.CAP_PROP_AUTO_EXPOSURE] == (3 if exposure_auto else 1)
+    if not exposure_auto:
+        assert cap._properties[cv2.CAP_PROP_EXPOSURE] == 156
+    assert cap.get(cv2.CAP_PROP_AUTOFOCUS) == int(focus_value is None)
+    assert pinned == (focus_value is not None)
+    if focus_value is not None:
+        assert cap._properties[cv2.CAP_PROP_FOCUS] == focus_value
+        assert cap.get(cv2.CAP_PROP_FOCUS) == focus_value
+
+
+@pytest.mark.parametrize("backend", [cv2.CAP_MSMF, cv2.CAP_AVFOUNDATION])
+def test_other_backends_keep_requested_size_when_format_resets_dimensions(
+    mocker, backend
+):
+    class FormatResetsSizeCapture(FakeVideoCapture):
+        def get(self, prop):
+            if prop == cv2.CAP_PROP_BACKEND:
+                return backend
+            return super().get(prop)
+
+        def set(self, prop, value):
+            assert prop != cv2.CAP_PROP_MODE, (
+                "V4L2 mode command sent to another backend"
+            )
+            accepted = super().set(prop, value)
+            if prop == cv2.CAP_PROP_FOURCC:
+                self._properties[cv2.CAP_PROP_FRAME_WIDTH] = 640
+                self._properties[cv2.CAP_PROP_FRAME_HEIGHT] = 480
+            return accepted
+
+    cap = FormatResetsSizeCapture(0)
+    mocker.patch.object(camera_mod.platform, "camera_set_auto_exposure")
+    mocker.patch.object(camera_mod.platform, "camera_unlock_focus")
+
+    camera_mod.configure_capture(
+        cap,
+        size=(1920, 1080),
+        exposure_auto=True,
+        exposure=-6,
+    )
+
+    assert cap.get(cv2.CAP_PROP_FRAME_WIDTH) == 1920
+    assert cap.get(cv2.CAP_PROP_FRAME_HEIGHT) == 1080
+
+
+def test_camera_init_warms_up_and_starts_reader(mocker) -> None:
+    # Warmup: 15 reads + 1 good per attempt; then the reader thread also
+    # pulls frames. Provide enough fake reads.
+    vc = FakeVideoCapture(
+        index=0,
+        read_results=[(True, _frame())] * 200,
+    )
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc)
+
+    cam = Camera(index=0)
+    try:
+        # _open set BUFFERSIZE.
+        assert (cv2.CAP_PROP_BUFFERSIZE, 1) in vc.set_calls
+        # _open set FOURCC + width/height from CONFIG.camera, in that order.
+        # FOURCC must precede width/height — Windows MSMF re-negotiates on
+        # format change, so width/height set before FOURCC gets discarded.
+        from physiclaw.common.config import CONFIG
+
+        props = [p for p, _ in vc.set_calls]
+        fourcc_idx = props.index(cv2.CAP_PROP_FOURCC)
+        width_idx = props.index(cv2.CAP_PROP_FRAME_WIDTH)
+        height_idx = props.index(cv2.CAP_PROP_FRAME_HEIGHT)
+        assert fourcc_idx < width_idx < height_idx
+        assert (cv2.CAP_PROP_FRAME_WIDTH, CONFIG.camera.width) in vc.set_calls
+        assert (cv2.CAP_PROP_FRAME_HEIGHT, CONFIG.camera.height) in vc.set_calls
+        assert cam._reader._frame is not None
+        assert cam._reader.alive
+    finally:
+        cam._reader.stop()
+
+
+def test_camera_init_retries_on_first_open_failure(mocker) -> None:
+    closed = FakeVideoCapture(index=0, is_open=False)
+    open_ = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    capture = mocker.patch.object(cv2, "VideoCapture", side_effect=[closed, open_])
+    mocker.patch.object(
+        camera_mod.platform, "camera_backend", return_value=cv2.CAP_DSHOW
+    )
+    perm_spy = mocker.patch.object(camera_mod.platform, "ensure_camera_permission")
+
+    cam = Camera(index=0)
+    try:
+        perm_spy.assert_called_once()
+        assert capture.call_args_list == [
+            mocker.call(0, cv2.CAP_DSHOW),
+            mocker.call(0, cv2.CAP_DSHOW),
+        ]
+    finally:
+        cam._reader.stop()
+
+
+def test_camera_init_raises_when_open_keeps_failing(mocker) -> None:
+    closed = FakeVideoCapture(index=0, is_open=False)
+    mocker.patch.object(cv2, "VideoCapture", return_value=closed)
+    mocker.patch.object(camera_mod.platform, "ensure_camera_permission")
+
+    with pytest.raises(RuntimeError, match="Cannot open camera"):
+        Camera(index=0)
+
+
+@pytest.mark.parametrize(
+    "bad_read", [(False, None), (True, np.zeros((8, 8, 3), dtype=np.uint8))]
+)
+def test_camera_warmup_retries_on_bad_read(mocker, bad_read) -> None:
+    """First open returns a cap whose reads all fail; second open works."""
+    bad = FakeVideoCapture(index=0, read_results=[bad_read] * 200)
+    good = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    mocker.patch.object(cv2, "VideoCapture", side_effect=[bad, good])
+    mocker.patch.object(camera_mod.platform, "ensure_camera_permission")
+
+    cam = Camera(index=0)
+    try:
+        assert cam._reader._frame is not None
+    finally:
+        cam._reader.stop()
+
+
+def test_camera_warmup_raises_after_repeated_read_failures(mocker) -> None:
+    # _open is called once at __init__ + once per failed acquire attempt.
+    # Each of the 3 resolution-ladder rungs (4K default → 2560 → 1920)
+    # runs a 2-attempt acquire that reopens after each failure →
+    # 1 + 3×2 = 7 caps total before warmup gives up.
+    bad_caps = [
+        FakeVideoCapture(index=0, read_results=[(False, None)] * 200) for _ in range(7)
+    ]
+    mocker.patch.object(cv2, "VideoCapture", side_effect=bad_caps)
+    mocker.patch.object(camera_mod.platform, "ensure_camera_permission")
+
+    with pytest.raises(RuntimeError, match="read failed"):
+        Camera(index=0)
+
+
+# ---------- fixtures ----------
+
+
+def _ready_camera(mocker) -> tuple[Camera, FakeVideoCapture]:
+    """Build a Camera with reader thread halted, ready for manual ticks."""
+    vc = FakeVideoCapture(
+        index=0,
+        read_results=[(True, _frame())] * 200,
+    )
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc)
+    cam = Camera(index=0)
+    cam._reader.stop()
+    return cam, vc
+
+
+# ---------- _reopen ----------
+
+
+def test_reopen_rejects_zero_buffers_before_publishing_recovery(mocker):
+    cam, _ = _ready_camera(mocker)
+    blank = np.zeros((8, 8, 3), dtype=np.uint8)
+    broken = FakeVideoCapture(index=0, read_results=[(True, blank)] * 3)
+    mocker.patch.object(cv2, "VideoCapture", return_value=broken)
+    publish = mocker.spy(cam._reader, "publish")
+
+    cam._reopen()
+
+    assert broken.released
+    assert cam._reader._frame is None
+    publish.assert_not_called()
+
+
+def test_reopen_swallows_release_failure(mocker) -> None:
+    cam, _ = _ready_camera(mocker)
+    bad_cap = MagicMock()
+    bad_cap.release.side_effect = RuntimeError("already closed")
+    cam.cap = bad_cap
+    new_vc = FakeVideoCapture(
+        index=0,
+        read_results=[(True, _frame())] * 200,
+    )
+    mocker.patch.object(cv2, "VideoCapture", return_value=new_vc)
+    mocker.patch.object(camera_mod.platform, "ensure_camera_permission")
+
+    cam._reopen()
+
+    assert cam.cap is new_vc
+
+
+def test_reopen_logs_when_open_raises(
+    mocker,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    cam, _ = _ready_camera(mocker)
+    cam.cap = MagicMock()
+    mocker.patch.object(cam, "_open", side_effect=RuntimeError("dead"))
+
+    with caplog.at_level(logging.DEBUG, logger="physiclaw.core.hardware.camera"):
+        cam._reopen()
+
+    assert any("reopen failed" in r.getMessage() for r in caplog.records)
+
+
+def test_reconnect_verifies_frames_and_resets_drought(mocker) -> None:
+    mocker.patch.object(
+        camera_mod.platform, "camera_backend", return_value=cv2.CAP_DSHOW
+    )
+    cam, original = _ready_camera(mocker)
+    recovered = _frame()
+    replacement = FakeVideoCapture(
+        index=0, read_results=[(False, None), (False, None), (True, recovered)]
+    )
+    reset = mocker.patch.object(camera_mod.platform, "camera_reset_controls")
+    capture = mocker.patch.object(cv2, "VideoCapture", return_value=replacement)
+    cam._reader._first_fail_time = fr_mod.time.monotonic() - 30
+
+    cam._reopen()
+
+    assert original.released
+    assert not replacement.released
+    assert cam._reader.fresh_frame().frame is recovered
+    assert cam._reader._first_fail_time is None
+    reset.assert_called_once_with()
+    capture.assert_called_once_with(0, cv2.CAP_DSHOW)
+
+
+def test_reconnect_rejects_empty_stream_then_recovers_on_next_attempt(mocker) -> None:
+    now = fr_mod.time.monotonic()
+    cam, _ = _ready_camera(mocker)
+    empty = FakeVideoCapture(index=0)
+    recovered = _frame()
+    good = FakeVideoCapture(index=0, read_results=[(True, recovered)])
+    mocker.patch.object(cv2, "VideoCapture", side_effect=[empty, good])
+    cam._reader.FRAME_WAIT_SECONDS = 0
+    fail_time = fr_mod.time.monotonic() - 30
+    cam._reader._first_fail_time = fail_time
+
+    cam._reopen()
+
+    assert empty.released
+    assert cam._reader.fresh_frame() is None
+    assert cam._reader._first_fail_time == fail_time
+    assert cam._reader._frame_time == now
+
+    cam._reopen()
+
+    assert cam._reader.fresh_frame().frame is recovered
+    assert cam._reader._first_fail_time is None
+
+
+def test_close_during_reconnect_discards_verification_frame(mocker) -> None:
+    cam, _ = _ready_camera(mocker)
+    replacement = FakeVideoCapture(index=0)
+    mocker.patch.object(cv2, "VideoCapture", return_value=replacement)
+    seq = cam._reader._frame_seq
+
+    def read():
+        cam._closing = True
+        return True, _frame()
+
+    mocker.patch.object(replacement, "read", side_effect=read)
+
+    cam._reopen()
+    cam.close()
+
+    assert cam._reader._frame_seq == seq
+    assert replacement.released
+
+
+# ---------- _fresh_frame / accessors ----------
+
+
+def test_fresh_frame_returns_recent_copy(mocker) -> None:
+    cam, _ = _ready_camera(mocker)
+
+    out = cam._fresh_frame()
+
+    # Should be a copy of cam._frame.
+    assert out is not None
+    assert out.frame is not cam._reader._frame
+    np.testing.assert_array_equal(out.frame, cam._reader._frame)
+    assert out.published_at == cam._reader._published_at
+
+
+def test_fresh_frame_returns_none_when_no_frame(mocker) -> None:
+    cam, _ = _ready_camera(mocker)
+    cam._reader._frame = None
+    cam._reader._frame_time = 0.0
+    mocker.patch.object(camera_mod.FrameReader, "FRAME_WAIT_SECONDS", 0.01)
+
+    out = cam._fresh_frame()
+
+    assert out is None
+
+
+def test_raw_frame_does_not_rotate(mocker) -> None:
+    cam, _ = _ready_camera(mocker)
+    cam.rotation = cv2.ROTATE_90_CLOCKWISE  # would normally rotate
+
+    out = cam.raw_frame()
+
+    np.testing.assert_array_equal(out, cam._reader._frame)
+
+
+def test_peek_applies_rotation(mocker) -> None:
+    cam, _ = _ready_camera(mocker)
+    cam._reader.publish(_frame(h=2, w=4))  # distinct h/w to verify rotation
+    cam.rotation = cv2.ROTATE_90_CLOCKWISE
+
+    out = cam.peek()
+
+    # 2x4 → rotated 90 CW = 4x2.
+    assert out.shape[:2] == (4, 2)
+
+
+def test_peek_no_rotation_when_minus_one(mocker) -> None:
+    cam, _ = _ready_camera(mocker)
+    cam.rotation = -1
+
+    out = cam.peek()
+
+    np.testing.assert_array_equal(out, cam._reader._frame)
+
+
+def test_peek_returns_none_when_no_frame(mocker) -> None:
+    cam, _ = _ready_camera(mocker)
+    cam._reader._frame = None
+    cam._reader._frame_time = 0.0
+    mocker.patch.object(camera_mod.FrameReader, "FRAME_WAIT_SECONDS", 0.01)
+
+    assert cam.peek() is None
+
+
+def test_snapshot_draws_bbox_when_provided(mocker) -> None:
+    cam, _ = _ready_camera(mocker)
+    cam._reader.publish(_frame(h=100, w=100))
+    cam.rotation = -1
+    save_spy = mocker.patch.object(camera_mod, "save_snapshot")
+
+    out = cam.snapshot(bbox=((10, 10), (50, 50)))
+
+    # Some green pixels along the rectangle.
+    assert (out[:, :, 1] == 255).any()
+    save_spy.assert_called_once()
+
+
+def test_snapshot_returns_none_when_no_frame(mocker) -> None:
+    cam, _ = _ready_camera(mocker)
+    cam._reader._frame = None
+    cam._reader._frame_time = 0.0
+    mocker.patch.object(camera_mod.FrameReader, "FRAME_WAIT_SECONDS", 0.01)
+
+    assert cam.snapshot() is None
+
+
+def test_snapshot_no_bbox(mocker) -> None:
+    cam, _ = _ready_camera(mocker)
+    cam._reader.publish(_frame())
+    cam.rotation = -1
+    mocker.patch.object(camera_mod, "save_snapshot")
+
+    out = cam.snapshot()
+
+    np.testing.assert_array_equal(out, cam._reader._frame)
+
+
+def test_snapshot_keeps_selected_frame_time_when_reader_publishes_during_copy(mocker):
+    cam, _ = _ready_camera(mocker)
+    wall = mocker.patch(
+        "physiclaw.core.hardware.frame_reader.time.time", return_value=1000.0
+    )
+    selected = MagicMock()
+    pixels = _frame(h=2, w=4)
+
+    def copy():
+        wall.return_value = 1001.0
+        cam._reader.publish(_frame())
+        return pixels.copy()
+
+    selected.copy.side_effect = copy
+    cam._reader.publish(selected)
+    cam.rotation = cv2.ROTATE_90_CLOCKWISE
+    sample = cam.snapshot_with_time()
+
+    np.testing.assert_array_equal(sample.frame, cv2.rotate(pixels, cam.rotation))
+    assert sample.published_at == 1000.0
+    assert cam._reader.fresh_frame().published_at == 1001.0
+
+
+# ---------- close ----------
+
+
+@pytest.mark.parametrize("capture_controls", ["linux", "windows"], indirect=True)
+def test_focus_controls_roundtrip_capture_properties(mocker, capture_controls):
+    cam, _ = _ready_camera(mocker)
+
+    applied = cam.apply_focus(137.0)
+    position = cam.read_focus()
+
+    assert applied is True
+    assert position == 137.0
+
+
+def test_capture_timeout_does_not_kill_reconnect_or_release_busy_handle(mocker):
+    from physiclaw.port.backends.v4l2 import CaptureLock
+
+    cam, cap = _ready_camera(mocker)
+    # This tests lock recovery; AVFoundation without a UVC channel legitimately
+    # cannot apply focus, so don't depend on the host's focus capability.
+    mocker.patch.object(camera_mod.platform, "camera_apply_focus", return_value=True)
+    cam._cap_lock = CaptureLock(timeout_error=camera_mod.DeviceTimeout, timeout=0)
+    cam._cap_lock.acquire()
+    try:
+        cam._reopen()
+        assert not cap.released
+        with pytest.raises(camera_mod.DeviceTimeout):
+            cam.apply_focus(500)
+        assert not cam.focus_pinned
+    finally:
+        cam._cap_lock.release()
+    assert cam.apply_focus(500)
+    cam.close()
+
+
+@pytest.mark.parametrize("capture_controls", ["linux"], indirect=True)
+def test_linux_clamped_position_is_not_remembered(mocker, capture_controls):
+    cam, cap = _ready_camera(mocker)
+    original = cap.set
+
+    def clamp(prop, value):
+        return original(prop, min(value, 1023) if prop == cv2.CAP_PROP_FOCUS else value)
+
+    cap.set = clamp
+    assert cam.apply_focus(0)
+    assert cam.read_focus() == 0
+    assert not cam.apply_focus(1024)
+    assert cam._focus_value is None and not cam.focus_pinned
+    assert cap.get(cv2.CAP_PROP_AUTOFOCUS) == 1
+    cam.close()
+
+
+@pytest.mark.parametrize("refused", [False, True], ids=["ignored", "refused"])
+@pytest.mark.parametrize("capture_controls", ["linux"], indirect=True)
+def test_linux_failed_af_restore_is_retried_on_close(mocker, capture_controls, refused):
+    cam, cap = _ready_camera(mocker)
+    assert cam.apply_focus(137)
+    original = cap.set
+    restores = []
+
+    def first_restore_fails(prop, value):
+        if prop == cv2.CAP_PROP_AUTOFOCUS and value == 1:
+            restores.append(value)
+            if len(restores) == 1:
+                # Report success without changing the mode, or refuse.
+                return not refused
+        return original(prop, value)
+
+    cap.set = first_restore_fails
+    try:
+        cam.unlock_focus()
+        assert not cam.focus_pinned
+        assert cam._focus_value is None
+        assert cap.get(cv2.CAP_PROP_AUTOFOCUS) == 0
+        assert cam._focus_needs_restore
+    finally:
+        cam.close()
+    assert restores == [1, 1]
+    assert cap.get(cv2.CAP_PROP_AUTOFOCUS) == 1
+    assert cap.released
+
+
+@pytest.mark.parametrize(
+    "restored", [True, None], ids=["confirmed", "legacy-best-effort"]
+)
+def test_completed_af_request_does_not_add_another_restore_on_close(mocker, restored):
+    cam, cap = _ready_camera(mocker)
+    mocker.patch.object(camera_mod.platform, "camera_apply_focus", return_value=True)
+    assert cam.apply_focus(137)
+    unlock = mocker.patch.object(
+        camera_mod.platform, "camera_unlock_focus", return_value=restored
+    )
+
+    cam.unlock_focus()
+    cam.close()
+
+    assert not cam.focus_pinned
+    unlock.assert_called_once_with(cap)
+
+
+def test_focus_range_uses_port_inside_capture_lock(mocker):
+    cam, _ = _ready_camera(mocker)
+
+    def query(index):
+        assert index == cam.index
+        assert cam._cap_lock.locked()
+        return 0, 1023, 1
+
+    mocker.patch.object(
+        camera_mod.platform, "camera_focus_search_range", side_effect=query
+    )
+    assert cam.focus_search_range == (0, 1023, 1)
+    cam.close()
+    with pytest.raises(camera_mod.DeviceNotFound):
+        _ = cam.focus_search_range
+
+
+def test_close_stops_thread_and_releases(mocker) -> None:
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc)
+    cam = Camera(index=0)
+
+    cam.close()
+
+    assert not cam._reader.alive
+    assert vc.released is True
+
+
+@pytest.mark.parametrize("stage", ["reader", "exposure", "focus"])
+def test_regression_interrupted_close_still_releases_capture(
+    mocker, stage, capture_controls
+):
+    cam, vc = _ready_camera(mocker)
+    mocker.patch.object(camera_mod.CONFIG.camera, "auto_exposure", True)
+    cam.set_manual_exposure(-5)
+    cam.lock_focus()
+    boundaries = {
+        "reader": (cam._reader, "stop"),
+        "exposure": (camera_mod.platform, "camera_set_auto_exposure"),
+        "focus": (camera_mod.platform, "camera_unlock_focus"),
+    }
+    owner, method = boundaries[stage]
+    mocker.patch.object(owner, method, side_effect=KeyboardInterrupt)
+
+    with pytest.raises(KeyboardInterrupt):
+        cam.close()
+
+    assert vc.released
+    assert not cam._cap_lock.locked()
+
+
+def test_interrupted_close_keeps_native_release_behind_capture_lock(mocker):
+    cam, vc = _ready_camera(mocker)
+    mocker.patch.object(cam._reader, "stop", side_effect=KeyboardInterrupt)
+    mocker.patch.object(cam, "CLOSE_LOCK_TIMEOUT_SECONDS", 0)
+    cam._cap_lock.acquire()
+
+    try:
+        with pytest.raises(KeyboardInterrupt):
+            cam.close()
+    finally:
+        cam._cap_lock.release()
+
+    assert not vc.released
+
+
+@pytest.mark.parametrize("control", ["camera_set_auto_exposure", "camera_unlock_focus"])
+def test_close_control_restore_failure_still_releases_capture(
+    mocker, control, caplog, capture_controls
+):
+    cam, vc = _ready_camera(mocker)
+    mocker.patch.object(camera_mod.CONFIG.camera, "auto_exposure", True)
+    cam.set_manual_exposure(-5)
+    cam.lock_focus()
+    mocker.patch.object(camera_mod.platform, control, side_effect=OSError("unplugged"))
+
+    cam.close()
+
+    assert vc.released
+    assert "hand-back on close failed" in caplog.text
+
+
+def test_close_hands_held_manual_exposure_back_to_auto(mocker) -> None:
+    # A held manual value lives in the camera's volatile RAM and would
+    # outlive the process — close() must hand exposure back to firmware
+    # auto so the next run (or another app) doesn't inherit a stale hold.
+    # Only when AE is the configured mode (a tune-imposed hold, not a pin).
+    mocker.patch.object(camera_mod.CONFIG.camera, "auto_exposure", True)
+    cam, _ = _ready_camera(mocker)
+    cam.set_manual_exposure(-5)
+    set_auto = mocker.patch.object(camera_mod.platform, "camera_set_auto_exposure")
+
+    cam.close()
+
+    set_auto.assert_called_once_with(cam.cap)
+
+
+def test_close_does_not_touch_exposure_when_auto(mocker) -> None:
+    # Nothing held → nothing to reset.
+    cam, _ = _ready_camera(mocker)
+    set_auto = mocker.patch.object(camera_mod.platform, "camera_set_auto_exposure")
+
+    cam.close()
+
+    set_auto.assert_not_called()
+
+
+def test_close_keeps_manual_when_user_pinned_it_in_config(mocker) -> None:
+    # auto_exposure=false in config is the user's pin — exit must not
+    # flip the camera back to auto behind their back.
+    mocker.patch.object(camera_mod.CONFIG.camera, "auto_exposure", False)
+    cam, _ = _ready_camera(mocker)
+    set_auto = mocker.patch.object(camera_mod.platform, "camera_set_auto_exposure")
+
+    cam.close()
+
+    set_auto.assert_not_called()
+
+
+def test_close_leaks_cap_instead_of_deadlocking_when_lock_held(mocker, caplog) -> None:
+    """A reader wedged inside a blocking cap.read() holds _cap_lock
+    forever; close() must time out and leak the handle, never release
+    the cap lock-free (native race can segfault) and never hang."""
+    import logging
+
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc)
+    cam = Camera(index=0)
+    mocker.patch.object(cam._reader, "JOIN_TIMEOUT_SECONDS", 0.05)
+    mocker.patch.object(cam, "CLOSE_LOCK_TIMEOUT_SECONDS", 0.05)
+    assert cam._cap_lock.acquire(timeout=1.0)  # simulate the wedged reader
+    try:
+        with caplog.at_level(logging.WARNING, logger="physiclaw.core.hardware.camera"):
+            cam.close()  # must return, not hang
+
+        assert vc.released is False
+        assert any(
+            "leaking the capture handle" in r.getMessage() for r in caplog.records
+        )
+    finally:
+        cam._cap_lock.release()
+        cam.close()  # real cleanup now that the lock is free
+    assert vc.released is True
+
+
+# ---------- platform size cap ----------
+
+
+def test_open_clamps_request_to_platform_size_cap(mocker) -> None:
+    # macOS without a UVC exposure channel: 4K firmware AE can overexpose
+    # with no correction lever, so the request must drop to the cap.
+    mocker.patch.object(
+        camera_mod.platform, "camera_size_cap", return_value=(1920, 1080)
+    )
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame(1080, 1920))] * 200)
+
+    _open_camera_no_thread(mocker, vc=vc)
+
+    negotiated = dict(vc.set_calls)
+    assert negotiated[cv2.CAP_PROP_FRAME_WIDTH] == 1920
+    assert negotiated[cv2.CAP_PROP_FRAME_HEIGHT] == 1080
+
+
+def test_open_uses_config_request_without_size_cap(mocker) -> None:
+    mocker.patch.object(camera_mod.platform, "camera_size_cap", return_value=None)
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame(2160, 3840))] * 200)
+
+    _open_camera_no_thread(mocker, vc=vc)
+
+    negotiated = dict(vc.set_calls)
+    assert negotiated[cv2.CAP_PROP_FRAME_WIDTH] == camera_mod.CONFIG.camera.width
+    assert negotiated[cv2.CAP_PROP_FRAME_HEIGHT] == camera_mod.CONFIG.camera.height
+
+
+# ---------- exposure control ----------
+
+
+def test_open_applies_exposure_after_size_negotiation(mocker) -> None:
+    # Renegotiation (FOURCC/size) is what disables driver AE — the
+    # re-assert must come after it or it gets wiped. (AE mode; the manual
+    # path is covered by test_open_applies_manual_exposure_when_config_...)
+    mocker.patch.object(camera_mod.CONFIG.camera, "auto_exposure", True)
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    order: list = []
+    mocker.patch.object(
+        camera_mod.platform,
+        "camera_set_auto_exposure",
+        side_effect=lambda cap: order.append("exposure"),
+    )
+    real_set = vc.set
+    vc.set = lambda prop, value: (order.append(prop), real_set(prop, value))
+
+    _open_camera_no_thread(mocker, vc=vc)
+
+    assert order.index("exposure") > order.index(cv2.CAP_PROP_FRAME_HEIGHT)
+
+
+def test_open_applies_manual_exposure_when_config_disables_auto(mocker) -> None:
+    mocker.patch.object(camera_mod.CONFIG.camera, "auto_exposure", False)
+    mocker.patch.object(camera_mod.CONFIG.camera, "exposure", -5)
+    manual_spy = mocker.patch.object(
+        camera_mod.platform,
+        "camera_set_manual_exposure",
+    )
+    # Baseline-sized frames so warmup accepts the first rung — exactly
+    # one negotiation, exactly one exposure application.
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame(2160, 3840))] * 200)
+
+    _open_camera_no_thread(mocker, vc=vc)
+
+    manual_spy.assert_called_once_with(vc, -5)
+
+
+def test_reopen_reapplies_remembered_manual_exposure(mocker) -> None:
+    vc1 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    cam = _open_camera_no_thread(mocker, vc=vc1)
+    manual_spy = mocker.patch.object(
+        camera_mod.platform,
+        "camera_set_manual_exposure",
+    )
+
+    cam.set_manual_exposure(-7)
+    manual_spy.assert_called_once_with(vc1, -7)
+
+    vc2 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 10)
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc2)
+    cam._reopen()
+
+    # The reconstructed cap got the remembered value, not a revert to auto.
+    manual_spy.assert_called_with(vc2, -7)
+
+
+def test_set_auto_exposure_remembered_across_reopen(mocker) -> None:
+    vc1 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    cam = _open_camera_no_thread(mocker, vc=vc1)
+    auto_spy = mocker.patch.object(
+        camera_mod.platform,
+        "camera_set_auto_exposure",
+    )
+
+    cam.set_auto_exposure()
+
+    vc2 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 10)
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc2)
+    cam._reopen()
+
+    auto_spy.assert_called_with(vc2)
+
+
+def test_exposure_setter_holds_cap_lock(mocker) -> None:
+    # cv2.VideoCapture can't take set() concurrent with read() — the
+    # setter must run under the same lock the reader loop uses.
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    cam = _open_camera_no_thread(mocker, vc=vc)
+    seen: dict = {}
+    mocker.patch.object(
+        camera_mod.platform,
+        "camera_set_auto_exposure",
+        side_effect=lambda cap: seen.setdefault(
+            "locked",
+            cam._cap_lock.locked(),
+        ),
+    )
+
+    cam.set_auto_exposure()
+
+    assert seen["locked"] is True
+
+
+# ---------- focus lock ----------
+
+
+def test_lock_focus_is_a_raw_unremembered_freeze(mocker) -> None:
+    # The freeze is only the calibration step's `focus.lock` callable —
+    # the remembered, replayable state is an absolute position
+    # (`apply_focus`), so a reopen must NOT re-freeze.
+    vc1 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    cam = _open_camera_no_thread(mocker, vc=vc1)
+    lock_spy = mocker.patch.object(
+        camera_mod.platform, "camera_lock_focus", return_value=True
+    )
+
+    assert cam.lock_focus() is True
+    lock_spy.assert_called_once_with(vc1)
+
+    vc2 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 10)
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc2)
+    cam._reopen()
+
+    lock_spy.assert_called_once()  # no re-freeze on reopen
+
+
+def test_close_hands_pinned_focus_back_to_autofocus(mocker) -> None:
+    # A pinned lens position lives in the camera's volatile RAM and would
+    # outlive the process — close() must hand it back to AF.
+    cam, _ = _ready_camera(mocker)
+    mocker.patch.object(camera_mod.platform, "camera_apply_focus", return_value=True)
+    cam.apply_focus(137.0)
+    unlock_spy = mocker.patch.object(camera_mod.platform, "camera_unlock_focus")
+
+    cam.close()
+
+    unlock_spy.assert_called_once_with(cam.cap)
+
+
+def test_close_does_not_touch_focus_when_never_pinned(mocker) -> None:
+    cam, _ = _ready_camera(mocker)
+    unlock_spy = mocker.patch.object(camera_mod.platform, "camera_unlock_focus")
+
+    cam.close()
+
+    unlock_spy.assert_not_called()
+
+
+def test_focus_setters_hold_cap_lock(mocker) -> None:
+    # Same thread-safety contract as the exposure setters: never a
+    # set() concurrent with the reader's read().
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    cam = _open_camera_no_thread(mocker, vc=vc)
+    seen: dict = {}
+    mocker.patch.object(
+        camera_mod.platform,
+        "camera_lock_focus",
+        side_effect=lambda cap: seen.setdefault("locked", cam._cap_lock.locked()),
+    )
+
+    cam.lock_focus()
+
+    assert seen["locked"] is True
+
+
+def test_wait_frames_returns_when_reader_publishes(mocker) -> None:
+    from concurrent.futures import ThreadPoolExecutor
+
+    from tests.timing_helpers import WAIT_TIMEOUT
+
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    cam = _open_camera_no_thread(mocker, vc=vc)
+    waiting = threading.Event()
+    original_wait = cam._reader._cond.wait
+
+    def wait(timeout):
+        waiting.set()
+        return original_wait(timeout)
+
+    mocker.patch.object(cam._reader._cond, "wait", side_effect=wait)
+
+    def publish(n: int) -> None:
+        assert waiting.wait(WAIT_TIMEOUT)
+        for _ in range(n):
+            cam._reader.publish(_frame())
+
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        publisher = pool.submit(publish, 3)
+        try:
+            assert cam.wait_frames(3, timeout=WAIT_TIMEOUT) is True
+        finally:
+            waiting.set()
+        publisher.result(timeout=WAIT_TIMEOUT)
+
+
+def test_wait_frames_times_out_without_publisher(mocker) -> None:
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    cam = _open_camera_no_thread(mocker, vc=vc)
+
+    assert cam.wait_frames(1, timeout=0.05) is False
+
+
+# ---------- resolution fallback ladder ----------
+
+
+def _width_requests(vc: FakeVideoCapture) -> list[int]:
+    return [int(v) for p, v in vc.set_calls if p == cv2.CAP_PROP_FRAME_WIDTH]
+
+
+def test_warmup_accepts_first_rung_when_frame_meets_baseline(mocker) -> None:
+    # A real 4K camera: the over-ask negotiates cleanly, no ladder walk.
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame(2160, 3840))] * 200)
+
+    cam = _open_camera_no_thread(mocker, vc=vc)
+
+    assert _width_requests(vc) == [3840]
+    assert cam._request_size == (3840, 2160)
+
+
+def test_warmup_accepts_first_rung_for_well_behaved_1080p_camera(mocker) -> None:
+    # A 1080p camera whose driver snaps the 4K ask to its max mode
+    # (V4L2 / AVFoundation behavior) — the 1920-long-edge frame meets
+    # the baseline, so no renegotiation happens.
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame(1080, 1920))] * 200)
+
+    cam = _open_camera_no_thread(mocker, vc=vc)
+
+    assert _width_requests(vc) == [3840]
+    assert cam._request_size == (3840, 2160)
+
+
+def test_warmup_steps_down_ladder_on_undersized_frames(mocker) -> None:
+    # The MSMF failure mode: the over-ask falls back to 640×480. Warmup
+    # renegotiates down the ladder and accepts the last rung's frame —
+    # the same outcome the old fixed 1920×1080 request produced.
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+
+    cam = _open_camera_no_thread(mocker, vc=vc)
+
+    assert _width_requests(vc) == [3840, 2560, 1920]
+    assert cam._request_size == (1920, 1080)
+    assert cam._reader._frame is not None
+
+
+def test_request_ladder_is_single_rung_when_config_pins_1080p(mocker) -> None:
+    # A user who pins [camera] width/height gets exactly that request —
+    # no fallbacks below it, identical to the pre-ladder behavior.
+    mocker.patch.object(camera_mod.CONFIG.camera, "width", 1920)
+    mocker.patch.object(camera_mod.CONFIG.camera, "height", 1080)
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+
+    cam = _open_camera_no_thread(mocker, vc=vc)
+
+    assert _width_requests(vc) == [1920]
+    assert cam._request_size == (1920, 1080)
+
+
+def test_reopen_reuses_settled_ladder_rung(mocker) -> None:
+    # After warmup settles on 1920×1080, a reader-loop reconnect must
+    # re-request that rung, not restart the ladder at 4K.
+    vc1 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    cam = _open_camera_no_thread(mocker, vc=vc1)
+    assert cam._request_size == (1920, 1080)
+    vc2 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc2)
+
+    cam._reopen()
+
+    assert _width_requests(vc2) == [1920]
+
+
+def test_apply_focus_remembered_across_reopen(mocker) -> None:
+    # The calibrated position must survive a reconnect: the rebuilt cap
+    # is re-driven to the exact value, not just re-frozen in place.
+    vc1 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    cam = _open_camera_no_thread(mocker, vc=vc1)
+    apply_spy = mocker.patch.object(
+        camera_mod.platform, "camera_apply_focus", return_value=True
+    )
+
+    assert cam.apply_focus(137.0) is True
+    apply_spy.assert_called_once_with(vc1, 137.0)
+
+    vc2 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 10)
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc2)
+    cam._reopen()
+
+    apply_spy.assert_called_with(vc2, 137.0)
+
+
+def test_refused_apply_focus_is_not_remembered(mocker) -> None:
+    vc1 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    cam = _open_camera_no_thread(mocker, vc=vc1)
+    apply_spy = mocker.patch.object(
+        camera_mod.platform, "camera_apply_focus", return_value=False
+    )
+
+    assert cam.apply_focus(137.0) is False
+
+    vc2 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 10)
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc2)
+    cam._reopen()
+
+    apply_spy.assert_called_once()  # only the refused explicit call
+
+
+@pytest.mark.parametrize(
+    "failure", [False, OSError("USB lost"), KeyboardInterrupt("USB lost")]
+)
+def test_failed_focus_change_invalidates_previous_pin(mocker, failure):
+    camera, cap = _ready_camera(mocker)
+    apply = mocker.patch.object(
+        camera_mod.platform, "camera_apply_focus", return_value=True
+    )
+    unlock = mocker.patch.object(camera_mod.platform, "camera_unlock_focus")
+    assert camera.apply_focus(137.0)
+    apply.side_effect = [failure]
+
+    if isinstance(failure, BaseException):
+        with pytest.raises(type(failure), match="USB lost"):
+            camera.apply_focus(200.0)
+    else:
+        assert camera.apply_focus(200.0) is False
+    unlock.assert_called_once_with(cap)
+    assert camera.focus_pinned is False
+    assert camera._focus_value is None
+
+    replacement = FakeVideoCapture(index=0, read_results=[(True, _frame())])
+    mocker.patch.object(cv2, "VideoCapture", return_value=replacement)
+    camera._reopen()
+
+    assert apply.call_count == 2  # accepted original, failed change; no replay
+    unlock.assert_called_with(replacement)
+    assert not camera.focus_pinned
+
+
+def test_unlock_focus_clears_the_remembered_value(mocker) -> None:
+    vc1 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    cam = _open_camera_no_thread(mocker, vc=vc1)
+    apply_spy = mocker.patch.object(
+        camera_mod.platform, "camera_apply_focus", return_value=True
+    )
+    mocker.patch.object(camera_mod.platform, "camera_unlock_focus")
+
+    cam.apply_focus(137.0)
+    cam.unlock_focus()
+
+    vc2 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 10)
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc2)
+    cam._reopen()
+
+    apply_spy.assert_called_once()  # the explicit apply — none after unlock
+
+
+def test_read_focus_delegates_to_platform(mocker) -> None:
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    cam = _open_camera_no_thread(mocker, vc=vc)
+    mocker.patch.object(camera_mod.platform, "camera_read_focus", return_value=42.0)
+
+    assert cam.read_focus() == 42.0
+
+
+def test_configure_capture_applies_seeded_focus(mocker) -> None:
+    cap = MagicMock()
+    apply_spy = mocker.patch.object(
+        camera_mod.platform, "camera_apply_focus", return_value=True
+    )
+    mocker.patch.object(camera_mod.platform, "camera_set_auto_exposure")
+
+    camera_mod.configure_capture(
+        cap, exposure_auto=True, exposure=-6, focus_value=137.0
+    )
+
+    apply_spy.assert_called_once_with(cap, 137.0)
+
+
+@pytest.mark.parametrize("capture_controls", ["linux", "windows"], indirect=True)
+def test_configure_without_saved_focus_resets_inherited_manual_mode(
+    mocker, capture_controls
+):
+    cap = FakeVideoCapture(index=0)
+    cap.set(cv2.CAP_PROP_AUTOFOCUS, 0)
+    cap.set(cv2.CAP_PROP_FOCUS, 137)
+
+    pinned = camera_mod.configure_capture(cap, exposure_auto=True, exposure=-6)
+
+    assert not pinned
+    assert cap.get(cv2.CAP_PROP_AUTOFOCUS) == 1
+
+
+@pytest.mark.parametrize("error_type", [OSError, KeyboardInterrupt])
+@pytest.mark.parametrize("rollback_fails", [False, True])
+def test_interrupted_open_focus_apply_requests_autofocus_before_release(
+    mocker, error_type, rollback_fails
+):
+    cap = FakeVideoCapture(index=0)
+    mocker.patch.object(cv2, "VideoCapture", return_value=cap)
+    mocker.patch.object(
+        camera_mod.platform,
+        "camera_apply_focus",
+        side_effect=error_type("focus failed"),
+    )
+
+    def restore(capture):
+        assert not capture.released
+        if rollback_fails:
+            raise OSError("rollback failed")
+
+    unlock = mocker.patch.object(
+        camera_mod.platform, "camera_unlock_focus", side_effect=restore
+    )
+
+    with pytest.raises(error_type, match="focus failed"):
+        Camera(index=0, focus_value=137.0)
+
+    unlock.assert_called_once_with(cap)
+    assert cap.released
+
+
+def test_constructor_seed_pins_focus_at_first_open(mocker) -> None:
+    # The bundle value flows through configure_capture from the very
+    # first open — warmup frames are already captured under the pinned
+    # lens; no caller-side apply ritual afterwards.
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc)
+    apply_spy = mocker.patch.object(
+        camera_mod.platform, "camera_apply_focus", return_value=True
+    )
+
+    cam = Camera(index=0, focus_value=137.0)
+    cam._reader.stop()
+
+    apply_spy.assert_called_with(vc, 137.0)
+
+
+def test_focus_pinned_true_when_apply_succeeds(mocker) -> None:
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    cam = _open_camera_no_thread(mocker, vc=vc)
+    assert cam.focus_pinned is False
+
+    mocker.patch.object(camera_mod.platform, "camera_apply_focus", return_value=True)
+    cam.apply_focus(137.0)
+
+    assert cam.focus_pinned is True
+
+
+def test_focus_pinned_is_false_when_the_driver_refuses_the_apply(mocker) -> None:
+    # A remembered position the driver won't apply → lens not pinned, so
+    # focus_pinned must report False (the -4 exposure ceiling depends on it).
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc)
+    mocker.patch.object(camera_mod.platform, "camera_apply_focus", return_value=False)
+
+    cam = Camera(index=0, focus_value=137.0)  # bundle value present…
+    cam._reader.stop()
+
+    assert cam.focus_pinned is False  # …but apply failed → not pinned
+
+
+def test_refused_open_apply_hands_the_lens_back_to_autofocus(mocker) -> None:
+    # A half-failed apply (AF disabled, then the position write refused)
+    # would strand the lens frozen at an arbitrary position — a state
+    # nothing downstream models. The choke point must restore live AF,
+    # the one supported unpinned mode.
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc)
+    mocker.patch.object(camera_mod.platform, "camera_apply_focus", return_value=False)
+    unlock_spy = mocker.patch.object(camera_mod.platform, "camera_unlock_focus")
+
+    cam = Camera(index=0, focus_value=137.0)
+    cam._reader.stop()
+
+    assert cam.focus_pinned is False
+    unlock_spy.assert_called()
+
+
+def test_refused_focus_restore_stays_auto_through_warmup_and_reopen(mocker) -> None:
+    # A failed restore selects AF for this session, including resolution
+    # renegotiation and reconnect. Neither should silently re-pin it.
+    vc1 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc1)
+    apply_spy = mocker.patch.object(
+        camera_mod.platform, "camera_apply_focus", return_value=False
+    )
+    unlock = mocker.patch.object(camera_mod.platform, "camera_unlock_focus")
+    cam = Camera(index=0, focus_value=137.0)
+    cam._reader.stop()
+    assert cam.focus_pinned is False
+
+    apply_spy.return_value = True
+    vc2 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 10)
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc2)
+    cam._reopen()
+
+    assert cam.focus_pinned is False
+    assert cam._focus_value is None
+    apply_spy.assert_called_once_with(vc1, 137.0)
+    unlock.assert_called_with(vc2)
+
+
+def test_focus_pinned_drops_when_a_reopen_apply_is_refused(mocker) -> None:
+    # The honest downgrade: a lens pinned earlier whose reconnect apply
+    # is refused is handed back to live AF by the choke point —
+    # focus_pinned must follow reality down, not stay True off the
+    # remembered value.
+    vc1 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    cam = _open_camera_no_thread(mocker, vc=vc1)
+    apply_spy = mocker.patch.object(
+        camera_mod.platform, "camera_apply_focus", return_value=True
+    )
+    assert cam.apply_focus(137.0) is True
+    assert cam.focus_pinned is True
+
+    apply_spy.return_value = False
+    vc2 = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 10)
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc2)
+    cam._reopen()
+
+    assert cam.focus_pinned is False
+
+
+@pytest.mark.parametrize("stage", ["configure", "warmup", "thread_start"])
+@pytest.mark.parametrize("error_type", [RuntimeError, KeyboardInterrupt])
+def test_regression_camera_init_failure_releases_capture(mocker, stage, error_type):
+    mocker.patch.object(camera_mod.CONFIG.camera, "auto_exposure", True)
+    vc = FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200)
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc)
+    targets = {
+        "configure": (camera_mod.platform, "camera_set_auto_exposure"),
+        "warmup": (vc, "read"),
+        "thread_start": (threading.Thread, "start"),
+    }
+    mocker.patch.object(*targets[stage], side_effect=error_type("capture failed"))
+
+    with pytest.raises(error_type, match="capture failed"):
+        Camera(index=0)
+
+    assert vc.released
+
+
+def test_regression_camera_retry_releases_refused_handles(mocker) -> None:
+    first = FakeVideoCapture(index=0, is_open=False)
+    second = FakeVideoCapture(index=0, is_open=False)
+    mocker.patch.object(cv2, "VideoCapture", side_effect=[first, second])
+    mocker.patch.object(camera_mod.platform, "ensure_camera_permission")
+
+    with pytest.raises(camera_mod.DeviceNotFound, match="Cannot open camera"):
+        Camera(index=0)
+
+    assert first.released and second.released
+
+
+def test_regression_repeated_close_does_not_reset_replacement_controls(mocker):
+    mocker.patch.object(camera_mod.CONFIG.camera, "auto_exposure", True)
+    cam, vc = _ready_camera(mocker)
+    mocker.patch.object(camera_mod.platform, "camera_apply_focus", return_value=True)
+    auto = mocker.patch.object(camera_mod.platform, "camera_set_auto_exposure")
+    unlock = mocker.patch.object(camera_mod.platform, "camera_unlock_focus")
+    reset = mocker.patch.object(camera_mod.platform, "camera_reset_controls")
+    cam.set_manual_exposure(-5)
+    cam.apply_focus(137.0)
+
+    cam.close()
+    cam.close()
+
+    auto.assert_called_once_with(vc)
+    unlock.assert_called_once_with(vc)
+    reset.assert_called_once_with()
+    assert not cam.focus_pinned
+
+
+class ScheduledLock:
+    """Real exclusion, with one-shot hooks for deterministic thread ordering."""
+
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.before_acquire = None
+        self.after_release = None
+
+    def acquire(self, *args, **kwargs):
+        hook, self.before_acquire = self.before_acquire, None
+        if hook is not None:
+            hook()
+        return self.lock.acquire(*args, **kwargs)
+
+    def release(self):
+        self.lock.release()
+        hook, self.after_release = self.after_release, None
+        if hook is not None:
+            hook()
+
+    def __enter__(self):
+        self.acquire()
+        return self
+
+    def __exit__(self, *_):
+        self.release()
+
+
+class ControlledReader:
+    """A FrameReader boundary that delivers reconnects on demand."""
+
+    def __init__(self, *, read_frame, reopen, label):
+        self.reconnect = reopen
+
+    def publish(self, frame):
+        pass
+
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
+
+    def note_reopened(self):
+        pass
+
+
+def _scheduled_camera(mocker, *, focus_value=None):
+    captures = [
+        FakeVideoCapture(index=0, read_results=[(True, _frame())] * 200),
+        FakeVideoCapture(index=0),
+    ]
+    readers = []
+
+    def make_reader(**kwargs):
+        reader = ControlledReader(**kwargs)
+        readers.append(reader)
+        return reader
+
+    gate = ScheduledLock()
+    mocker.patch.object(camera_mod.platform, "camera_capture_lock", return_value=gate)
+    mocker.patch.object(camera_mod, "FrameReader", side_effect=make_reader)
+    mocker.patch.object(cv2, "VideoCapture", side_effect=captures)
+    camera = Camera(index=0, focus_value=focus_value)
+    return camera, captures, readers[0], gate
+
+
+def test_regression_reconnect_replays_just_applied_focus(mocker):
+    apply = mocker.patch.object(
+        camera_mod.platform, "camera_apply_focus", return_value=True
+    )
+    camera, captures, reader, gate = _scheduled_camera(mocker, focus_value=50.0)
+    gate.after_release = reader.reconnect
+
+    assert camera.apply_focus(137.0)
+
+    apply.assert_called_with(captures[1], 137.0)
+    assert camera.focus_pinned
+
+
+def test_regression_interleaved_exposure_writes_remember_final_mode(mocker):
+    camera, captures, reader, gate = _scheduled_camera(mocker)
+    manual = mocker.patch.object(camera_mod.platform, "camera_set_manual_exposure")
+    gate.before_acquire = camera.set_auto_exposure
+
+    camera.set_manual_exposure(-5)
+    reader.reconnect()
+
+    manual.assert_called_with(captures[1], -5)
+
+
+def test_regression_interleaved_unlock_clears_pin_verdict(mocker):
+    mocker.patch.object(camera_mod.platform, "camera_apply_focus", return_value=True)
+    camera, _, _, gate = _scheduled_camera(mocker, focus_value=50.0)
+    gate.before_acquire = lambda: camera.apply_focus(137.0)
+
+    camera.unlock_focus()
+
+    assert not camera.focus_pinned
+
+
+def test_regression_queued_reconnect_cannot_open_after_close(mocker):
+    camera, captures, reader, _ = _scheduled_camera(mocker)
+
+    camera.close()
+    reader.reconnect()
+
+    assert camera.cap is captures[0]
+    assert captures[0].released
+
+
+@pytest.mark.parametrize(
+    ("method", "args", "driver"),
+    [
+        ("set_auto_exposure", (), "camera_set_auto_exposure"),
+        ("set_manual_exposure", (-5,), "camera_set_manual_exposure"),
+        ("lock_focus", (), "camera_lock_focus"),
+        ("unlock_focus", (), "camera_unlock_focus"),
+        ("read_focus", (), "camera_read_focus"),
+        ("apply_focus", (137.0,), "camera_apply_focus"),
+    ],
+)
+def test_regression_control_queued_during_close_does_not_touch_driver(
+    mocker, method, args, driver
+):
+    camera, _, _, gate = _scheduled_camera(mocker)
+    control = mocker.patch.object(camera_mod.platform, driver)
+    gate.before_acquire = camera.close
+
+    with pytest.raises(camera_mod.DeviceNotFound, match="closing or closed"):
+        getattr(camera, method)(*args)
+
+    control.assert_not_called()
+
+
+def test_regression_interrupted_thread_start_does_not_release_during_read(mocker):
+    from tests.timing_helpers import WAIT_TIMEOUT
+
+    blocked, release = threading.Event(), threading.Event()
+    vc = FakeVideoCapture(index=0)
+    frame = _frame(1080, 1920)
+    reads = 0
+    threads = []
+    real_start = threading.Thread.start
+
+    def read():
+        nonlocal reads
+        reads += 1
+        if reads <= 16:  # Initial warmup, then a blocked background read.
+            return True, frame
+        blocked.set()
+        assert release.wait(WAIT_TIMEOUT)
+        return False, None
+
+    def interrupted_start(thread):
+        threads.append(thread)
+        real_start(thread)
+        assert blocked.wait(WAIT_TIMEOUT)
+        raise KeyboardInterrupt("startup interrupted")
+
+    mocker.patch.object(cv2, "VideoCapture", return_value=vc)
+    mocker.patch.object(vc, "read", side_effect=read)
+    mocker.patch.object(threading.Thread, "start", interrupted_start)
+    mocker.patch.object(camera_mod.FrameReader, "JOIN_TIMEOUT_SECONDS", 0)
+    mocker.patch.object(Camera, "CLOSE_LOCK_TIMEOUT_SECONDS", 0)
+
+    try:
+        with pytest.raises(KeyboardInterrupt, match="startup interrupted"):
+            Camera(index=0)
+        released_during_read = vc.released
+    finally:
+        release.set()
+        threads[0].join(timeout=WAIT_TIMEOUT)
+        vc.release()
+
+    assert not released_during_read
+    assert not threads[0].is_alive()
+
+
+@pytest.mark.parametrize(
+    ("method", "args", "driver"),
+    [
+        ("lock_focus", (), "camera_lock_focus"),
+        ("apply_focus", (137.0,), "camera_apply_focus"),
+    ],
+)
+@pytest.mark.parametrize("accepted", [True, False])
+def test_regression_close_restores_unremembered_focus_attempt(
+    mocker, method, args, driver, accepted
+):
+    camera, cap = _ready_camera(mocker)
+    mocker.patch.object(camera_mod.platform, driver, return_value=accepted)
+    unlock = mocker.patch.object(camera_mod.platform, "camera_unlock_focus")
+
+    getattr(camera, method)(*args)
+    if method == "apply_focus" and not accepted:
+        unlock.assert_called_once_with(cap)  # immediate rollback
+    unlock.reset_mock()
+    camera.close()
+
+    unlock.assert_called_once_with(cap)
+
+
+@pytest.mark.parametrize(
+    ("method", "args", "driver"),
+    [
+        ("lock_focus", (), "camera_lock_focus"),
+        ("apply_focus", (137.0,), "camera_apply_focus"),
+    ],
+)
+def test_regression_close_restores_interrupted_focus_attempt(
+    mocker, method, args, driver
+):
+    camera, cap = _ready_camera(mocker)
+    mocker.patch.object(camera_mod.platform, driver, side_effect=OSError("USB lost"))
+    unlock = mocker.patch.object(camera_mod.platform, "camera_unlock_focus")
+
+    with pytest.raises(OSError, match="USB lost"):
+        getattr(camera, method)(*args)
+    if method == "apply_focus":
+        unlock.assert_called_once_with(cap)  # immediate rollback
+    unlock.reset_mock()
+    camera.close()
+
+    unlock.assert_called_once_with(cap)

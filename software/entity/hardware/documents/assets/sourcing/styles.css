@@ -1,0 +1,580 @@
+/* PhysiClaw sourcing guide — web-first scrolling document (not paged print).
+   Styled to read as a sibling of the assembly manual (styles.css): the same
+   design tokens, a white sheet on the gray desk, the accent reserved for the
+   title and class labels. Typography follows the docs' plain, untracked
+   headings, with proportional text for prose and specs, and mono for codes. */
+:root {
+  --accent:     #d4511a;
+  --ink:        #1f1f1f;
+  --ink-soft:   #6a6a6a;
+  --ink-faint:  #b8b8b8;
+  --rule:       #d8d8d8;
+  --page-bg:    #ffffff;
+  --tint:       #faf4f0;
+  --mark:       #f6dcd1;  /* ~20% accent on white — the highlight wash */
+  --link:       #4a8bc7;
+  --ok:         #2e7d4f;
+  --font-cjk:   "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans SC";
+  --font-sans:  Arial, "Helvetica Neue", var(--font-cjk), sans-serif;
+  --font-mono:  "SFMono-Regular", Consolas, "Liberation Mono", var(--font-cjk), monospace;
+}
+
+* { box-sizing: border-box; }
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #eaeaea;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.7;
+  font-synthesis: none;
+}
+a, .guide-open { color: var(--link); text-decoration: none; }
+a:hover, .guide-open:hover { text-decoration: underline; }
+
+/* The content sits on one white sheet, like a manual page on the gray desk. */
+.wrap {
+  max-width: 1560px;
+  margin: 28px auto;
+  padding: 44px 56px 64px;
+  background: var(--page-bg);
+}
+
+/* ---- masthead — mirrors the manual's .head ------------------------------ */
+.mast {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  line-height: 1.2;
+  margin-bottom: 18px;
+}
+.mast h1 {
+  margin: 0;
+  color: var(--accent);
+  font-size: 28px;
+  font-weight: 700;
+}
+.mast .url {
+  color: var(--ink-faint);
+  font-size: 13px;
+}
+
+/* ---- bought-checklist chrome -------------------------------------------- */
+/* The tally and its reset / highlight buttons sit on their own line,
+   left-aligned just above the table; tabular figures keep the count steady. */
+.checklist { display: flex; align-items: baseline; gap: 14px; margin-top: 24px; }
+.checklist .tally {
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.checklist button {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+.checklist button:hover { color: var(--accent); }
+body.hl .checklist .hl { color: var(--accent); }
+
+/* ---- optional tools ----------------------------------------------------- */
+.optional-tools {
+  margin-top: 32px;
+  max-width: 760px;
+}
+.optional-tools h2 {
+  margin: 0 0 12px;
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 700;
+}
+.optional-tools .table-wrap { margin-top: 0; }
+
+/* ---- parts table --------------------------------------------------------
+   Border hierarchy: a containing frame (ink-faint), one strong rule under
+   the header (ink), a medium rule opening each class group (ink-faint), and
+   a light inner grid (rule). Numbers are tabular so columns of figures
+   align; the type hierarchy is component (bold ink) > spec/application/notes
+   (regular soft) > supplier variants (smaller soft). */
+.table-wrap { margin-top: 8px; overflow-x: auto; }
+table.sourcing {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 1180px;
+  border: 1px solid var(--ink-faint);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.sourcing th, .sourcing td {
+  border: 1px solid var(--rule);
+  padding: 9px 12px;
+  text-align: left;
+  vertical-align: middle;
+  line-height: 1.65;
+}
+
+/* Column widths (11 columns, sums to 100%):
+   Class | Component | Spec | Qty | Application | Bought | 3 × Supplier | Ref | Notes */
+.sourcing th:nth-child(1)  { width: 6%; }
+.sourcing th:nth-child(2)  { width: 11%; }
+.sourcing th:nth-child(3)  { width: 21%; }
+.sourcing th:nth-child(4)  { width: 4%; }
+.sourcing th:nth-child(5)  { width: 11%; }
+.sourcing th:nth-child(6)  { width: 3%; }
+.sourcing th:nth-child(7), .sourcing th:nth-child(8), .sourcing th:nth-child(9) { width: 9%; }
+.sourcing th:nth-child(10) { width: 6%; }
+.sourcing th:nth-child(11) { width: 11%; }
+
+/* Three short columns need a reading width, not the BOM's 1180px canvas.
+   Keep the shared table rules and type while giving the purpose more room. */
+table.sourcing.optional-sourcing {
+  min-width: 0;
+  table-layout: fixed;
+  border: none;
+}
+.optional-sourcing th:nth-child(1) { width: 28%; }
+.optional-sourcing th:nth-child(2) { width: 48%; }
+.optional-sourcing th:nth-child(3) { width: 24%; }
+.optional-sourcing td {
+  border: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--rule) 65%, var(--page-bg));
+  padding: 10px 12px;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+.optional-sourcing tbody tr:last-child td { border-bottom-color: var(--rule); }
+.tool-spec {
+  margin-top: 2px;
+  color: var(--ink-faint);
+  font-size: 12px;
+  font-weight: 400;
+}
+.supplier-offer + .supplier-offer { margin-top: 8px; }
+
+.sourcing thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--page-bg);
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  padding: 11px 12px;
+  border: none;
+  border-bottom: 2px solid var(--ink);
+}
+.optional-sourcing thead th {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--rule);
+}
+/* Align the Qty / Bought headers with their centered columns. */
+.sourcing thead th:nth-child(4),
+.sourcing thead th.get { text-align: center; }
+
+/* A medium rule opens each class group, lifting it off the inner grid. */
+.sourcing tbody tr.grp td { border-top: 1.5px solid var(--ink-faint); }
+
+/* The bought checkbox, the row's only stateful control, drawn in the
+   page's idiom instead of the OS widget: a hairline box that leans toward
+   the accent on hover, ticking with the same Feather check the copy
+   buttons morph to. The tick lands with a green flash and soft scale (the
+   copy-button morph's idiom), then settles into the row's muted grey — a
+   checked row is always a dimmed row, so a well-bought list stays quiet
+   instead of accumulating saturated green. Ticked rows dim in place, never
+   hide: display:none inside the rowspan grid would orphan a block's
+   merged cells. */
+td.get { text-align: center; }
+td.get input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  vertical-align: middle;
+  border: 1.5px solid var(--ink-faint);
+  border-radius: 3px;
+  background: var(--page-bg) center / 11px no-repeat;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+td.get input:hover { border-color: var(--accent); }
+td.get input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+td.get input:checked {
+  border-color: var(--ink-faint);
+  background-color: var(--ink-faint);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+}
+/* The landing flash plays only on a fresh tick: `ticked` is set by the
+   change handler, never by the restore path, so a reload's re-checked
+   boxes settle silently instead of all flashing green. */
+td.get input.ticked:checked { animation: tick-in 0.3s ease; }
+@keyframes tick-in {
+  0% { transform: scale(0.7); border-color: var(--ok); background-color: var(--ok); }
+  60% { transform: scale(1.1); border-color: var(--ok); background-color: var(--ok); }
+  100% { transform: scale(1); }
+}
+
+td.cls {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+td.comp { font-weight: 700; }
+td.spec, td.desc, td.ref, td.note { color: var(--ink-soft); }
+td.qty {
+  text-align: center;
+  white-space: nowrap;
+}
+td.ref { white-space: nowrap; }
+
+/* supplier cells; custom parts show a "询价说明" action line under the shop
+   name — hovering fades in a styled tooltip with the inquiry message,
+   clicking copies it (the copy icon morphs into a green check). */
+td.offer .v-prod {
+  color: var(--ink-soft);
+  font-size: 12px;
+  margin-top: 2px;
+}
+td.offer.pending, td.offer.na { color: var(--ink-faint); }
+
+/* Reserve room for the small flag without shifting supplier links. */
+.reportable { position: relative; }
+/* A quiet folded corner marks the last opened offer without marking it bought. */
+.reportable.opened::after {
+  content: "";
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  border-left: 8px solid transparent;
+  border-bottom: 8px solid color-mix(in srgb, var(--accent) 35%, var(--page-bg));
+  pointer-events: none;
+}
+.sourcing td.reportable, .accessory-offer.reportable, .supplier-offer.reportable {
+  padding-right: 30px;
+}
+.accessory-offer.reportable, .supplier-offer.reportable { min-height: 28px; }
+a.report-link {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: color-mix(in srgb, var(--ink-soft) 70%, var(--page-bg));
+  opacity: 0;
+  --flag-offset: 2px;
+  pointer-events: none;
+  transition: opacity 140ms ease-out,
+    color 140ms ease-out, background-color 140ms ease-out;
+}
+.report-link svg {
+  width: 11px;
+  height: 11px;
+  transform: translateY(var(--flag-offset));
+  transition: transform 140ms ease-out;
+}
+/* A mouse-clicked supplier link keeps focus after its new tab closes. Only
+   keyboard focus should keep the flag visible once the pointer leaves. */
+.reportable:hover > .report-link,
+.reportable:has(:focus-visible) > .report-link {
+  opacity: 1;
+  --flag-offset: 0px;
+  pointer-events: auto;
+}
+a.report-link:hover, a.report-link:focus-visible {
+  color: var(--accent);
+  background: var(--tint);
+  text-decoration: none;
+}
+a.report-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* Delay hover labels to avoid flashes; hide and keyboard focus stay immediate. */
+.report-link::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 4px);
+  right: 0;
+  z-index: 4;
+  width: max-content;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--ink) 85%, var(--ink-soft));
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.4;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
+.report-link:hover::after {
+  opacity: 1;
+  transition: opacity 120ms ease-out 400ms;
+}
+.report-link:focus-visible::after { opacity: 1; transition: none; }
+@media (hover: none), (any-pointer: coarse) {
+  a.report-link {
+    opacity: 1;
+    --flag-offset: 0px;
+    pointer-events: auto;
+    width: 32px;
+    height: 32px;
+  }
+  .sourcing td.reportable, .accessory-offer.reportable, .supplier-offer.reportable {
+    padding-right: 44px;
+  }
+  .accessory-offer.reportable, .supplier-offer.reportable { min-height: 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  a.report-link, .report-link svg { transition: none; }
+  .report-link svg { transform: none; }
+  .report-link:hover::after { transition-duration: 0s; }
+}
+
+/* Long supplier instructions open above the page, leaving the BOM compact. */
+.guide-open {
+  display: block;
+  border: 0;
+  padding: 0;
+  margin-top: 8px;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+.supplier-guide {
+  width: min(620px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  color: var(--ink);
+  background: var(--page-bg);
+  box-shadow: 0 20px 80px #0003;
+}
+.supplier-guide::backdrop { background: #0006; }
+.guide-close { position: absolute; top: 8px; right: 8px; margin: 0; }
+.guide-close button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+.guide-close button:hover { color: var(--ink); }
+.guide-open:focus-visible, .supplier-guide :is(button, a):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.guide-body { padding: 20px; font-size: 13px; }
+.guide-body p { margin: 0 0 16px; }
+.guide-body h3 { margin: 24px 0 12px; font-size: 15px; font-weight: 700; }
+:is(.guide-parts, .guide-settings) { width: 100%; border-collapse: collapse; font-size: 13px; }
+:is(.guide-parts, .guide-settings) :is(th, td) {
+  padding: 9px 0;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  vertical-align: middle;
+}
+.guide-parts th { color: var(--ink-soft); font-size: 12px; font-weight: 700; }
+.guide-parts :is(th, td):nth-child(2) { width: 48px; text-align: right; }
+:is(.guide-parts, .guide-settings) tbody tr:last-child > * { border-bottom: 0; }
+.guide-parts code { font-family: var(--font-mono); overflow-wrap: anywhere; }
+.guide-spec { margin-top: 3px; color: var(--ink-soft); font-size: 12px; }
+.guide-qty { display: inline-block; min-width: 32px; padding: 2px 6px; font-variant-numeric: tabular-nums; }
+.guide-qty::before { content: "×"; margin-right: 3px; color: var(--ink-soft); }
+.guide-part { display: flex; align-items: flex-start; gap: 6px; }
+.guide-part button.copy { flex-shrink: 0; }
+.guide-part button.copy span { display: none; }
+.guide-part button.copy::after,
+.guide-part button.copy::before { left: auto; right: 0; }
+.guide-body > h3:first-child { margin-top: 0; padding-right: 36px; }
+.guide-steps { margin: 20px 0 0; padding-left: 24px; }
+.guide-steps > li { padding-left: 6px; margin-bottom: 20px; }
+.guide-steps > li:last-child { margin-bottom: 0; }
+.guide-steps > li::marker { color: var(--ink-soft); font-weight: 700; }
+.guide-steps h4 { margin: 0 0 6px; font-size: 13px; }
+.guide-steps p { margin: 0 0 12px; }
+.guide-settings :is(th, td) {
+  padding: 8px 10px;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+.guide-settings th { width: 36%; color: var(--ink-soft); font-weight: 400; }
+
+button.copy {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  color: var(--link);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+button.copy:hover { color: var(--ink); }
+/* The two icons stack in place and cross-fade with a soft scale, so the
+   copy -> check swap reads as one mark transforming, not a content jump. */
+button.copy svg {
+  width: 12px;
+  height: 12px;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+button.copy .ic-check {
+  position: absolute;
+  left: 0;
+  color: var(--ok);
+  opacity: 0;
+  transform: scale(0.5);
+}
+button.copy.ok { color: var(--ok); }
+button.copy.ok .ic-copy { opacity: 0; transform: scale(0.5); }
+button.copy.ok .ic-check { opacity: 1; transform: scale(1); }
+/* Tooltip: the full inquiry message, fading and settling in below the line
+   after a short intent delay (so it doesn't flash on a passing cursor). */
+button.copy::after {
+  content: attr(data-q);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 3;
+  width: max-content;
+  max-width: 300px;
+  padding: 9px 12px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.6;
+  text-align: left;
+  white-space: pre-line;
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+button.copy::before {
+  content: "";
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 14px;
+  z-index: 3;
+  border: 5px solid transparent;
+  border-top: none;
+  border-bottom-color: var(--ink);
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+button.copy:hover::after, button.copy:hover::before,
+button.copy:focus-visible::after, button.copy:focus-visible::before {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.25s;
+}
+/* Buttons near the table's right edge flip their bubble to open leftward, so
+   it stays inside .table-wrap instead of being clipped at the edge. */
+button.copy.flip::after { left: auto; right: 0; }
+button.copy.flip::before { left: auto; right: 14px; }
+
+/* notes; an embedded 询价说明 control flows inline with the sentence. */
+td.note button.copy { margin-top: 0; vertical-align: -1px; }
+.note-accessory {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+}
+
+.accessory-offer { margin-top: 4px; }
+.accessory-offer + .accessory-offer {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed color-mix(in srgb, var(--rule) 65%, transparent);
+}
+.accessory-spec { font-size: 12px; }
+
+/* Bought dimming. Row-level dimming covers only single-row cells; a cell
+   spanning several rows ([rowspan]) greys via its own `done` class, which
+   the page script sets only when every covered row is bought. :is() gives
+   the group its most specific argument's weight, so the dim color outranks
+   the per-column color rules (td.cls, td.note, td.ref, .v-prod) regardless
+   of source order. */
+:is(tr.done td:not([rowspan]), td.done),
+:is(tr.done td:not([rowspan]), td.done) :is(a:not(.report-link), .v-prod, button.copy, .guide-open) {
+  color: var(--ink-faint);
+}
+
+/* Highlight (body.hl): unbought rows wash their Spec and Qty cells —
+   exactly what the buyer reads at the shop — in the accent's own light
+   wash, strong enough to eyeball scanning down the column. Both are
+   always single-row cells, so row state alone decides. */
+body.hl tbody tr:not(.done) :is(td.spec, td.qty) { background: var(--mark); }
+
+/* ---- narrow screens ------------------------------------------------------ */
+/* The table scrolls in .table-wrap while the sheet's margins tighten. */
+@media (max-width: 720px) {
+  .wrap { margin: 0; padding: 24px 16px 48px; }
+  .mast { flex-wrap: wrap; gap: 4px; }
+  .guide-body { padding: 20px 16px 16px; }
+}
+
+@media (max-width: 480px) {
+  .optional-sourcing thead th, .optional-sourcing td { padding: 9px 8px; }
+}
+
+/* ---- print -------------------------------------------------------------- */
+/* The checkboxes stay — printed empty they make the page a bench checklist,
+   printed mid-sourcing they carry the current state; only the buttons
+   (reset, highlight) drop. The tally prints. */
+@media print {
+  body { background: #fff; }
+  .wrap { margin: 0; padding: 0; max-width: none; }
+  .table-wrap { overflow: visible; }
+  .sourcing thead th { position: static; }
+  .checklist button { display: none; }
+  .guide-open, .guide-close, .guide-part button.copy { display: none; }
+  a.report-link, .reportable.opened::after { display: none; }
+  .sourcing td.reportable, .accessory-offer.reportable, .supplier-offer.reportable {
+    padding-right: 12px;
+  }
+  .accessory-offer.reportable, .supplier-offer.reportable { min-height: 0; }
+  .supplier-guide {
+    display: block;
+    position: static;
+    width: 100%;
+    max-height: none;
+    margin: 24px 0 0;
+    box-shadow: none;
+    break-before: page;
+  }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

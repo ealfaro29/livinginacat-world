@@ -1,0 +1,526 @@
+"""Dispatch — one ToolCall in, exactly one ToolResultMessage out.
+
+Owns the per-call half of the engine's protocol invariants:
+
+  4. Arguments validated against JSONSchema before dispatch.
+  5. Errors marked: failed tool_calls get synthetic tool_result(is_error=True).
+  6. Transcript stays API-legal: each ToolCall gets exactly one ToolResult
+     with matching tool_call_id.
+
+The *judgment* — when to refuse a call, what to warn about — lives in
+`policy.py` as the guards/observers on `EngineRun.policies`; this module
+owns the mechanics of running them in declared order and turning a Block
+into an error ToolResult.
+"""
+
+import logging
+import time
+from contextlib import suppress
+
+from physiclaw.agent.engine.mcp_tool import ToolCallExpired
+from physiclaw.agent.engine.policy import DispatchGuard
+from physiclaw.agent.engine.runspec import EngineRun
+from physiclaw.agent.engine.session import Session
+from physiclaw.agent.engine.validator import ValidationError, validate_arguments
+from physiclaw.agent.runtime.stopping import checkpoint
+from physiclaw.agent.trace import (
+    brief_content,
+    format_call_args,
+    format_call_result,
+)
+from physiclaw.agent.trace.format import brief, note_text
+from physiclaw.common import verdict
+from physiclaw.common.log_style import console_text, format_tool_call
+from physiclaw.contract.content import mcp_blocks_to_content_blocks
+from physiclaw.contract.dto import (
+    ContentBlock,
+    TextBlock,
+    ToolCall,
+    ToolResultMessage,
+)
+
+log = logging.getLogger(__name__)
+
+
+async def dispatch(
+    run: EngineRun,
+    session: Session,
+    call: ToolCall,
+    turn: int,
+    *,
+    expires_at: float | None = None,
+) -> ToolResultMessage:
+    """Guards, validate, execute, observe. Pair successful calls and tool
+    errors with a ToolResultMessage. Cancellation propagates so the loop
+    can enforce its time budget and the runtime can stop."""
+    checkpoint()
+    if session.sentinel_status is not None:
+        # A producer may batch calls. Closing is final even within that batch;
+        # pair the remaining calls with refusals without invoking any handler.
+        run.tr.write(
+            {
+                "event": "tool_blocked_closed",
+                "turn": turn,
+                "name": call.name,
+                "id": call.id,
+                "arguments": call.arguments,
+            }
+        )
+        return _refused_result(
+            session, call, turn, "session is closed; tool was not executed"
+        )
+    log.debug(
+        "turn %d: calling %s(%s)",
+        turn,
+        call.name,
+        format_call_args(call.name, call.arguments),
+    )
+
+    blocked = _run_guards(run, session, call, turn, run.policies.pre_validation_guards)
+    if blocked is not None:
+        return blocked
+
+    schema = run.schema_by_name.get(call.name)
+    if schema is None:
+        run.tr.write(
+            {"event": "tool_unknown", "turn": turn, "name": call.name, "id": call.id}
+        )
+        log.warning(
+            "turn %d: %s — unknown tool",
+            turn,
+            call.name,
+            extra={
+                "event": "tool.unknown",
+                "console_message": f"Unknown tool: {call.name} — action skipped",
+                "turn": turn,
+                "tool": call.name,
+                "tool_call_id": call.id,
+            },
+        )
+        return _refused_result(session, call, turn, f"unknown tool: {call.name!r}")
+
+    # Principle 4: validate arguments before executing.
+    try:
+        validate_arguments(call.arguments, schema.get("input_schema") or {})
+    except ValidationError as e:
+        run.tr.write(
+            {
+                "event": "tool_invalid_args",
+                "turn": turn,
+                "name": call.name,
+                "id": call.id,
+                "arguments": call.arguments,
+                "error": str(e),
+            }
+        )
+        log.warning(
+            "turn %d: %s — invalid arguments: %s",
+            turn,
+            call.name,
+            e,
+            extra={
+                "event": "tool.invalid_arguments",
+                "console_message": f"Invalid {call.name} arguments: {console_text(e, 160)}",
+                "turn": turn,
+                "tool": call.name,
+                "tool_call_id": call.id,
+            },
+        )
+        return _refused_result(
+            session, call, turn, f"invalid arguments for {call.name}: {e}"
+        )
+
+    blocked = _run_guards(run, session, call, turn, run.policies.post_validation_guards)
+    if blocked is not None:
+        return blocked
+
+    local = run.local_registry.get(call.name)
+    # Clock starts after the guards: this measures the tool, not the gating.
+    t0 = time.monotonic()
+    if local is not None and call.name not in {
+        "note",
+        "update_progress",
+        "end_session",
+    }:
+        # A presentation failure must not change whether a tool executes.
+        with suppress(Exception):
+            log.info(
+                "turn %d: calling %s(%s)",
+                turn,
+                call.name,
+                format_call_args(call.name, call.arguments),
+                extra={
+                    "event": "tool.started",
+                    "turn": turn,
+                    "tool": call.name,
+                    "tool_call_id": call.id,
+                    "console": True,
+                    "console_message": "Tool: "
+                    + format_tool_call(call.name, call.arguments),
+                },
+            )
+    try:
+        if expires_at is not None and time.monotonic() >= expires_at:
+            raise ToolCallExpired("proposal expired before tool execution")
+        session.facts.begin(call.name)
+        if local is not None:
+            result = await local.handler(session, call.arguments)
+            if local.returns_blocks:
+                # A local tool DECLARING raw MCP-style blocks (run_macro's
+                # step log + final view) — same verdict + observer path as
+                # an MCP call, so the screen it carries supersedes and the
+                # observers see its verdict. It IS a gesture turn to
+                # StuckReflection and KeyboardBelief, but invisible to
+                # stuck.py's same-target and cycle detectors (no bbox
+                # centers, no signature) — so its loop protection is
+                # `policy.BurnedMacro`, one abort burning the macro for the
+                # session, rather than the same-target tiers.
+                if not isinstance(result, list):
+                    # The flag and the handler's return type state one fact
+                    # twice, and nothing else checks they agree — a str here
+                    # would silently become a list of characters. Raising
+                    # lands in the except below, a normal tool error.
+                    raise TypeError(
+                        f"{call.name} declares returns_blocks but returned "
+                        f"{type(result).__name__}"
+                    )
+                return _blocks_result(
+                    run, session, call, result, turn, elapsed_ms=_ms_since(t0)
+                )
+            if not isinstance(result, str):
+                # The mirror mismatch: blocks from a handler that never
+                # declared them would be serialized as their repr. Same
+                # landing as above — and this narrows the Handler union for
+                # the text path below.
+                raise TypeError(
+                    f"{call.name} returned {type(result).__name__} but does "
+                    "not declare returns_blocks"
+                )
+            elapsed_ms = _ms_since(t0)
+            run.tr.write(
+                {
+                    "event": "tool_result",
+                    "turn": turn,
+                    "name": call.name,
+                    "id": call.id,
+                    "arguments": call.arguments,
+                    "elapsed_ms": elapsed_ms,
+                    "text": result,
+                }
+            )
+            _log_result(call, turn, format_call_result(call.name, result), elapsed_ms)
+            session.facts.record(
+                call, turn=turn, changed=None, failed=False, result_text=result
+            )
+            return ToolResultMessage(tool_call_id=call.id, content=result)
+
+        blocks = await run.mcp.call_tool(
+            call.name, call.arguments, expires_at=expires_at
+        )
+        return _blocks_result(
+            run, session, call, blocks, turn, elapsed_ms=_ms_since(t0)
+        )
+
+    except ToolCallExpired:
+        log.warning("turn %d: %s refused — proposal expired", turn, call.name)
+        run.tr.write(
+            {
+                "event": "tool_blocked_expired",
+                "turn": turn,
+                "name": call.name,
+                "id": call.id,
+                "arguments": call.arguments,
+                "expires_at": expires_at,
+            }
+        )
+        return _refused_result(
+            session, call, turn, "proposal expired; tool was not executed"
+        )
+    except Exception as e:
+        elapsed_ms = _ms_since(t0)
+        log.error(
+            "turn %d: %s failed after %.2fs — %s: %s",
+            turn,
+            call.name,
+            elapsed_ms / 1000,
+            type(e).__name__,
+            e,
+            exc_info=True,
+            extra={
+                "console_traceback": False,
+                "event": "tool.failed",
+                "console_message": f"Tool {call.name} failed ({elapsed_ms / 1000:.1f}s)",
+                "turn": turn,
+                "tool": call.name,
+                "tool_call_id": call.id,
+                "duration_ms": elapsed_ms,
+            },
+        )
+        run.tr.write(
+            {
+                "event": "tool_error",
+                "turn": turn,
+                "name": call.name,
+                "id": call.id,
+                "arguments": call.arguments,
+                "elapsed_ms": elapsed_ms,
+                "error": str(e),
+            }
+        )
+        content = _observe_result(
+            run,
+            session,
+            call,
+            f"{call.name} failed: {e}",
+            turn=turn,
+            changed=None,
+            failed=True,
+        )
+        return ToolResultMessage(
+            tool_call_id=call.id,
+            content=content,
+            is_error=True,
+        )
+
+
+def _ms_since(t0: float) -> int:
+    return int((time.monotonic() - t0) * 1000)
+
+
+def _log_result(
+    call: ToolCall,
+    turn: int,
+    result: str,
+    elapsed_ms: int,
+    *,
+    notice: str | None = None,
+    failed: bool = False,
+) -> None:
+    """Show intent and exceptional outcomes; save routine completion details."""
+    # A completed physical action must never become retryable because its log failed.
+    with suppress(Exception):
+        is_note = call.name == "note"
+        note = note_text(call.arguments) if is_note else ""
+        # A note's result already echoes its summary; showing the args repeats it.
+        label = (
+            call.name
+            if is_note
+            else f"{call.name}({format_call_args(call.name, call.arguments)})"
+        )
+        log.log(
+            logging.WARNING if failed else logging.INFO,
+            "turn %d: %s → %s — %.2fs",
+            turn,
+            label,
+            result,
+            elapsed_ms / 1000,
+            extra={
+                "event": "tool.failed" if failed else "tool.completed",
+                "turn": turn,
+                "tool": call.name,
+                "tool_call_id": call.id,
+                "duration_ms": elapsed_ms,
+                "console": notice is not None or bool(note.strip()),
+                "console_message": notice
+                or ("Agent: " + brief(" ".join(note.split()), 220) if is_note else ""),
+            },
+        )
+
+
+def _outcome_notice(
+    call: ToolCall, action: str, changed: bool | None
+) -> tuple[str | None, bool]:
+    # Only inspect the core-composed action text, never OCR/screen content.
+    failure = verdict.failure_line(call.name, action)
+    if failure is not None:
+        if call.name == "run_macro":
+            return brief(failure.split(" — ", 1)[0], 220), True
+        return "sequence — " + brief(failure, 200), True
+    if changed is False:
+        return f"Result: {call.name} — no visible screen change", False
+    return None, False
+
+
+def _blocks_result(
+    run: EngineRun,
+    session: Session,
+    call: ToolCall,
+    blocks: list[dict],
+    turn: int,
+    *,
+    elapsed_ms: int,
+) -> ToolResultMessage:
+    """Raw MCP-style blocks → observed ToolResultMessage — the shared tail
+    of the MCP path and the local block-returning path (run_macro)."""
+    if run.debug_intercept is not None:
+        # The e2e debug harness (debug mode, env-only): the call RAN for
+        # real — a gate's send genuinely reaches the phone — and only its
+        # observation may be rewritten to the virtual thread. Success path
+        # only (errors never reach this tail), riding the same verdict /
+        # observer / trace machinery — marked, so a forensic read can
+        # never mistake a virtual thread for a real one.
+        try:
+            faked = run.debug_intercept(
+                call,
+                session.active_plugin.id if session.active_plugin else None,
+                blocks,
+            )
+        except Exception:
+            log.exception("debug observation transform failed — retaining real result")
+            faked = None
+        if faked is not None:
+            run.tr.write(
+                {
+                    "event": "debug_faked",
+                    "turn": turn,
+                    "name": call.name,
+                    "id": call.id,
+                    "arguments": call.arguments,
+                }
+            )
+            blocks = faked
+    session.facts.observe(blocks, tool=call.name)
+    content = mcp_blocks_to_content_blocks(blocks)
+    action = verdict.action_text(blocks)
+    changed = verdict.parse(action)
+    notice, failed = _outcome_notice(call, action, changed)
+    content = _observe_result(
+        run,
+        session,
+        call,
+        content,
+        turn=turn,
+        changed=changed,
+        failed=False,
+        action_text=action,
+        result_blocks=blocks,
+    )
+    run.tr.write(
+        {
+            "event": "tool_result",
+            "turn": turn,
+            "name": call.name,
+            "id": call.id,
+            "arguments": call.arguments,
+            "elapsed_ms": elapsed_ms,
+            "changed": changed,
+            "is_error": False,
+            # The content as the model receives it (scaled frames, the
+            # observer's verdict line) — the trace keeps its text whole
+            # and files its frames once, and the wire log's scrub of a
+            # later request finds those same bytes already on disk.
+            "blocks": content,
+        }
+    )
+    _log_result(
+        call, turn, brief_content(content), elapsed_ms, notice=notice, failed=failed
+    )
+    return ToolResultMessage(tool_call_id=call.id, content=content)
+
+
+def _run_guards(
+    run: EngineRun,
+    session: Session,
+    call: ToolCall,
+    turn: int,
+    guards: tuple[DispatchGuard, ...],
+) -> ToolResultMessage | None:
+    """Run one phase's dispatch guards (pre- or post-validation, split once
+    at Policies construction) in declared order; the first Block wins and
+    becomes an error ToolResult."""
+    for guard in guards:
+        block = guard.check(session, call, turn=turn)
+        if block is None:
+            continue
+        run.tr.write(
+            {
+                "event": block.event,
+                "turn": turn,
+                "name": call.name,
+                "id": call.id,
+                "arguments": call.arguments,
+            }
+        )
+        log.warning(
+            "turn %d: %s blocked — %s",
+            turn,
+            call.name,
+            block.log_msg,
+            extra={
+                "event": "tool.blocked",
+                "console_message": f"Blocked {call.name}: {console_text(block.log_msg)}",
+                "turn": turn,
+                "tool": call.name,
+                "tool_call_id": call.id,
+            },
+        )
+        return _refused_result(session, call, turn, block.content)
+    return None
+
+
+def _refused_result(
+    session: Session, call: ToolCall, turn: int, content: str
+) -> ToolResultMessage:
+    session.facts.record(
+        call, turn=turn, changed=None, failed=True, result_text=content, executed=False
+    )
+    return ToolResultMessage(tool_call_id=call.id, content=content, is_error=True)
+
+
+def _observe_result(
+    run: EngineRun,
+    session: Session,
+    call: ToolCall,
+    content: str | list[ContentBlock],
+    *,
+    turn: int,
+    changed: bool | None,
+    failed: bool,
+    action_text: str | None = None,
+    result_blocks: list[dict] | None = None,
+) -> str | list[ContentBlock]:
+    """Run the result observers in declared order; each may append one
+    advisory line to the tool-result content (traced under its event)."""
+    factual_result = action_text
+    if factual_result is None and isinstance(content, str):
+        factual_result = content
+    notices: list[str] = []
+    for obs in run.policies.result_observers:
+        try:
+            advisory = obs.observe(session, call, changed=changed, failed=failed)
+        except Exception:
+            # The tool already ran. An advisory failure must not erase its
+            # receipt or turn a completed action into a retryable tool error.
+            log.exception("result observer %s failed — skipped", type(obs).__name__)
+            continue
+        if advisory is None:
+            continue
+        run.tr.write(
+            {
+                "event": advisory.event,
+                "turn": turn,
+                "name": call.name,
+                "id": call.id,
+            }
+        )
+        notices.append(advisory.text)
+        content = _append_text(content, advisory.text)
+    session.facts.record(
+        call,
+        turn=turn,
+        changed=changed,
+        failed=failed,
+        result_text=factual_result,
+        result_blocks=result_blocks,
+        notices=tuple(notices),
+    )
+    return content
+
+
+def _append_text(
+    content: str | list[ContentBlock], extra: str
+) -> str | list[ContentBlock]:
+    """Append a line of text to a tool-result content, whatever its shape."""
+    if isinstance(content, str):
+        return f"{content}\n{extra}"
+    return [*content, TextBlock(text=extra)]

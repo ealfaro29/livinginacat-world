@@ -90,3 +90,20 @@ for (const box of document.querySelectorAll("[data-viewer-box]")) {
     frame.addEventListener("load", () => frame.focus(), { once: true });
   });
 }
+
+// A shared manual can be opened from either edition of the project.
+const landingLanguage = new URLSearchParams(location.search).get("home");
+if (landingLanguage === "es" || landingLanguage === "en") {
+  for (const link of document.querySelectorAll("[data-landing]")) {
+    link.href = landingLanguage === "es" ? "/es/" : "/";
+    link.textContent = landingLanguage === "es" ? "← Volver al inicio" : "← Back to home";
+  }
+}
+
+for (const link of document.querySelectorAll('.guide-prose a[href^="/documentation/"]')) {
+  const target = new URL(link.href);
+  if (target.pathname === "/documentation/" || target.searchParams.has("home")) continue;
+  const language = ["es", "en"].includes(landingLanguage) ? landingLanguage : document.documentElement.lang;
+  target.searchParams.set("home", language);
+  link.href = target.pathname + target.search + target.hash;
+}

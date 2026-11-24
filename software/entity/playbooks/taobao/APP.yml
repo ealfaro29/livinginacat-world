@@ -1,0 +1,221 @@
+# The pack MANIFEST — what the app is and what its playbooks share:
+# placeholders, landmarks, and any pages more than one route lands on.
+# Never a route: each playbook is its own folder beside this file
+# (buy/PLAYBOOK.yml → taobao/buy), and the hands routes share are pack
+# macros (macros/launch.yml is the cold launch every route starts with).
+kind: manifest
+schema: 1
+app: taobao
+description: >-
+  Buy on 淘宝 (Taobao) deterministically: the marketplace by courier, plus
+  盒马 groceries, 天猫超市 staples and 淘宝闪购 takeout — search, pick, the
+  storefront's own cart, a human payment gate, pay.
+
+placeholders:
+  CONTACT:
+    description: the IM contact name of YOUR user thread, exactly as the chat app shows it
+    example: QiaoQian
+
+landmarks:
+  dismiss:
+    label: "scrim above a bottom sheet"  # below the IM-banner zone (y < 0.15)
+    at: [0.35, 0.16, 0.65, 0.24]         # the `covered:` recover hand taps it
+  cart:
+    label: "购物车"                       # detail-page bottom bar, third icon —
+    at: [0.231, 0.898, 0.346, 0.954]     # measured live on the detail footer
+  confirm:
+    label: ["确定", "加入购物车"]           # a sheet's full-width bottom button —
+    at: [0.06, 0.910, 0.94, 0.955]       # UNRECORDED estimate — record it
+  close:
+    label: "the ✕ below a promo popup card"  # 天降红包 / coupon popups: an icon,
+    at: [0.44, 0.68, 0.56, 0.75]             # no text row — the box is the tap; the
+                                             # marketplace's ✕ sits at y 0.67–0.73, 盒马's at 0.69–0.75
+  select-all:
+    label: "全选"                             # the cart footer's left checkbox + label
+    at: [0.040, 0.858, 0.220, 0.896]         # the label sits at x 0.14–0.21
+  pairing-close:
+    label: "the ✕ on a storefront's 推荐搭配 sheet"   # 盒马 covers the item page with it
+    at: [0.884, 0.246, 0.977, 0.298]                # right after 加入购物车: an icon, top right
+
+# The pages every route lands on, declared once: anchors (semantics —
+# geometry is captured on YOUR device via `physiclaw playbooks pages
+# calibrate taobao`) and the recover hand each page runs when a walk
+# is not where it must be. A route may declare its own hand for a page
+# to override these for that walk.
+pages:
+  home:
+    description: "the 淘宝 feed: its tab row (推荐 / 关注) over the search bar"
+    anchors:                       # one anchor, two readings, pinned to the tab
+      - {text: ["推荐", "关注"], within: [0.0, 0.04, 0.45, 0.11]}   # row: a scrolled
+                                   # cart's 为你推荐 sits centred, lower
+    forbid: ["我的闪购"]            # the 闪购外卖 tab prints the same header row
+    recover:
+      covered: {tap: app.landmarks.close}
+      elsewhere: {macro: app.macros.launch}  # the cold launch lands on the feed
+  results:                        # the filter row pins them: two-char
+    description: a marketplace search's results, under the filter row (综合 / 销量)
+    anchors:                      # anchors are read exactly, so the band
+      - {text: "综合", within: top}   # keeps feed text (组合, 热销) from
+      - {text: "销量", within: top}   # standing in for them
+    forbid: ["综合排序", "超值外卖送到家"]   # a storefront's results say 综合排序 / 销量优先; the 闪购 results carry the 闪购 slogan
+    scrollable: true
+    recover:                      # one hand per reading of the deviation:
+      covered: {tap: app.landmarks.dismiss}   # a coupon sheet over the results
+      elsewhere: go_back                  # a promo page or mis-tap: the edge
+                                          # swipe (the chevron tap misses)
+    tries: 2                      # this page's tries per walk
+  # The sheet's identity is two rows every variant prints: the pay
+  # button and the total. Rows that vary between sheets (备注 vs 开具发票,
+  # 顺手买 vs 超值换购) are not anchors — every anchor must show.
+  buysheet:
+    description: "the buy sheet: a pay button over the 实付 / 补贴后 total row"
+    anchors:
+      - {text: ["免密支付", "提交订单", "立即支付"], within: bottom}
+      - {text: ["实付", "补贴后", "优惠后", "价格明细"], within: [0.0, 0.15, 1.0, 0.85]}  # the total row: below the header banner, above the pay bar
+    forbid: ["支付成功", "外卖到家"]   # a 闪购 takeout order page prints 优惠后 and 立即支付 too
+    recover:
+      covered: {tap: app.landmarks.close}
+      elsewhere: go_back
+    tries: 2
+  detail:                         # a listing's page: the footer's two buttons
+    description: "a listing's page: 加入购物车 and 立即购买 in the footer"
+    anchors:
+      - {text: "加入购物车", within: bottom}
+      - {text: ["立即购买", "领券购买"], within: bottom}
+    forbid: ["闪购外卖"]            # the feed's bottom cards print both buttons; only its tab row says this
+    recover:
+      covered: {tap: app.landmarks.close}
+      elsewhere: go_back
+    tries: 2
+  cart:                           # Not the 结算 button: it reads
+    description: "the marketplace 购物车 tab: its lines over the 全选 footer"
+    anchors:                      # 结算（1） once a line is ticked, and a two-char
+      - {text: "购物车", within: top}     # anchor is read exactly — the title
+      - {text: "全选", within: bottom}    # (购物车（85）) and 全选 hold either way
+    scrollable: true
+    recover:
+      covered: {tap: app.landmarks.close}
+    tries: 2
+  paid:
+    description: "the order paid: 支付成功 over what the app offers next"
+    anchors:
+      - ["支付成功", "付款成功", "购买成功"]
+
+  # ---- the three delivery storefronts, each with its own cart and order page ----
+  # 盒马 (Hema): the main search jumps straight into its storefront.
+  hema-home:
+    description: "盒马's storefront home: 权益中心 over its own tab bar"
+    anchors:
+      - {text: "权益中心", within: [0.5, 0.10, 1.0, 0.30]}
+      - {text: "分类", within: bottom}          # the storefront's own tab bar
+    # A promo card (天天特惠 / 秋风起) covers the home on entry and dims
+    # 权益中心 past OCR, so the reading is unknown, not covered: one hand
+    # for every reading closes a card while one shows, else pops a screen.
+    recover: {macro: app.macros.hema-recover}
+    tries: 4                      # counted per walk, and every round enters the home twice
+  # 淘宝闪购: the home tab, its search results (store cards), a store's menu.
+  shangou-home:
+    description: "the 淘宝闪购 tab: 闪购外卖 over 我的闪购"
+    anchors:
+      - {text: "闪购外卖", within: top}
+      - {text: "我的闪购", within: [0.5, 0.10, 1.0, 0.30]}
+    recover:
+      covered: {tap: app.landmarks.close}
+      elsewhere: go_back
+    tries: 2
+  shangou-results:                # the search header's slogan under the query; the chips,
+    description: "a 闪购 search's results: the header's slogan under the query"
+    anchors:                      # the sort row and the cards all vary by query
+      - {text: "超值外卖送到家", within: [0.0, 0.10, 0.6, 0.16]}
+    forbid: ["我的闪购", "历史搜索"]   # the 闪购 tab itself; the search-entry page keeps the slogan
+    scrollable: true
+    recover:
+      elsewhere: go_back
+    tries: 2
+  shangou-store:                  # a store's menu: 点餐/评价 tabs up top (外送/自取 above them only at a restaurant)
+    description: a 闪购 store's menu, its 点餐 / 评价 tab row up top
+    anchors:                      # the header slot 闪购 pages share; no 商家 anchor — a brand store puts its slogan there
+      - {text: "点餐", within: [0.0, 0.10, 0.6, 0.16]}
+      - {text: "评价", within: [0.0, 0.10, 0.6, 0.16]}
+    scrollable: true
+    recover:
+      covered: {tap: app.landmarks.dismiss}
+      elsewhere: go_back
+    tries: 2
+  shangou-order:                  # the takeout order page: pays from its own button
+    description: a 闪购 takeout order page, which pays from its own button
+    anchors:
+      - {text: "外卖到家", within: top}
+      - {text: "立即支付", within: bottom}
+    forbid: ["支付成功"]            # the paid page keeps the order's rows under its banner
+    recover:
+      elsewhere: go_back
+    tries: 2
+  # 天猫超市闪购: a store inside 闪购, reached by searching its name there.
+  tmall-home:
+    description: "天猫超市's store page inside 闪购: its header over 全部商品"
+    anchors:
+      - {text: "天猫超市闪购", within: top}
+      - {text: "全部商品", within: [0.0, 0.15, 1.0, 0.35]}
+    forbid: ["全选", "清空"]        # the cart sheet over the storefront leaves the header showing
+    recover:
+      covered: {tap: app.landmarks.close}
+      elsewhere: {macro: app.macros.store-back}
+    tries: 3
+  # Shared by 盒马 and 天猫超市: their in-store search results, item page,
+  # cart and order page read alike, and the walk knows which store it is in.
+  store-order:                    # 确认订单 (盒马) / 闪购天猫超市闪购 (天猫超市), 提交订单 below
+    description: "a storefront's order page: 确认订单 or the store's name, over 提交订单"
+    anchors:
+      - {text: ["确认订单", "天猫超市闪购"], within: [0.0, 0.0, 1.0, 0.60]}
+      - {text: "提交订单", within: bottom}
+    forbid: ["支付成功"]            # the paid page keeps the order's rows under its banner
+    recover:
+      elsewhere: go_back
+    tries: 2
+  store-results:
+    description: a storefront's in-store results, under its sort row (综合排序 / 销量优先)
+    anchors:
+      - {text: "综合排序", within: top}
+      - {text: "销量优先", within: top}
+    scrollable: true
+    recover:
+      elsewhere: go_back
+    tries: 2
+  store-detail:                   # an item page: 加入购物车 and the 店铺 tab, no 立即购买
+    description: "a storefront item's page: 加入购物车 and the 店铺 tab, no 立即购买"
+    anchors:
+      - {text: "加入购物车", within: bottom}
+      - {text: "店铺", within: bottom}
+    # The marketplace's detail page prints 立即购买; the 闪购 tab's feed
+    # prints tiles with 加入购物车 and a 店铺 link in the same band.
+    forbid: ["立即购买", "领券购买", "我的闪购", "闪购外卖"]
+    recover:
+      covered: {tap: app.landmarks.close}
+      elsewhere: go_back
+    tries: 2
+  # The two storefront carts differ: 盒马's is a page under a 购物车
+  # title, 天猫超市's a sheet over its store page headed by 全选（已选N件）
+  # (the marketplace cart keeps its 全选 in the footer). Both end in a
+  # footer whose button reads 去结算, 领券结算 when a coupon is claimable,
+  # or 差¥N起送 below the store's minimum. 清空 beside 全选 is too small
+  # for OCR to hold, so neither reads it.
+  hema-cart:
+    description: "盒马's cart: a 购物车 title over the footer's settle button"
+    anchors:
+      - {text: "购物车", within: top}
+      - {text: ["去结算", "领券结算", "起送"], within: bottom}
+    scrollable: true
+    recover:
+      covered: {tap: app.landmarks.close}
+    tries: 2
+  tmall-cart:                     # the sheet leaves the store's header showing
+    description: 天猫超市's cart sheet, its 全选 row under the store header
+    anchors:
+      - {text: "天猫超市闪购", within: top}
+      - {text: "全选", within: [0.0, 0.25, 0.5, 0.70]}
+      - {text: ["去结算", "领券结算", "起送"], within: bottom}
+    scrollable: true
+    recover:
+      covered: {tap: app.landmarks.close}
+    tries: 2

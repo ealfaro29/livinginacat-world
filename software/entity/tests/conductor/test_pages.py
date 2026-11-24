@@ -1,0 +1,359 @@
+"""Tests for `physiclaw.conductor.spec.pages` — declaration parsing and
+the learned store."""
+
+from __future__ import annotations
+
+import json
+
+import pytest
+from conductor_fakes import make_learned
+
+from physiclaw.common import paths
+from physiclaw.common.bbox import BANDS
+from physiclaw.common.placeholders import write_placeholder_values
+from physiclaw.conductor.load import prints
+from physiclaw.conductor.spec import conventions, pages
+from physiclaw.conductor.spec.pages import (
+    Landmark,
+    LearnedPage,
+    PagesError,
+    parse_landmarks,
+    parse_pages,
+)
+
+VALID = """\
+results:
+  description: the results page
+  anchors:
+    - "综合"
+    - {text: "搜索", within: top}
+  forbid: ["直播中"]
+  scrollable: true
+item-detail:
+  description: the item-detail page
+  anchors: ["加入购物车", "立即购买"]
+"""
+
+
+# ---------- parse ----------
+
+
+def test_parse_valid_pages() -> None:
+    out = parse_pages(VALID, "taobao")
+
+    assert set(out) == {"results", "item-detail"}
+    r = out["results"]
+    assert r.anchors[0].text == "综合" and r.anchors[0].within is None
+    assert r.anchors[1].within == BANDS["top"]
+    assert r.forbid[0].text == "直播中" and r.forbid[0].within is None
+    assert r.scrollable is True
+    assert out["item-detail"].scrollable is False
+
+
+@pytest.mark.parametrize(
+    "contact", ['Alice "Q"', "Alice: Q", r"Alice\team", "0123", "null"]
+)
+@pytest.mark.parametrize("template", ['"<<CONTACT>>"', "'<<CONTACT>>'", "<<CONTACT>>"])
+def test_regression_page_placeholders_preserve_literal_contact(
+    contact, template
+) -> None:
+    write_placeholder_values({"CONTACT": contact})
+    text = f"thread:\n  description: the contact chat\n  anchors:\n    - {template}\n"
+
+    pages = parse_pages(text, "channel")
+
+    assert pages["thread"].anchors[0].text == contact
+
+
+def test_regression_pages_reject_merge_aliases() -> None:
+    text = (
+        "first: &page {description: chat, anchors: [Alice]}\n"
+        "second: {<<: [*page, *page]}\n"
+    )
+
+    with pytest.raises(PagesError, match="aliases"):
+        parse_pages(text, "channel")
+
+
+def test_parse_empty_file_is_no_pages() -> None:
+    assert parse_pages("", "taobao") == {}
+
+
+@pytest.mark.parametrize(
+    "text, fragment",
+    [
+        ("results: []", "must be a mapping"),
+        ("results:\n  anchors: []", "non-empty"),
+        ("results:\n  anchors: ['a']\n  bogus: 1", "unknown key"),
+        ("Results:\n  anchors: ['a']", "lowercase"),
+        ("results:\n  anchors: [{text: 'a', within: middle}]", "one of"),
+        ("results:\n  anchors: ['x']", "needs a `within`"),
+        ("results:\n  anchors: 'a'", "is a list"),
+        ("results:\n  anchors: {text: 'a', within: top}", "must be a list"),
+        ("results:\n  anchors: [{or: ['a', 'b']}]", "unknown key"),
+        ("results:\n  anchors: [123]", "a text, a list"),
+        ("results:\n  anchors: ['ok']\n  forbid: 'nope'", "list of terms"),
+        ("results:\n  anchors: ['ok']\n  scrollable: 1", "true or false"),
+    ],
+)
+def test_parse_rejects_with_named_error(text: str, fragment: str) -> None:
+    with pytest.raises(PagesError, match=fragment):
+        parse_pages(text, "taobao")
+
+
+def test_single_char_anchor_allowed_with_region() -> None:
+    out = parse_pages(
+        "results:\n  description: a search's results\n"
+        "  anchors: [{text: 'x', within: top}]",
+        "app",
+    )
+
+    assert out["results"].anchors[0].text == "x"
+
+
+# ---------- anchor alternates ----------
+
+
+def test_bare_string_anchor_has_no_alternates() -> None:
+    # Every pages.yml written before alternates existed must parse to
+    # exactly what it did before.
+    a = parse_pages(VALID, "taobao")["results"].anchors[0]
+
+    assert (a.text, a.alts) == ("综合", ())
+    assert a.readings == ("综合",)
+
+
+def test_anchor_alternates_parse_as_one_anchor() -> None:
+    out = parse_pages(
+        "lock:\n  description: the lock screen\n"
+        '  anchors: [{text: ["Swipe up", "轻扫以打开"], within: top}]',
+        "ios2",
+    )
+    (a,) = out["lock"].anchors
+
+    # First reading is canonical — the learned-geometry key; the rest are
+    # alternates, mirroring LearnedAnchor's text/variants split.
+    assert a.text == "Swipe up"
+    assert a.alts == ("轻扫以打开",)
+    assert a.readings == ("Swipe up", "轻扫以打开")
+    assert a.within == BANDS["top"]
+
+
+@pytest.mark.parametrize(
+    "text, fragment",
+    [
+        ("p:\n  anchors: [{text: []}]", "one string or up to 4"),
+        (
+            "p:\n  anchors: [{text: ['a1','b2','c3','d4','e5']}]",
+            "one string or up to 4",
+        ),
+        ("p:\n  anchors: [{text: ['dup', 'dup']}]", "duplicate `text` reading"),
+        # The single-char rule is per reading — one loose alternate opens
+        # the same door as one loose anchor.
+        ("p:\n  anchors: [{text: ['Search', 'x']}]", "needs a `within`"),
+        ("p:\n  anchors: [{text: ['ok', 123]}]", "must be a string"),
+    ],
+)
+def test_alternates_rejected_with_named_error(text: str, fragment: str) -> None:
+    with pytest.raises(PagesError, match=fragment):
+        parse_pages(text, "app")
+
+
+# ---------- the ios pack (scaffolded like any other) ----------
+
+
+def test_ios_pack_is_scaffolded_then_read_from_disk() -> None:
+    # `ios` used to be reserved-and-unloadable. It is now an ordinary
+    # pack directory the user owns — scaffolded by the CLI, read from
+    # disk like every other, never shipped in the wheel.
+    from physiclaw.conductor.load import scaffold
+
+    assert prints.scan_app_decls(conventions.IOS_APP) == {}  # nothing until scaffolded
+
+    scaffold.init_pack(conventions.IOS_APP)
+    decls = prints.scan_app_decls(conventions.IOS_APP)
+
+    assert "locked" in decls
+    assert decls["locked"].anchors  # semantics only — geometry is captured
+
+
+def test_scaffolded_ios_pages_are_matchable_prints_without_geometry() -> None:
+    from physiclaw.conductor.load import scaffold
+
+    scaffold.init_pack(conventions.IOS_APP)
+
+    found = prints.prints_for_app(conventions.IOS_APP)
+
+    assert [p.page_id for p in found] == ["ios.locked"]
+    # No learned file until `calibrate` runs — text-only matching.
+    assert found[0].learned is None
+
+
+# ---------- discovery + learned store ----------
+
+
+def _write_pack(app: str, text: str) -> None:
+    from conductor_fakes import compose_pack_doc
+
+    d = paths.playbooks_dir() / app
+    d.mkdir(parents=True)
+    (d / "APP.yml").write_text(compose_pack_doc(app, text), encoding="utf-8")
+
+
+def test_scan_app_decls_reads_pack_or_empty() -> None:
+    _write_pack("taobao", VALID)
+
+    assert set(prints.scan_app_decls("taobao")) == {"results", "item-detail"}
+    assert prints.scan_app_decls("absent") == {}
+
+
+def test_scan_app_decls_validates_name_before_touching_paths() -> None:
+    with pytest.raises(pages.PagesError, match="app name"):
+        prints.scan_app_decls("../escape")
+
+
+def test_parse_wraps_any_loader_error_as_pages_error(mocker) -> None:
+    # The YAML loader does not confine itself to YAMLError (deep nesting
+    # surfaces as RecursionError) — the contract is PagesError-only.
+    from physiclaw.conductor.spec import specfile
+
+    mocker.patch.object(
+        specfile.yaml_loader, "load", side_effect=RecursionError("deep")
+    )
+
+    with pytest.raises(pages.PagesError, match="invalid YAML"):
+        pages.parse_pages("x: {anchors: ['a']}", "app")
+
+
+def test_learned_round_trip_and_merge() -> None:
+    _write_pack("taobao", VALID)
+    page = LearnedPage(
+        anchors={"综合": make_learned("综合", 0.2, 0.11, variants=("综台",))},
+        observations=7,
+    )
+    prints.save_learned("taobao", {"results": page})
+
+    by_name = {p.decl.name: p for p in prints.prints_for_app("taobao")}
+
+    r = by_name["results"]
+    assert r.learned is not None and r.learned.observations == 7
+    assert r.learned.anchors["综合"].variants == ("综台",)
+    d = by_name["item-detail"]
+    assert d.learned is None
+
+
+def test_load_learned_missing_or_garbage_is_empty() -> None:
+    assert prints.load_learned("nothing") == {}
+
+    paths.learned_pages_dir().mkdir(parents=True, exist_ok=True)
+    (paths.learned_pages_dir() / "bad.json").write_text("{nope", encoding="utf-8")
+
+    assert prints.load_learned("bad") == {}
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        (field, value)
+        for field in ("cx", "cy", "pos_tol", "freq")
+        for value in (float("nan"), float("inf"), "NaN", -0.1, 1.1, True)
+    ]
+    + [
+        ("text", 3),
+        ("text", ""),
+        ("variants", "wrong shape"),
+        ("variants", [3]),
+    ],
+)
+def test_invalid_learned_anchors_fall_back_to_declarations(field, value) -> None:
+    _write_pack("taobao", VALID)
+    learned = LearnedPage(
+        anchors={"综合": make_learned("综合", 0.2, 0.11)}, observations=7
+    )
+    prints.save_learned("taobao", {"results": learned})
+    path = prints.learned_file("taobao")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["pages"]["results"]["anchors"][0][field] = value
+    path.write_text(json.dumps(data), encoding="utf-8")
+
+    assert prints.load_learned("taobao") == {}
+    assert all(p.learned is None for p in prints.prints_for_app("taobao"))
+
+
+def test_parse_pages_rejects_unpopulated_placeholder() -> None:
+    with pytest.raises(PagesError, match="unpopulated template placeholder.*CONTACT"):
+        parse_pages('thread:\n  anchors: ["<<CONTACT>>"]\n', "channel")
+
+
+# ---------- `landmarks:` (declared fixed spots) ----------
+
+
+def test_parse_landmarks_happy_path() -> None:
+    out = parse_landmarks(
+        {
+            "back": {"label": "back chevron", "at": [0.02, 0.05, 0.1, 0.1]},
+            "dismiss": {"label": ["scrim", "empty area"], "at": [0.3, 0.1, 0.7, 0.2]},
+            "cart": {"label": "cart", "at": [0.8, 0.0, 0.9, 0.1]},  # open vocabulary
+        }
+    )
+
+    assert out["back"] == Landmark(label=("back chevron",), bbox=(0.02, 0.05, 0.1, 0.1))
+    assert out["dismiss"].label == ("scrim", "empty area")
+    assert set(out) == {"back", "dismiss", "cart"}
+
+
+def test_parse_landmarks_page_scope_is_checked_against_the_pack() -> None:
+    spec = {"cart": {"label": "cart", "at": [0.2, 0.9, 0.3, 0.95], "page": "detail"}}
+
+    assert parse_landmarks(spec)["cart"].page == "detail"  # unchecked door
+    assert parse_landmarks(spec, {"detail"})["cart"].page == "detail"
+    with pytest.raises(PagesError, match="not a declared page"):
+        parse_landmarks(spec, {"home"})
+    with pytest.raises(PagesError, match="must be a"):
+        parse_landmarks({"cart": {**spec["cart"], "extra": 1}})
+
+
+def test_parse_landmarks_names_and_count_are_bounded() -> None:
+    with pytest.raises(PagesError):
+        parse_landmarks({"Cart Tab": {"label": "cart", "at": [0.8, 0.0, 0.9, 0.1]}})
+    many = {f"spot{i}": {"label": "x", "at": [0.1, 0.1, 0.2, 0.2]} for i in range(13)}
+    with pytest.raises(PagesError, match="max"):
+        parse_landmarks(many)
+
+
+def test_parse_landmarks_rejects_bad_shapes() -> None:
+    with pytest.raises(PagesError, match="label, at"):
+        parse_landmarks({"back": {"label": "x"}})
+    with pytest.raises(PagesError, match="left < right"):
+        parse_landmarks({"back": {"label": "x", "at": [0.9, 0.1, 0.2, 0.2]}})
+    with pytest.raises(PagesError, match="duplicate"):
+        parse_landmarks({"back": {"label": ["x", "x"], "at": [0.1, 0.1, 0.2, 0.2]}})
+
+
+def test_collect_page_decls_skips_a_dotted_route_page() -> None:
+    # `page: ios.locked` with anchors beside it is a playbook error (a
+    # reserved built-in cannot be declared) — reported by that route's
+    # own parse, never by taking the whole pack down.
+    doc = {
+        "playbooks": {
+            "walk": {
+                "route": [
+                    {"page": "home", "anchors": ["Files"]},
+                    {"page": "ios.locked", "anchors": ["x"]},
+                ]
+            }
+        }
+    }
+
+    assert list(pages.collect_page_decls(doc, doc.get("playbooks"))) == ["home"]
+
+
+def test_a_forbid_text_takes_the_anchor_shape() -> None:
+    out = parse_pages(
+        "thread:\n  description: the chat thread\n  anchors: ['Alice']\n"
+        "  forbid:\n    - {text: ['微信', 'Weixin'], within: [0.3, 0.03, 0.7, 0.12]}\n",
+        "chat",
+    )
+
+    (f,) = out["thread"].forbid
+    assert f.readings == ("微信", "Weixin") and f.within == (0.3, 0.03, 0.7, 0.12)

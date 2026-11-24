@@ -23,6 +23,7 @@ export const guideGroups = [
 ];
 
 export const guides = [
+  {slug:"entity", source:"docs/ENTITY.md", group:"build", title:"Operate Alfonsito with Entity", description:"Pair the iPhone, calibrate, manage tasks and run Pulse. Español / English."},
   {
     slug: "assembly",
     source: "docs/ASSEMBLY-ES.md",
@@ -203,6 +204,7 @@ function guideReference(href, source, { repo, siteUrl }) {
 }
 
 export function resolveGuideLink(href, source, context) {
+  if (href.startsWith("#")) return href.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
   const internal = guideReference(href, source, context);
   if (internal) return internal;
   if (href.startsWith(context.siteUrl + "/"))
@@ -274,6 +276,7 @@ export function renderGuideMarkdown(markdown, guide, context) {
 }
 
 export const publishedGuideSlugs = [
+  "entity",
   "assembly",
   "project-guide",
   "hardware",
@@ -306,7 +309,7 @@ export function renderGuidePage(guide, markdown, context) {
   return `<article class="wrap guide-page"><header class="guide-header">
     <div class="crumb"><a href="${parent}">${es ? v1Label : "Documentation"}</a></div>
     <h1>${esc(guide.title)}</h1><p class="lead">${esc(guide.description)}</p>
-    <div class="guide-actions">${es ? '<a href="/downloads/guia-ensamblaje-ft412-es.pdf">Abrir el manual en PDF</a>' : ""}
+    <div class="guide-actions">${es ? '<a href="/downloads/guia-ensamblaje-ft412-es.pdf" target="_blank" rel="noopener">Abrir el manual en PDF</a>' : ""}
     <a href="${download}" download>${es ? "Descargar Markdown" : "Download Markdown"}</a></div></header>
     ${toc ? `<details class="guide-toc-mobile"><summary>${contents}</summary><nav aria-label="${contents}">${toc}</nav></details>` : ""}
     <div class="guide-layout"><aside class="guide-sidebar">${toc ? `<nav class="guide-toc" aria-label="${contents}"><h2>${contents}</h2>${toc}</nav>` : ""}</aside>

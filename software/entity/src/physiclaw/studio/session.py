@@ -1,0 +1,239 @@
+"""The studio's one MCP session — the hardware side of the boundary.
+
+Owns the persistent `McpClient`, the one-rig serialization lock, and
+the published-tool allowlist. Every phone interaction goes through
+`act`, which returns the normalized view the two browser panes render:
+action text, the annotated JPEG, and the listing parsed into element
+rows. HTTP marshalling lives in `server.py`; this module never sees a
+Request. `Session` is the contract the server and CLI see — the mock
+(`mock.py`) is its other implementation.
+"""
+
+import asyncio
+import logging
+from typing import Protocol
+
+from physiclaw.agent.engine.mcp_tool import McpClient
+from physiclaw.common import verdict
+from physiclaw.common.config import server_url
+from physiclaw.common.listing import Screen
+
+log = logging.getLogger(__name__)
+
+
+class Session(Protocol):
+    """What the studio server drives: one rig, one act door — and one
+    `drive` door that lends the rig to a driver (the stepping core) for
+    the length of one job, under the same one-rig lock."""
+
+    @property
+    def mcp_url(self) -> str: ...
+
+    @property
+    def busy(self) -> bool: ...
+
+    def state(self) -> dict: ...
+
+    async def act(self, tool: str, args: dict) -> dict: ...
+
+    async def drive(self, job): ...
+
+    async def close(self) -> None: ...
+
+
+def unpublished(tool: str) -> ValueError:
+    """The one refusal for a tool outside the published surface."""
+    return ValueError(f"tool {tool!r} is not on the published MCP surface")
+
+
+def view_reply(blocks: list[dict]) -> dict:
+    """Tool-reply blocks → the studio wire shape {text, image, rows,
+    listing}.
+
+    The action/listing split is `common.verdict`'s block-shape rule
+    (block 0 is action text iff it is a text block) — not re-derived
+    here. `listing` is the verbatim text; the panes render from `rows`.
+    """
+    image = next((b for b in blocks if b["type"] == "image"), None)
+    listing = verdict.screen_text(blocks)
+    return {
+        "text": verdict.action_text(blocks),
+        "image": (
+            {"mime_type": image["mime_type"], "data": image["data"]}
+            if image is not None
+            else None
+        ),
+        "rows": [el.to_dict() for el in Screen.read(listing).rows],
+        "listing": listing,
+    }
+
+
+class StudioSession:
+    """Lazy-connecting wrapper: the studio starts with no server
+    running; the first `act` dials out. A transport-level failure drops
+    the client so the next call reconnects — the browser sees one
+    failed action and a banner, not a dead process."""
+
+    def __init__(self, base_url: str | None = None):
+        # Accept the URL with or without the /mcp suffix — McpClient
+        # appends it, and users naturally paste the full endpoint.
+        self._base = base_url.rstrip("/").removesuffix("/mcp") if base_url else None
+        self._client: McpClient | None = None
+        self._tools: list[str] = []
+        self._lock = asyncio.Lock()
+        # MCP's transport opens task-local cancellation scopes. One worker
+        # must own connection setup, calls (including reconnect), and teardown.
+        self._worker: asyncio.Task | None = None
+        self._requests: asyncio.Queue | None = None
+
+    @property
+    def base_url(self) -> str:
+        """The server's control-plane base — what readiness is probed at."""
+        return (self._base or server_url()).rstrip("/")
+
+    @property
+    def mcp_url(self) -> str:
+        return self.base_url + "/mcp"
+
+    @property
+    def busy(self) -> bool:
+        return self._lock.locked()
+
+    def state(self) -> dict:
+        """For GET /api/state — cheap, never dials the server."""
+        return {
+            "connected": self._client is not None,
+            "mcp_url": self.mcp_url,
+            "tools": list(self._tools),
+        }
+
+    async def act(self, tool: str, args: dict) -> dict:
+        """Call one published tool, serialized (one rig). Raises
+        ValueError for a tool outside the published surface,
+        ConnectionError when the server is unreachable (client dropped
+        for reconnect), RuntimeError when the tool itself errored (it
+        ran and said no — the session is fine, so it passes through)."""
+
+        async def call(client):
+            if tool not in self._tools:
+                raise unpublished(tool)
+            try:
+                return await client.call_tool(tool, args)
+            except RuntimeError:
+                raise
+            except Exception as e:
+                raise ConnectionError(f"MCP call {tool!r} failed: {e}") from e
+
+        async with self._lock:
+            blocks = await self._submit(call)
+        return view_reply(blocks)
+
+    async def drive(self, job):
+        """Lend the connected client to `job(client)` — a driver that
+        makes many calls (a stepped playbook node) — holding the one-rig
+        lock throughout, so a manual gesture answers busy meanwhile.
+        Raises what the job raises; a transport failure drops the
+        client for reconnect exactly like `act`."""
+        async with self._lock:
+            return await self._submit(job)
+
+    async def _submit(self, job):
+        # The caller holds the rig lock until work AND cancellation cleanup
+        # finish. A fresh queue prevents abandoned requests from being replayed.
+        if self._worker is not None and self._worker.cancelling():
+            await self._stop_worker(self._worker)
+        if self._worker is None or self._worker.done():
+            self._requests = asyncio.Queue()
+            self._worker = asyncio.create_task(self._serve(self._requests))
+        worker = self._worker
+        reply = asyncio.get_running_loop().create_future()
+        assert self._requests is not None
+        self._requests.put_nowait((job, reply))
+        try:
+            # Also watch the worker: close can cancel it before it even starts.
+            await asyncio.wait((reply, worker), return_when=asyncio.FIRST_COMPLETED)
+            if reply.done():
+                return reply.result()
+            raise asyncio.CancelledError("MCP session closed")
+        except asyncio.CancelledError:
+            reply.cancel()
+            await self._stop_worker(worker)
+            raise
+
+    async def _serve(self, requests: asyncio.Queue) -> None:
+        owner = asyncio.current_task()
+        assert owner is not None
+        try:
+            while not owner.cancelling():
+                job, reply = await requests.get()
+                try:
+                    client = await self._connected()
+                    result = await job(client)
+                except ConnectionError as e:
+                    await self._disconnect()
+                    if not reply.done():
+                        reply.set_exception(e)
+                except Exception as e:
+                    if not reply.done():
+                        reply.set_exception(e)
+                else:
+                    if not reply.done():
+                        reply.set_result(result)
+                # A driver may catch cancellation and return. Still retire its
+                # connection instead of waiting forever for another request.
+                if reply.cancelled():
+                    return
+        finally:
+            await self._disconnect()
+
+    async def _connected(self) -> McpClient:
+        if self._client is None:
+            client = McpClient(self._base)
+            await client.__aenter__()
+            try:
+                tools = [t["name"] for t in await client.list_tools()]
+            except BaseException as e:
+                try:
+                    await client.__aexit__(None, None, None)
+                except BaseException:
+                    log.debug("studio MCP discovery teardown", exc_info=True)
+                if isinstance(e, Exception):
+                    raise ConnectionError(f"MCP tool discovery failed: {e}") from e
+                raise
+            self._client = client
+            self._tools = tools
+            log.info("studio connected (%s, %d tools)", self.mcp_url, len(self._tools))
+        return self._client
+
+    async def close(self) -> None:
+        """Stop active work and drop the client (idempotent). The allowlist
+        stays — it names a frozen surface, and /api/state showing it is harmless."""
+        if self._worker is not None:
+            await self._stop_worker(self._worker)
+
+    async def _stop_worker(self, worker: asyncio.Task) -> None:
+        # Cancel once; repeated caller cancellation must not interrupt MCP's
+        # teardown. Shield the join, then propagate any caller cancellation.
+        if not worker.done() and not worker.cancelling():
+            worker.cancel()
+        joined = asyncio.gather(worker, return_exceptions=True)
+        cancelled = None
+        while not joined.done():
+            try:
+                await asyncio.shield(joined)
+            except asyncio.CancelledError as e:
+                cancelled = e
+        if self._worker is worker:
+            self._worker = None
+            self._requests = None
+        if cancelled is not None:
+            raise cancelled
+
+    async def _disconnect(self) -> None:
+        """Only the connection's owner may enter or exit its MCP context."""
+        client, self._client = self._client, None
+        if client is not None:
+            try:
+                await client.__aexit__(None, None, None)
+            except Exception:
+                log.debug("studio MCP teardown", exc_info=True)

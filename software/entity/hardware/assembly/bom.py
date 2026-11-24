@@ -1,0 +1,147 @@
+"""BOM (bill of materials) for assembly steps — library.
+
+Each ``BasePart`` instance pushes one entry (``bom_key``, ``qty``,
+``category``) into a process-wide ``BOM_REGISTRY`` (in
+``hardware.parts.base``) the first time it builds — memo-guarded, so
+re-builds of the same instance don't double-push. To get the BOM for a
+procedure step, ``collect()`` clears the registry, drives the step's
+build (which transitively builds every prior step in the chain), then
+aggregates the registry by ``bom_key``.
+
+Predecessor for a delta is found by convention: same family prefix
+(``belt_`` / ``frame_`` / …), next-lower ``NN`` index in the filename.
+
+``write_bom`` is the public entry point: ``hardware.assembly.build_procedures``
+calls it during a render pass so one build also emits the Markdown BOM to
+``output/bom/`` (cheap there because the leaf-part cache is already warm).
+"""
+
+from __future__ import annotations
+
+from collections import defaultdict
+from dataclasses import dataclass
+from pathlib import Path
+
+from hardware.assembly.base import BaseAssembly
+from hardware.assembly.discovery import predecessor_module as predecessor_module
+from hardware.assembly.dispatch import load_step
+from hardware.parts.base import BOM_REGISTRY, BomCategory
+from hardware.scheme import BOM_DIR
+
+
+@dataclass(frozen=True, order=True)
+class BomEntry:
+    category: BomCategory
+    key: tuple
+    qty: int
+    custom_display: str | None = None
+
+    @property
+    def display(self) -> str:
+        """e.g. ('Screw', 'SHCS', 'M6', 16) -> 'Screw SHCS M6×16'. If the
+        part class provided a ``bom_display`` override, use that instead."""
+        if self.custom_display is not None:
+            return self.custom_display
+        head, *rest = self.key
+        out = head
+        for item in rest:
+            out += f"×{item:g}" if isinstance(item, (int, float)) else f" {item}"
+        return out
+
+
+# ── Collection ────────────────────────────────────────────────────────────────
+
+
+def collect(step: BaseAssembly) -> list[BomEntry]:
+    """Build the step and aggregate its BOM. Returns a sorted list.
+
+    Clears the registry up front (and the step's memo) so a re-collect
+    rebuilds cleanly. Every ``BasePart.build()`` in the chain pushes one
+    entry; we just aggregate by ``bom_key``."""
+    BOM_REGISTRY.clear()
+    if hasattr(step, "_built"):
+        delattr(step, "_built")
+    step.build()
+
+    sums: dict[tuple, int] = defaultdict(int)
+    categories: dict[tuple, BomCategory] = {}
+    displays: dict[tuple, str | None] = {}
+    for key, qty, category, display in BOM_REGISTRY:
+        sums[key] += qty
+        categories[key] = category
+        displays[key] = display
+
+    entries = [BomEntry(categories[k], k, q, displays[k]) for k, q in sums.items()]
+    entries.sort()
+    return entries
+
+
+# ── Delta against a predecessor step ──────────────────────────────────────────
+
+
+def delta(current: list[BomEntry], previous: list[BomEntry]) -> list[BomEntry]:
+    """Entries added at the current step that weren't at the previous
+    step. Quantity is the cumulative delta (current − previous, omitting
+    zero/negative deltas). Categories follow the current step."""
+    prev_qty = {e.key: e.qty for e in previous}
+    out: list[BomEntry] = []
+    for e in current:
+        diff = e.qty - prev_qty.get(e.key, 0)
+        if diff > 0:
+            out.append(BomEntry(e.category, e.key, diff, e.custom_display))
+    out.sort()
+    return out
+
+
+# ── Markdown writer ───────────────────────────────────────────────────────────
+
+
+def to_markdown(entries: list[BomEntry], *, title: str) -> str:
+    standard = [e for e in entries if e.category == "standard"]
+    custom = [e for e in entries if e.category == "custom"]
+    lines = [f"# {title}", ""]
+    lines += _section("Standard parts", standard)
+    lines += _section("Custom parts", custom)
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _section(heading: str, entries: list[BomEntry]) -> list[str]:
+    if not entries:
+        return []
+    out = [f"## {heading}", "", "| Qty | Part |", "|----:|------|"]
+    for e in entries:
+        out.append(f"| {e.qty} | {e.display} |")
+    out.append("")
+    return out
+
+
+# ── Public entry point ────────────────────────────────────────────────────────
+
+
+def write_bom(
+    step_name: str, *, cumulative: bool = True, want_delta: bool = False
+) -> None:
+    """Build ``step_name`` and write its BOM Markdown to ``BOM_DIR`` —
+    cumulative and/or delta-vs-predecessor.
+
+    Called before rendering to warm the leaf-part cache and retain BOMs if
+    rendering crashes. The first step's delta is its entire BOM (empty predecessor)."""
+    current = collect(load_step(step_name))
+    BOM_DIR.mkdir(parents=True, exist_ok=True)
+    if cumulative:
+        text = to_markdown(current, title=f"{step_name} — cumulative BOM")
+        _write_atomic(BOM_DIR / f"{step_name}.md", text)
+    if want_delta:
+        prev_name = predecessor_module(step_name)
+        previous = collect(load_step(prev_name)) if prev_name else []
+        entries = delta(current, previous)
+        title = f"{step_name} — delta vs. {prev_name.rsplit('.', 1)[-1] if prev_name else 'empty assembly'}"
+        _write_atomic(
+            BOM_DIR / f"{step_name}_delta.md", to_markdown(entries, title=title)
+        )
+
+
+def _write_atomic(path: Path, text: str) -> None:
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text(text, encoding="utf-8")
+    tmp.replace(path)

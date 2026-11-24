@@ -1,0 +1,161 @@
+"""Tests for `walk.record` — the walk's terminal record: the `walk`
+event every listening session gets (dry walks included — the boot's
+hand-on is the session's story), the runs.jsonl row a live walk adds,
+the first-terminal-moment latch, and the fail-open sink."""
+
+from __future__ import annotations
+
+from conductor_fakes import Sink
+
+from physiclaw.conductor.bench import runs
+from physiclaw.conductor.walk.record import Record
+from physiclaw.conductor.walk.walklog import Outcome
+
+
+class _Broken:
+    def write(self, event: dict) -> bool:
+        raise OSError("disk gone")
+
+
+def _run(
+    record: Record,
+    outcome: Outcome = Outcome.HANDOVER,
+    *,
+    idx: int = 2,
+    nodes: int = 5,
+    node: str | None = "search",
+    reason: str = "move did not land",
+) -> None:
+    record.run(
+        outcome,
+        idx=idx,
+        nodes=nodes,
+        node=node,
+        reason=reason,
+        micros=1,
+        rescues=0,
+        values={"keyword": "milk"},
+        total=None,
+    )
+
+
+def test_a_live_walk_writes_the_event_and_the_runs_row() -> None:
+    sink = Sink()
+    _run(Record("demo", "flow", dry=False, events=sink))
+
+    assert sink.events == [
+        {
+            "event": "walk",
+            "app": "demo",
+            "playbook": "flow",
+            "outcome": "handover",
+            "node": "search",
+            "idx": 2,
+            "nodes": 5,
+            "reason": "move did not land",
+            "micros": 1,
+            "rescues": 0,
+            "total": None,
+        }
+    ]
+    assert [r["outcome"] for r in runs.load()] == ["handover"]
+
+
+def test_a_dry_walk_still_tells_the_session_but_writes_no_row() -> None:
+    sink = Sink()
+    _run(
+        Record("channel", "boot", dry=True, events=sink),
+        Outcome.COMPLETED,
+        reason="hands over to demo/flow",
+    )
+
+    assert [e["reason"] for e in sink.events] == ["hands over to demo/flow"]
+    assert runs.load() == []
+
+
+def test_no_sink_means_no_event_and_the_row_still_lands() -> None:
+    _run(Record("demo", "flow", dry=False))
+
+    assert len(runs.load()) == 1
+
+
+def test_the_first_terminal_moment_wins() -> None:
+    sink = Sink()
+    record = Record("demo", "flow", dry=False, events=sink)
+    _run(record, Outcome.SUSPENDED, reason="asked")
+    _run(record, Outcome.HANDOVER, reason="end_session blocked")
+
+    assert record.outcome is Outcome.SUSPENDED
+    assert [e["outcome"] for e in sink.events] == ["suspended"]
+    assert len(runs.load()) == 1
+
+
+def test_a_failing_sink_never_stops_the_record() -> None:
+    record = Record("demo", "flow", dry=False, events=_Broken())
+
+    _run(record)
+
+    assert record.outcome is Outcome.HANDOVER
+    assert len(runs.load()) == 1
+
+
+def test_a_reading_is_an_event_beside_its_tool_result() -> None:
+    from conductor_fakes import Sink
+
+    from physiclaw.conductor.spec.match import Reading, Verdict
+    from physiclaw.conductor.walk.record import Record
+
+    sink = Sink()
+    verdict = Verdict(
+        kind=Reading.MATCH, page_id="taobao.results", dy=0.0, detail="2 anchors"
+    )
+    Record("taobao", "buy", dry=True, events=sink).read("peek", "search", verdict)
+
+    # The prose line for a grep, and the same reading as fields.
+    assert sink.events == [
+        {
+            "event": "walk_read",
+            "app": "taobao",
+            "playbook": "buy",
+            "after": "peek",
+            "node": "search",
+            "verdict": "match taobao.results (2 anchors)",
+            "kind": "match",
+            "page": "taobao.results",
+        }
+    ]
+
+
+def test_record_purchase_after_a_fire_writes_one_line(mocker) -> None:
+    record = Record("demo", "flow", dry=False)
+    day = mocker.patch.object(record, "day")
+    record.fired(45.0)
+
+    record.purchase("demo/buy")
+    record.purchase("demo/buy")
+
+    day.assert_called_once_with(
+        "conductor: demo: payment 45 fired (playbook demo/buy) — "
+        "verify what it paid for before paying again"
+    )
+
+
+def test_record_purchase_with_nothing_fired_writes_nothing(mocker) -> None:
+    record = Record("demo", "flow", dry=False)
+    day = mocker.patch.object(record, "day")
+
+    record.purchase("demo/buy")
+
+    day.assert_not_called()
+
+
+def test_record_purchase_owes_again_after_a_second_fire(mocker) -> None:
+    record = Record("demo", "flow", dry=False)
+    day = mocker.patch.object(record, "day")
+    record.fired(45.0)
+    record.purchase("demo/buy")
+    record.fired(12.5)
+
+    record.purchase("demo/buy")
+
+    assert day.call_count == 2

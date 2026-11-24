@@ -1,0 +1,47 @@
+kind: macro
+schema: 1
+name: open
+description: open the <<CONTACT>> WeChat thread via in-app search unless it already shows (resume reads)
+enabled: false
+steps:
+  # Already on the thread (a reply was just read there): nothing to
+  # reach — the jump skips every navigation step below.
+  - if_page: app.pages.thread
+    goto: done
+  - home_screen
+  - wait: 1
+  - tap: "blank area below the app cards"    # home_screen FROM home can open the app switcher
+    at: [0.42, 0.855, 0.58, 0.885]
+  - tap: "the WeChat dock icon"
+    at: [0.348, 0.893, 0.510, 0.973]
+  - wait: 2
+  # Resumed on the thread (a walk leaves WeChat there): nothing to reach.
+  - if_page: app.pages.thread
+    goto: done
+  - go_back                                  # in another thread -> pops to the chat list; on the list -> harmless edge bounce
+  # Search is position-independent: the chat list reorders itself
+  # (Official Accounts folder, new chats), so never tap a list row blind.
+  - tap: "Search"
+    at: [0.30, 0.098, 0.65, 0.132]
+  # WeChat resumes on the last search when a thread was opened from one
+  # (the boot's open, then this send in the same wake): the field still
+  # holds the previous term and a paste would double it. The clear (x)
+  # sits at the field's right end; on an empty field the tap only keeps
+  # focus.
+  - tap: "clear (x) in the search field"
+    at: [0.878, 0.064, 0.992, 0.124]
+  - send_to_clipboard: "<<CONTACT>>"
+  - long_press: "the search input field"
+    at: [0.15, 0.063, 0.60, 0.100]
+  - tap: "Paste"
+    at: [0.036, 0.114, 0.197, 0.162]
+  - wait: 1
+  # Only the row being tapped matters: section headers (Top Hits /
+  # Contacts / 联系人) shuffle with search history, but the first result
+  # stays in this band - and it must BE the contact.
+  - tap: "<<CONTACT>>"                        # first row under the Contacts header
+    at: [0.031, 0.185, 0.900, 0.235]
+    require: {text: "<<CONTACT>>", within: [0.0, 0.16, 1.0, 0.25]}
+    hint: "WeChat search's first result is not <<CONTACT>> - check the contact name"
+  - wait: 1
+  - mark: done                               # the jump lands here; walked to, it must show

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Entity · QR</title>
+  <script src="/assets/qrcode-1.4.4.min.js"></script>
+  <style>
+    body { font-family: system-ui; text-align: center; padding: 40px; background: #10130f; color: #f3f5e9; }
+    .qr { display: inline-block; padding: 24px; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    canvas { display: block; margin: 10px auto; }
+    p { font-size: 13px; color: #b9c2b0; word-break: break-all; max-width: 320px; margin: 4px auto; }
+    p.ip { color: #9ca3af; }
+    p.note { color: #d0ff00; font-size: 12px; margin: 8px auto 24px; }
+  </style>
+</head>
+<body>
+  <h2>Entity · Scan with your phone <span lang="es">/ Escaneá con el teléfono</span></h2>
+  <p class="note">Open the link in Safari or Chrome.<br><span lang="es">Abrí el enlace en Safari o Chrome.</span></p>
+  <div class="qr">
+    <canvas id="qr1"></canvas>
+    <p>__PHONE_URL__</p>
+    <p class="ip">__PHONE_URL_FALLBACK__</p>
+  </div>
+  <script>
+    if ("__PHONE_URL__" === "__PHONE_URL_FALLBACK__") document.querySelector(".ip").hidden = true;
+    var qr = qrcode(0, 'M');
+    qr.addData('__PHONE_URL__');
+    qr.make();
+    var canvas = document.getElementById('qr1');
+    var ctx = canvas.getContext('2d');
+    var size = 240, cells = qr.getModuleCount(), cell = size / cells;
+    canvas.width = canvas.height = size;
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#000';
+    for (var r = 0; r < cells; r++)
+      for (var c = 0; c < cells; c++)
+        if (qr.isDark(r, c)) ctx.fillRect(c * cell, r * cell, cell, cell);
+  </script>
+</body>
+</html>

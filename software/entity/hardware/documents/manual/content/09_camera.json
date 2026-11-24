@@ -1,0 +1,289 @@
+[
+  {
+    "type": "opener",
+    "page": "camera",
+    "secnum": {
+      "en": "SECTION 09",
+      "zh": "第 09 节"
+    },
+    "h1": {
+      "en": "Camera",
+      "zh": "摄像头"
+    },
+    "lede": {
+      "en": "The camera mounts on the right side of the frame and faces the phone screen.",
+      "zh": "摄像头装在框架右侧，正对手机屏幕。"
+    }
+  },
+  {
+    "type": "tall-left",
+    "page": "camera_10",
+    "head": {
+      "title": {
+        "en": "CAMERA",
+        "zh": "摄像头"
+      },
+      "small": "camera_10"
+    },
+    "variant": "hero",
+    "figures": [
+      {
+        "src": "camera_10_bracket_exploded_cam1.svg"
+      },
+      {
+        "src": "camera_10_bracket_assembled_cam0.svg"
+      }
+    ],
+    "notes": [
+      {
+        "h3": {
+          "en": "1/4-20, not metric",
+          "zh": "1/4-20 英制，不是公制"
+        },
+        "body": {
+          "en": "The SHCS and hex nut for the gooseneck are 1/4-20, the imperial tripod thread (≈ 6.35 mm). Do not use an M6 instead.",
+          "zh": "金属软管用 1/4-20 圆柱头螺栓和六角螺母。1/4-20 是英制三脚架螺纹（约 6.35 mm），不要用 M6 代替。"
+        },
+        "classes": "note overlay sm",
+        "style": "left:120mm; top:30mm; width:70mm;"
+      },
+      {
+        "h3": {
+          "en": "Imperial tools",
+          "zh": "英制工具"
+        },
+        "body": {
+          "en": "The 1/4-20 SHCS takes a 3/16\" hex key. The 1/4-20 hex nut takes a 7/16\" (or metric 11 mm) open-end wrench. Needle-nose pliers also do the job.",
+          "zh": "1/4-20 圆柱头螺栓用 3/16\" 内六角扳手，1/4-20 六角螺母用 7/16\"（或公制 11 mm）开口扳手。也可用尖嘴钳代替。"
+        },
+        "classes": "note overlay sm",
+        "style": "left:130mm; top:120mm; width:70mm;"
+      }
+    ],
+    "bom": {
+      "label": {
+        "en": "Bill of materials",
+        "zh": "物料清单"
+      },
+      "rows": [
+        {
+          "component": {
+            "en": "Corner bracket",
+            "zh": "角码"
+          },
+          "spec": "2×Ø6.5 mm",
+          "qty": "1"
+        },
+        {
+          "component": {
+            "en": "BHCS",
+            "zh": "半圆头螺栓"
+          },
+          "spec": "M5×10",
+          "qty": "1"
+        },
+        {
+          "component": {
+            "en": "T-nut",
+            "zh": "T 型螺母"
+          },
+          "spec": {
+            "en": "Drop-In M5",
+            "zh": "船形螺母 M5"
+          },
+          "qty": "1"
+        },
+        {
+          "component": {
+            "en": "SHCS",
+            "zh": "圆柱头螺栓"
+          },
+          "spec": {
+            "en": "1/4-20×16 (imperial)",
+            "zh": "1/4-20×16（英制）"
+          },
+          "qty": "1"
+        },
+        {
+          "component": {
+            "en": "Hex nut",
+            "zh": "六角螺母"
+          },
+          "spec": {
+            "en": "1/4-20 (imperial)",
+            "zh": "1/4-20（英制）"
+          },
+          "qty": "1"
+        }
+      ]
+    }
+  },
+  {
+    "type": "tall-left",
+    "page": "camera_20",
+    "head": {
+      "title": {
+        "en": "CAMERA",
+        "zh": "摄像头"
+      },
+      "small": "camera_20"
+    },
+    "variant": "hero",
+    "figures": [
+      {
+        "src": "camera_20_gooseneck_exploded_cam0.svg"
+      },
+      {
+        "src": "camera_20_gooseneck_assembled_cam0.svg"
+      }
+    ],
+    "notes": [
+      {
+        "h3": {
+          "en": "Thread on the gooseneck",
+          "zh": "拧上金属软管"
+        },
+        "body": {
+          "en": "Thread the gooseneck's female end onto the stud until it is tight against the hex nut.",
+          "zh": "把金属软管的内螺纹端拧到螺柱上，直到贴紧六角螺母。"
+        },
+        "classes": "note overlay sm",
+        "style": "left:140mm; top:105mm; width:60mm;"
+      }
+    ],
+    "bom": {
+      "label": {
+        "en": "Bill of materials",
+        "zh": "物料清单"
+      },
+      "rows": [
+        {
+          "component": {
+            "en": "Gooseneck",
+            "zh": "金属软管"
+          },
+          "spec": "Ø10×300, 1/4-20 M/F",
+          "qty": "1"
+        }
+      ]
+    }
+  },
+  {
+    "type": "tall-left",
+    "page": "camera_30",
+    "head": {
+      "title": {
+        "en": "CAMERA",
+        "zh": "摄像头"
+      },
+      "small": "camera_30"
+    },
+    "variant": "hero",
+    "figures": [
+      {
+        "src": "camera_30_mount_exploded_cam0.svg"
+      },
+      {
+        "src": "camera_30_mount_assembled_cam0.svg"
+      }
+    ],
+    "notes": [
+      {
+        "h3": {
+          "en": "Thread on the camera",
+          "zh": "拧上摄像头"
+        },
+        "body": {
+          "en": "Thread the camera's 1/4-20 female thread onto the gooseneck's male stud until it stops against the collar.",
+          "zh": "将摄像头的 1/4-20 内螺纹孔对准金属软管的外螺纹螺柱，旋转摄像头，直至其抵住台肩。"
+        },
+        "classes": "note overlay sm",
+        "style": "left:140mm; top:105mm; width:60mm;"
+      }
+    ],
+    "bom": {
+      "label": {
+        "en": "Bill of materials",
+        "zh": "物料清单"
+      },
+      "rows": [
+        {
+          "component": {
+            "en": "Camera",
+            "zh": "摄像头"
+          },
+          "spec": {
+            "en": "4K HD, autofocus",
+            "zh": "4K 高清，自动对焦"
+          },
+          "qty": "1"
+        }
+      ]
+    }
+  },
+  {
+    "type": "main-inset-br",
+    "page": "camera_40",
+    "head": {
+      "title": {
+        "en": "CAMERA",
+        "zh": "摄像头"
+      },
+      "small": "camera_40"
+    },
+    "main": {
+      "src": "camera_40_frame_assembled_cam1_annotated_camera_mount.svg",
+      "style": "transform: translateX(-35mm);"
+    },
+    "notes": [
+      {
+        "h3": {
+          "en": "Use the lower slot",
+          "zh": "用下方的型材槽"
+        },
+        "body": {
+          "en": "Install the corner bracket in the lower slot of the right extrusion's outer face.",
+          "zh": "把角码装进右侧型材外侧面的下方型材槽。"
+        },
+        "classes": "note overlay sm",
+        "style": "right:14mm; top:36mm; width:80mm;"
+      },
+      {
+        "h3": {
+          "en": "Orient the camera",
+          "zh": "调整摄像头朝向"
+        },
+        "body": {
+          "en": "Bend the gooseneck so that the camera points squarely at the phone screen. Align the sensor's long edge with the phone's long edge.",
+          "zh": "弯折金属软管，使摄像头正对手机屏幕。调整摄像头方向，使传感器的长边方向与手机的长边方向一致。"
+        },
+        "classes": "note overlay sm",
+        "style": "right:14mm; top:76mm; width:80mm;"
+      },
+      {
+        "h3": {
+          "en": "Check the camera",
+          "zh": "检查摄像头"
+        },
+        "body": {
+          "en": "Make sure that the camera does not drift or wobble.",
+          "zh": "确认摄像头固定牢靠，不会移位或晃动。"
+        },
+        "classes": "note overlay sm",
+        "style": "right:14mm; top:122mm; width:80mm;"
+      },
+      {
+        "h3": {
+          "en": "Route the USB cable",
+          "zh": "USB 线走线"
+        },
+        "body": {
+          "en": "Tie the camera's USB cable along the gooseneck with cable ties, clear of the belt.",
+          "zh": "用捆扎带把摄像头的 USB 线沿金属软管固定，避免碰到同步带。"
+        },
+        "classes": "note overlay sm",
+        "style": "left:16mm; top:20mm; width:70mm;"
+      }
+    ]
+  }
+]

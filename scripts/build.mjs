@@ -176,6 +176,7 @@ const docsLabels = {
   },
 };
 const guideES = {
+  entity: ["Usar Alfonsito con Entity", "Vincular el iPhone, calibrar, gestionar tareas y probar Pulso."],
   assembly: [
     "Guía ilustrada de ensamblaje",
     "Las piezas y los herrajes de cada uno de los 30 pasos.",
@@ -230,6 +231,7 @@ const guideSections = [
     "guides",
     [
       "assembly",
+      "entity",
       "project-guide",
       "hardware",
       "motor-mounts",
@@ -252,7 +254,7 @@ for (const lang of ["en", "es"]) {
         const [name, detail] =
           lang === "es" ? guideES[slug] : [guide.title, guide.description];
         const langHint = lang === "es" && !guide.lang ? " · EN" : "";
-        return resource(guideUrl(guide), name + langHint, detail);
+        return resource(guideUrl(guide) + "?home=" + lang + (slug === "entity" ? (lang === "es" ? "#espanol" : "#english") : ""), name + (slug === "entity" ? "" : langHint), detail);
       });
       if (id === "resources")
         links.unshift(
@@ -262,7 +264,7 @@ for (const lang of ["en", "es"]) {
             lang === "es" ? "V2 · Piezas y presupuesto" : "V2 · Parts and budget",
             lang === "es" ? "Lista de compras y envío estimado a Costa Rica." : "Shopping list and estimated shipping to Costa Rica.",
           ),
-          resource("/tools/control-module/", d.planner, d.plannerText),
+          resource("/tools/control-module/?home=" + lang, d.planner, d.plannerText),
         );
       return `<section class="section" id="${id}"><h2>${d.sets[index]}</h2><div class="resources">${links.join("")}</div></section>`;
     })

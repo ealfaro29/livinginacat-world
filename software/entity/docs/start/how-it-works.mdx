@@ -1,0 +1,45 @@
+---
+title: How it works
+description: How PhysiClaw's agent handles a request end to end. It wakes, reads the message, executes the task, responds, and exits.
+---
+
+Interacting with PhysiClaw is intuitive. It has its own dedicated phone running its own WhatsApp account. Just add it as a contact, and you can chat with it exactly like you would with a real person.
+
+<svg viewBox="0 0 700 290" role="img" aria-label="A user and PhysiClaw communicate through the phone" style="max-width:560px;width:100%;height:auto;margin:1.5rem auto;display:block" xmlns="http://www.w3.org/2000/svg" font-family="'Inter','Segoe UI',system-ui,sans-serif">
+  <defs>
+    <g id="iphone">
+      <rect x="0" y="0" width="90" height="190" rx="22"/>
+      <rect x="31" y="14" width="28" height="9" rx="4.5"/>
+      <path d="M27 176 L63 176" stroke-width="2.4"/>
+    </g>
+  </defs>
+  <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <use href="#iphone" x="125" y="70"/>
+    <use href="#iphone" x="485" y="70"/>
+    <path d="M240 165 L460 165" stroke-dasharray="7 7"/>
+  </g>
+  <g fill="currentColor" text-anchor="middle">
+    <text x="170" y="52" font-size="18" font-weight="600">User</text>
+    <text x="530" y="52" font-size="18" font-weight="600">PhysiClaw</text>
+  </g>
+</svg>
+
+## Wake
+
+PhysiClaw's runtime continuously runs a loop, checking for two things: whether any scheduled task is due to run, and whether the phone screen has lit up with a new notification. As soon as either condition is met, it wakes the agent.
+
+## Read messages
+
+Once awakened, the agent unlocks the phone with a passcode, opens WhatsApp, reads the user's latest message, and interprets their intent.
+
+## Execute task
+
+Based on the user's intent, the agent picks the right app to carry out the task. If the task requires user confirmation, it waits for the user to confirm before proceeding.
+
+## Respond
+
+Once the task is complete, the agent sends a response message to the user. If there are no new messages, it closes WhatsApp and returns to the home screen.
+
+## Exit
+
+The agent records its memory and, if there are any new scheduled tasks, adds them to the task list. It then ends the session and waits to be woken again.

@@ -1,0 +1,35 @@
+kind: macro
+schema: 1
+name: launch
+description: bring Taobao to its feed from wherever the phone is — every route's start
+# Disabled until rehearsed on YOUR device: physiclaw macros run taobao/launch
+enabled: false
+steps:
+  # ── 1. raise Taobao in whatever state it kept ──────────────────────
+  # Raised first: a cold launch quits whatever is in front, and the
+  # boot leaves the IM app there.
+  - run: foreground                          # Taobao in front, as it kept itself
+  # Taobao restores the last TAB: a walk that ended on 闪购外卖 comes
+  # back on it, and that tab is not the feed. Its header still holds the
+  # 推荐 tab — press it while the tab's own row (我的闪购) shows.
+  - tap: "推荐"
+    at: [0.14, 0.055, 0.26, 0.095]
+    when: ["我的闪购"]
+  # Resumed on the feed: nothing more to do. Anything else it kept (an
+  # ad, a search, an item page, an order sheet) is mid-state: quit and
+  # launch cold.
+  - if_page: app.pages.home
+    goto: feed
+  # ── 2. first cold launch ───────────────────────────────────────────
+  - run: cold-launch                         # quit, relaunch past the ad, onto 推荐, settled
+  # Taobao restores the page it was quit on ONCE: the first cold launch
+  # after a force_quit may come up on that page, and the launch after
+  # that on the feed. So the feed already showing is done; otherwise
+  # quit and launch once more, and the mark checks the pass reached it.
+  - if_page: app.pages.home
+    goto: feed
+  # ── 3. second cold launch ──────────────────────────────────────────
+  - run: cold-launch                         # quit, relaunch past the ad, onto 推荐, settled
+  # ── the feed: every exit lands here ────────────────────────────────
+  # The mark peeks fresh — THIS view is what the home verify reads.
+  - mark: feed

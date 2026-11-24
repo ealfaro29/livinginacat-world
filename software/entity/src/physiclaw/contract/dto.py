@@ -1,0 +1,381 @@
+"""Data-transfer objects — the single shape the engine loop operates on.
+
+Every provider serializes messages, tool_calls, finish reasons, and
+assistant content differently. These DTOs normalize that boundary: the
+engine deals only in DTOs; provider classes own translation to/from
+their native wire format (`AnthropicChatProvider` → `/v1/messages` blocks,
+`OpenAICompatibleProvider` → `/chat/completions` dicts, etc.). Reasoning
+stays out of public assistant content. Opaque state needed
+for protocol continuity (such as signed Anthropic thinking blocks) lives
+in `vendor_extra` and is replayed only by the originating provider.
+
+The DTOs define five message kinds and two content-block kinds without
+committing to any one API's encoding:
+
+  Message kinds:
+    - `SystemMessage`     — the system prompt
+    - `UserMessage`       — user-role content (text, optionally + images)
+    - `AssistantMessage`  — model response (text + tool_calls + usage)
+    - `ToolResultMessage` — paired result of a `ToolCall` by id
+    - `OutputResultMessage` — feedback for a structured generation
+
+  Content blocks (inside Message.content when multipart):
+    - `TextBlock`   — plain text
+    - `ImageBlock`  — base64-encoded image bytes + media_type
+
+`Usage` is a normalized cache-aware token count populated by each
+provider from its native usage block. The engine reads it via
+`AssistantMessage.usage` for the per-turn cache-summary log; the raw
+provider response is preserved on `AssistantMessage.raw` for trace
+replay / debugging.
+"""
+
+from dataclasses import dataclass, field
+from enum import StrEnum
+from typing import Any, Final, Literal, get_args
+
+
+class FinishReason(StrEnum):
+    """Provider-normalized stop cause. Principle 3: preserve the real
+    cause — do not derive it from content. Values equal their string form
+    so equality checks against OpenAI-style strings still work."""
+
+    TOOL_CALLS = "tool_calls"
+    STOP = "stop"
+    LENGTH = "length"  # truncated — arguments may be incomplete
+    CONTENT_FILTER = "content_filter"
+    ERROR = "error"  # our own: parse / transport failures
+
+
+# ---------- content blocks ----------
+
+
+@dataclass(frozen=True)
+class TextBlock:
+    """Plain text content. Used inside `UserMessage.content` and
+    `ToolResultMessage.content` when multipart."""
+
+    text: str
+
+
+@dataclass(frozen=True)
+class ImageBlock:
+    """Image content carried as base64 bytes (no data URL wrapper). The
+    provider re-encodes per its wire format — OpenAI emits `image_url`
+    with a `data:` URL, Anthropic emits `image` with `source.base64`,
+    etc. Engine code (compaction, cache markers) stores `ImageBlock`
+    directly; the encoding lives entirely in the provider."""
+
+    media_type: str  # e.g. "image/jpeg", "image/png"
+    data_b64: str  # base64-encoded image bytes
+
+
+ContentBlock = TextBlock | ImageBlock
+
+
+# ---------- tool call / result primitives ----------
+
+
+@dataclass(frozen=True)
+class ToolCall:
+    """One call the model made. Arguments already parsed from JSON."""
+
+    id: str
+    name: str
+    arguments: dict[str, Any]
+
+
+# ---------- token usage ----------
+
+
+@dataclass(frozen=True)
+class Usage:
+    """Normalized per-call token accounting.
+
+    Each provider parses its native usage block into this shape:
+      - OpenAI Responses: `usage.input_tokens`, `usage.output_tokens`,
+        `usage.input_tokens_details.cached_tokens`,
+        `usage.input_tokens_details.cache_write_tokens`
+      - OpenAI-compatible chat: `usage.prompt_tokens`,
+        `usage.completion_tokens`,
+        `usage.prompt_tokens_details.cached_tokens`,
+        `usage.prompt_tokens_details.cache_write_tokens`
+        (or the compatible spelling `cache_creation_input_tokens`)
+      - Anthropic: `usage.input_tokens`, `usage.output_tokens`,
+        `usage.cache_read_input_tokens`,
+        `usage.cache_creation_input_tokens`
+      - Google: the OpenAI shape through its compatibility endpoint;
+        completion counts are normalized to include paid thinking when the
+        shim reports it only in `total_tokens`.
+
+    All zero = "provider didn't report" (e.g. local models, error
+    responses). The engine treats zeros as "no data" rather than 0%
+    cache hit.
+    """
+
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    cached_tokens: int = 0  # cache hit (read)
+    cache_creation_tokens: int = 0  # cache write (first-time)
+    # Output tokens spent on reasoning (OpenAI-shape
+    # `completion_tokens_details.reasoning_tokens`) — INCLUDED in
+    # completion_tokens, broken out because they are invisible in the reply.
+    reasoning_tokens: int = 0
+
+    @property
+    def new_tokens(self) -> int:
+        """Prompt tokens neither read from nor written to the cache — the
+        full-price part of the input. Floored at 0 against a provider
+        that reports more cached than total."""
+        return max(
+            0, self.prompt_tokens - self.cached_tokens - self.cache_creation_tokens
+        )
+
+    def buckets(self) -> dict[str, int]:
+        """The token buckets a bill is computed from, under the names the
+        `usage` event carries (`USAGE_BUCKETS`): `input` is the whole
+        prompt, `input_new` + `cache_read` + `cache_write` its split,
+        `output` the completion with `reasoning` the part spent thinking."""
+        return {
+            "input": self.prompt_tokens,
+            "input_new": self.new_tokens,
+            "cache_read": self.cached_tokens,
+            "cache_write": self.cache_creation_tokens,
+            "output": self.completion_tokens,
+            "reasoning": self.reasoning_tokens,
+        }
+
+
+# The bucket names, in `Usage.buckets` order — the ONE list every reader
+# (the session summary, the log renderer, `physiclaw logs --usage`)
+# iterates, so a bucket added here reaches them all.
+USAGE_BUCKETS: tuple[str, ...] = tuple(Usage().buckets())
+
+# The kinds of model call a session spends tokens on: the turn loop's own
+# request, the conductor's scoped decision call, the memory curation at
+# close. One `usage` event per call, whatever the kind, so a reader
+# sums one event type to get the session's bill.
+UsageCall = Literal["turn", "micro", "curate"]
+USAGE_CALL_TURN: Final[UsageCall] = "turn"
+USAGE_CALL_MICRO: Final[UsageCall] = "micro"
+USAGE_CALL_CURATE: Final[UsageCall] = "curate"
+
+# How much hidden thinking a call asks the model for — the playbook
+# author's word (`think:` on an `agent` or `select` step), vendor-
+# neutral: "off" asks for none, the three levels scale it. Each vendor
+# translates a level into its own request field (a `thinking` block
+# with a token budget, a `reasoning_effort` word, an `enable_thinking`
+# flag — `BaseChatProvider.thinking_params`), and a model that cannot go
+# that low or high gets its nearest setting. None = the vendor's own
+# default for that model.
+Thinking = Literal["off", "low", "medium", "high"]
+THINKING_LEVELS: tuple[Thinking, ...] = get_args(Thinking)
+
+
+def usage_event(
+    usage: Usage,
+    *,
+    call: UsageCall,
+    model: str,
+    elapsed_ms: int,
+    response_id: str = "",
+    response_model: str = "",
+    error: str | None = None,
+) -> dict:
+    """The one `usage` event shape (events.jsonl): every model call's
+    account, in the fields the OpenTelemetry GenAI conventions name —
+    who asked (`call`), the model requested (`model`, `provider/model`)
+    and the one the reply named (`response_model`), the reply's id for
+    reconciling against the provider's own bill, the round-trip time,
+    and the token buckets (`Usage.buckets`). `error` is the exception
+    class of a failed call (tokens zero), None otherwise. `turn` is
+    stamped by the trace, which owns turns; the provider leaves it None.
+    Rates are the reader's: multiply each bucket by the model's price
+    and add."""
+    return {
+        "event": "usage",
+        "turn": None,
+        "call": call,
+        "model": model,
+        "response_model": response_model,
+        "response_id": response_id,
+        "elapsed_ms": elapsed_ms,
+        **usage.buckets(),
+        "error": error,
+    }
+
+
+# ---------- messages (engine history entries) ----------
+
+
+@dataclass(frozen=True)
+class SystemMessage:
+    """The system prompt. One per session, always at index 0."""
+
+    content: str
+
+
+@dataclass(frozen=True)
+class UserMessage:
+    """User-role content. May be a plain string (most messages) or a list
+    of content blocks (when carrying images, e.g. tool-call corrective
+    messages don't have images, but plan-tail messages might in the
+    future)."""
+
+    content: str | list[ContentBlock]
+
+
+@dataclass
+class AssistantMessage:
+    """A single turn's assistant output, normalized across providers.
+
+    `content` may be empty when the model only called tools. `usage` is
+    the per-call token accounting (cache-aware); each provider populates
+    it from its own response shape. `raw` retains the provider's
+    original response dict for trace replay / debugging.
+
+    `vendor_extra` carries opaque tokens a provider needs to round-trip
+    verbatim across turns to preserve hidden state — e.g. Gemini 3's
+    `thought_signature` (links the model's prior internal reasoning to
+    the next turn). Keyed by `PROVIDER_ID` so multiple vendors can
+    coexist in mixed-history scenarios. Engine code never reads this;
+    only the originating provider does, on serialize.
+
+    Producer identity and execution grants belong to the host's arbitration
+    result, independently of the message or any model's raw response.
+    """
+
+    content: str
+    tool_calls: list[ToolCall]
+    finish_reason: FinishReason
+    usage: Usage = field(default_factory=Usage)
+    # The reply's own identity as the provider named it: its id (what the
+    # provider's bill lists) and the model that actually answered (a dated
+    # snapshot, say). Normalized by each wire-shape parser like `usage`.
+    response_id: str = ""
+    response_model: str = ""
+    raw: dict[str, Any] = field(default_factory=dict)
+    vendor_extra: dict[str, Any] = field(default_factory=dict)
+
+    # Host-only compaction projection. Never serialized by provider adapters.
+    context_calls: list[ToolCall] = field(default_factory=list)
+    decode_error: str | None = None
+    refused: bool = False
+
+    def tool_names(self) -> list[str]:
+        return [tc.name for tc in self.tool_calls]
+
+
+@dataclass(frozen=True)
+class ToolResultMessage:
+    """Result of one `ToolCall`. Principle 6: every tool_call must have
+    exactly one result with the same id in the very next message.
+
+    `is_superseded` marks a result that `compact.drop_stale_screens`
+    rewrote into a text stub (the original screen capture is now stale —
+    a more recent peek/screenshot has landed). Providers use this flag,
+    not content parsing, to find the deepest byte-stable point for the
+    second cache-control marker.
+    """
+
+    tool_call_id: str
+    content: str | list[ContentBlock]
+    is_error: bool = False
+    is_superseded: bool = False
+    context_results: list["ToolResultMessage"] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class OutputResultMessage:
+    """Host feedback for an accepted structured reply, independent of its wire format.
+
+    The provider uses the original reply to serialize a function receipt or
+    ordinary user feedback. Compaction owns the content and retained artifacts.
+    """
+
+    reply: AssistantMessage
+    content: str | list[ContentBlock]
+    is_error: bool = False
+    is_superseded: bool = False
+    context_results: list[ToolResultMessage] = field(default_factory=list)
+
+
+Message = (
+    SystemMessage
+    | UserMessage
+    | AssistantMessage
+    | ToolResultMessage
+    | OutputResultMessage
+)
+
+
+def role_of(m: Message) -> str:
+    """A message's role word — the one vocabulary a text record of a
+    conversation is written and read in."""
+    if isinstance(m, SystemMessage):
+        return "system"
+    if isinstance(m, AssistantMessage):
+        return "assistant"
+    return "user"
+
+
+def message_of(role: str, content: "str | list[ContentBlock]") -> Message:
+    """A message back from its role word (`role_of`'s inverse for the
+    three roles a text record keeps). Only the user role carries blocks
+    (a screen's frame beside its listing); system and assistant content
+    is text."""
+    if role == "system":
+        assert isinstance(content, str), "a system message is text"
+        return SystemMessage(content=content)
+    if role == "assistant":
+        assert isinstance(content, str), "an assistant message is text"
+        return AssistantMessage(
+            content=content, tool_calls=[], finish_reason=FinishReason.STOP
+        )
+    return UserMessage(content=content)
+
+
+@dataclass(frozen=True)
+class MicroRecord:
+    """One conductor decision call, whole — what the wire log keeps and
+    a re-ask reads back: the request in its own shape (role and content
+    per message — text, or the typed blocks of a screen's frame beside
+    its listing; a provider's wire may move the system prompt
+    elsewhere), the raw reply, and the caller's reading of it."""
+
+    call: str
+    node: str
+    thinking: Thinking | None
+    allowed: tuple[str, ...]  # the answers the caller accepted
+    answer: str | None  # what it read; None = an invalid reply
+    confidence: float | None
+    request: list[dict[str, Any]]
+    raw: dict[str, Any]
+    reason: str | None = None  # the reply's own one-line reason, as read
+    # A tool call's arguments as read (a tap's label and at, a scroll's
+    # direction, a run's name, done's return fields); None for a
+    # question's answer.
+    args: dict[str, Any] | None = None
+
+
+# ---------- ToolResult (legacy alias for ToolResultMessage) ----------
+# Pre-DTO-refactor short name. Engine + provider code migrated to the
+# fully-qualified `ToolResultMessage`; only test fixtures still
+# construct `ToolResult(...)`. Drop when those tests are updated.
+ToolResult = ToolResultMessage
+
+
+__all__ = [
+    "FinishReason",
+    "TextBlock",
+    "ImageBlock",
+    "ContentBlock",
+    "ToolCall",
+    "Usage",
+    "SystemMessage",
+    "UserMessage",
+    "AssistantMessage",
+    "ToolResultMessage",
+    "ToolResult",  # alias — see note above
+    "Message",
+]

@@ -1,0 +1,314 @@
+"""Boundary fakes and explicit producer construction for engine tests."""
+
+from __future__ import annotations
+
+import uuid
+from typing import Any
+from unittest.mock import MagicMock
+
+from physiclaw.agent.engine import policy as policy_mod
+from physiclaw.agent.engine.builtin_tool import LocalTool
+from physiclaw.agent.engine.builtin_tool import schemas as _schemas
+from physiclaw.agent.engine.output import ActionCatalog
+from physiclaw.agent.engine.provenance import PluginBinding
+from physiclaw.agent.engine.runspec import EngineRun, Settings
+from physiclaw.agent.engine.scratchpad import MAX_CHARS
+from physiclaw.agent.engine.session import Session
+from physiclaw.agent.llm.context_policy import CollapsePolicy, ContextPolicy
+from physiclaw.agent.llm.producer import LLMProducer
+from physiclaw.contract.dto import (
+    AssistantMessage,
+    FinishReason,
+    OutputResultMessage,
+    ToolCall,
+    ToolResultMessage,
+    Usage,
+)
+from physiclaw.contract.turn import TurnMetadata
+from physiclaw.provider.chat.structured import decode_completion
+from physiclaw.provider.chat.wire import (
+    assistant_to_wire,
+    output_result_to_message,
+    tool_result_to_wire,
+    user_content_to_openai,
+)
+
+
+class FakeProvider:
+    """Scripted provider — pops AssistantMessages from a queue."""
+
+    PROVIDER_ID = "fake"
+    structured_transport = "tool"
+
+    def __init__(self, responses: list[Any]):
+        self._responses = list(responses)
+        self.model = "fake-model"
+        self.calls: list[tuple] = []
+        self.closed = False
+
+    def serialize_history(self, messages, *, metadata=None):
+        wire = []
+        for message in messages:
+            if isinstance(message, OutputResultMessage):
+                message = output_result_to_message(message)
+            if isinstance(message, AssistantMessage):
+                wire.append(assistant_to_wire(message))
+            elif isinstance(message, ToolResultMessage):
+                wire.append(tool_result_to_wire(message))
+            else:
+                wire.append(
+                    {
+                        "role": type(message).__name__.removesuffix("Message").lower(),
+                        "content": user_content_to_openai(message.content),
+                    }
+                )
+        return wire
+
+    def validate_output_spec(self, spec):
+        assert spec.function_name == "submit_turn"
+
+    async def generate_structured(
+        self, messages, spec, *, metadata=None, on_request=None
+    ):
+        if on_request:
+            on_request(
+                {
+                    "messages": self.serialize_history(messages, metadata=metadata),
+                    "tools": [spec.tool()],
+                }
+            )
+        reply = await self.respond(messages, spec, metadata=metadata)
+        return decode_completion(reply, spec)
+
+    async def respond(self, messages, spec, *, metadata=None):
+        self.calls.append(
+            (len(messages), len(spec.schema["properties"]["action"]["oneOf"]))
+        )
+        if not self._responses:
+            raise RuntimeError("FakeProvider exhausted")
+        nxt = self._responses.pop(0)
+        if isinstance(nxt, Exception):
+            raise nxt
+        return nxt
+
+    async def aclose(self):
+        self.closed = True
+
+
+class FakeMcpClient:
+    def __init__(self):
+        self.tool_calls: list[tuple] = []
+
+    async def call_tool(self, name, arguments, *, expires_at=None):
+        self.tool_calls.append((name, arguments))
+        return [{"type": "text", "text": "mcp-ok"}]
+
+
+def _asst(
+    *, content="", tool_calls=None, finish=FinishReason.TOOL_CALLS, usage=None
+) -> AssistantMessage:
+    return AssistantMessage(
+        content=content,
+        tool_calls=tool_calls or [],
+        finish_reason=finish,
+        usage=usage or Usage(),
+    )
+
+
+def _reply(
+    fields=None,
+    action=None,
+    *,
+    content="",
+    finish=FinishReason.TOOL_CALLS,
+    usage=None,
+    call_id=None,
+):
+    """Author a native TurnOutput reply; fields may be malformed for rejection tests."""
+    return _asst(
+        content=content,
+        finish=finish,
+        usage=usage,
+        tool_calls=[
+            _tc(
+                "submit_turn",
+                {
+                    "scratchpad": None,
+                    **({"summary": ""} if fields is None else fields),
+                    "action": action,
+                },
+                tcid=call_id,
+            )
+        ],
+    )
+
+
+def _tc(name: str, args: dict | None = None, *, tcid: str = None) -> ToolCall:
+    return ToolCall(
+        id=tcid or f"tc_{uuid.uuid4().hex[:8]}",
+        name=name,
+        arguments=args or {},
+    )
+
+
+def _settings(**over) -> Settings:
+    base = {
+        "max_turns": 300,
+        "max_session_attempts": 3,
+        "provider_retry_attempts": 3,
+        "retry_backoff_seconds": 0.0,
+        "wait_default_minutes": 15,
+        "max_session_seconds": 0,
+    }
+    base.update(over)
+    return Settings(**base)
+
+
+def _arbitration_run(
+    chat, *, plugins=(), attempts=3, backoff=0.0, session=None, messages=None
+) -> EngineRun:
+    provider = FakeProvider([])
+    provider.respond = chat
+    run = _mk_run(
+        provider,
+        session=session,
+        messages=messages,
+        settings=_settings(
+            provider_retry_attempts=attempts, retry_backoff_seconds=backoff
+        ),
+    )
+    run.plugins = (*plugins, *run.plugins)
+    return run
+
+
+def _turn_metadata(turn=0) -> TurnMetadata:
+    return TurnMetadata("session", turn, None, 300 - turn)
+
+
+def _mk_run(
+    provider=None,
+    *,
+    session=None,
+    messages=None,
+    mcp=None,
+    tool_schemas=None,
+    schema_by_name=None,
+    local_registry=None,
+    tr=None,
+    rlog=None,
+    layout_incomplete=False,
+    policies=None,
+    settings=None,
+    deadline=None,
+    collapse=CollapsePolicy(first_at=100, keep=10, interval=100),
+) -> EngineRun:
+    tool_schemas = tool_schemas if tool_schemas is not None else _schemas(_registry())
+    run = EngineRun(
+        plugins=(),
+        mcp=mcp if mcp is not None else FakeMcpClient(),
+        schema_by_name=(
+            schema_by_name
+            if schema_by_name is not None
+            else {s["name"]: s for s in tool_schemas}
+        ),
+        local_registry=local_registry if local_registry is not None else {},
+        tr=tr if tr is not None else MagicMock(),
+        rlog=rlog if rlog is not None else MagicMock(),
+        settings=settings or _settings(),
+        policies=(
+            policies
+            if policies is not None
+            else policy_mod.default_policies(layout_incomplete=layout_incomplete)
+        ),
+        deadline=deadline,
+    )
+    if provider is not None:
+        source = LLMProducer(
+            provider,
+            run,
+            session if session is not None else Session(),
+            messages if messages is not None else [],
+            layout_incomplete=layout_incomplete,
+            catalog=ActionCatalog.compile(tool_schemas, [], max_scratchpad=MAX_CHARS),
+            context_policy=ContextPolicy(collapse=collapse),
+        )
+        run.plugins = (
+            PluginBinding("physiclaw.llm", source, "LLM", presentation="model"),
+        )
+    return run
+
+
+def _llm(run) -> LLMProducer:
+    return next(
+        binding.plugin
+        for binding in run.plugins
+        if isinstance(binding.plugin, LLMProducer)
+    )
+
+
+def _peek_tool() -> LocalTool:
+    async def handler(_session, _args):
+        return "peek-result"
+
+    return LocalTool(
+        name="peek",
+        description="look",
+        input_schema={"type": "object", "additionalProperties": True},
+        handler=handler,
+    )
+
+
+def _note_tool() -> LocalTool:
+    async def handler(_session, args):
+        return f"noted: {args.get('summary', '')}"
+
+    return LocalTool(
+        name="note",
+        description="note",
+        input_schema={"type": "object", "additionalProperties": True},
+        handler=handler,
+    )
+
+
+def _end_session_tool() -> LocalTool:
+    """Mirrors the real end_session — sets the session sentinel."""
+
+    async def handler(session: Session, args: dict):
+        session.sentinel_status = args["status"]
+        session.sentinel_recap = args.get("recap", "")
+        return f"session closing: {args['status']}"
+
+    return LocalTool(
+        name="end_session",
+        description="close",
+        input_schema={"type": "object", "additionalProperties": True},
+        handler=handler,
+    )
+
+
+def _registry() -> dict[str, LocalTool]:
+    return {t.name: t for t in (_note_tool(), _peek_tool(), _end_session_tool())}
+
+
+def patch_loop_tails(mocker) -> dict:
+    """Stub the tail-injection + compaction deps so `loop.drive` runs in
+    isolation — shared by `test_loop.py`'s fixture and `test_engine.py`'s
+    `_patch_session_deps`. Imports lazily: `compact` pulls cv2/numpy, and
+    this module is imported at collection time by files that never drive
+    the loop. Returns the mocks keyed by target so tests can spy."""
+    from physiclaw.agent import layout
+    from physiclaw.agent.engine import compact, plan, scratchpad
+
+    return {
+        "scratchpad": mocker.patch.object(
+            scratchpad, "inject_tail", side_effect=lambda msgs, _sp: msgs
+        ),
+        "plan": mocker.patch.object(
+            plan, "inject_tail", side_effect=lambda msgs, _p: msgs
+        ),
+        "layout": mocker.patch.object(
+            layout, "inject_tail", side_effect=lambda msgs: msgs
+        ),
+        "drop_stale_screens": mocker.patch.object(compact, "drop_stale_screens"),
+        "collapse_old_turns": mocker.patch.object(compact, "collapse_old_turns"),
+    }

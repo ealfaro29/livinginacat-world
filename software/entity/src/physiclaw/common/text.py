@@ -1,0 +1,171 @@
+"""UTF-8 by default for every text I/O.
+
+``Path.read_text`` / ``write_text`` / ``open`` without an explicit
+``encoding=`` fall back to ``locale.getencoding()`` — GBK on Chinese
+Windows, cp1252 on Western Windows. That's bricked PhysiClaw twice
+already (config.toml in 58aa00d, SKILL.md after). Route every short-
+lived text I/O through these helpers so UTF-8 is the only default.
+
+Long-lived append handles (session logs in agent/trace) keep an explicit
+``open(path, "a", encoding="utf-8")`` inline — wrapping a stateful
+file handle in a helper would be more indirection than it's worth.
+"""
+
+import json
+import math
+import tempfile
+import unicodedata
+from collections.abc import Iterator
+from contextlib import suppress
+from pathlib import Path
+from typing import Any
+
+from physiclaw.port import filesystem
+
+
+def load_json(text: str | bytes, **kwargs: Any) -> Any:
+    """Keep JSON safe for recursive consumers on every supported Python version.
+
+    Python 3.14 can decode nesting that earlier versions rejected. Bound
+    container depth to 256 so rendering and traversing the result remain safe.
+    """
+    value = json.loads(text, **kwargs)
+    if not isinstance(value, (dict, list)):
+        return value
+    pending = [(value, 0)]
+    while pending:
+        item, depth = pending.pop()
+        if depth >= 256:
+            raise ValueError("JSON nesting exceeds 256 containers")
+        children = item.values() if isinstance(item, dict) else item
+        pending.extend(
+            (child, depth + 1) for child in children if isinstance(child, (dict, list))
+        )
+    return value
+
+
+def _finite_json_number(text: str) -> float:
+    number = float(text)
+    if not math.isfinite(number):
+        raise ValueError("non-finite JSON number")
+    return number
+
+
+def json_object(text: str) -> dict[str, Any] | None:
+    """Read a finite JSON object; None for malformed or non-object data."""
+    try:
+        value = load_json(
+            text, parse_float=_finite_json_number, parse_constant=_finite_json_number
+        )
+    except (ValueError, RecursionError):
+        return None
+    return value if isinstance(value, dict) else None
+
+
+def json_span(text: str, opener: str, closer: str) -> Any | None:
+    """Parse the outermost JSON span (`opener`..`closer`) out of an LLM
+    reply — tolerant of ```json fences and surrounding prose. None on
+    anything malformed; payload validation stays with the caller. The one
+    home for the idiom (curate's list replies, the conductor's decision
+    objects)."""
+    start, end = text.find(opener), text.rfind(closer)
+    if start == -1 or end <= start:
+        return None
+    try:
+        return load_json(text[start : end + 1])
+    except (ValueError, TypeError, RecursionError):
+        return None
+
+
+def iter_jsonl(path: Path, needle: str | None = None) -> Iterator[dict[str, Any]]:
+    """The objects of a JSONL file, streamed; a malformed line is skipped, a
+    missing file yields nothing. `needle` skips lines that cannot be
+    wanted before they are parsed (a substring the wanted records
+    carry) — the reader still checks the record."""
+    if not path.exists():
+        return
+    # Decode per line: a torn UTF-8 sequence must not discard the rest
+    # of the stream (TextIOWrapper can fail while decoding a whole chunk).
+    with open(path, "rb") as f:
+        for raw in f:
+            try:
+                line = raw.decode("utf-8")
+                if needle is not None and needle not in line:
+                    continue
+                rec = load_json(line)
+            except (ValueError, RecursionError):
+                continue
+            if isinstance(rec, dict):
+                yield rec
+
+
+def read_text(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
+def write_text(path: Path, data: str) -> None:
+    # Encode before opening: invalid Unicode must not truncate existing state.
+    # Binary output also preserves LF without Windows newline translation.
+    path.write_bytes(data.encode("utf-8"))
+
+
+def write_text_atomic(path: Path, data: str) -> None:
+    """Replace a text file only after its complete UTF-8 contents are written.
+
+    Each writer owns a sibling temporary file; the last rename wins. A failed
+    write or rename preserves the previous file and removes the temporary one.
+    The parent directory must exist. This does not serialize read/modify/write.
+    """
+    # A fixed prefix fits even when the destination name fills the filename limit.
+    with tempfile.NamedTemporaryFile(
+        dir=path.parent, prefix=".physiclaw-", suffix=".tmp", delete=False
+    ) as f:
+        tmp = Path(f.name)
+    try:
+        write_text(tmp, data)
+        filesystem.replace_file(tmp, path)
+    finally:
+        with suppress(OSError):
+            tmp.unlink(missing_ok=True)
+
+
+def append_text(path: Path, data: str) -> None:
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(data)
+
+
+def append_line(path: Path, text: str) -> None:
+    """Append UTF-8 text followed by LF, starting on a new line.
+
+    Preserve existing bytes, including CRLF/CR endings. Inspect only the last
+    byte so appending to a growing daily log does not reread the whole file.
+    Encode before opening so invalid Unicode cannot leave a partial record.
+    """
+    data = (text + "\n").encode("utf-8")
+    separator = b""
+    with path.open("a+b") as f:
+        if f.tell():
+            f.seek(-1, 2)
+            if f.read(1) not in (b"\n", b"\r"):
+                separator = b"\n"
+        f.write(separator + data)
+
+
+def clip(text: str, limit: int) -> str:
+    """Truncate with a trailing ellipsis — the one spelling of the
+    log-line trimmer (several modules used to hand-roll it)."""
+    if len(text) <= limit:
+        return text
+    return text[: limit - 1] + "…"
+
+
+def fold(text: str) -> str:
+    """The one case-and-width folding: NFKC, casefold, whitespace
+    removed, NFKC again — Unicode's NFKC_Casefold shape. The last pass
+    is load-bearing: NFKC turns a spacing mark (¯ ¨) into a space plus
+    a combining mark, and once the space is gone that mark composes
+    with its new neighbour, so a single pass is not idempotent (a
+    property test found "Õ¯"). Every reader that compares text by
+    meaning folds through here."""
+    folded = "".join(unicodedata.normalize("NFKC", text).casefold().split())
+    return unicodedata.normalize("NFKC", folded)

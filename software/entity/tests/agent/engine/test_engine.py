@@ -1,0 +1,915 @@
+"""Tests for `physiclaw.agent.engine.engine` — the session lifecycle:
+`_run_session` (wiring, teardown, crash handling) and `run` (the
+outcome-contract driver: STUCK retries, WAIT follow-up, setup restart,
+budget). The turn driver's tests live in `test_loop.py`; tool-call
+execution in `test_dispatch.py`."""
+
+from __future__ import annotations
+
+import asyncio
+from dataclasses import replace
+from types import SimpleNamespace
+from unittest.mock import MagicMock
+
+import pytest
+from engine_fakes import (
+    FakeMcpClient,
+    FakeProvider,
+    _asst,
+    _registry,
+    _reply,
+    _schemas,
+    _tc,
+    patch_loop_tails,
+)
+
+from physiclaw.agent.engine import (
+    builtin_tool as builtin_tool_mod,
+)
+from physiclaw.agent.engine import (
+    compact as compact_mod,
+)
+from physiclaw.agent.engine import engine as engine_mod
+from physiclaw.agent.engine import (
+    jobs as jobs_mod,
+)
+from physiclaw.agent.engine import (
+    memory as memory_mod,
+)
+from physiclaw.agent.engine import pitfalls
+from physiclaw.agent.engine import (
+    prompt as prompt_mod,
+)
+from physiclaw.agent.engine import (
+    skill as skill_mod,
+)
+from physiclaw.agent.engine.provenance import PluginBinding
+from physiclaw.agent.engine.session import Session
+from physiclaw.agent.runtime.hook import Trigger
+from physiclaw.agent.runtime.sentinel import DONE, IDLE, STUCK, WAIT
+from physiclaw.contract.dto import UserMessage
+from physiclaw.contract.plugin import ProposedTurn
+from tests.timing_helpers import wait_for
+
+# ---------- _run_session ----------
+
+
+@pytest.mark.parametrize(
+    "source, label, headline",
+    [
+        ("cron:buy-coffee", "Buy coffee", "Scheduled task started: Buy coffee"),
+        ("first-run", "", "Learning phone controls"),
+        ("phone", "", "Task started"),
+    ],
+)
+async def test_task_start_names_the_work_without_dumping_the_wake_prompt(
+    completed_run, caplog, source, label, headline
+):
+    import logging
+
+    trigger = Trigger(description="private wake context", source=source, label=label)
+    with caplog.at_level(logging.INFO):
+        await engine_mod.run([trigger], model_ref="fake/model")
+    record = next(
+        r for r in caplog.records if getattr(r, "event", "") == "session.started"
+    )
+    assert record.console and record.console_message == headline
+    wake = next(
+        c.args[0]
+        for c in completed_run.tr.write.call_args_list
+        if c.args[0].get("event") == "wake"
+    )
+    assert wake["triggers"][0]["description"] == "private wake context"
+    if label:
+        assert wake["triggers"][0]["label"] == label
+
+
+async def test_session_logs_carry_context_through_turns_and_restore_it(
+    completed_run, mocker
+):
+    import json
+    import logging
+
+    from physiclaw.common.logger.context import record_fields
+    from physiclaw.common.logger.structured import JsonLogFormatter
+
+    captured = []
+
+    class Capture(logging.Handler):
+        def emit(self, record):
+            if record.name.startswith("physiclaw."):
+                captured.append(json.loads(JsonLogFormatter("runtime").format(record)))
+
+    mocker.patch.object(engine_mod, "new_sid", return_value="correlated-session")
+    handler = Capture()
+    root = logging.getLogger()
+    previous_level = root.level
+    root.addHandler(handler)
+    root.setLevel(logging.DEBUG)
+    completed_run.plugin.aclose.side_effect = lambda: logging.getLogger(
+        "physiclaw.plugin"
+    ).info("closing plugin")
+    try:
+        outcome = await engine_mod.run(
+            [Trigger(description="t")], model_ref="fake/model"
+        )
+    finally:
+        root.removeHandler(handler)
+        root.setLevel(previous_level)
+
+    assert outcome.status == DONE
+    completed = [r for r in captured if r.get("event") == "tool.completed"]
+    assert [r["tool"] for r in completed] == ["note", "end_session"]
+    assert all(
+        r["session_id"] == "correlated-session" and r["turn"] == 0 for r in completed
+    )
+    assert all(r["tool_call_id"] for r in completed)
+    closing = next(r for r in captured if r["message"] == "closing plugin")
+    assert closing["session_id"] == "correlated-session"
+    assert "turn" not in closing and "tool_call_id" not in closing
+    assert "session_id" not in record_fields(logging.makeLogRecord({}))
+
+
+async def test_regression_private_macro_dispatch_survives_hidden_schema(
+    private_macro_run,
+):
+    state = private_macro_run
+
+    outcome = await engine_mod.run([Trigger(description="t")], model_ref="fake/model")
+
+    assert outcome.status == DONE
+    assert ("home_screen", {}) in state.mcp.tool_calls
+    assert "run_macro" not in {
+        name
+        for branch in state.chat.call_args.args[1].schema["properties"]["action"][
+            "oneOf"
+        ]
+        for name in branch["properties"]
+    }
+    assert "run_macro" not in state.chat.call_args.args[0][0].content
+    assert state.provider.closed
+    state.plugin.aclose.assert_awaited_once()
+
+
+async def test_private_macro_hidden_schema_still_validates_arguments(private_macro_run):
+    state = private_macro_run
+    hand = _asst(tool_calls=[_tc("run_macro", {"name": 123})])
+    state.plugin.advance.side_effect = [ProposedTurn(hand), None]
+
+    outcome = await engine_mod.run([Trigger(description="t")], model_ref="fake/model")
+
+    assert outcome.status == DONE
+    assert state.mcp.tool_calls == []
+    results = [getattr(m, "content", "") for m in state.chat.call_args.args[0]]
+    assert (
+        "invalid arguments for run_macro: name: expected string, got int (123)"
+        in str(results)
+    )
+
+
+async def test_private_macro_setup_preserves_remote_tool_dispatch(private_macro_run):
+    state = private_macro_run
+    state.provider._responses.insert(
+        0,
+        _reply({"summary": "remote check"}, {"remote_probe": {"value": 5}}),
+    )
+
+    outcome = await engine_mod.run([Trigger(description="t")], model_ref="fake/model")
+
+    assert outcome.status == DONE
+    assert ("remote_probe", {"value": 5}) in state.mcp.tool_calls
+
+
+def _async_returning(value):
+    async def _coro(*a, **kw):
+        return value
+
+    return _coro
+
+
+def _patch_session_deps(mocker):
+    """Stub everything _run_session pulls beyond the loop."""
+    mocker.patch(
+        "physiclaw.common.config.parse_model_ref", return_value=("fake", "fake-model")
+    )
+    mocker.patch.object(
+        engine_mod, "get_mcp", side_effect=_async_returning(FakeMcpClient())
+    )
+    mocker.patch.object(
+        engine_mod, "list_tools_cached", side_effect=_async_returning([])
+    )
+    mocker.patch.object(skill_mod, "discover_builtin_skills", return_value={})
+    mocker.patch.object(skill_mod, "discover_user_skills", return_value={})
+    mocker.patch.object(
+        builtin_tool_mod,
+        "build_registry",
+        return_value=_registry(),
+    )
+    mocker.patch.object(
+        builtin_tool_mod,
+        "schemas",
+        return_value=_schemas(_registry()),
+    )
+    mocker.patch.object(memory_mod, "load_persistent", return_value="")
+    mocker.patch.object(skill_mod, "render_builtin", return_value="")
+    mocker.patch.object(skill_mod, "render_section", return_value="")
+    mocker.patch.object(prompt_mod, "render_system_prompts", return_value="SYSTEM")
+    mocker.patch.object(prompt_mod, "prefix_hash", return_value="hashX")
+    mocker.patch.object(
+        compact_mod,
+        "new_summary_placeholder",
+        return_value=UserMessage(content="<sum>"),
+    )
+    mocker.patch.object(
+        compact_mod, "new_memory_placeholder", return_value=UserMessage(content="<mem>")
+    )
+    mocker.patch.object(
+        compact_mod, "new_skills_placeholder", return_value=UserMessage(content="<skl>")
+    )
+    patch_loop_tails(mocker)
+    mocker.patch.object(jobs_mod, "format_fired", return_value="")
+
+    fake_tr = MagicMock()
+    fake_rlog = MagicMock()
+    mocker.patch.object(engine_mod, "Trace", return_value=fake_tr)
+    mocker.patch.object(engine_mod, "RawLog", return_value=fake_rlog)
+    return {"tr": fake_tr, "rlog": fake_rlog}
+
+
+@pytest.fixture
+def completed_run(mocker):
+    deps = _patch_session_deps(mocker)
+    provider = FakeProvider([_reply(None, {"end_session": {"status": DONE}})])
+    plugin = SimpleNamespace(
+        session_setup=mocker.AsyncMock(return_value=None),
+        advance=mocker.AsyncMock(return_value=None),
+        aclose=mocker.AsyncMock(),
+    )
+    mocker.patch.object(
+        engine_mod.plugin_loader,
+        "load_plugins",
+        return_value=(PluginBinding("fixture", plugin, name="test"),),
+    )
+    factory = mocker.patch.object(
+        engine_mod, "make_chat_provider", return_value=provider
+    )
+    return SimpleNamespace(**deps, provider=provider, plugin=plugin, factory=factory)
+
+
+@pytest.fixture
+def recorded_run(completed_run, monkeypatch, caplog):
+    """The real session writers with the same isolated provider/MCP boundaries."""
+    import logging
+
+    from physiclaw.agent.trace import RawLog, Trace
+    from physiclaw.common import paths
+
+    monkeypatch.setattr(engine_mod, "Trace", Trace)
+    monkeypatch.setattr(engine_mod, "RawLog", RawLog)
+    monkeypatch.setattr(engine_mod, "new_sid", lambda: "recorded-abc123")
+    caplog.set_level(logging.DEBUG)
+    completed_run.directory = paths.sessions_dir() / "recorded-abc123"
+    return completed_run
+
+
+async def test_provider_setup_failure_is_saved_before_session_capture_closes(
+    recorded_run,
+):
+    from physiclaw.common.provider_errors import ProviderConfigurationError
+
+    recorded_run.factory.side_effect = ProviderConfigurationError(
+        "API credential is missing"
+    )
+
+    with pytest.raises(ProviderConfigurationError, match="API credential is missing"):
+        await engine_mod.run([Trigger(description="t")], model_ref="fake/model")
+
+    text = (recorded_run.directory / "runtime.log").read_text(encoding="utf-8")
+    assert "ProviderConfigurationError: API credential is missing" in text
+    assert "Traceback" in text
+
+
+@pytest.mark.parametrize("phase", ["generate_structured", "serialize_history"])
+async def test_late_provider_configuration_failure_propagates_without_retry(
+    completed_run, mocker, phase
+):
+    from physiclaw.common.provider_errors import ProviderConfigurationError
+
+    failure = mocker.patch.object(
+        completed_run.provider,
+        phase,
+        side_effect=ProviderConfigurationError("fix setup"),
+    )
+
+    with pytest.raises(ProviderConfigurationError, match="fix setup"):
+        await engine_mod.run([Trigger(description="t")], model_ref="fake/model")
+
+    failure.assert_called_once()
+    completed_run.factory.assert_called_once()
+    assert completed_run.provider.closed
+    completed_run.plugin.aclose.assert_awaited_once()
+    completed_run.tr.close.assert_called_once()
+    completed_run.rlog.close.assert_called_once()
+
+
+async def test_disabled_pitfalls_skip_curation(completed_run, mocker):
+    curate = mocker.patch.object(engine_mod.curate, "curate", new=mocker.AsyncMock())
+
+    async def finish(_run, session):
+        session.sentinel_status = DONE
+        session.added_pitfalls = True
+
+    mocker.patch.object(engine_mod.loop, "drive", side_effect=finish)
+    outcome = await engine_mod.run([Trigger(description="t")], model_ref="fake/model")
+
+    assert outcome.status == DONE
+    curate.assert_not_awaited()
+
+
+async def test_shutdown_after_last_action_skips_curation_and_preserves_done(
+    completed_run, mocker
+):
+    from physiclaw.agent.runtime.stopping import stop_event
+
+    event = asyncio.Event()
+    token = stop_event.set(event)
+    mocker.patch.object(engine_mod.CONFIG.pitfalls, "enabled", True)
+    curate = mocker.patch.object(engine_mod.curate, "curate", new=mocker.AsyncMock())
+
+    async def finish(_run, session):
+        session.sentinel_status = DONE
+        session.sentinel_recap = "finished"
+        session.added_pitfalls = True
+        event.set()
+
+    mocker.patch.object(engine_mod.loop, "drive", side_effect=finish)
+    try:
+        with pytest.raises(asyncio.CancelledError):
+            await engine_mod.run([Trigger(description="t")], model_ref="fake/model")
+    finally:
+        stop_event.reset(token)
+
+    curate.assert_not_awaited()
+    assert completed_run.provider.closed
+    completed_run.plugin.aclose.assert_awaited_once()
+    completed_run.tr.write.assert_any_call(
+        {"event": "done", "sentinel": DONE, "recap": "finished"}
+    )
+    completed_run.tr.close.assert_called_once()
+    completed_run.rlog.close.assert_called_once()
+
+
+async def test_wire_close_failure_stays_in_the_session_diagnostics(
+    recorded_run, monkeypatch
+):
+    from physiclaw.agent.trace import RawLog
+
+    close = RawLog.close
+
+    def fail_close(raw):
+        close(raw)
+        raise OSError("wire close failure detail")
+
+    monkeypatch.setattr(RawLog, "close", fail_close)
+    outcome = await engine_mod.run([Trigger(description="t")], model_ref="fake/model")
+
+    assert outcome.status == DONE
+    text = (recorded_run.directory / "runtime.log").read_text(encoding="utf-8")
+    assert "OSError: wire close failure detail" in text and "Traceback" in text
+    assert text.index("wire close failure detail") < text.index("END session=")
+
+
+async def test_regression_failed_plugin_setup_is_skipped_but_closed(completed_run):
+    completed_run.plugin.session_setup.side_effect = RuntimeError("setup failed")
+
+    outcome = await engine_mod.run([Trigger(description="t")], model_ref="fake/model")
+
+    assert outcome.status == DONE
+    completed_run.plugin.advance.assert_not_awaited()
+    completed_run.plugin.aclose.assert_awaited_once()
+
+
+async def test_run_plugin_without_setup_contribution_still_advances(completed_run):
+    plugin = completed_run.plugin
+
+    outcome = await engine_mod.run([Trigger(description="t")], model_ref="fake/model")
+
+    assert outcome.status == DONE
+    plugin.advance.assert_awaited_once()
+    plugin.aclose.assert_awaited_once()
+
+
+async def test_engine_supplies_lazy_decision_factory_without_selecting_a_model(
+    completed_run, mocker, monkeypatch
+):
+    monkeypatch.setattr(engine_mod.CONFIG.decision, "model", "fake/shadow")
+    monkeypatch.setattr(engine_mod.CONFIG.decision, "mode", "shadow")
+    factory = mocker.patch.object(engine_mod, "make_decision_provider")
+
+    outcome = await engine_mod.run([Trigger(description="t")], model_ref="fake/model")
+
+    assert outcome.status == DONE
+    services = completed_run.plugin.session_setup.call_args.args[0]
+    assert services.session_provider is completed_run.provider
+    assert services.decision_provider_factory is factory
+    factory.assert_not_called()
+
+
+async def test_session_closes_pending_shadow_before_trace_and_chat_provider(
+    completed_run, observation_blocks, mocker, monkeypatch, decision_clock
+):
+    import time
+
+    from physiclaw.contract.decision import DecisionCapabilities
+    from physiclaw.contract.observation import OBSERVATION_META
+    from physiclaw.decision.plugin import DecisionPlugin
+
+    monkeypatch.setattr(engine_mod.CONFIG.decision, "model", "fake/shadow")
+    monkeypatch.setattr(engine_mod.CONFIG.decision, "mode", "shadow")
+    completed_run.tr.write.return_value = True
+    started, cancelled = asyncio.Event(), asyncio.Event()
+
+    async def evaluate(_request, *, deadline):
+        assert deadline > decision_clock.get_running_loop().time()
+        started.set()
+        try:
+            await asyncio.Event().wait()
+        finally:
+            cancelled.set()
+
+    async def close_decision():
+        assert cancelled.is_set()
+        assert not completed_run.provider.closed
+        completed_run.tr.close.assert_not_called()
+
+    decision_provider = SimpleNamespace(
+        api_kind="decision",
+        capabilities=DecisionCapabilities(images=True),
+        evaluate=mocker.AsyncMock(side_effect=evaluate),
+        aclose=mocker.AsyncMock(side_effect=close_decision),
+    )
+    mocker.patch.object(
+        engine_mod, "make_decision_provider", return_value=decision_provider
+    )
+    plugin = DecisionPlugin()
+    close = mocker.spy(plugin, "aclose")
+    mocker.patch.object(
+        engine_mod.plugin_loader,
+        "load_plugins",
+        return_value=(PluginBinding("physiclaw.decision", plugin, name="Decision"),),
+    )
+    mocker.patch.object(
+        engine_mod,
+        "list_tools_cached",
+        new=mocker.AsyncMock(
+            return_value=[{"name": "tap", "input_schema": {"type": "object"}}]
+        ),
+    )
+    original_chat = completed_run.provider.respond
+
+    async def chat(messages, tools, *, metadata):
+        await wait_for(started.wait())
+        return await original_chat(messages, tools, metadata=metadata)
+
+    completed_run.provider.respond = chat
+    session = Session()
+    session.plan.update(
+        user_said="打开淘宝",
+        steps=[{"content": "打开淘宝", "status": "in_progress"}],
+    )
+    blocks = observation_blocks()
+    blocks[0]["_meta"][OBSERVATION_META]["observed_after"] = time.time()
+    session.facts.observe(blocks, tool="peek")
+
+    await engine_mod._run_session(
+        [Trigger(description="t")], model_ref="fake/model", session=session
+    )
+
+    assert session.sentinel_status == DONE
+    assert cancelled.is_set()
+    decision_provider.evaluate.assert_awaited_once()
+    decision_provider.aclose.assert_awaited_once()
+    close.assert_awaited_once()
+    assert completed_run.provider.closed
+    completed_run.tr.close.assert_called_once()
+
+
+async def test_plugin_cleanup_keeps_the_borrowed_provider_open(completed_run):
+    provider_open_during_cleanup = []
+
+    async def close_plugin():
+        provider_open_during_cleanup.append(not completed_run.provider.closed)
+
+    completed_run.plugin.aclose.side_effect = close_plugin
+
+    outcome = await engine_mod.run([Trigger(description="t")], model_ref="fake/model")
+
+    assert outcome.status == DONE
+    assert provider_open_during_cleanup == [True]
+    assert completed_run.provider.closed
+
+
+@pytest.mark.parametrize("resource", ["provider", "plugin"])
+async def test_regression_cancelled_close_finishes_remaining_cleanup(
+    completed_run, mocker, resource
+):
+    async def cancel_close():
+        asyncio.current_task().cancel("stop")
+        await asyncio.sleep(0)
+
+    close = mocker.patch.object(
+        getattr(completed_run, resource),
+        "aclose",
+        side_effect=cancel_close,
+    )
+
+    with pytest.raises(asyncio.CancelledError, match="stop"):
+        await asyncio.create_task(
+            engine_mod.run([Trigger(description="t")], model_ref="fake/model")
+        )
+
+    close.assert_awaited_once()
+    completed_run.plugin.aclose.assert_awaited_once()
+    completed_run.tr.close.assert_called_once()
+    completed_run.rlog.close.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    ("resource", "method"),
+    [("provider", "aclose"), ("plugin", "aclose"), ("tr", "close"), ("rlog", "close")],
+)
+async def test_regression_close_error_preserves_done_and_closes_other_resources(
+    completed_run, mocker, resource, method
+):
+    target = getattr(completed_run, resource)
+    mocker.patch.object(target, method, side_effect=OSError("close failed"))
+
+    outcome = await engine_mod.run([Trigger(description="t")], model_ref="fake/model")
+
+    assert outcome.status == DONE
+    completed_run.factory.assert_called_once()
+    completed_run.plugin.aclose.assert_awaited_once()
+    completed_run.tr.close.assert_called_once()
+    completed_run.rlog.close.assert_called_once()
+
+
+@pytest.mark.parametrize(("sink", "trace_closes"), [("Trace", 0), ("RawLog", 1)])
+async def test_run_log_construction_failure_closes_only_opened_resources(
+    completed_run, mocker, sink, trace_closes
+):
+    mocker.patch.object(engine_mod, sink, side_effect=OSError("cannot open log"))
+    mocker.patch.object(engine_mod.CONFIG.engine, "max_attempts", 1)
+
+    outcome = await engine_mod.run([Trigger(description="t")], model_ref="fake/model")
+
+    assert outcome.status == STUCK
+    assert "cannot open log" in outcome.recap
+    assert completed_run.tr.close.call_count == trace_closes
+    completed_run.rlog.close.assert_not_called()
+    completed_run.factory.assert_not_called()
+
+
+async def test_regression_curate_read_error_does_not_retry_completed_task(
+    completed_run, mocker
+):
+    registry = _registry()
+    path = pitfalls.paths.pitfalls_dir() / "pitfalls.md"
+
+    async def note(session, args):
+        session.added_pitfalls = True
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"\xff")
+        return "noted"
+
+    registry["note"] = replace(registry["note"], handler=note)
+    mocker.patch.object(builtin_tool_mod, "build_registry", return_value=registry)
+    mocker.patch.object(engine_mod.CONFIG.pitfalls, "enabled", True)
+
+    outcome = await engine_mod.run([Trigger(description="t")], model_ref="fake/model")
+
+    assert outcome.status == DONE
+    completed_run.factory.assert_called_once()
+    assert len(completed_run.provider.calls) == 1
+    assert path.read_bytes() == b"\xff"
+
+
+@pytest.mark.asyncio
+async def test_run_session_closes_provider_in_finally(mocker) -> None:
+    deps = _patch_session_deps(mocker)
+    asst = _reply({"summary": "x"}, {"end_session": {"status": DONE, "recap": "fin"}})
+    fake_provider = FakeProvider([asst])
+    mocker.patch.object(engine_mod, "make_chat_provider", return_value=fake_provider)
+
+    session = Session()
+    await engine_mod._run_session(
+        [Trigger(description="t")],
+        model_ref="fake/fake-model",
+        session=session,
+    )
+
+    assert session.sentinel_status == DONE
+    assert fake_provider.closed is True
+    deps["tr"].close.assert_called_once()
+    deps["rlog"].close.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_run_session_crash_marks_stuck(mocker) -> None:
+    _patch_session_deps(mocker)
+    mocker.patch.object(
+        engine_mod,
+        "make_chat_provider",
+        side_effect=RuntimeError("bad provider"),
+    )
+
+    session = Session()
+    await engine_mod._run_session(
+        [Trigger(description="t")],
+        model_ref="fake/fake-model",
+        session=session,
+    )
+
+    assert session.sentinel_status == STUCK
+    assert "session crashed" in session.sentinel_recap
+
+
+@pytest.mark.asyncio
+async def test_run_session_cancellation_propagates(mocker) -> None:
+    import logging
+
+    from physiclaw.common.logger.context import record_fields
+
+    _patch_session_deps(mocker)
+    mocker.patch.object(
+        engine_mod,
+        "make_chat_provider",
+        side_effect=asyncio.CancelledError,
+    )
+
+    with pytest.raises(asyncio.CancelledError):
+        await engine_mod._run_session(
+            [Trigger(description="t")],
+            model_ref="fake/fake-model",
+            session=Session(),
+        )
+    assert "session_id" not in record_fields(logging.makeLogRecord({}))
+
+
+# ---------- run (outcome-contract wiring: retries, WAIT, budget) ----------
+
+
+@pytest.mark.asyncio
+async def test_run_wait_without_create_job_auto_schedules(mocker) -> None:
+    # The follow-up now lives in the outcome contract; run() must feed it
+    # the session's created-job flag so a jobless WAIT gets the singleton.
+    upsert = mocker.patch("physiclaw.agent.engine.jobs.upsert_auto_wait_check")
+
+    async def fake_session(triggers, *, model_ref, session: Session, settings=None):
+        session.sentinel_status = WAIT
+        session.sentinel_recap = "waiting"
+
+    mocker.patch.object(engine_mod, "_run_session", side_effect=fake_session)
+
+    await engine_mod.run([Trigger(description="t")], model_ref="x/y")
+
+    upsert.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_run_wait_with_create_job_skips_auto_schedule(mocker) -> None:
+    upsert = mocker.patch("physiclaw.agent.engine.jobs.upsert_auto_wait_check")
+
+    async def fake_session(triggers, *, model_ref, session: Session, settings=None):
+        session.sentinel_status = WAIT
+        session.sentinel_recap = "scheduled"
+        session.sentinel_turn_created_job = True
+
+    mocker.patch.object(engine_mod, "_run_session", side_effect=fake_session)
+
+    await engine_mod.run([Trigger(description="t")], model_ref="x/y")
+
+    upsert.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_run_retries_on_stuck(mocker) -> None:
+    mocker.patch.object(engine_mod.CONFIG.engine, "max_attempts", 3)
+    statuses = iter([STUCK, STUCK, DONE])
+
+    async def fake_session(triggers, *, model_ref, session: Session, settings=None):
+        session.sentinel_status = next(statuses)
+        session.sentinel_recap = "x"
+
+    spy = mocker.patch.object(
+        engine_mod,
+        "_run_session",
+        side_effect=fake_session,
+    )
+
+    await engine_mod.run([Trigger(description="t")], model_ref="x/y")
+
+    assert spy.call_count == 3
+
+
+@pytest.mark.asyncio
+async def test_run_stops_after_done(mocker) -> None:
+    mocker.patch.object(engine_mod.CONFIG.engine, "max_attempts", 5)
+
+    async def fake_session(triggers, *, model_ref, session: Session, settings=None):
+        session.sentinel_status = DONE
+
+    spy = mocker.patch.object(
+        engine_mod,
+        "_run_session",
+        side_effect=fake_session,
+    )
+
+    await engine_mod.run([Trigger(description="t")], model_ref="x/y")
+
+    assert spy.call_count == 1
+
+
+@pytest.mark.asyncio
+async def test_run_gives_up_after_max_stucks(mocker) -> None:
+    mocker.patch.object(engine_mod.CONFIG.engine, "max_attempts", 2)
+
+    async def fake_session(triggers, *, model_ref, session: Session, settings=None):
+        session.sentinel_status = STUCK
+        session.sentinel_recap = "always stuck"
+
+    spy = mocker.patch.object(
+        engine_mod,
+        "_run_session",
+        side_effect=fake_session,
+    )
+
+    await engine_mod.run([Trigger(description="t")], model_ref="x/y")
+
+    assert spy.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_run_restarts_once_after_setup_completes(mocker) -> None:
+    # Session 1 finishes first-run setup → restart; session 2 does the task.
+    outcomes = iter([("setup", True), (DONE, False)])
+
+    async def fake_session(triggers, *, model_ref, session: Session, settings=None):
+        status, restart = next(outcomes)
+        session.sentinel_status = None if restart else status
+        session.restart_for_setup = restart
+
+    spy = mocker.patch.object(engine_mod, "_run_session", side_effect=fake_session)
+
+    await engine_mod.run([Trigger(description="t")], model_ref="x/y")
+
+    assert spy.call_count == 2  # setup session + task session
+
+
+@pytest.mark.asyncio
+async def test_run_no_restart_when_only_first_run_trigger(mocker) -> None:
+    # A synthetic first-run wake has no request to resume: after setup
+    # completes the layout is saved and loads on the next wake, so the loop
+    # must NOT restart (which would replay the stale "learn the layout"
+    # trigger and re-enter first-run setup).
+    async def fake_session(triggers, *, model_ref, session: Session, settings=None):
+        session.sentinel_status = IDLE
+        session.restart_for_setup = True
+
+    spy = mocker.patch.object(engine_mod, "_run_session", side_effect=fake_session)
+
+    await engine_mod.run(
+        [Trigger(description="learn the layout", source="first-run")],
+        model_ref="x/y",
+    )
+
+    assert spy.call_count == 1  # no restart — nothing real to resume
+
+
+@pytest.mark.asyncio
+async def test_run_restarts_when_real_trigger_accompanies_first_run(mocker) -> None:
+    # first-run + a real request in the same wake → restart so the real
+    # request is handled with the layout loaded.
+    outcomes = iter([(None, True), (DONE, False)])
+
+    async def fake_session(triggers, *, model_ref, session: Session, settings=None):
+        status, restart = next(outcomes)
+        session.sentinel_status = status
+        session.restart_for_setup = restart
+
+    spy = mocker.patch.object(engine_mod, "_run_session", side_effect=fake_session)
+
+    await engine_mod.run(
+        [
+            Trigger(description="phone IM arrived", source="phone"),
+            Trigger(description="learn the layout", source="first-run"),
+        ],
+        model_ref="x/y",
+    )
+
+    assert spy.call_count == 2  # restarted to handle the phone request
+
+
+@pytest.mark.asyncio
+async def test_run_setup_restart_does_not_consume_stuck_attempt(mocker) -> None:
+    # Even with max_attempts=1, the setup restart still allows the task session.
+    mocker.patch.object(engine_mod.CONFIG.engine, "max_attempts", 1)
+    outcomes = iter([("setup", True), (DONE, False)])
+
+    async def fake_session(triggers, *, model_ref, session: Session, settings=None):
+        status, restart = next(outcomes)
+        session.sentinel_status = None if restart else status
+        session.restart_for_setup = restart
+
+    spy = mocker.patch.object(engine_mod, "_run_session", side_effect=fake_session)
+
+    await engine_mod.run([Trigger(description="t")], model_ref="x/y")
+
+    assert spy.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_run_setup_restart_fires_at_most_once(mocker) -> None:
+    # A pathological session that keeps flagging restart must not loop forever.
+    mocker.patch.object(engine_mod.CONFIG.engine, "max_attempts", 3)
+
+    async def fake_session(triggers, *, model_ref, session: Session, settings=None):
+        session.sentinel_status = DONE
+        session.restart_for_setup = True  # always flags
+
+    spy = mocker.patch.object(engine_mod, "_run_session", side_effect=fake_session)
+
+    await engine_mod.run([Trigger(description="t")], model_ref="x/y")
+
+    # 1 setup restart (uncounted) + then the guard blocks further restarts and
+    # the DONE session ends the loop → 2 total.
+    assert spy.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_run_budget_exhausted_stuck_not_retried(mocker) -> None:
+    # Budget exhaustion is STUCK but retryable=False — a slow environment
+    # would burn every retry the same way, so one attempt only.
+    mocker.patch.object(engine_mod.CONFIG.engine, "max_attempts", 3)
+
+    async def fake_session(triggers, *, model_ref, session: Session, settings=None):
+        session.sentinel_status = STUCK
+        session.sentinel_recap = "wall-clock budget (10s) exhausted"
+        session.budget_exhausted = True
+
+    spy = mocker.patch.object(engine_mod, "_run_session", side_effect=fake_session)
+
+    await engine_mod.run([Trigger(description="t")], model_ref="x/y")
+
+    assert spy.call_count == 1
+
+
+@pytest.mark.parametrize("status", [400, 401, 403])
+async def test_permanent_provider_failure_does_not_restart_session(
+    completed_run, mocker, status
+):
+    from physiclaw.common.provider_errors import ProviderPermanentError
+
+    mocker.patch.object(engine_mod.CONFIG.engine, "max_attempts", 3)
+    generate = mocker.patch.object(
+        completed_run.provider,
+        "generate_structured",
+        side_effect=ProviderPermanentError(f"HTTP {status}", status_code=status),
+    )
+
+    outcome = await engine_mod.run([Trigger(description="t")], model_ref="fake/model")
+
+    assert outcome.status == "FAIL"
+    assert f"HTTP {status}" in outcome.recap
+    generate.assert_awaited_once()
+    completed_run.factory.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_done_is_recorded_before_the_curation_pass(mocker) -> None:
+    # A Ctrl-C during the optional post-session curation call must not
+    # cost the summary its outcome: the `done` event is written first.
+    deps = _patch_session_deps(mocker)
+    asst = _reply({"summary": "x"}, {"end_session": {"status": DONE, "recap": "fin"}})
+    mocker.patch.object(
+        engine_mod, "make_chat_provider", return_value=FakeProvider([asst])
+    )
+    mocker.patch.object(engine_mod.CONFIG.pitfalls, "enabled", True)
+    curate = mocker.patch.object(
+        engine_mod.curate, "curate", side_effect=asyncio.CancelledError()
+    )
+    session = Session()
+    session.added_pitfalls = True
+
+    with pytest.raises(asyncio.CancelledError):
+        await engine_mod._run_session(
+            [Trigger(description="t")], model_ref="fake/fake-model", session=session
+        )
+
+    curate.assert_awaited_once()
+    assert curate.await_args.kwargs["rlog"] is deps["rlog"]
+    done = [
+        c.args[0]
+        for c in deps["tr"].write.call_args_list
+        if c.args[0].get("event") == "done"
+    ]
+    assert done == [{"event": "done", "sentinel": DONE, "recap": "fin"}]

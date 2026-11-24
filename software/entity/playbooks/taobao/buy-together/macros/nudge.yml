@@ -1,0 +1,16 @@
+kind: macro
+schema: 1
+name: nudge
+description: shift the marketplace cart's list a finger's width up — the first line's checkbox under the floating button moves clear of it
+# Disabled until rehearsed on YOUR device: physiclaw macros run taobao/buy-together.nudge
+enabled: false
+steps:
+  # This phone's AssistiveTouch button floats over the left edge at y
+  # 0.31–0.37, exactly where the cart's first line keeps its checkbox;
+  # a full scroll snaps the list back to the top, a short slow stroke
+  # does not.
+  - swipe: up
+    at: [0.30, 0.50, 0.70, 0.60]
+    size: s
+    speed: slow
+  - wait: 1

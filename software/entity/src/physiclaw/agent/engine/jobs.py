@@ -1,0 +1,298 @@
+"""Engine-side job integration.
+
+This module:
+  - extracts cron-fired job ids from Triggers,
+  - formats firings into the SYSTEM prompt,
+  - creates new jobs when the model's response includes `create_job`.
+
+Outcome marking is the agent's responsibility via `finish_job` — there
+is no engine-side fallback. The cron hook expires forgotten `fired`
+jobs after the configured timeout: one-time jobs fail; periodic jobs re-arm.
+
+Data model + jobs.md I/O lives in `physiclaw.agent.engine.job_store`. The hook
+that actually ticks and fires is `physiclaw.agent.hooks.cron`.
+"""
+
+import datetime as dt
+import logging
+
+from physiclaw.agent.engine.job_store import (
+    ID_RE,
+    JOBS_PATH,
+    KIND_ONE_TIME,
+    KIND_PERIODIC,
+    NEVER,
+    STATUS_CANCEL,
+    STATUS_DONE,
+    STATUS_FAIL,
+    STATUS_PEND,
+    TERMINAL_STATUSES,
+    Job,
+    format_minute,
+    load_jobs,
+    min_fire_gap,
+    next_fire,
+    one_line,
+    parses_as_field,
+    update_fields,
+    validate_schedule,
+)
+from physiclaw.agent.runtime.hook import Trigger
+from physiclaw.common.text import clip
+
+log = logging.getLogger(__name__)
+
+_CRON_PREFIX = "cron:"
+
+# Every periodic fire wakes the full agent (camera + LLM turns), and
+# done/fail re-arms the job — a `*/5` "reply watcher" therefore loops
+# forever at enormous cost once its purpose is gone. Below this floor,
+# force a one-time follow-up instead.
+PERIODIC_MIN_GAP = dt.timedelta(minutes=30)
+
+AUTO_WAIT_JOB_ID = "wait-check-auto"
+_AUTO_WAIT_DESCRIPTION = "Auto follow-up after WAIT with no explicit create_job."
+_AUTO_WAIT_CONTEXT = "Previous session ended with WAIT. Re-check the user channel and the app, and continue the task."
+
+
+def fired_job_ids(triggers: list[Trigger]) -> list[str]:
+    """Extract cron job ids from Trigger.source values like 'cron:a,b'."""
+    ids: list[str] = []
+    for t in triggers:
+        if not t.source or not t.source.startswith(_CRON_PREFIX):
+            continue
+        ids.extend(x for x in t.source[len(_CRON_PREFIX) :].split(",") if x)
+    return ids
+
+
+def format_fired(triggers: list[Trigger]) -> str:
+    """Build a SYSTEM-prompt section describing the cron jobs firing now."""
+    ids = fired_job_ids(triggers)
+    if not ids:
+        return ""
+    try:
+        jobs = {j.id: j for j in load_jobs()}
+    except Exception:
+        log.exception("jobs: failed to load jobs.md")
+        return ""
+
+    blocks: list[str] = []
+    for jid in ids:
+        j = jobs.get(jid)
+        if j is None:
+            continue
+        blocks.append(f"### {j.id}\n{j.description}\n\nContext: {j.context}")
+    if not blocks:
+        return ""
+    return "## Scheduled jobs firing now\n\n" + "\n\n".join(blocks)
+
+
+def create_job(
+    *,
+    id: str,
+    description: str,
+    schedule: str,
+    context: str,
+    kind: str = KIND_ONE_TIME,
+) -> None:
+    """Append a new job section to jobs.md. Pure append — never edits or
+    overwrites an existing entry.
+
+    Id format: `<user>-<topic>-<YYYY-MM-DD>` — see JOBS.md § Id format.
+
+    Raises ValueError on duplicate id (even if the existing entry is
+    terminal — the agent must pick a fresh id), invalid kind, invalid
+    schedule, a periodic schedule firing more often than
+    PERIODIC_MIN_GAP, missing description, a description the parser
+    would misread (a `- Field:` lookalike or a `#` heading), or context
+    shorter than 10 chars. Multi-line description/context/schedule are
+    folded to one line (see `job_store.one_line`) rather than rejected.
+    """
+    if not ID_RE.fullmatch(id):
+        raise ValueError(f"invalid job id {id!r} (lowercase + digits + hyphens)")
+    if kind not in (KIND_ONE_TIME, KIND_PERIODIC):
+        raise ValueError(f"kind must be one-time or periodic, got {kind!r}")
+    schedule = one_line(schedule)  # croniter tolerates trailing newlines
+    validate_schedule(schedule)
+    if kind == KIND_PERIODIC:
+        gap = min_fire_gap(schedule, dt.datetime.now())
+        if gap is not None and gap < PERIODIC_MIN_GAP:
+            raise ValueError(
+                f"periodic schedule {schedule!r} fires every "
+                f"{int(gap.total_seconds() // 60)} min — the minimum for "
+                f"periodic jobs is {int(PERIODIC_MIN_GAP.total_seconds() // 60)} "
+                "min (each fire wakes the whole agent). For a reply check or "
+                "follow-up, create a ONE-TIME job at a specific minute instead, "
+                "and create another one then if it's still unresolved."
+            )
+    context = one_line(context)
+    if len(context) < 10:
+        raise ValueError("context must be at least 10 characters")
+    description = one_line(description)
+    if not description:
+        raise ValueError("description is required")
+    # The description occupies its own raw line in jobs.md; two shapes
+    # would be misread rather than rejected by the parser — a known-field
+    # lookalike silently BECOMES that field, and a `#` heading splits the
+    # section so the job silently vanishes. Refuse both with a message
+    # the model can act on.
+    if description.startswith("#"):
+        raise ValueError(
+            "description must not start with '#' — it would be parsed "
+            "as a jobs.md heading. Rephrase it as plain text."
+        )
+    if parses_as_field(description):
+        raise ValueError(
+            "description must not look like a '- Field: value' line — "
+            "it would be parsed as that field. Rephrase it as plain text."
+        )
+
+    if any(j.id == id for j in load_jobs()):
+        raise ValueError(f"job id already exists: {id!r}")
+
+    now = dt.datetime.now()
+    nxt = next_fire(schedule, now)
+    stamp_now = format_minute(now)
+    stamp_next = format_minute(nxt) if nxt else NEVER
+
+    block = (
+        f"\n## {id}\n"
+        f"{description}\n\n"
+        f"- Type: {kind}\n"
+        f"- Status: {STATUS_PEND}\n"
+        f"- Schedule: `{schedule}`\n"
+        f"- Context: {context}\n"
+        f"- Create time: {stamp_now}\n"
+        f"- Next fire time: {stamp_next}\n"
+        f"- Last fire time: {NEVER}\n"
+        f"- Execution time: {NEVER}\n"
+        f"- Execution result: {NEVER}\n"
+    )
+    JOBS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    existed = JOBS_PATH.exists()
+    with open(JOBS_PATH, "a", encoding="utf-8") as f:
+        if not existed:
+            f.write("# Jobs\n")
+        f.write(block)
+    log.info(
+        "jobs: created %s (schedule=%r, next=%s)",
+        id,
+        schedule,
+        stamp_next,
+        extra={
+            "event": "task.scheduled",
+            "console": id != AUTO_WAIT_JOB_ID,
+            "console_message": f"Scheduled: {clip(description, 120)} · next {stamp_next}",
+        },
+    )
+
+
+def upsert_auto_wait_check(at: dt.datetime) -> None:
+    """Singleton auto-follow-up after WAIT. Reuses one canonical id so
+    jobs.md doesn't grow one entry per close; resets prior fire/exec
+    history on reschedule so the row reads as a fresh pending job."""
+    schedule = f"{at.minute} {at.hour} {at.day} {at.month} *"
+    if AUTO_WAIT_JOB_ID in {j.id for j in load_jobs()}:
+        update_fields(
+            JOBS_PATH,
+            {
+                AUTO_WAIT_JOB_ID: {
+                    "Schedule": f"`{schedule}`",
+                    "Status": STATUS_PEND,
+                    "Next fire time": format_minute(at),
+                    "Last fire time": NEVER,
+                    "Execution time": NEVER,
+                    "Execution result": NEVER,
+                }
+            },
+        )
+        log.info(
+            "jobs: rescheduled %s (schedule=%r, next=%s)",
+            AUTO_WAIT_JOB_ID,
+            schedule,
+            format_minute(at),
+        )
+    else:
+        create_job(
+            id=AUTO_WAIT_JOB_ID,
+            description=_AUTO_WAIT_DESCRIPTION,
+            schedule=schedule,
+            context=_AUTO_WAIT_CONTEXT,
+        )
+
+
+def get_job(id: str) -> Job:
+    """Return the full Job for `id`. Raises ValueError on unknown id."""
+    existing = {j.id: j for j in load_jobs()}
+    if id not in existing:
+        raise ValueError(f"no job with id {id!r}")
+    return existing[id]
+
+
+def finish_job(*, id: str, status: str, recap: str) -> str:
+    """Mark a job as terminated. `status` is one of done / fail / cancel.
+
+    Sets Status (or pend reset for periodic done/fail), Execution time
+    (now), and Execution result (recap). Raises ValueError on unknown
+    id, invalid status, or already-terminal status (re-finishing a
+    closed job is a bug, not idempotent).
+
+    For periodic jobs, done/fail reset to pend so the next firing still
+    happens; cancel is permanent (to revive, create_job with a new id).
+    Returns the tool-reply line; when a periodic job re-arms, the reply
+    says so explicitly — agents read "done" as "over" and the job
+    fires again minutes later.
+    """
+    if status not in TERMINAL_STATUSES:
+        raise ValueError(
+            f"status must be one of {sorted(TERMINAL_STATUSES)}, got {status!r}"
+        )
+    existing = {j.id: j for j in load_jobs()}
+    if id not in existing:
+        raise ValueError(f"no job with id {id!r}")
+    j = existing[id]
+    if j.status in TERMINAL_STATUSES:
+        raise ValueError(f"job {id!r} is already in terminal status {j.status!r}")
+    new_status = (
+        STATUS_PEND
+        if j.kind == KIND_PERIODIC and status in (STATUS_DONE, STATUS_FAIL)
+        else status
+    )
+    update_fields(
+        JOBS_PATH,
+        {
+            id: {
+                "Status": new_status,
+                "Execution time": format_minute(dt.datetime.now()),
+                "Execution result": recap.strip() or status,
+            }
+        },
+    )
+    if new_status == STATUS_PEND:
+        next_notice = f" · next {j.next_fire_time or 'scheduled run'}"
+    else:
+        next_notice = ""
+    outcome = {
+        STATUS_DONE: "completed",
+        STATUS_FAIL: "failed",
+        STATUS_CANCEL: "cancelled",
+    }[status]
+    log.log(
+        logging.WARNING if status == STATUS_FAIL else logging.INFO,
+        "jobs: finished %s as %s",
+        id,
+        status,
+        extra={
+            "event": "task.schedule_updated",
+            "console": id != AUTO_WAIT_JOB_ID,
+            "console_message": f"Scheduled task {outcome}: {clip(j.description, 100)}{next_notice}",
+        },
+    )
+    if new_status == STATUS_PEND:
+        nxt = j.next_fire_time or "its next scheduled minute"
+        return (
+            f"finished job {id!r} as {status} — PERIODIC job, so it is "
+            f"RE-ARMED and will fire again at {nxt}. If its purpose is "
+            "over, call finish_job(status='cancel') now to stop it for good"
+        )
+    return f"finished job {id!r} as {status}"

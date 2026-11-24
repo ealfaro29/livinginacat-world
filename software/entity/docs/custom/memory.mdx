@@ -1,0 +1,50 @@
+---
+title: Memory
+description: How PhysiClaw remembers across sessions.
+---
+
+When the agent wakes, it loads the Markdown files under `~/.physiclaw/memory/` to keep its memory continuous across sessions.
+
+<FileTree>
+- ~/.physiclaw/memory/
+  - USER.md
+  - memory.md
+  - 2026-06-22.md
+  - …
+</FileTree>
+
+| File | Holds | Who writes it |
+| --- | --- | --- |
+| `USER.md` | who you are, your preferences, the messaging apps you use | you |
+| `memory.md` | things you've asked the agent to remember | the agent |
+| `YYYY-MM-DD.md` | that day's activity log, append-only | the agent |
+
+## Example
+
+`USER.md` is optional. It holds info about you, so you don't have to tell the agent the same things every time.
+
+```markdown
+## Name
+Mike
+
+## Messaging
+WhatsApp (handle: mike_g)
+
+## Communication
+- Always reply to the message first, then act
+- Confirm with me before any payment
+
+## Useful info
+Shipping address: 123 Main St, Austin, TX 78701
+
+## Taste
+No spicy food; coffee black, no sugar
+```
+
+## Tell it to remember
+
+You don't need to edit these memory files by hand. Just tell PhysiClaw what to remember in the conversation, and it will write it to `memory.md` automatically. Every future session will remember it.
+
+:::tip[Message]
+Remember I'm allergic to peanuts. Always check before ordering food.
+:::

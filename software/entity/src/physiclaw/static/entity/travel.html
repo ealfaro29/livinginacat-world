@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Entity · Recorrido</title><link rel="icon" href="sentient.svg">
+<style>
+@font-face{font-family:Space;src:url(space-grotesk.ttf) format("truetype");font-display:swap}
+:root{color-scheme:dark;--bg:#101310;--card:#191d18;--line:#434a3e;--muted:#bdc5b8;--accent:#dbff32}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f6f8f4;font:16px/1.45 Space,system-ui,sans-serif}
+main{max-width:790px;margin:auto;padding:24px 18px 45px}header,.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+header{padding-bottom:16px;border-bottom:1px solid var(--line)}header img{width:29px;vertical-align:middle;margin-right:7px}
+a{color:var(--accent)}h1{font-size:clamp(28px,5vw,44px);margin:22px 0 3px}h2{font-size:19px;margin:0}
+p{color:var(--muted);margin:.45em 0 1em}section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:15px}
+button,select{font:inherit;color:inherit;background:#262d23;border:1px solid #515a4a;border-radius:8px;padding:9px 13px}
+button{cursor:pointer;touch-action:manipulation}button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.45;cursor:default}.primary{background:var(--accent);color:#152000;font-weight:700}
+#pad{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;max-width:560px;margin:18px auto 9px}
+#pad button{min-height:44px}#pad [data-dir=back],#pad [data-dir=front]{grid-column:2}#pad [data-dir=left]{grid-column:1}#pad [data-dir=right]{grid-column:3}
+#corners{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:16px 0}#corners button{text-align:left}#corners small{display:block;color:var(--muted);font-variant-numeric:tabular-nums}
+#status{min-height:24px;color:var(--accent)}#status.error{color:#ffbc9f}output{font:600 15px/1.4 ui-monospace,monospace}label{color:var(--muted)}
+@media(max-width:460px){main{padding:14px 10px}section{padding:12px}button,select{padding:9px 7px}#pad{gap:4px;font-size:14px}}
+</style>
+</head>
+<body><main>
+<header><strong><img src="sentient.svg" alt="">Entity by Sentient</strong><select id="lang" aria-label="Idioma / Language"><option value="es">Español</option><option value="en">English</option></select></header>
+<h1 id="title"></h1><p id="intro"></p>
+<section><div class="row"><h2 id="move"></h2><label><span id="step"></span> <select id="size"><option value="1" selected>1 mm</option><option value="5">5 mm</option></select></label></div>
+<div id="pad"><button data-dir="back"></button><button data-dir="left"></button><button data-dir="right"></button><button data-dir="front"></button></div>
+<div class="row"><output id="position">X — · Y —</output><button id="refresh"></button><button id="park"></button></div></section>
+<section><h2 id="mark"></h2><p id="guide"></p><div id="corners"><button data-corner="top-left"></button><button data-corner="top-right"></button><button data-corner="bottom-left"></button><button data-corner="bottom-right"></button></div>
+<div class="row"><span id="total"></span><button class="primary" id="apply"></button></div></section><p id="status" role="status" aria-live="polite"></p>
+<script>
+const strings={
+ es:{park:"Apartar el carro",parked:"Carro estacionado en la esquina medida más cercana.",no_measured_park:"No hay una esquina medida disponible desde esta posición.",task_active:"Terminá la tarea activa antes de medir el recorrido.",title:"Recorrido de Alfonsito",intro:"Mirando la máquina desde el frente, acercá el carro a cada esquina con las flechas. Usá 1 mm al acercarte al borde y dejá unos 2–3 mm antes del tope.",move:"Mover con la punta levantada",step:"Paso",back:"↑ Fondo",front:"↓ Frente",left:"← Izquierda",right:"Derecha →",mark:"Marcar las esquinas",guide:"Cuando la punta esté fuera del vidrio y quede libre la vista de la cámara, pulsá la esquina donde está el carro. Cada botón guarda esa posición.",'top-left':"Fondo izquierdo",'top-right':"Fondo derecho",'bottom-left':"Frente izquierdo",'bottom-right':"Frente derecho",empty:"Sin marcar",refresh:"Leer posición",apply:"Usar estas esquinas",active:"Recorrido guardado y activo.",done:"Posición guardada.",busy:"Leyendo la MKS…",count:"de 4 guardadas",not_calibrated:"Terminá primero la calibración del brazo y la prueba de precisión.",position_changed:"La posición cambió. Leé la posición actual antes de continuar.",marks_changed:"Las marcas cambiaron. Leé las posiciones y revisalas.",corner_order:"Verificá los lados de las cuatro esquinas mirando desde el frente.",enclose_glass:"El área debe incluir el vidrio y la posición de referencia. Revisá las esquinas.",clear_glass:"El puente tapa el vidrio en una esquina. Movelo más hacia el frente o el fondo antes de marcarla.",travel_span:"Ese punto supera el recorrido previsto para estos rieles. Revisá la posición y las marcas.",unavailable:"La MKS está ocupada o no respondió. Pulsá Leer posición.",need_four:"Marcá las cuatro esquinas."},
+ en:{park:"Park carriage",parked:"Carriage parked at the nearest measured corner.",no_measured_park:"No measured corner is available from this position.",task_active:"Finish the active task before measuring travel.",title:"Alfonsito travel",intro:"Face the front of the machine. Use the arrows to approach each corner. Switch to 1 mm near the edge and stop about 2–3 mm before the mechanical stop.",move:"Move with the tip raised",step:"Step",back:"↑ Back",front:"↓ Front",left:"← Left",right:"Right →",mark:"Record the corners",guide:"When the tip clears the glass and the camera view is unobstructed, press the corner where the carriage is resting. Each button saves that position.",'top-left':"Back left",'top-right':"Back right",'bottom-left':"Front left",'bottom-right':"Front right",empty:"Unmarked",refresh:"Read position",apply:"Use these corners",active:"Travel saved and active.",done:"Position saved.",busy:"Reading the MKS…",count:"of 4 saved",not_calibrated:"Complete arm calibration and the precision check first.",position_changed:"The carriage moved. Read the current position before continuing.",marks_changed:"The marks changed. Read and check their positions.",corner_order:"Check all four corner labels while facing the machine.",enclose_glass:"The area must contain the glass and the reference park. Check the corners.",clear_glass:"At this corner the bridge still covers the glass. Move farther toward the front or back before marking.",travel_span:"That position exceeds the designed rail travel. Check the position and marks.",unavailable:"The MKS is busy or did not respond. Press Read position.",need_four:"Record all four corners."}
+};
+const $=id=>document.getElementById(id);
+let language=new URLSearchParams(location.search).get('lang')==='en'?'en':'es', state=null, locked=false, message='', failed=false;
+function coords(p){return 'X '+p[0].toFixed(1)+' · Y '+p[1].toFixed(1)+' mm'}
+function render(){
+ const t=strings[language]; document.documentElement.lang=language; document.title='Entity · '+t.title; $('lang').value=language;
+ for(const key of ['title','intro','move','step','mark','guide','refresh','park','apply']) $(key).textContent=t[key];
+ for(const b of document.querySelectorAll('[data-dir]')){b.textContent=t[b.dataset.dir];b.disabled=locked||!state?.can_teach}
+ for(const b of document.querySelectorAll('[data-corner]')){
+  const k=b.dataset.corner,p=state?.marks[k],small=document.createElement('small');small.textContent=p?coords(p):t.empty;
+  b.replaceChildren(document.createTextNode(t[k]),small);b.disabled=locked||!state?.can_teach;
+ }
+ const n=Object.keys(state?.marks||{}).length;
+ $('apply').disabled=locked||!state?.can_teach||n!==4;$('refresh').disabled=locked;$('park').disabled=locked||!Object.keys(state?.limits||{}).length;$('position').textContent=state?coords(state.position):'X — · Y —';
+ $('total').textContent=n+' '+t.count; $('status').className=failed?'error':'';
+ const active=n===4&&Object.entries(state.marks).every(([k,v])=>state.limits[k]?.every((c,i)=>c===v[i]));
+ $('status').textContent=t[message]||(active?t.active:'');
+}
+async function request(action,more={}){
+ if(locked)return;locked=true; failed=false; message='busy';render();
+ try{
+  const options={cache:'no-store'};
+  if(action)Object.assign(options,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,frame:state.frame,from:state.position,...more})});
+  const res=await fetch('/entity/api/travel',options),data=await res.json();
+  if(!res.ok)throw new Error(data.error);
+  state=data;message=action==='park'?'parked':action==='mark'?'done':action==='apply'?'active':'';
+ }catch(e){
+  failed=true;message=strings[language][e.message]?e.message:'unavailable';
+  if(action==='jog'||message==='position_changed'||message==='not_calibrated'||message==='unavailable')state=null;
+ }finally{locked=false;render()}
+}
+$('lang').onchange=e=>{language=e.target.value;const u=new URL(location.href);u.searchParams.set('lang',language);history.replaceState(null,'',u);render()};
+for(const b of document.querySelectorAll('[data-dir]'))b.onclick=()=>request('jog',{direction:b.dataset.dir,mm:Number($('size').value)});
+for(const b of document.querySelectorAll('[data-corner]'))b.onclick=()=>request('mark',{corner:b.dataset.corner});
+$('park').onclick=()=>request('park');$('apply').onclick=()=>request('apply',{marks:state.marks});$('refresh').onclick=()=>request(null);
+render();request(null);
+</script></main></body></html>

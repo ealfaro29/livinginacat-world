@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#16151a">
+<title>Entity · Hardware Setup</title>
+<script src="/assets/qrcode-1.4.4.min.js"></script>
+<style>
+:root{
+  /* Warm graphite neutrals — a calm, professional base that pairs
+     cleanly with the terracotta accent (no cold-navy / warm-orange clash). */
+  --bg:#16151a; --bg2:#1c1b21; --card:#212026; --card2:#292831;
+  --line:#33323b; --line2:#413f4a;
+  --txt:#efece7; --muted:#a6a199; --faint:#736e66; --strong:#fff;
+  /* Brand accent — matches the hardware manual (#d4511a terracotta). */
+  --accent:#d4511a; --accent-d:#b8440f; --accent-lt:#e8804f; --accent-ink:#fff6f0;
+  /* Muted, editorial semantic colors — refined, not neon. */
+  --ok:#4cc98a; --orange:#ef9450; --red:#e0685f; --blue:#7099c2; --amber:#e0a93f;
+  --r:14px; --shadow:0 14px 44px rgba(7,5,3,.5);
+  --page-glow:#2c1d14; --side-foot:#131217;
+}
+/* Light theme — warm cream surfaces, same terracotta accent (matches the
+   manual). Only the neutrals, strong-text, glows and note text flip. */
+body.theme-light{
+  --bg:#f7f3ee; --bg2:#efe9e1; --card:#ffffff; --card2:#f3eee7;
+  --line:#e6e0d6; --line2:#d8d1c5;
+  --txt:#221f1b; --muted:#6b655c; --faint:#9b9389; --strong:#1a1714;
+  --shadow:0 12px 30px rgba(60,45,30,.12);
+  --page-glow:#f3e7dc; --side-foot:#e9e2d8;
+}
+body.theme-light .note.info{color:#2b4a6b}
+body.theme-light .note.ok{color:#15693f}
+body.theme-light .note.warn{color:#785711}
+body.theme-light .note.err{color:#9c332b}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  background:radial-gradient(1100px 680px at 84% -14%,var(--page-glow) 0%,var(--bg) 52%);
+  color:var(--txt); -webkit-font-smoothing:antialiased; line-height:1.5;
+  transition:background .25s ease,color .25s ease;
+}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+a{color:var(--blue);text-decoration:none}
+
+/* Light/dark toggle — fixed top-right */
+.theme-toggle{position:fixed;top:16px;right:18px;z-index:50;width:38px;height:38px;border-radius:50%;
+  display:grid;place-items:center;font-size:16px;line-height:1;
+  background:var(--card2);border:1px solid var(--line2);color:var(--muted);
+  box-shadow:0 3px 10px rgba(0,0,0,.18);transition:.15s}
+.theme-toggle:hover{color:var(--strong);border-color:var(--faint);transform:translateY(-1px)}
+.lang-toggle{right:64px;width:auto;min-width:38px;padding:0 12px;border-radius:19px;font-size:13px;font-weight:600;letter-spacing:.02em}
+
+/* ── Shell ─────────────────────────────────────────── */
+.shell{display:grid;grid-template-columns:312px minmax(0,1fr);min-height:100vh}
+
+/* ── Sidebar ───────────────────────────────────────── */
+.side{
+  background:linear-gradient(180deg,var(--bg2),var(--side-foot));
+  border-right:1px solid var(--line);
+  padding:28px 22px;display:flex;flex-direction:column;gap:26px;
+  position:sticky;top:0;height:100vh;overflow:auto;
+}
+.brand{display:flex;align-items:center;gap:11px}
+.brand .logo{
+  width:46px;height:38px;flex:none;display:grid;place-items:center;
+}
+.brand .logo svg{
+  width:46px;height:auto;display:block;
+  filter:drop-shadow(0 3px 9px rgba(212,81,26,.38));
+}
+.brand b{font-size:15px;letter-spacing:.2px}
+.brand span{display:block;font-size:11px;color:var(--faint);font-weight:500}
+
+.bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar > i{display:block;height:100%;width:0;border-radius:99px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-d));transition:width .4s ease}
+.bar-cap{font-size:11px;color:var(--faint);margin-top:7px}
+
+.steps{list-style:none;display:flex;flex-direction:column;gap:2px}
+.steps li{
+  display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:10px;
+  color:var(--muted);font-size:13.5px;transition:.2s;position:relative;
+}
+.steps li .dot{
+  width:22px;height:22px;border-radius:50%;flex:none;display:grid;place-items:center;
+  font-size:11px;font-weight:700;border:1.5px solid var(--line2);color:var(--faint);
+  background:var(--card);transition:.2s;
+}
+.steps li.done{color:var(--txt)}
+.steps li.done .dot{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.steps li.active{color:var(--strong);background:var(--card2)}
+.steps li.active .dot{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 4px rgba(212,81,26,.16)}
+.side-foot{margin-top:auto;font-size:11.5px;color:var(--faint);line-height:1.7}
+.side-foot code{background:var(--card);padding:1px 6px;border-radius:5px;color:var(--muted)}
+
+/* ── Stage ─────────────────────────────────────────── */
+.stage{min-width:0;padding:40px;display:flex;align-items:center;justify-content:center}
+/* Vertically centered, biased a little above true center (margin-bottom
+   shifts the centered panel up by half its value). */
+.panel{width:100%;min-width:0;max-width:640px;margin-bottom:9vh;overflow-wrap:anywhere;animation:rise .35s ease}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* Step header — accent kicker, title, lede. */
+.panel-head{margin-bottom:30px}
+.kicker{font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+h1{font-size:30px;line-height:1.16;margin:0 0 13px;letter-spacing:-.025em;font-weight:700;color:var(--strong)}
+.lede{color:var(--muted);font-size:15.5px;line-height:1.62;max-width:54ch;margin:0}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:24px;box-shadow:var(--shadow)}
+.card + .card{margin-top:16px}
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .side{display:none}
+  .stage{padding:76px 20px 30px;align-items:flex-start}
+  .panel{margin-bottom:0}
+}
+@media (max-width:480px){.stage{padding:76px 16px 24px}.card{padding:20px}}
+
+.steps-do{list-style:none;display:flex;flex-direction:column;gap:14px;margin:2px 0}
+.steps-do li{display:flex;gap:13px;align-items:flex-start;font-size:14.5px;color:var(--txt)}
+.steps-do li .n{width:24px;height:24px;border-radius:50%;flex:none;display:grid;place-items:center;
+  background:var(--card2);border:1px solid var(--line2);font-size:12px;font-weight:700;color:var(--accent)}
+.steps-do li b{color:var(--strong)}
+.steps-do li small{display:block;color:var(--muted);font-size:13px;margin-top:1px}
+
+.actions{display:flex;gap:12px;align-items:center;margin-top:26px;flex-wrap:wrap}
+/* Step-level footer bar (direct child of .detail) — divider + breathing room.
+   In-card .actions are nested deeper and keep their inline styling. */
+.detail > .actions{margin-top:30px;padding-top:24px;border-top:1px solid var(--line)}
+/* Primary action always sits at the far right; Back stays at the far left. */
+.detail > .actions .btn.primary{margin-left:auto}
+/* "Auto mode" toggle-button — armed state is just the accent border + tint.
+   Hover deepens whichever state it's in: off hovers neutral (the .btn
+   default), on hovers warmer — so the armed button never greys out. */
+.auto-btn.on{border-color:var(--accent);color:var(--strong);background:rgba(212,81,26,.1)}
+.auto-btn.on:hover{border-color:var(--accent-lt);background:rgba(212,81,26,.18)}
+.auto-hint{color:var(--faint);font-size:11.5px;line-height:1.55;max-width:34ch;margin:0 auto 0 0}
+.detail > .actions:has(.auto-hint) .btn.primary{margin-left:22px}
+.btn{padding:12px 22px;border-radius:11px;font-weight:650;font-size:14.5px;
+  background:var(--card2);border:1px solid var(--line2);transition:.15s;display:inline-flex;align-items:center;gap:9px}
+.btn:hover{border-color:var(--faint);transform:translateY(-1px)}
+.btn:active{transform:none}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn.primary{background:linear-gradient(135deg,var(--accent-lt),var(--accent-d));
+  border-color:transparent;color:var(--accent-ink);box-shadow:0 6px 18px rgba(212,81,26,.35)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.btn.ghost:hover{color:var(--txt);background:var(--card)}
+
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+  border-radius:50%;animation:sp .7s linear infinite;display:inline-block}
+.btn.primary .spin{border-color:rgba(255,245,239,.4);border-top-color:var(--accent-ink)}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* status note */
+.note{display:flex;gap:11px;align-items:flex-start;padding:13px 15px;border-radius:11px;
+  font-size:13.5px;margin-top:16px;border:1px solid;line-height:1.55}
+.note .ic{flex:none;font-size:15px;line-height:1.4}
+.note.info{background:rgba(112,153,194,.10);border-color:rgba(112,153,194,.32);color:#cfdef0}
+.note.ok{background:rgba(76,201,138,.10);border-color:rgba(76,201,138,.32);color:#bdecd1}
+.note.warn{background:rgba(224,169,63,.10);border-color:rgba(224,169,63,.32);color:#f0ddb2}
+.note.err{background:rgba(224,104,95,.10);border-color:rgba(224,104,95,.32);color:#f3cbc7}
+.note.center{display:block;text-align:center}
+
+.pill{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;
+  padding:5px 11px;border-radius:99px;background:var(--card2);border:1px solid var(--line2);color:var(--muted)}
+.pill .led{width:8px;height:8px;border-radius:50%;background:var(--faint)}
+.pill.wait .led{background:var(--amber);animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+.kv{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.kv span{font-size:12.5px;padding:6px 11px;border-radius:9px;background:var(--card2);border:1px solid var(--line);color:var(--muted)}
+.kv span b{color:var(--strong);font-weight:650}
+
+/* QR */
+.qrwrap{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.qrcard{position:relative;width:272px;max-width:100%;background:#fff;padding:16px;border-radius:14px;flex:none;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+.qrcard canvas{display:block;width:100%;height:auto;aspect-ratio:1;image-rendering:pixelated}
+.qr-done{position:absolute;inset:0;border-radius:14px;display:none;flex-direction:column;
+  align-items:center;justify-content:center;gap:12px;background:rgba(255,255,255,.94);backdrop-filter:blur(2px)}
+.qr-done.show{display:flex;animation:rise .25s ease}
+.qr-done .check{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:30px;font-weight:800;
+  color:#fff;background:linear-gradient(135deg,var(--ok),#2fa56f);box-shadow:0 8px 22px rgba(76,201,138,.45)}
+.qr-done .lbl{color:#1f2430;font-weight:700;font-size:15px}
+.qrwrap .qrtxt{flex:1;min-width:min(200px,100%)}
+.url{font-family:Arial,"Helvetica Neue","PingFang SC","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif;
+  font-size:13px;line-height:1.65;font-variant-numeric:tabular-nums;
+  font-synthesis:none;-webkit-font-smoothing:auto;color:var(--accent);
+  background:var(--bg);padding:8px 11px;border-radius:8px;border:1px solid var(--line);word-break:break-all;margin-top:8px}
+.url.alt{color:var(--faint)}
+
+.success-hero{text-align:center;padding:18px 0}
+.mcp-connect{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:6px 12px;
+  width:fit-content;max-width:100%;margin:26px auto 0;padding:16px 4px 0;
+  font-size:14.5px;line-height:1.6;color:var(--muted);--mcp-color:var(--amber)}
+.mcp-connect[data-state="online"]{--mcp-color:var(--ok)}
+.mcp-connect[data-state="offline"]{--mcp-color:var(--red)}
+.mcp-label{position:relative;flex:none;padding-inline-start:14px}
+.mcp-label::before{content:"";position:absolute;inset-inline-start:0;top:50%;transform:translateY(-50%);
+  width:6px;height:6px;border-radius:50%;background:var(--mcp-color);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--mcp-color) 15%,transparent);
+  transition:background .2s,box-shadow .2s}
+.mcp-connect[data-state="checking"] .mcp-label::before,
+.mcp-connect[data-state="waiting"] .mcp-label::before{animation:pulse 1.4s infinite}
+@media (prefers-reduced-motion:reduce){.mcp-label::before{animation:none!important;transition:none}}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip-path:inset(50%);white-space:nowrap;border:0}
+#mcpAddress{min-width:0;overflow-wrap:anywhere;text-align:left;color:var(--txt);
+  -webkit-user-select:all;user-select:all}
+.success-hero .big{width:80px;height:80px;border-radius:50%;margin:0 auto 18px;display:grid;place-items:center;
+  font-size:40px;background:linear-gradient(135deg,var(--accent-lt),var(--accent-d));color:var(--accent-ink);
+  box-shadow:0 12px 40px rgba(212,81,26,.4)}
+  :root{--bg:#10130f;--bg2:#141812;--card:#171c15;--card2:#20261d;--line:#353c31;--line2:#505847;--txt:#f3f5e9;--muted:#b9c2b0;--faint:#96a28d;--accent:#d0ff00;--accent-d:#b8e500;--accent-lt:#e1ff70;--accent-ink:#10130f;--page-glow:#28311f;--side-foot:#10130f}
+  body.theme-light{--accent:#486100;--accent-lt:#d0ff00;--accent-d:#a7d000;--accent-ink:#11160e;--page-glow:#e2ebd2}
+  .brand .logo svg{width:31px;height:30px}.brand .logo path{fill:var(--accent)}
+</style>
+</head>
+<body>
+<select id="langToggle" class="theme-toggle lang-toggle" aria-label="Idioma / Language"><option value="es">ES</option><option value="en">EN</option><option value="zh">中文</option></select>
+<button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle light/dark theme" title="Toggle theme"></button>
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      <div class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40.4 37.6"><path fill-rule="evenodd" clip-rule="evenodd" d="M29.7156 16.4261C30.3557 16.9263 30.905 17.5261 31.3343 18.2049C32.3295 19.7785 32.5992 21.6484 32.0841 23.4035C31.5689 25.1585 30.3112 26.6548 28.5876 27.5633L11.3108 36.6482C9.58712 37.5568 7.53874 37.8032 5.61629 37.3326C3.69378 36.8625 2.00056 35.7639 1.00542 34.1901C0.0102797 32.6166 -0.259412 30.7466 0.255738 28.9916C0.770833 27.2366 2.02858 25.7402 3.75225 24.8318L10.5691 21.2389C9.92896 20.7386 9.43383 20.0895 9.00446 19.4106C8.00927 17.8371 7.73963 15.9671 8.25473 14.2121C8.76988 12.4571 10.0276 10.9607 11.7512 10.0523L29.0821 0.917844C30.8058 0.0093833 32.8541 -0.236816 34.7766 0.233462C36.6991 0.703741 38.3382 1.85193 39.3333 3.42542C40.3286 4.99896 40.5985 6.86891 40.083 8.62396C39.5681 10.379 38.3102 11.8753 36.5865 12.7838L29.7156 16.4261ZM18.972 22.0838L6.25368 28.7871C5.05727 29.4177 4.64733 30.8143 5.33811 31.9065L5.33816 31.9066C6.02894 32.9988 7.55876 33.373 8.75516 32.7424L26.0861 23.608C27.2825 22.9774 27.6924 21.5808 27.0017 20.4886L27.0016 20.4885C26.3365 19.4369 24.8934 19.0509 23.7192 19.5866L19.2017 21.9676C19.1257 22.0076 19.0492 22.0464 18.972 22.0838ZM21.3668 15.5318L34.0851 8.82849C35.2815 8.19788 35.6915 6.80126 35.0007 5.70906L35.0006 5.70897C34.3099 4.61677 32.78 4.24258 31.5836 4.87314L14.2527 14.0076C13.0563 14.6382 12.6464 16.0348 13.3371 17.127L13.3372 17.1271C14.0023 18.1788 15.4453 18.5647 16.6196 18.029L21.1372 15.648C21.2131 15.608 21.2896 15.5693 21.3668 15.5318Z" fill="white"/></svg></div>
+      <div><b>Entity by Sentient</b><span id="brandSub">Hardware Setup</span></div>
+    </div>
+    <div>
+      <div class="bar"><i id="bar"></i></div>
+      <div class="bar-cap" id="barCap">Step 0 of 0</div>
+    </div>
+    <ul class="steps" id="stepList"></ul>
+    <div class="side-foot" id="sideFoot"></div>
+  </aside>
+
+  <main class="stage">
+    <div class="panel" id="panel"><!-- step rendered here --></div>
+  </main>
+</div>
+
+<script>
+"use strict";
+
+/* ── Theme (light/dark) ─────────────────────────────── */
+// localStorage can throw (private mode / disabled) — guard once here.
+const getLS = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+const setLS = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+
+const THEME_KEY = "physiclaw-theme";
+function applyTheme(t) {
+  document.body.classList.toggle("theme-light", t === "light");
+  const btn = document.getElementById("themeToggle");
+  if (btn) btn.textContent = t === "light" ? "☾" : "☀";  // icon of the mode you'll switch to
+}
+(function initTheme() {
+  let t = getLS(THEME_KEY);
+  if (!t) t = (window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches) ? "light" : "dark";
+  applyTheme(t);
+})();
+document.getElementById("themeToggle").onclick = () => {
+  const next = document.body.classList.contains("theme-light") ? "dark" : "light";
+  setLS(THEME_KEY, next);
+  applyTheme(next);
+};
+
+/* ── Language (English / 中文) ───────────────────────
+   Every user-facing string lives in STR[key] as { en, zh } — the two
+   languages sit side by side so a translation is never out of sight of its
+   source. Values are plain strings, or functions for ones that interpolate
+   runtime values. t(key, ...args) looks up the active language (falling back
+   to English). Switching language re-renders the current step. */
+const LANG_KEY = "entity-language";
+const STR = {
+  docTitle: { en: "Entity · Hardware Setup", zh: "Entity · 硬件设置" },
+  brandSub: { en: "Hardware Setup", zh: "硬件设置" },
+  langName: { en: "中文", zh: "EN" },  // shown on the toggle = the language you switch TO
+  foot: { en: `You can also press <code>↵ Enter</code> to confirm each step.`, zh: `也可以按 <code>↵ Enter</code> 键确认当前操作。` },
+  langLabel: { en: "Switch to Chinese", zh: "切换到英文" },
+  themeLabel: { en: "Switch between light and dark themes", zh: "切换浅色或深色主题" },
+  noResponse: { en: "no response received", zh: "未收到响应" },
+  noCameraMatch: { en: "no matching camera found", zh: "未找到匹配的摄像头" },
+  requestTimeout: { en: "the request timed out", zh: "请求超时" },
+  networkError: { en: "couldn't reach the Entity server", zh: "无法连接到 Entity 服务器" },
+  requestFailed: { en: "the request failed", zh: "请求失败" },
+  back: { en: "Back", zh: "返回" },
+  cont: { en: "Continue", zh: "继续" },
+  working: { en: "Working…", zh: "处理中…" },
+  autoBtn: { en: "Auto mode", zh: "自动模式" },
+  autoHint: {
+    en: "If you've calibrated before and haven't moved the equipment, turn on Auto mode and click Continue. Setup will run on its own and pause when it needs your help.",
+    zh: "如果之前校准过，设备也没有挪动，可以开启「自动模式」，再点击「继续」。校准会自动进行，需要你操作时会暂停。",
+  },
+  stepOf: { en: (n) => `Step ${n} of ${STEPS.length}`, zh: (n) => `第 ${n} 步，共 ${STEPS.length} 步` },
+  finalStep: { en: "Final step", zh: "最后一步" },
+  nav_phone: { en: "Connect phone", zh: "连接手机" },
+  nav_position: { en: "Position equipment", zh: "摆放设备" },
+  nav_arm: { en: "Connect arm", zh: "连接机械臂" },
+  nav_camera: { en: "Connect camera", zh: "连接摄像头" },
+  nav_viewport: { en: "Locate screen", zh: "定位屏幕" },
+  nav_armcal: { en: "Calibrate arm", zh: "校准机械臂" },
+  nav_camcal: { en: "Calibrate camera", zh: "校准摄像头" },
+  nav_validate: { en: "Check calibration", zh: "验证校准结果" },
+  nav_at: { en: "AssistiveTouch", zh: "辅助触控" },
+  nav_finish: { en: "Finish", zh: "完成" },
+  s_phone_title: { en: "Connect your phone", zh: "连接手机" },
+  s_phone_lede: {
+    en: "Connect your phone, get the equipment in place, then calibrate the arm and camera. Calibration helps Entity find the right spot on the screen and tap it accurately.",
+    zh: "先连接手机、摆好设备，再校准机械臂和摄像头。校准后，Entity 才能找到屏幕上的目标并准确点击。",
+  },
+  s_phone_scan: {
+    en: `Scan this QR code with the iPhone on the rig, open the link in <b>Safari</b>, and sign in if prompted. Leave the Entity page open.`,
+    zh: `用 iPhone 的「相机」扫描二维码，再用 <b style="color:var(--strong)">Safari</b> 或 <b style="color:var(--strong)">Chrome</b> 打开链接，手机上就会显示 <b style="color:var(--strong)">Entity</b> bridge 页面。`,
+  },
+  s_phone_qroff: { en: "Couldn't display the QR code.<br>Type the address shown on this page into your phone's browser.", zh: "二维码未能显示。<br>请在手机浏览器中输入页面上的网址。" },
+  s_phone_altUrl: { en: "Try this address if the main address won't open on your phone", zh: "如果手机无法打开上方的网址，请试试这个地址" },
+  s_phone_doneBadge: { en: "Phone connected", zh: "手机已连接" },
+  s_phone_waiting: { en: "Waiting for phone…", zh: "等待手机连接…" },
+  s_phone_ok: { en: "Phone connected. Leave the bridge page open on your phone.", zh: "手机已连接。请让手机停留在 bridge 页面。" },
+  s_position_title: { en: "Position the equipment", zh: "摆放设备" },
+  s_position_lede: { en: "Connect the hardware and place the phone securely in its holder.", zh: "接好硬件，把手机平稳地放入支架。" },
+  s_position_li1: { en: `<b>Connect the arm's control board.</b> Plug it into your computer with a USB cable, then connect the 12 V power supply.`, zh: `<b>连接机械臂控制板。</b>用 USB 线连接电脑，再接上 12 V 电源。` },
+  s_position_li2: { en: `<b>Connect the camera</b> to your computer with a USB cable.`, zh: `<b>连接摄像头。</b>用 USB 线将摄像头连接到电脑。` },
+  s_position_li3: {
+    en: `<b>Place the phone in the holder</b> with its top-left corner against the holder's inner corner.<small>Keep the screen level and facing up. If the rear camera bump makes the phone tilt or rock, place a thin pad under the back to keep it level and steady.</small>`,
+    zh: `<b>把手机放进支架，</b>左上角靠紧支架内角。<small>屏幕朝上，保持水平。如果背面的摄像头凸起导致手机放不平，可以在背面垫一小块薄垫，让手机放稳、不晃动。</small>`,
+  },
+  s_position_li4: { en: `<b>Keep the phone unlocked and the screen on.</b> Leave the bridge page open without switching to another app.`, zh: `<b>保持手机解锁，屏幕常亮。</b>停留在 bridge 页面，不要切换到其他应用。` },
+  s_position_btn: { en: "Everything is in place", zh: "已摆放到位" },
+  s_arm_title: { en: "Connect the arm", zh: "连接机械臂" },
+  s_arm_lede: { en: "The arm connects over USB. On the FT412, the Raspberry Pi connects over USB to the MKS DLC32 that controls the arm.", zh: "FT412 通过 USB 将树莓派连接到 MKS DLC32 控制板。" },
+  s_arm_card: {
+    en: `Check the USB cable and 12 V power supply, and make sure the power is on. Then click <b>Connect arm</b>. Entity will find and connect the arm automatically.`,
+    zh: `确认 USB 线和 12 V 电源都已接好，电源开关已打开。然后点击<b>「连接机械臂」</b>，Entity 会自动查找并连接。`,
+  },
+  s_arm_btn: { en: "Connect arm", zh: "连接机械臂" },
+  s_arm_busy: { en: "Connecting…", zh: "连接中…" },
+  s_arm_ok: { en: "Arm connected.", zh: "机械臂已连接。" },
+  s_arm_err: {
+    en: (r) => `Couldn't connect the arm: ${msg(r)}. Check the USB cable and 12 V power supply, then try again.`,
+    zh: (r) => `机械臂连接失败：${msg(r)}。请检查 USB 线和 12 V 电源，然后重试。`,
+  },
+  s_camera_title: { en: "Connect the camera", zh: "连接摄像头" },
+  s_camera_lede: { en: "Entity will find the overhead camera by looking for markers on your phone's screen.", zh: "Entity 会通过手机屏幕上的标记，自动识别俯拍摄像头。" },
+  s_camera_card: {
+    en: `Use your computer's camera app to check the view. Point the camera straight down at the phone. Keep all four screen corners visible and let the screen fill as much of the image as possible. Close the camera app, then click <b>Connect camera</b>. Entity will display colored markers on the phone's bridge page to find the right camera.`,
+    zh: `先用电脑上的相机应用查看画面。把摄像头放在手机正上方，镜头垂直朝下。屏幕的四个角都要拍到，同时让屏幕尽量占满画面。调整好后，关闭相机应用，再点击<b>「连接摄像头」</b>。Entity 会根据屏幕上的彩色标记找到这台摄像头。`,
+  },
+  s_camera_btn: { en: "Connect camera", zh: "连接摄像头" },
+  s_camera_busy: { en: "Detecting…", zh: "检测中…" },
+  s_camera_ok: { en: (r) => `Camera ${r.body.index} connected.`, zh: (r) => `摄像头 ${r.body.index} 已连接。` },
+  s_camera_err: {
+    en: (r) => `Couldn't find the camera: ${msg(r, t("noCameraMatch"))}. Leave the bridge page open on your phone and keep the screen on. Check that the camera can see all four screen corners, then try again.`,
+    zh: (r) => `未找到摄像头：${msg(r, t("noCameraMatch"))}。请让手机停留在 bridge 页面，保持屏幕常亮。确认摄像头能拍到屏幕的四个角后，再试一次。`,
+  },
+  s_viewport_title: { en: "Locate the screen", zh: "定位屏幕" },
+  s_viewport_lede: {
+    en: "A screenshot of the orange square tells Entity where the web page sits on your phone's screen.",
+    zh: "这一步要确定网页在手机屏幕上的位置。截一张带有橙色方块的截图，就能完成测量。",
+  },
+  s_viewport_li1: {
+    en: `<b>Check that an orange square is visible</b> on your phone.<small>Keep the bridge page open and the screen on.</small>`,
+    zh: `<b>确认手机屏幕上出现了橙色方块。</b><small>让手机停留在 bridge 页面，保持屏幕常亮。</small>`,
+  },
+  s_viewport_li2: { en: `<b>Tap the AssistiveTouch button once.</b> The shortcut you set up earlier will take and upload a screenshot.`, zh: `<b>轻点一次辅助触控按钮。</b>之前设置好的快捷指令会自动截屏并上传。` },
+  s_viewport_li3: { en: `Click <b>Measure</b> on this page.`, zh: `在本页面点击<b>「测量」</b>。` },
+  s_viewport_btn: { en: "Measure", zh: "测量" },
+  s_viewport_busy: { en: "Measuring…", zh: "测量中…" },
+  s_viewport_ok: { en: "Screen located.", zh: "屏幕已定位。" },
+  s_viewport_err: {
+    en: (r) => `Couldn't locate the screen: ${msg(r)}.`,
+    zh: (r) => `屏幕定位失败：${msg(r)}。`,
+  },
+  s_viewport_warn: { en: "Couldn't display the orange square. Leave the bridge page open on your phone, keep the screen on, then try again.", zh: "橙色方块未能显示。请让手机停留在 bridge 页面，保持屏幕亮着，然后重试。" },
+  s_armcal_title: { en: "Calibrate the arm", zh: "校准机械臂" },
+  s_armcal_lede: {
+    en: "The arm will tap 18 points on the screen. Entity records where each tap lands so it can move the stylus to the right place.",
+    zh: "机械臂会依次点击屏幕上的 18 个位置，记录实际落点，用来校准点击位置。",
+  },
+  s_armcal_li1: {
+    en: `<b>Move the stylus tip directly above the orange circle</b> in the center of the screen.<small>Calibration will start from here.</small>`,
+    zh: `<b>把触控笔尖移到屏幕中央橙色圆圈的正上方。</b><small>校准会从这里开始。</small>`,
+  },
+  s_armcal_li2: {
+    en: `<b>Click Start and leave the equipment in place.</b> Calibration takes about 30 seconds.`,
+    zh: `<b>点击「开始」，等待约 30 秒。</b>机械臂会自动点击屏幕，校准期间请不要挪动设备。`,
+  },
+  same_cradle: { en: "Reuse my four marked corners. The same phone and cradle are in the same place.", es: "Usar mis cuatro esquinas marcadas. El teléfono y la cuna siguen en el mismo lugar." },
+  travel_reused: { en: "The four measured parking corners are active.", es: "Las cuatro esquinas medidas están activas." },
+  travel_missing: { en: "This fit has no compatible measured corners. Only the reference park is in use.", es: "Este ajuste no coincide con cuatro esquinas guardadas. El carro usa la posición de referencia." },
+  s_armcal_btn: { en: "Start", zh: "开始" },
+  s_armcal_busy: { en: "Tapping 18 points…", zh: "正在点击 18 个位置…" },
+  s_armcal_input: {
+    en: "No saved arm calibration was found. Move the stylus tip directly above the orange circle in the center of the screen, then click Start.",
+    zh: "没有找到之前的机械臂校准记录。请把触控笔尖移到屏幕中央橙色圆圈的正上方，再点击「开始」。",
+  },
+  s_armcal_ok: { en: (r) => `Arm calibrated using ${r.body.pairs} tap positions.`, zh: (r) => `机械臂校准完成，已记录 ${r.body.pairs} 个点击位置。` },
+  s_armcal_warnSkew: {
+    en: "The phone appears slightly rotated relative to the arm. If the calibration check fails later, straighten the phone and repeat this step.",
+    zh: "手机和机械臂没有完全对齐。如果稍后的验证不通过，请把手机摆正后重新校准机械臂。",
+  },
+  s_armcal_err: {
+    en: (r) => `Arm calibration failed: ${msg(r)}.`,
+    zh: (r) => `机械臂校准失败：${msg(r)}。`,
+  },
+  s_armcal_warn: { en: "Couldn't display the center circle. Leave the bridge page open on your phone, keep the screen on, then try again.", zh: "中心圆圈未能显示。请让手机停留在 bridge 页面，保持屏幕亮着，然后重试。" },
+  s_camcal_title: { en: "Calibrate the camera", zh: "校准摄像头" },
+  s_camcal_lede: {
+    en: "Your phone will show a checkerboard to help the camera focus, followed by 15 dots. Entity uses the dots to work out where each part of the camera image falls on the phone's screen.",
+    zh: "手机会先显示黑白棋盘格，让摄像头对焦，再显示 15 个圆点。找到这些圆点后，Entity 就知道摄像头画面中的位置对应屏幕上的哪里。",
+  },
+  s_camcal_li1: {
+    en: `<b>Make sure the camera can see the entire screen.</b> Keep the lighting even and avoid glare.<small>All 15 dots must be clearly visible to the camera.</small>`,
+    zh: `<b>让整个手机屏幕都在摄像头画面里。</b>光线要均匀，屏幕上不要有反光。<small>15 个圆点都需要拍清楚。</small>`,
+  },
+  s_camcal_li2: {
+    en: `<b>Click Calibrate and leave the equipment in place.</b> The checkerboard and dots will appear automatically.`,
+    zh: `<b>点击「校准」，不要挪动设备。</b>手机会依次显示棋盘格和圆点。`,
+  },
+  s_camcal_btn: { en: "Calibrate", zh: "校准" },
+  s_camcal_busyFrame: { en: "Checking camera view…", zh: "正在检查摄像头画面…" },
+  s_camcal_busyDots: { en: "Focusing and finding 15 dots…", zh: "正在对焦并识别 15 个圆点…" },
+  s_camcal_kvRot: { en: "Image rotation", zh: "画面旋转" },
+  camRotation: {
+    en: n => ({"-1":"0°","0":"90° clockwise","1":"180°","2":"90° counterclockwise"})[n],
+    es: n => ({"-1":"0°","0":"90° a la derecha","1":"180°","2":"90° a la izquierda"})[n],
+    zh: n => ({"-1":"0°","0":"顺时针 90°","1":"180°","2":"逆时针 90°"})[n]
+  },
+  camAxes: { en:"Rotating the mount is optional. It can help the screen fill more of the image.", es:"Girar el soporte es opcional. Puede ayudar a que el teléfono ocupe más de la imagen.", zh:"支架可以选用其他朝向，以提高屏幕占画面的比例。" },
+  camAngle: { en:"Align the phone edges with the edges of the camera view.", es:"Alineá los bordes del teléfono con los bordes de la imagen.", zh:"请让手机边缘与摄像头画面对齐。" },
+  camTilt: { en:"Check that the lens is pointing straight down at the screen.", es:"Comprobá que el lente apunte de frente al vidrio.", zh:"请让镜头垂直朝向手机屏幕。" },
+  camCoverage: { en:"Bring the camera closer while keeping all four screen corners in view.", es:"Acercá la cámara manteniendo las cuatro esquinas en el encuadre.", zh:"可拉近摄像头，同时让屏幕四角留在画面内。" },
+  camMarker: { en:"The camera could not identify the orientation markers. Keep the Entity page visible on the phone and retry.", es:"La cámara no identificó las marcas de orientación. Dejá visible la página de Entity en el teléfono y volvé a intentar.", zh:"摄像头未识别方向标记。请在手机上显示 Entity 页面后重试。" },
+  camFit: { en:n=>"The camera saw all "+n+" dots, but their positions did not match the grid. Check the image orientation and retry.", es:n=>"La cámara vio los "+n+" puntos, pero sus posiciones no coincidieron con la cuadrícula. Revisá la orientación de la imagen y volvé a intentar.", zh:n=>"已识别全部 "+n+" 个圆点，但位置与网格不符。请检查图像方向后重试。" },
+  camCount: { en:(n,total)=>`The camera saw ${n} of ${total} dots. Keep the whole screen in view and check for reflections.`, es:(n,total)=>`La cámara vio ${n} de ${total} puntos. Comprobá que se vea toda la pantalla y que no haya reflejos.`, zh:(n,total)=>`识别到 ${n}/${total} 个圆点，请检查屏幕边缘和反光。` },
+  tapCounts: { en:(touches,seen,total)=>`The phone registered ${touches} of ${total} taps. The camera located ${seen} of ${total} targets.`, es:(touches,seen,total)=>`El teléfono registró ${touches} de ${total} toques. La cámara localizó ${seen} de ${total} blancos.`, zh:(touches,seen,total)=>`手机记录了 ${touches}/${total} 次点击。摄像头识别了 ${seen}/${total} 个目标。` },
+  tapCamera: { en:"Check in the camera view that each colored target is fully visible.", es:"Revisá en la vista de la cámara que cada punto de color se vea completo.", zh:"请在摄像头画面中查看每一个彩色目标是否完整可见。" },
+  tapMiss: { en:"Check where the stylus lands on the glass.", es:"Revisá dónde cae la punta sobre el vidrio.", zh:"请检查触笔在屏幕上的落点。" },
+  s_camcal_kvCov: { en: "Screen coverage", zh: "屏幕占画面比例" },
+  s_camcal_errCam: { en: (r) => `Couldn't read the camera image: ${msg(r)}.`, zh: (r) => `无法读取摄像头画面：${msg(r)}。` },
+  s_camcal_errMap: {
+    en: (r) => `Couldn't detect the dots: ${msg(r)}. Reduce screen glare, make sure the lighting is even, and try again.`,
+    zh: (r) => `没能识别出圆点：${msg(r)}。请调整光线，避开屏幕反光后重试。`,
+  },
+  s_camcal_ok: { en: (dots) => `Camera calibrated. Detected all ${dots} dots.`, zh: (dots) => `摄像头校准完成，已识别全部 ${dots} 个圆点。` },
+  s_validate_title: { en: "Check the calibration", zh: "验证校准结果" },
+  s_validate_lede: {
+    en: "The arm will tap a few targets to check its accuracy. The calibration is saved if the check passes.",
+    zh: "机械臂会点击几个目标，检查落点是否准确。通过后会自动保存校准结果。",
+  },
+  s_validate_li1: {
+    en: `<b>Leave the equipment in place and avoid screen glare.</b><small>The arm will tap several targets during this check.</small>`,
+    zh: `<b>不要挪动设备，屏幕上不要有反光。</b><small>机械臂会依次点击几个目标。</small>`,
+  },
+  s_validate_li2: {
+    en: `<b>Click Check calibration.</b> Entity will locate each target with the camera, tap it with the arm, and check how close the tap lands to the target.`,
+    zh: `<b>点击「验证校准结果」。</b>Entity 会用摄像头找到每个目标，再让机械臂点击，并检查落点是否准确。`,
+  },
+  s_validate_btn: { en: "Check calibration", zh: "验证校准结果" },
+  s_validate_busy: { en: "Checking tap accuracy…", zh: "正在检查点击精度…" },
+  s_validate_ok: {
+    en: (r) => `Calibration check passed. ${r.body.passed} of ${r.body.total} taps were on target. Calibration saved.`,
+    zh: (r) => `验证通过。共点击 ${r.body.total} 次，${r.body.passed} 次命中目标。校准结果已保存。`,
+  },
+  s_validate_err: {
+    en: (r) => { const p = r.body || {}; return `Calibration check failed${p.passed != null ? ` (${p.passed} of ${p.total} taps on target)` : ""}. Check for glare and uneven lighting, then try again. If it still fails, go back and recalibrate the arm or camera.`; },
+    zh: (r) => { const p = r.body || {}; return `验证未通过${p.passed != null ? `（共点击 ${p.total} 次，${p.passed} 次命中目标）` : ""}。请调整光线，避开屏幕反光后重试。如果还是不通过，请返回前面的步骤，重新校准机械臂或摄像头。`; },
+  },
+  s_at_title: { en: "Verify AssistiveTouch", zh: "验证辅助触控" },
+  s_at_lede: {
+    en: "The AssistiveTouch button runs two shortcuts: tap once to take and upload a screenshot, or press and hold to copy text to your iPhone's clipboard.",
+    zh: "辅助触控按钮用来触发两个快捷指令：轻点一次，截屏并上传；长按，把文字复制到 iPhone 剪贴板。",
+  },
+  s_at_li1: {
+    en: `<b>Drag the AssistiveTouch button onto the orange circle</b> on your phone.<small>Center the button on the circle so the arm can tap it.</small>`,
+    zh: `<b>把辅助触控悬浮按钮拖到橙色圆圈上。</b><small>让按钮的中心对准圆圈，方便机械臂点击。</small>`,
+  },
+  s_at_li2: {
+    en: `<b>Click Verify.</b> The arm will tap the button to check screenshot uploads, then press and hold it to check the clipboard shortcut.`,
+    zh: `<b>点击「验证」。</b>机械臂会先轻点按钮，检查截图上传，再长按按钮，检查文字复制。`,
+  },
+  s_at_btn: { en: "Verify", zh: "验证" },
+  s_at_busy: { en: "Verifying…", zh: "验证中…" },
+  s_at_ok: {
+    en: (clip) => `Both shortcuts are working.${clip != null ? ` Test text: <b>${clip}</b>.` : ""}`,
+    zh: (clip) => `两个快捷指令都正常。${clip != null ? `测试文本：<b>${clip}</b>。` : ""}`,
+  },
+  s_at_err: {
+    en: "AssistiveTouch check failed. Center the button on the orange circle and check that its single-tap and long-press actions run the correct iOS shortcuts, then try again.",
+    zh: "辅助触控验证未通过。请把按钮中心对准橙色圆圈，检查「单点」和「长按」是否设置为对应的快捷指令，然后重试。",
+  },
+  s_finish_finishingTitle: { en: "Finishing setup…", zh: "正在完成设置…" },
+  s_finish_finishingLede: { en: "Returning your phone to the Home Screen and checking that the camera is ready.", zh: "正在让手机返回主屏幕，并检查摄像头是否就绪。" },
+  s_finish_err: { en: "Couldn't confirm that Entity is ready. Check that the Entity server is running, wait for the equipment to stop moving, then click Retry.", zh: "暂时无法确认设备状态。请确认电脑上的 Entity 服务正常运行，等设备停止运动后，再点击「重试」。" },
+  s_finish_homeErr: { en: (r) => `Couldn't return the phone to the Home Screen: ${msg(r)}.`, zh: (r) => `无法让手机返回主屏幕：${msg(r)}。` },
+  s_finish_retry: { en: "Retry", zh: "重试" },
+  s_finish_readyTitle: { en: "Entity is ready", zh: "Entity 已就绪" },
+  s_finish_readyLedeShort: { en: "Calibration is complete. The arm and camera are ready to use.", zh: "硬件已校准，可以开始使用了。" },
+  s_finish_readyLede: {
+    en: (when) => `Setup completed${when}. The arm and camera are ready to use.`,
+    zh: (when) => `硬件设置已完成${when}，现在可以使用 Entity 了。`,
+  },
+  s_finish_when: { en: (mm, ss) => ` in ${mm}m ${ss}s`, zh: (mm, ss) => `（用时 ${mm} 分 ${ss} 秒）` },
+  s_finish_learning: {
+    en: "On the first run, Entity needs a few minutes to learn your chat app and keyboard layout. Put your chat app in the Dock at the bottom of your iPhone's Home Screen so it's easy to find.",
+    zh: "首次使用时，Entity 还需要几分钟来熟悉聊天应用和键盘布局。请把聊天应用放在 iPhone 主屏幕底部的 Dock 栏，方便后续打开。",
+  },
+  s_finish_close: { en: "You can close this tab now.", zh: "现在可以关闭这个标签页了。" },
+  s_finish_mcp_checking: { en: "Checking…", zh: "检查中…" },
+  s_finish_mcp_online: { en: "Online", zh: "在线" },
+  s_finish_mcp_offline: { en: "Offline", zh: "离线" },
+  s_finish_mcp_waiting: { en: "Setup required", zh: "待设置" },
+};
+const esSetup = {
+ docTitle:'Entity · Configuración del equipo', brandSub:'Configuración del equipo', langName:'Español', foot:'También podés pulsar <code>↵ Enter</code> para confirmar cada paso.', langLabel:'Idioma', themeLabel:'Cambiar el tema claro u oscuro',
+ noResponse:'sin respuesta', noCameraMatch:'no se encontró la cámara', requestTimeout:'se agotó el tiempo de espera', networkError:'no se pudo conectar con Entity', requestFailed:'falló la solicitud', back:'Atrás', cont:'Continuar', working:'En curso…', autoBtn:'Modo automático', autoHint:'Si ya calibraste este teléfono y el equipo sigue en la misma posición, podés usar el modo automático. El asistente se detendrá cuando necesite tu ayuda.',
+ stepOf:n=>'Paso '+n+' de '+STEPS.length, finalStep:'Último paso', nav_phone:'Conectar teléfono',nav_position:'Ubicar el equipo',nav_arm:'Conectar brazo',nav_camera:'Conectar cámara',nav_viewport:'Localizar pantalla',nav_armcal:'Calibrar brazo',nav_camcal:'Calibrar cámara',nav_validate:'Comprobar precisión',nav_at:'AssistiveTouch',nav_finish:'Terminar',
+ s_phone_title:'Conectá el teléfono',s_phone_lede:'Primero conectá el teléfono. Después vamos a ubicar la pantalla y calibrar el brazo y la cámara para que la punta toque donde corresponde.',
+ s_phone_scan:'Escaneá el QR con el iPhone de la máquina, abrí el enlace en <b>Safari</b> e iniciá sesión si te lo pide. Dejá abierta la página de Entity.',
+ s_phone_qroff:'Abrí en el navegador del teléfono la dirección que aparece aquí.',s_phone_altUrl:'Si la primera dirección no abre, usá esta',s_phone_doneBadge:'Teléfono conectado',s_phone_waiting:'Esperando al teléfono…',s_phone_ok:'Teléfono conectado. Dejá abierta la página de Entity en el teléfono.',
+ s_position_title:'Ubicá el equipo',s_position_lede:'Conectá los componentes y apoyá el teléfono en su cama.',s_position_li1:'<b>Conectá la MKS.</b> Usá el cable USB hacia la Raspberry y conectá la fuente de 12 V de la MKS.',s_position_li2:'<b>Conectá la cámara</b> a la Raspberry por USB.',
+ s_position_li3:'<b>Colocá el teléfono en la cama</b> con la esquina superior izquierda apoyada contra la esquina interior.<small>El vidrio debe quedar horizontal, hacia arriba. Si el teléfono se mece por las cámaras traseras, nivelalo con una almohadilla fina.</small>',s_position_li4:'<b>Dejá el teléfono desbloqueado y la pantalla encendida.</b> Mantené abierta la página de Entity.',s_position_btn:'Todo está en su lugar',
+ s_arm_title:'Conectá el brazo',s_arm_lede:'En la FT412, Entity se comunica por USB con la MKS DLC32 que controla el brazo.',s_arm_card:'Verificá que la MKS esté encendida y conectada a la Raspberry por USB. Pulsá <b>Conectar brazo</b>.',s_arm_btn:'Conectar brazo',s_arm_busy:'Conectando…',s_arm_ok:'Brazo conectado.',s_arm_err:r=>'No se pudo conectar el brazo ('+msg(r)+'). Revisá el USB y los 12 V y volvé a intentarlo.',
+ s_camera_title:'Conectá la cámara',s_camera_lede:'Entity reconocerá la cámara al ver los marcadores de la pantalla del teléfono.',s_camera_card:'Colocá la cámara mirando directamente hacia abajo. Las cuatro esquinas del vidrio deben verse en la imagen. Cerrá cualquier aplicación que esté usando la cámara y pulsá <b>Conectar cámara</b>. Entity mostrará marcadores de colores en el teléfono.',s_camera_btn:'Conectar cámara',s_camera_busy:'Buscando…',s_camera_ok:r=>'Cámara '+r.body.index+' conectada.',s_camera_err:r=>'No se encontró la cámara ('+msg(r,t("noCameraMatch"))+'). Dejá Entity abierto en el teléfono, revisá que las cuatro esquinas sean visibles e intentá otra vez.',
+ s_viewport_title:'Localizá la pantalla',s_viewport_lede:'Una captura del cuadrado naranja le muestra a Entity dónde queda la página dentro de la pantalla.',s_viewport_li1:'<b>Buscá el cuadrado naranja</b> en el teléfono.<small>Dejá la página abierta y la pantalla encendida.</small>',s_viewport_li2:'<b>Tocá una vez el botón flotante de AssistiveTouch.</b> El atajo de captura subirá la imagen.',s_viewport_li3:'Pulsá <b>Medir</b> aquí.',s_viewport_btn:'Medir',s_viewport_busy:'Midiendo…',s_viewport_ok:'Pantalla localizada.',s_viewport_err:r=>'No se pudo localizar la pantalla ('+msg(r)+').',s_viewport_warn:'El cuadrado naranja no apareció. Dejá Entity abierto en el teléfono y volvé a intentar.',
+ s_armcal_title:'Calibrá el brazo',s_armcal_lede:'El brazo tocará 18 puntos. Entity registrará dónde cae cada toque.',s_armcal_li1:'<b>Alineá la punta justo encima del círculo naranja</b> del centro de la pantalla.<small>Desde ahí comienza la calibración.</small>',s_armcal_li2:'<b>Pulsá Iniciar y dejá el equipo en su sitio.</b> La medición tarda unos 30 segundos.',s_armcal_btn:'Iniciar',s_armcal_busy:'Tocando 18 puntos…',s_armcal_input:'Alineá la punta encima del círculo naranja central y pulsá Iniciar.',s_armcal_ok:r=>'Brazo calibrado con '+r.body.pairs+' posiciones.',s_armcal_warnSkew:'El teléfono parece girado con respecto al brazo. Si falla la comprobación, enderezalo y repetí este paso.',s_armcal_err:r=>'Falló la calibración del brazo ('+msg(r)+').',s_armcal_warn:'No apareció el círculo central. Dejá Entity abierto en el teléfono e intentá otra vez.',
+ s_camcal_title:'Calibrá la cámara',s_camcal_lede:'El teléfono mostrará un tablero para enfocar y después 15 puntos. Con esos puntos Entity relaciona la imagen de la cámara con el vidrio.',s_camcal_li1:'<b>Comprobá que se vea toda la pantalla.</b> Usá luz pareja y evitá reflejos.<small>Los 15 puntos deben verse claramente.</small>',s_camcal_li2:'<b>Pulsá Calibrar y dejá la cámara y el teléfono en su sitio.</b> El patrón aparecerá automáticamente.',s_camcal_btn:'Calibrar',s_camcal_busyFrame:'Revisando la imagen…',s_camcal_busyDots:'Enfocando y buscando los 15 puntos…',s_camcal_kvRot:'Rotación de la imagen',s_camcal_kvCov:'Cobertura de la pantalla',s_camcal_errCam:r=>'No se pudo leer la cámara ('+msg(r)+').',s_camcal_errMap:r=>'No se detectaron los puntos ('+msg(r)+'). Revisá los reflejos y la iluminación e intentá otra vez.',s_camcal_ok:dots=>'Cámara calibrada con los '+dots+' puntos.',
+ s_validate_title:'Comprobá la precisión',s_validate_lede:'El brazo tocará varios blancos. Si acierta, Entity guardará esta calibración.',s_validate_li1:'<b>Dejá el equipo en su sitio y evitá los reflejos.</b><small>Durante esta prueba el brazo tocará la pantalla.</small>',s_validate_li2:'Pulsá <b>Comprobar precisión</b>. Entity localizará los blancos con la cámara y medirá los toques.',s_validate_btn:'Comprobar precisión',s_validate_busy:'Comprobando los toques…',s_validate_ok:r=>'Calibración guardada. Acertó '+r.body.passed+' de '+r.body.total+' toques.',s_validate_err:r=>{const x=r.body||{};return 'Falló la comprobación'+(x.passed==null?'':' ('+x.passed+' de '+x.total+' aciertos)')+'. Revisá los reflejos y repetí. Si persiste, recalibrá el brazo o la cámara.';},
+ s_at_title:'Verificá AssistiveTouch',s_at_lede:'Un toque en el botón flotante activa el atajo de captura. Mantenerlo presionado activa el atajo del portapapeles.',s_at_li1:'<b>Arrastrá el botón de AssistiveTouch hasta el círculo naranja.</b><small>Hacé coincidir los centros para que la punta pueda tocarlo.</small>',s_at_li2:'Pulsá <b>Verificar</b>. Entity probará primero el toque corto y después la pulsación larga.',s_at_btn:'Verificar',s_at_busy:'Verificando…',s_at_ok:clip=>'Los dos atajos funcionan.'+(clip==null?'':' Texto de prueba: <b>'+clip+'</b>.'),s_at_err:'Revisá que AssistiveTouch esté centrado en el círculo y que el toque corto y la pulsación larga ejecuten los atajos correctos de iOS. Volvé a intentar.',
+ s_finish_finishingTitle:'Terminando la configuración…',s_finish_finishingLede:'Volviendo al inicio del iPhone y comprobando la cámara.',s_finish_err:'Entity todavía no confirmó que el equipo esté listo. Verificá que el servidor siga encendido, esperá a que el brazo se detenga y pulsá Reintentar.',s_finish_homeErr:r=>'No se pudo volver al inicio del teléfono ('+msg(r)+').',s_finish_retry:'Reintentar',s_finish_readyTitle:'Entity está listo',s_finish_readyLedeShort:'Calibración completa. El brazo y la cámara están listos.',s_finish_readyLede:when=>'Configuración completa'+when+'. El brazo y la cámara están listos.',s_finish_when:(mm,ss)=>' en '+mm+' min '+ss+' s',s_finish_learning:'Si usás controles desde un chat, colocá la aplicación en el Dock del iPhone para encontrarla fácilmente.',s_finish_close:'Ya podés cerrar esta pestaña.',s_finish_mcp_checking:'Comprobando…',s_finish_mcp_online:'En línea',s_finish_mcp_offline:'Sin conexión',s_finish_mcp_waiting:'Falta configurar'
+};
+for (const [key,value] of Object.entries(esSetup)) STR[key].es=value;
+const normLang = (l) => { const code=String(l || "").toLowerCase().split("-")[0]; return ["en","zh"].includes(code) ? code : "es"; };
+let LANG = "en";
+function t(k, ...a) {
+  const e = STR[k];
+  if (e === undefined) return k;
+  const v = (LANG in e) ? e[LANG] : e.en;
+  if (v === undefined) return k;
+  return typeof v === "function" ? v(...a) : v;
+}
+function setStaticText() {
+  document.documentElement.lang = LANG;
+  document.title = t("docTitle");
+  const sub = document.getElementById("brandSub"); if (sub) sub.textContent = t("brandSub");
+  const foot = document.getElementById("sideFoot"); if (foot) foot.innerHTML = t("foot");
+  const lb = document.getElementById("langToggle");
+  if (lb) {
+    lb.value = LANG;
+    lb.setAttribute("aria-label", "Idioma / Language");
+    lb.title = "Español / English / 中文";
+  }
+  const tb = document.getElementById("themeToggle");
+  if (tb) {
+    tb.setAttribute("aria-label", t("themeLabel"));
+    tb.title = t("themeLabel");
+  }
+}
+function applyLang(l) {
+  if (WORKING) return;
+  stopAuto(); AUTO_ARMED = false;
+  LANG = normLang(l);
+  setLS(LANG_KEY, LANG);
+  const url = new URL(location.href); url.searchParams.set("lang", LANG); history.replaceState(null, "", url);
+  setStaticText();
+  if (document.getElementById("panel")) render();
+}
+(function initLang() {
+  LANG = normLang(new URLSearchParams(location.search).get("lang") || getLS(LANG_KEY) || navigator.language || "es");
+  setStaticText();
+})();
+document.getElementById("langToggle").onchange = e => applyLang(e.target.value);
+
+// Phone bridge URLs are substituted server-side (see handle_setup_page).
+const PHONE_URL = "__PHONE_URL__";
+const PHONE_URL_FALLBACK = "__PHONE_URL_FALLBACK__";
+const $ = (h) => { const t = document.createElement("template"); t.innerHTML = h.trim(); return t.content.firstChild; };
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+function renderQR(canvas, text) {
+  if (typeof qrcode === "undefined") return false;  // local QR asset unavailable
+  const qr = qrcode(0, "M");
+  qr.addData(text);
+  qr.make();
+  const px = 240, cells = qr.getModuleCount(), cell = Math.floor(px / cells), size = cell * cells;
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = "#000";
+  for (let r = 0; r < cells; r++)
+    for (let c = 0; c < cells; c++)
+      if (qr.isDark(r, c)) ctx.fillRect(c * cell, r * cell, cell, cell);
+  return true;
+}
+
+async function api(method, path, body, timeoutMs = 60000) {
+  const ctl = new AbortController();
+  const to = setTimeout(() => ctl.abort(), timeoutMs);
+  try {
+    const r = await fetch(path, {
+      method,
+      cache: "no-store",
+      headers: body ? { "Content-Type": "application/json" } : {},
+      body: body ? JSON.stringify(body) : (method === "POST" ? "" : undefined),
+      signal: ctl.signal,
+    });
+    const txt = await r.text();
+    let json = null; try { json = txt ? JSON.parse(txt) : {}; } catch { json = { _raw: txt }; }
+    return { ok: r.ok, status: r.status, body: json };
+  } catch (e) {
+    return { ok: false, status: 0, body: { message: e.name === "AbortError" ? t("requestTimeout") : t("networkError") } };
+  } finally {
+    clearTimeout(to);
+  }
+}
+const isOk = (res) => res.ok && res.body && (res.body.status === "ok" || res.body.ok === true);
+
+/* ── Step definitions ───────────────────────────────────────────
+   Each step: { key, done(status), render(ctx) }. The sidebar label comes
+   from t("nav_<key>"); render() returns the stage DOM and uses ctx.next()
+   (advance) / ctx.back() / ctx.go(i) (jump).
+   NOTE: keep this sequence in sync with the CLI (cli/setup/hardware.py
+   run()) — the two surfaces are intentionally mirrored. */
+const STEPS = [
+  { key: "phone", done: (s) => s.bridge, render: connectPhone },
+  { key: "position", done: (s) => s.arm, render: positionRig },
+  { key: "arm", done: (s) => s.arm, render: connectArm },
+  { key: "camera", done: (s) => s.camera, render: connectCamera },
+  { key: "viewport", done: (s) => "viewport_shift" in (s.steps || {}), render: viewportShift },
+  { key: "armcal", done: (s) => "mapping_a" in (s.steps || {}), render: calibrateArm },
+  { key: "camcal", done: (s) => "mapping_b" in (s.steps || {}), render: calibrateCamera },
+  { key: "validate", done: (s) => (s.steps || {}).validated === true, render: validate },
+  { key: "at", done: (s) => "assistive_touch" in (s.steps || {}), render: assistiveTouch },
+  { key: "finish", done: (s) => s.ready, render: finish },
+];
+
+let CURRENT = 0;
+let VIEW_ID = 0;
+let WORKING = false;
+let STEP_READY = Promise.resolve();
+let STATUS = { steps: {} };
+const START = Date.now();
+
+async function refreshStatus() {
+  const r = await api("GET", "/api/status");
+  if (r.ok && r.body) STATUS = r.body;
+  return STATUS;
+}
+
+function renderSidebar() {
+  const list = document.getElementById("stepList");
+  list.innerHTML = "";
+  STEPS.forEach((st, i) => {
+    const done = i < CURRENT;
+    const active = i === CURRENT;
+    const li = $(`<li class="${done ? "done" : ""} ${active ? "active" : ""}">
+      <span class="dot">${done ? "✓" : (i + 1)}</span><span>${t("nav_" + st.key)}</span></li>`);
+    if (done) li.onclick = () => go(i);
+    list.appendChild(li);
+  });
+  const pct = Math.round((CURRENT / (STEPS.length - 1)) * 100);
+  document.getElementById("bar").style.width = pct + "%";
+  document.getElementById("barCap").textContent = t("stepOf", Math.min(CURRENT + 1, STEPS.length));
+}
+
+function ctxFor(i) {
+  const view = VIEW_ID;
+  const active = () => CURRENT === i && VIEW_ID === view;
+  return {
+    active,
+    next: () => active() ? go(Math.min(i + 1, STEPS.length - 1), true) : false,
+    back: () => active() ? go(Math.max(0, i - 1)) : false,
+    go,
+  };
+}
+
+let _stopHooks = [];
+function render() {
+  VIEW_ID++;
+  STEP_READY = Promise.resolve();
+  _stopHooks.forEach(fn => { try { fn(); } catch {} });
+  _stopHooks = [];
+  renderSidebar();
+  const panel = document.getElementById("panel");
+  panel.innerHTML = "";
+  const node = STEPS[CURRENT].render(ctxFor(CURRENT));
+  panel.appendChild(node);
+}
+
+async function go(i, automatic = false) {
+  if (WORKING) return false;
+  if (!automatic) { stopAuto(); AUTO_ARMED = false; }
+  const prepared = STEP_READY;
+  const view = ++VIEW_ID;
+  CURRENT = Math.max(0, Math.min(i, STEPS.length - 1));
+  await prepared;
+  await refreshStatus();
+  if (VIEW_ID !== view) return false;
+  render();
+  return true;
+}
+
+/* Auto mode (mirrors the CLI `--auto`): run each step for the user by
+   triggering its confirm button and advancing. It drives the real steps, so
+   it stops and hands control back the moment a step fails or needs a physical
+   action (take the AT screenshot, position the stylus, place the AT button) —
+   leaving the user on that step to finish it, then press Continue to resume. */
+let AUTO = false;       // the autoRun loop is currently driving
+let AUTO_ARMED = false; // "Auto mode" button is on — Continue starts the run
+let AUTO_ID = 0;
+function stopAuto() {
+  AUTO = false;
+  AUTO_ID++;
+}
+
+async function advance(ctx) {
+  const advanced = await ctx.next();
+  if (advanced && AUTO_ARMED && !AUTO) autoRun();
+  return advanced;
+}
+
+async function autoRun() {
+  if (AUTO || !AUTO_ARMED) return;
+  const run = ++AUTO_ID;
+  AUTO = true;
+  try {
+    while (AUTO && AUTO_ID === run && CURRENT < STEPS.length - 1) {
+      const button = enterTarget();
+      if (!button || !button.onclick || !(await button.onclick())) break;
+    }
+  } finally {
+    if (AUTO_ID === run) AUTO = false;
+  }
+}
+
+/* shared layout helper */
+function shell({ n, eyebrow, title, lede, cards = [] }) {
+  const wrap = $(`<div class="detail"></div>`);
+  const head = $(`<div class="panel-head"></div>`);
+  head.appendChild($(`<div class="kicker">${eyebrow || t("stepOf", n)}</div>`));
+  if (title) head.appendChild($(`<h1>${title}</h1>`));
+  if (lede) head.appendChild($(`<p class="lede">${lede}</p>`));
+  wrap.appendChild(head);
+  cards.forEach(c => wrap.appendChild(c));
+  return wrap;
+}
+function card(inner) { const c = $(`<div class="card"></div>`); if (typeof inner === "string") c.innerHTML = inner; else c.appendChild(inner); return c; }
+function note(kind, html) { return $(`<div class="note ${kind}"><span class="ic">${{ info: "ℹ", ok: "✓", warn: "⚠", err: "✕" }[kind]}</span><span>${html}</span></div>`); }
+function busy(btn, on, label) {
+  if (on) { if (!btn.disabled) btn._t = btn.innerHTML; btn.disabled = true; btn.innerHTML = `<span class="spin"></span>${label || t("working")}`; }
+  else { btn.disabled = false; btn.innerHTML = btn._t; }
+}
+
+function setWorking(on) {
+  WORKING = on;
+  document.getElementById("langToggle").disabled = on;
+  document.querySelectorAll("#panel .actions .ghost").forEach(button => button.disabled = on);
+}
+
+/* Consistent step footer: Back on the left, the primary action on the
+   right. `back: true` adds a Back button to the previous step (no positional
+   index — insert-safe). `primary.id` lets steps grab the button for
+   busy()/label swaps. The primary always carries data-enter so Enter confirms it. */
+function footer(ctx, { back, primary } = {}) {
+  const bar = $(`<div class="actions"></div>`);
+  if (back) {
+    const b = $(`<button class="btn ghost">${t("back")}</button>`);
+    b.onclick = () => ctx.back();
+    bar.appendChild(b);
+  }
+  if (primary) {
+    const p = $(`<button class="btn primary" data-enter></button>`);
+    p.textContent = primary.label;
+    if (primary.id) p.id = primary.id;
+    if (primary.disabled) p.disabled = true;
+    if (primary.onClick) p.onclick = async () => {
+      if (p.disabled || WORKING || !ctx.active()) return false;
+      p.disabled = true;
+      try { return await primary.onClick(); }
+      finally { if (ctx.active()) p.disabled = false; }
+    };
+    bar.appendChild(p);
+  }
+  return bar;
+}
+
+const ADVANCE_DELAY = 700;  // ms — let the success note linger before advancing
+const msg = (r, fallback = t("noResponse")) => String((r.body && (r.body.message || r.body.error)) || fallback).trim().replace(/[.。]+$/, "");
+
+/* Wire the primary button to a one-shot async action and own the lifecycle
+   every action step shares: toggle busy, clear the result area `st`, run
+   `call()`, refresh status. `ok(r)` decides success (defaults to isOk —
+   some endpoints always return status:"ok" and signal pass/fail in the
+   body, so they pass a custom predicate). `onOk(r)` renders the result;
+   `err(r)` returns the error message; `input(r)` explains a required manual
+   action and pauses auto mode. The wizard then auto-advances, unless
+   `hold` is set — that turns the button into "Continue" so the user can
+   read a result worth keeping before moving on. */
+function runAction(ctx, go, st, { busy: label, prepare, call, ok = isOk, onOk, err, prepareError = err, input, hold, delay = ADVANCE_DELAY }) {
+  let prepared = prepare ? prepare() : null;
+  if (prepared) {
+    STEP_READY = prepared;
+    prepared.then(r => {
+      if (ctx.active() && !go.disabled && !isOk(r)) st.appendChild(note("warn", prepareError(r)));
+    });
+  }
+  go.onclick = async () => {
+    if (go.disabled || WORKING || !ctx.active()) return false;
+    busy(go, true, label); st.innerHTML = "";
+    setWorking(true);
+    let next = false;
+    try {
+      const pending = prepared;
+      prepared = null;
+      const ready = prepare ? await (pending || prepare()) : null;
+      if (!ctx.active()) return false;
+      const r = ready && !isOk(ready) ? ready : await call();
+      if (!ctx.active()) return false;
+      if (!ok(r)) {
+        stopAuto();
+        st.appendChild(input && r.body && r.body.status === "needs_input"
+          ? note("info", input(r)) : note("err", err(r)));
+        return false;
+      }
+      onOk(r);
+      await refreshStatus();
+      if (!ctx.active()) return false;
+      if (!hold) { await sleep(delay); next = true; }
+    } catch (e) {
+      stopAuto();
+      if (ctx.active()) st.appendChild(note("err", err({body: {message: e.message || t("requestFailed")}})));
+      return false;
+    } finally {
+      if (!next) busy(go, false);
+      setWorking(false);
+    }
+    if (next) return advance(ctx);
+    go.textContent = t("cont");
+    go.onclick = async () => {
+      if (go.disabled || WORKING || !ctx.active()) return false;
+      go.disabled = true;
+      return advance(ctx);
+    };
+    return true;
+  };
+}
+
+/* ── 1. Connect phone ──────────────────────────────── */
+function connectPhone(ctx) {
+  const altUrl = (PHONE_URL_FALLBACK && PHONE_URL_FALLBACK !== PHONE_URL)
+    ? `<div class="url alt" title="${t("s_phone_altUrl")}">${PHONE_URL_FALLBACK}</div>` : "";
+  const body = card(`<div class="qrwrap">
+      <div class="qrcard"><canvas id="qr"></canvas>
+        <div class="qr-done" id="qrDone"><div class="check">✓</div><div class="lbl">${t("s_phone_doneBadge")}</div></div>
+      </div>
+      <div class="qrtxt">
+        <p style="color:var(--muted);font-size:14px">${t("s_phone_scan")}</p>
+        <div class="url">${PHONE_URL}</div>${altUrl}
+        <div id="connState" style="margin-top:14px"></div>
+      </div>
+    </div>`);
+  const wrap = shell({ n: 1, title: t("s_phone_title"), lede: t("s_phone_lede"), cards: [body] });
+  // Continue advances one step. If "Auto mode" is on, that same press then
+  // drives the rest of the wizard hands-off (mirrors the CLI `--auto`).
+  const actions = footer(ctx, { primary: { id: "nextBtn", label: t("cont"), disabled: true, onClick: () => advance(ctx) } });
+  // "Auto mode" toggle-button: click to arm (a check badge appears in the
+  // top-right corner), then press Continue to run every step automatically
+  // (pausing on any step that needs you). Disabled until the phone connects.
+  const autoBtn = $(`<button type="button" class="btn auto-btn" id="autoBtn" disabled>${t("autoBtn")}</button>`);
+  autoBtn.classList.toggle("on", AUTO_ARMED);
+  autoBtn.onclick = () => {
+    AUTO_ARMED = !AUTO_ARMED;
+    autoBtn.classList.toggle("on", AUTO_ARMED);
+    if (!AUTO_ARMED) stopAuto();
+  };
+  // Auto-mode button sits just left of Continue on the right; its explanation
+  // (was a button tooltip) fills the left of the action bar, where the button
+  // used to be.
+  actions.insertBefore(autoBtn, actions.firstChild);
+  actions.insertBefore($(`<p class="auto-hint">${t("autoHint")}</p>`), autoBtn);
+  wrap.appendChild(actions);
+
+  const qrCanvas = body.querySelector("#qr");
+  if (!renderQR(qrCanvas, PHONE_URL)) {
+    qrCanvas.replaceWith($(`<div style="width:100%;aspect-ratio:1;display:grid;place-items:center;color:#666;font-size:13px;text-align:center;padding:12px">${t("s_phone_qroff")}</div>`));
+  }
+
+  const stateEl = body.querySelector("#connState");
+  const nextBtn = actions.querySelector("#nextBtn");
+  let stop = false; _stopHooks.push(() => stop = true);
+  (async function poll() {
+    while (!stop) {
+      const s = await refreshStatus();
+      if (s.bridge) {
+        body.querySelector("#qrDone").classList.add("show");
+        stateEl.innerHTML = ""; stateEl.appendChild(note("ok", t("s_phone_ok")));
+        nextBtn.disabled = false;
+        autoBtn.disabled = false;
+        return;
+      }
+      stateEl.innerHTML = ""; stateEl.appendChild($(`<span class="pill wait"><span class="led"></span>${t("s_phone_waiting")}</span>`));
+      await sleep(1500);
+    }
+  })();
+  return wrap;
+}
+
+/* ── 2. Position rig ───────────────────────────────── */
+function positionRig(ctx) {
+  const list = card(`<ul class="steps-do">
+    <li><span class="n">1</span><div>${t("s_position_li1")}</div></li>
+    <li><span class="n">2</span><div>${t("s_position_li2")}</div></li>
+    <li><span class="n">3</span><div>${t("s_position_li3")}</div></li>
+    <li><span class="n">4</span><div>${t("s_position_li4")}</div></li>
+  </ul>`);
+  const wrap = shell({ n: 2, title: t("s_position_title"), lede: t("s_position_lede"), cards: [list] });
+  wrap.appendChild(footer(ctx, { back: true, primary: { label: t("s_position_btn"), onClick: () => ctx.next() } }));
+  return wrap;
+}
+
+/* ── 3. Connect arm ────────────────────────────────── */
+function connectArm(ctx) {
+  const c = card(`<p style="color:var(--muted);font-size:14.5px">${t("s_arm_card")}</p><div id="st"></div>`);
+  const wrap = shell({ n: 3, title: t("s_arm_title"), lede: t("s_arm_lede"), cards: [c] });
+  const actions = footer(ctx, { back: true, primary: { id: "go", label: t("s_arm_btn") } });
+  wrap.appendChild(actions);
+  const st = c.querySelector("#st");
+  runAction(ctx, actions.querySelector("#go"), st, {
+    busy: t("s_arm_busy"),
+    call: () => api("POST", "/api/connect-arm", null, 40000),
+    onOk: () => st.appendChild(note("ok", t("s_arm_ok"))),
+    err: r => t("s_arm_err", r),
+    delay: 1500,
+  });
+  return wrap;
+}
+
+/* ── 4. Connect camera ─────────────────────────────── */
+function connectCamera(ctx) {
+  const c = card(`<p style="color:var(--muted);font-size:14.5px">${t("s_camera_card")}</p>
+    <div id="st"></div>`);
+  const wrap = shell({ n: 4, title: t("s_camera_title"), lede: t("s_camera_lede"), cards: [c] });
+  const actions = footer(ctx, { back: true, primary: { id: "go", label: t("s_camera_btn") } });
+  wrap.appendChild(actions);
+  const st = c.querySelector("#st");
+  runAction(ctx, actions.querySelector("#go"), st, {
+    busy: t("s_camera_busy"),
+    call: () => api("POST", "/api/connect-camera", { index: "auto" }, 60000),
+    onOk: r => st.appendChild(note("ok", t("s_camera_ok", r))),
+    err: r => t("s_camera_err", r),
+  });
+  return wrap;
+}
+
+/* ── 5. Locate the screen (viewport shift) ─────────── */
+function viewportShift(ctx) {
+  const list = card(`<ul class="steps-do">
+    <li><span class="n">1</span><div>${t("s_viewport_li1")}</div></li>
+    <li><span class="n">2</span><div>${t("s_viewport_li2")}</div></li>
+    <li><span class="n">3</span><div>${t("s_viewport_li3")}</div></li>
+  </ul>`);
+  const st = $(`<div id="st"></div>`);
+  const wrap = shell({ n: 5, title: t("s_viewport_title"), lede: t("s_viewport_lede"), cards: [list, st] });
+  const actions = footer(ctx, { back: true, primary: { id: "go", label: t("s_viewport_btn") } });
+  wrap.appendChild(actions);
+  runAction(ctx, actions.querySelector("#go"), st, {
+    busy: t("s_viewport_busy"),
+    prepare: () => api("POST", "/api/bridge/switch", { mode: "calibrate", phase: "screenshot_cal" }),
+    prepareError: () => t("s_viewport_warn"),
+    call: () => api("POST", "/api/calibrate/viewport-shift", { fresh: !AUTO }, 40000),
+    onOk: () => st.appendChild(note("ok", t("s_viewport_ok"))),
+    err: r => t("s_viewport_err", r),
+  });
+  return wrap;
+}
+
+/* ── 6. Calibrate arm (position stylus + tap routine) ── */
+function calibrateArm(ctx) {
+  const list = card(`<ul class="steps-do">
+    <li><span class="n">1</span><div>${t("s_armcal_li1")}</div></li>
+    <li><span class="n">2</span><div>${t("s_armcal_li2")}</div></li>
+  </ul><label><input type="checkbox" id="sameCradle"> ${t("same_cradle")}</label>`);
+  const st = $(`<div id="st"></div>`);
+  const wrap = shell({ n: 6, title: t("s_armcal_title"), lede: t("s_armcal_lede"), cards: [list, st] });
+  const actions = footer(ctx, { back: true, primary: { id: "go", label: t("s_armcal_btn") } });
+  wrap.appendChild(actions);
+  runAction(ctx, actions.querySelector("#go"), st, {
+    busy: t("s_armcal_busy"),
+    prepare: () => api("POST", "/api/bridge/switch", { mode: "calibrate", phase: "center" }),
+    prepareError: () => t("s_armcal_warn"),
+    // In auto mode the stylus is parked off-screen — tell the server to drive
+    // it onto the screen center first (using the saved calibration).
+    call: () => {
+      const options = AUTO ? { from_park: true } : {};
+      if (list.querySelector("#sameCradle").checked) options.same_cradle = true;
+      return api("POST", "/api/calibrate/arm", Object.keys(options).length ? options : null, 130000);
+    },
+    onOk: r => {
+      st.appendChild(note("ok", t("s_armcal_ok", r)));
+      if (r.body.reused_travel) st.appendChild(note("ok", t("travel_reused")));
+      else if (list.querySelector("#sameCradle").checked) st.appendChild(note("warn", t("travel_missing")));
+      if (!r.body.aligned) st.appendChild(note("warn", t("s_armcal_warnSkew")));
+    },
+    input: () => t("s_armcal_input"),
+    err: r => t("s_armcal_err", r),
+    hold: true,
+  });
+  return wrap;
+}
+
+/* ── 7. Calibrate camera (rotation/coverage + mapping) ─ */
+function addCameraOptions(card) {
+  if (!["entity.livinginacat.world", "entity-alfonsito.pages.dev"].includes(location.hostname)) return;
+  const link = document.createElement("a");
+  link.className = "btn";
+  link.href = "/camara?lang=" + (LANG === "es" ? "es" : "en");
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.textContent = LANG === "es" ? "Opciones de cámara ↗" : LANG === "zh" ? "摄像头设置 ↗" : "Camera settings ↗";
+  card.appendChild(link);
+}
+function calibrateCamera(ctx) {
+  const list = card(`<ul class="steps-do">
+    <li><span class="n">1</span><div>${t("s_camcal_li1")}</div></li>
+    <li><span class="n">2</span><div>${t("s_camcal_li2")}</div></li>
+  </ul>`);
+  const st = $(`<div id="st"></div>`);
+  const wrap = shell({ n: 7, title: t("s_camcal_title"), lede: t("s_camcal_lede"), cards: [list, st] });
+  addCameraOptions(list);
+  const actions = footer(ctx, { back: true, primary: { id: "go", label: t("s_camcal_btn") } });
+  wrap.appendChild(actions);
+  const go = actions.querySelector("#go");
+
+  let frame;
+  runAction(ctx, go, st, {
+    busy: t("s_camcal_busyFrame"),
+    call: async () => {
+      frame = true;
+      const chk = await api("POST", "/api/calibrate/camera", null, 20000);
+      if (!isOk(chk) || !ctx.active()) return chk;
+      const rotation = t("camRotation", chk.body.rotation) || chk.body.rotation_name;
+      st.appendChild($(`<div class="kv"><span>${t("s_camcal_kvRot")} <b>${rotation}</b></span><span>${t("s_camcal_kvCov")} <b>${Math.round((chk.body.coverage || 0) * 100)}%</b></span></div>`));
+      const advice = [["Rotate camera", "camAxes"], ["Straighten camera", "camAngle"], ["Camera may be tilted", "camTilt"], ["Move camera closer", "camCoverage"]];
+      for (const issue of chk.body.issues || []) {
+        const match = advice.find(([prefix]) => issue.startsWith(prefix));
+        st.appendChild(note(match && match[1] === "camAxes" ? "info" : "warn", match ? t(match[1]) : issue));
+      }
+      busy(go, true, t("s_camcal_busyDots"));
+      frame = false;
+      return api("POST", "/api/calibrate/camera-mapping");
+    },
+    onOk: r => st.appendChild(note("ok", t("s_camcal_ok", r.body.dots))),
+    err: r => {
+      const message = msg(r);
+      if (frame && /marker not found|orientation markers/i.test(message)) return t("camMarker");
+      const grid = message.match(/(\d+)-dot grid.*last saw (\d+) dots/i);
+      if (grid) return grid[1] === grid[2] ? t("camFit", grid[1]) : t("camCount", grid[2], grid[1]);
+      return t(frame ? "s_camcal_errCam" : "s_camcal_errMap", r);
+    },
+    hold: true,
+  });
+  return wrap;
+}
+
+/* ── 8. Validate ───────────────────────────────────── */
+function validate(ctx) {
+  const list = card(`<ul class="steps-do">
+    <li><span class="n">1</span><div>${t("s_validate_li1")}</div></li>
+    <li><span class="n">2</span><div>${t("s_validate_li2")}</div></li>
+  </ul>`);
+  const st = $(`<div id="st"></div>`);
+  const wrap = shell({ n: 8, title: t("s_validate_title"), lede: t("s_validate_lede"), cards: [list, st] });
+  addCameraOptions(list);
+  const actions = footer(ctx, { back: true, primary: { id: "go", label: t("s_validate_btn") } });
+  wrap.appendChild(actions);
+  runAction(ctx, actions.querySelector("#go"), st, {
+    busy: t("s_validate_busy"),
+    call: () => api("POST", "/api/calibrate/validate", null, 70000),
+    ok: r => r.ok && r.body && r.body.calibrated,
+    onOk: r => st.appendChild(note("ok", t("s_validate_ok", r))),
+    err: r => {
+      const results = (r.body || {}).results;
+      if (!Array.isArray(results) || !results.length) return t("s_validate_err", r);
+      const touches = results.filter(row => Array.isArray(row.actual)).length;
+      const seen = results.filter(row => row.camera_observed === true).length;
+      const advice = (touches === results.length && seen < results.length) ? "tapCamera" : "tapMiss";
+      return t("tapCounts", touches, seen, results.length) + " " + t(advice);
+    },
+  });
+  return wrap;
+}
+
+/* ── 9. AssistiveTouch ─────────────────────────────── */
+function assistiveTouch(ctx) {
+  const list = card(`<ul class="steps-do">
+    <li><span class="n">1</span><div>${t("s_at_li1")}</div></li>
+    <li><span class="n">2</span><div>${t("s_at_li2")}</div></li>
+  </ul>`);
+  const st = $(`<div id="st"></div>`);
+  const wrap = shell({ n: 9, title: t("s_at_title"), lede: t("s_at_lede"), cards: [list, st] });
+  const actions = footer(ctx, { back: true, primary: { id: "go", label: t("s_at_btn") } });
+  wrap.appendChild(actions);
+  runAction(ctx, actions.querySelector("#go"), st, {
+    busy: t("s_at_busy"),
+    prepare: () => api("POST", "/api/calibrate/assistive-touch/show"),
+    call: () => api("POST", "/api/calibrate/assistive-touch/verify", null, 25000),
+    ok: r => r.ok && r.body && r.body.passed,
+    onOk: r => {
+      const clip = r.body.clipboard || {};
+      st.appendChild(note("ok", t("s_at_ok", clip.fetched ? (clip.text || "") : null)));
+    },
+    err: () => t("s_at_err"),
+  });
+  return wrap;
+}
+
+/* ── 10. Finish ────────────────────────────────────── */
+function finish(ctx) {
+  // Already done (e.g. a page refresh after setup) → show the ready state
+  // straight away. Only a genuine first finish runs home + mark-ready, so a
+  // refresh never re-homes the phone or re-fires the setup actions.
+  const alreadyReady = STATUS.ready;
+  const c = card($(`<div class="success-hero" id="hero">
+    <div class="big">${alreadyReady ? "✓" : '<span class="spin" style="width:30px;height:30px;border-width:3px"></span>'}</div>
+    <h1 style="margin:0">${alreadyReady ? t("s_finish_readyTitle") : t("s_finish_finishingTitle")}</h1>
+    <p class="lede" style="margin-top:8px">${alreadyReady ? t("s_finish_readyLedeShort") : t("s_finish_finishingLede")}</p></div>`));
+  const wrap = shell({ n: 10, eyebrow: t("finalStep"), title: "", cards: [c] });
+  const hero = c.querySelector("#hero");
+
+  function showReady(when) {
+    hero.innerHTML = `<div class="big">✓</div>
+      <h1 style="margin:0">${t("s_finish_readyTitle")}</h1>
+      <p class="lede" style="margin:10px auto 0;max-width:42ch">${t("s_finish_readyLede", when)}</p>`;
+    // Only the built-in runtime automatically learns the screen layout.
+    if (PHONE_URL.startsWith("https://")) {
+      const panelLink = document.createElement("a");
+      panelLink.className = "btn primary";
+      panelLink.href = "/?lang=" + LANG;
+      panelLink.textContent = LANG === "es" ? "Volver al panel" : "Return to dashboard";
+      hero.appendChild(panelLink);
+    } else if (__NO_RUNTIME__) {
+      const connect = $(`<p class="mcp-connect"><span class="mcp-label">MCP:<span class="sr-only" id="mcpStatus" role="status"></span></span> <span id="mcpAddress"></span></p>`);
+      connect.querySelector("#mcpAddress").textContent = window.location.origin + "/mcp";
+      hero.appendChild(connect);
+      const status = connect.querySelector("#mcpStatus");
+      function setState(state) {
+        if (connect.dataset.state === state) return;
+        connect.dataset.state = state;
+        status.textContent = t("s_finish_mcp_" + state);
+      }
+      let timer;
+      _stopHooks.push(() => clearTimeout(timer));
+      setState("checking");
+      (async function checkConnection() {
+        if (!ctx.active()) return;
+        // Use a fresh response; refreshStatus keeps old data after a disconnect.
+        const r = await api("GET", "/api/status", null, 2000);
+        if (!ctx.active()) return;
+        if (!r.ok || typeof r.body?.ready !== "boolean") setState("offline");
+        else setState(r.body.ready ? "online" : "waiting");
+        timer = setTimeout(checkConnection, 3000);
+      })();
+    } else if (!STATUS.layout_learned)
+      hero.appendChild($(`<div class="note info center">${t("s_finish_learning")}</div>`));
+    // Housekeeping line — kept faint so it doesn't compete with the info note.
+    hero.appendChild($(`<p style="text-align:center;color:var(--faint);font-size:12.5px;margin:14px 0 0">${t("s_finish_close")}</p>`));
+  }
+
+  if (alreadyReady) { showReady(""); return wrap; }
+  const active = ctx.active;
+
+  function showFailure(message) {
+    hero.innerHTML = "";
+    hero.appendChild(note("err", message));
+    const retry = $(`<button class="btn primary" data-enter>${t("s_finish_retry")}</button>`);
+    retry.onclick = () => ctx.go(STEPS.length - 1);
+    hero.appendChild(retry);
+  }
+
+  (async () => {
+    const home = await api("POST", "/api/phone/home");
+    if (!active()) return;
+    if (!isOk(home)) { showFailure(t("s_finish_homeErr", home)); return; }
+    await sleep(3000);
+    if (!active()) return;
+    const requested = await api("POST", "/api/ready");
+    if (requested.ok && requested.body && requested.body.ok) {
+      const deadline = Date.now() + 45000;
+      while (active() && Date.now() < deadline) {
+        // Read a fresh response: refreshStatus retains old state on error.
+        const r = await api("GET", "/api/status", null, Math.min(5000, deadline - Date.now()));
+        if (!active()) return;
+        if (!r.ok || !r.body) break;
+        STATUS = r.body;
+        if (STATUS.ready) {
+          const secs = Math.round((Date.now() - START) / 1000);
+          const mm = Math.floor(secs / 60), ss = secs % 60;
+          showReady(secs > 5 ? t("s_finish_when", mm, ss) : "");
+          return;
+        }
+        await sleep(1000);
+      }
+    }
+    if (active()) showFailure(t("s_finish_err"));
+  })();
+  return wrap;
+}
+
+/* ── Enter key = confirm / advance ─────────────────────
+   Activates the active step's main call-to-action: an explicit
+   [data-enter] button if present, else the last enabled primary
+   button (which is the "Continue" a step appends after showing
+   its result). Ignored while typing or when the button is busy. */
+function enterTarget() {
+  const panel = document.getElementById("panel");
+  const explicit = panel.querySelector("[data-enter]:not([disabled])");
+  if (explicit) return explicit;
+  const primaries = [...panel.querySelectorAll(".btn.primary")]
+    .filter(b => !b.disabled && b.offsetParent !== null);
+  return primaries[primaries.length - 1] || null;
+}
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" || e.isComposing) return;
+  if (e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return;
+  const t = e.target;
+  if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+  const btn = enterTarget();
+  if (btn) { e.preventDefault(); btn.click(); }
+});
+
+/* ── Boot ──────────────────────────────────────────── */
+(async function boot() {
+  const s = await refreshStatus();
+  if (s.ready) {
+    CURRENT = STEPS.length - 1;
+    const url = new URL(location.href);
+    if (url.searchParams.get("calibrate") === "1") {
+      const hardwareStep = STEPS.findIndex(st => ["phone", "position", "arm", "camera"].includes(st.key) && !st.done(s));
+      CURRENT = hardwareStep >= 0 ? hardwareStep : STEPS.findIndex(st => st.key === "viewport");
+      url.searchParams.delete("calibrate");
+      history.replaceState(null, "", url);
+    }
+    render();
+    return;
+  }
+  // Always start at step 1, UNLESS a setup is genuinely under way (arm/camera
+  // connected or calibration progress) — then resume at the first not-done
+  // step. A freshly started server with the phone bridge already connected is
+  // NOT progress, so it still starts at step 1 rather than skipping ahead.
+  const inProgress = s.arm || s.camera || Object.keys(s.steps || {}).length > 0;
+  let i = 0;
+  if (inProgress) for (; i < STEPS.length; i++) { if (!STEPS[i].done(s)) break; }
+  CURRENT = Math.min(i, STEPS.length - 1);
+  render();
+})();
+</script>
+</body>
+</html>

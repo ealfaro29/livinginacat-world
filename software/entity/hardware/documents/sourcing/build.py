@@ -1,0 +1,778 @@
+#!/usr/bin/env python3
+"""Render the bilingual PhysiClaw sourcing guide from purchasing and supplier data.
+
+The parts list is read from ``documents/bom/bom.json``, also used by the
+assembly manual and technical drawings. Class, component, spec, qty and application
+render verbatim from those rows, each carrying a short stable ``part_id``
+(e.g. ``rail-y``).
+
+``vendors/cn.json`` supplies the Chinese guide;
+``vendors/global.json`` supplies the English guide. Each is an array
+with one entry per BOM row, in BOM order, keyed by ``part_id``. Each entry
+adds the sourcing columns of the table — all optional:
+
+- ``ref`` — 参考价: a rough expected cost for the needed quantity, so the
+  buyer can judge whether a shop's price is reasonable (missing -> em dash);
+- ``inquiry`` — a ready-to-paste message for the shop (one fact per line).
+  It has no cell of its own: the part's ``note`` embeds it via the
+  ``{inquiry}`` placeholder as a click-to-copy "询价信息" control (hover
+  previews the message). Only custom / cut-to-order parts carry one;
+  standard parts are bought off the shelf by spec;
+- ``suppliers`` — 商家 1..3: up to three shops, each ``{name, url?,
+  product?, details?}``: the name (linked to the shop's ``url`` when filled in)
+  over the shop's own ``product`` spec. Missing slots render as pending;
+  a slot whose name is ``—`` renders as a muted dash (nothing to buy —
+  e.g. the part comes bundled with another purchase).
+  Localizable values take ``{"en":…,"zh":…}``; plain strings show in both
+  languages. Optional ``details`` opens a dialog with ``label`` (trigger),
+  ``title`` (accessible name), ``heading``, ``instructions`` (trusted inline
+  HTML, like notes), and optional ``parts`` or ``steps``. Each part has
+  ``part_number``, ``qty`` and ``description``; the renderer builds the table
+  and part-number copy controls. Steps have ``title``, inline-HTML ``text``,
+  and optional ``settings`` (``label`` / ``value`` pairs);
+- ``note`` — 备注: a free remark column at the table's end (missing -> em
+  dash). Notes are prose and emitted as trusted HTML, the manual's
+  convention for content strings (inline ``<a>`` is fine); data fields
+  (names, products, refs) are escaped instead. The placeholder ``{inquiry}``
+  renders as the same click-to-copy 询价信息 control as in the supplier
+  cells.
+- ``accessories`` — purchases needed with a particular supplier variant,
+  kept inside the Notes cell rather than added to the BOM or checklist.
+  Each has ``name``, ``url`` and optional ``spec`` (name/spec may be
+  localized). Each vendor link appears above its optional spec.
+  When present, purchase links render automatically after the note text,
+  including when no note text is supplied.
+
+The special value ``"Ditto"`` makes a field merge with the row above — the
+table cell spans both rows, exactly like a ditto mark in a paper ledger. Use
+it when consecutive parts are sourced together: the frame extrusions carry
+one ref / inquiry / suppliers set on their first row and ``"Ditto"`` on the
+rest, so the cutting order reads as one spanned block. ``"Ditto"`` works per
+field (``ref`` / ``inquiry`` / ``suppliers`` / ``note``), or per supplier
+slot inside the ``suppliers`` array; on the first row it is an error.
+
+The page is also the builder's own checklist: every row carries a
+"bought" checkbox between the BOM columns and the supplier columns,
+ticked rows dim, and a tally just above the table counts progress
+(``12/57 bought``). A cell that spans several rows (a class group or a
+Ditto block) dims only once every row it covers is bought. The list
+persists in ``localStorage`` keyed by the manual version, so state
+survives sessions but a new guide revision starts a clean list, and the
+EN / ZH pages share one list. Beside the reset control, a "highlight"
+toggle washes the unbought rows' Spec and Qty cells (what the buyer
+reads at the shop) in the accent's light wash; it persists with the
+list and hides, off, while the list is empty. Bought state changes only
+through its checkbox or reset. A small corner mark identifies only the last
+opened supplier cell until reload, without ticking Bought.
+On narrow screens the table scrolls sideways.
+
+``optional_tools.json`` supplies the optional tools
+section. Each item has localized ``name``, optional ``spec`` (shown beneath the
+tool name), and ``purpose``.
+Its ``sources`` maps ``en`` / ``zh`` to any number of ``{name, url, product?}``
+suppliers, using the same presentation as BOM suppliers. Missing suppliers
+show a pending placeholder. These extras are outside the BOM checklist and
+do not affect the required-parts tally.
+
+Run under ``uv`` from the repo root (standard library only, Python 3.12+)::
+
+    uv run python -m hardware.documents.sourcing.build              # en + zh
+    uv run python -m hardware.documents.sourcing.build --lang en    # English only -> sourcing_guide.html
+    uv run python -m hardware.documents.sourcing.build --scaffold   # sync both vendor files with the BOM, then build
+
+``--scaffold`` inserts a bare ``{"part_id": …}`` entry for every BOM row
+missing from the file, reorders entries to BOM order, and reports stale ids;
+it never expands entries with defaults.
+"""
+
+from __future__ import annotations
+
+import argparse
+import html
+import json
+import re
+from collections import Counter
+from pathlib import Path
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
+
+from hardware import buildlog
+from hardware.build_lock import locked_main
+from hardware.documents import BuildError
+from hardware.documents.assets import icon
+from hardware.documents.bom.loader import load_bom_rows
+
+# Shared localization, table grouping, timing and document chrome conventions.
+from hardware.documents.common import (
+    HTML_LANG,
+    URL_MARK,
+    _rowspans,
+    _step,
+    loc,
+    manual_version,
+    typeset_quantities,
+)
+from hardware.documents.dimensions import resolve_dimensions
+from hardware.documents.sourcing import VENDOR_FILES
+from hardware.scheme import OUTPUT_DIR as _OUTPUT_ROOT
+
+# --------------------------------------------------------------------------- #
+# Paths — package files are resolved relative to this file; output paths come
+# from hardware.scheme, so the cwd does not matter.
+# --------------------------------------------------------------------------- #
+SCRIPT_DIR = Path(__file__).resolve().parent
+ASSETS_DIR = SCRIPT_DIR.parent / "assets" / "sourcing"
+STYLES_CSS = ASSETS_DIR / "styles.css"
+OPTIONAL_TOOLS_FILE = SCRIPT_DIR / "optional_tools.json"
+# Each document owns its output directory and cleanup.
+OUTPUT_DIR = _OUTPUT_ROOT / "sourcing"
+
+LANG_FILENAME = {"en": "sourcing_guide.html", "zh": "physiclaw采购指南.html"}
+
+# localStorage key prefix for the bought checklist; the version-suffixed key
+# and the prefix both reach the page as body data attributes, so the JS never
+# restates this literal.
+STORE_PREFIX = "physiclaw-sourcing-"
+
+SUPPLIERS_PER_ROW = 3  # supplier slots per part
+DITTO = "Ditto"  # field value: merge this cell with the row above
+
+# UI chrome strings (content strings come localized from the JSON sources).
+UI = {
+    "doc_title": {"en": "PhysiClaw.ai Sourcing Guide", "zh": "PhysiClaw.ai 采购指南"},
+    "h1": {"en": "Sourcing guide", "zh": "采购指南"},
+    "pending": {"en": "to be found", "zh": "待补充"},
+    "inquiry_label": {"en": "Inquiry message", "zh": "询价信息"},
+    "supplier_n": {"en": "Supplier", "zh": "商家"},
+    "close": {"en": "Close", "zh": "关闭"},
+    "copy": {"en": "Copy", "zh": "复制"},
+    "report_link": {
+        "en": "Report link issue (opens GitHub in a new tab)",
+        "zh": "反馈链接问题（在新标签页打开 GitHub）",
+    },
+    "report_tip": {"en": "Something off?", "zh": "发现问题？"},
+    "opened_link": {"en": "Last opened", "zh": "上次打开"},
+    "report_prompt": {
+        "en": "Please describe the problem (unavailable link, wrong product, "
+        "or changed options). If possible, include a replacement link:",
+        "zh": "请说明问题（链接失效、商品不符或选项变更）。如有替代链接，请一并提供：",
+    },
+    # Bought-checklist chrome. tally_fmt/tally_done are JS templates
+    # ({n} ticked / {t} rows).
+    "th_bought": {"en": "Bought", "zh": "已购"},
+    "tally_fmt": {"en": "{n}/{t} bought", "zh": "已购 {n}/{t}"},
+    "tally_done": {"en": "All {t} parts bought", "zh": "全部 {t} 项已购齐"},
+    "reset": {"en": "reset", "zh": "重置"},
+    "reset_confirm": {"en": "Clear all bought marks?", "zh": "清除所有已购标记？"},
+    "hl": {"en": "highlight", "zh": "高亮"},
+    "th_cls": {"en": "Class", "zh": "类别"},
+    "th_component": {"en": "Component", "zh": "组件"},
+    "th_spec": {"en": "Spec", "zh": "规格"},
+    "th_qty": {"en": "Qty", "zh": "数量"},
+    "th_guide_part": {"en": "Part / machining", "zh": "零件 / 加工"},
+    "th_desc": {"en": "Application", "zh": "用途"},
+    "th_ref": {"en": "Ref. price", "zh": "参考价"},
+    "th_note": {"en": "Notes", "zh": "备注"},
+    "optional_tools_title": {
+        "en": "Optional tools",
+        "zh": "可选工具",
+    },
+    "th_tool": {"en": "Tool", "zh": "工具"},
+}
+
+
+def ui(key: str, lang: str) -> str:
+    return loc(UI[key], lang)
+
+
+def clean_supplier_url(url: str) -> str:
+    """Clean supplier links at render time without rewriting vendor JSON.
+
+    AliExpress item links keep only the scheme, host and product path.
+    Taobao/Tmall links retain ``id`` and ``skuId``. Other URLs pass through.
+    """
+    parts = urlparse(url)
+    host = parts.hostname or ""
+    if (
+        host in ("aliexpress.us", "aliexpress.com")
+        or host.endswith((".aliexpress.us", ".aliexpress.com"))
+    ) and re.fullmatch(r"/item/[0-9]+\.html", parts.path):
+        return urlunparse(parts._replace(query="", fragment=""))
+    if not host.endswith(("taobao.com", "tmall.com")):
+        return url
+    params = parse_qs(parts.query)
+    if "id" not in params:
+        return url
+    kept = {key: params[key] for key in ("id", "skuId") if key in params}
+    return urlunparse(parts._replace(query=urlencode(kept, doseq=True)))
+
+
+# --------------------------------------------------------------------------- #
+# Data — shared purchasing rows and market-specific supplier entries.
+# --------------------------------------------------------------------------- #
+def load_sourcing_data(vendor_file: Path) -> list[dict]:
+    """Read a vendor file (an array, one entry per BOM row),
+    bootstrapping an empty list on first run."""
+    if not vendor_file.exists():
+        return []
+    data = json.loads(vendor_file.read_text(encoding="utf-8"))
+    if not isinstance(data, list):
+        raise BuildError(
+            f"{vendor_file.name} must be a JSON array "
+            "(one entry per BOM row, keyed by part_id)"
+        )
+    return data
+
+
+def sync_entries(
+    rows: list[dict], entries: list[dict]
+) -> tuple[list[dict], list[str], list[str]]:
+    """Align the entry array with the BOM: one entry per row, in BOM order.
+    Missing rows get a bare ``{"part_id": …}``; entries whose id no longer
+    matches a row are dropped and reported. Authored entries pass through
+    untouched. Returns ``(synced, added_ids, stale_ids)``."""
+    ids = [e.get("part_id") for e in entries]
+    dupes = sorted(i for i, count in Counter(filter(None, ids)).items() if count > 1)
+    if dupes:
+        raise BuildError(
+            "duplicate part_id(s) in sourcing entries:\n"
+            + "\n".join(f"    {i}" for i in dupes)
+        )
+    by_id = {e.get("part_id"): e for e in entries}
+    row_ids = {r["part_id"] for r in rows}
+    synced: list[dict] = []
+    added: list[str] = []
+    for row in rows:
+        pid = row["part_id"]
+        if pid not in by_id:
+            added.append(pid)
+        synced.append(by_id.get(pid) or {"part_id": pid})
+    stale = [i for i in ids if i not in row_ids]
+    return synced, added, stale
+
+
+def write_sourcing_file(entries: list[dict], vendor_file: Path) -> None:
+    vendor_file.write_text(
+        json.dumps(entries, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Ditto resolution — per column, "Ditto" merges a cell with the row above.
+# --------------------------------------------------------------------------- #
+def ditto_walk(values: list, col: str, ids: list[str]) -> tuple[list[int], list]:
+    """Resolve one column's ``"Ditto"`` marks in a single walk, returning
+    ``(spans, resolved)``: a non-Ditto value opens a cell of span 1; each
+    following ``"Ditto"`` extends that cell (span 0 — no cell emitted) and
+    inherits the anchor's value into ``resolved``. ``"Ditto"`` on the first
+    row has nothing to merge with."""
+    spans = [0] * len(values)
+    resolved: list = []
+    anchor = -1
+    for i, value in enumerate(values):
+        if value == DITTO:
+            if anchor < 0:
+                raise BuildError(
+                    f'"{DITTO}" in {col!r} of entry {ids[i]!r} '
+                    "has no row above to merge with"
+                )
+            spans[anchor] += 1
+            resolved.append(resolved[anchor])
+        else:
+            anchor = i
+            spans[i] = 1
+            resolved.append(value)
+    return spans, resolved
+
+
+def supplier_columns(entries: list[dict]) -> list[list]:
+    """The three supplier columns as per-row value lists. An entry's
+    ``suppliers`` may be ``"Ditto"`` (all three slots merge), an array of up
+    to three slots (each a supplier dict or ``"Ditto"``), or missing."""
+    columns: list[list] = [[] for _ in range(SUPPLIERS_PER_ROW)]
+    for entry in entries:
+        suppliers = entry.get("suppliers")
+        if suppliers == DITTO:
+            slots = [DITTO] * SUPPLIERS_PER_ROW
+        elif suppliers is None:
+            slots = [None] * SUPPLIERS_PER_ROW
+        else:
+            slots = list(suppliers)[:SUPPLIERS_PER_ROW]
+            slots += [None] * (SUPPLIERS_PER_ROW - len(slots))
+        for j in range(SUPPLIERS_PER_ROW):
+            columns[j].append(slots[j])
+    return columns
+
+
+# --------------------------------------------------------------------------- #
+# Rendering
+# --------------------------------------------------------------------------- #
+def _span_attr(span: int) -> str:
+    return f' rowspan="{span}"' if span > 1 else ""
+
+
+def _inquiry_button(
+    message: str, lang: str, flip: bool = False, label: str | None = None
+) -> str:
+    """The click-to-copy 询价信息 control: copy icon + label; hovering shows
+    the message in a tooltip, clicking copies it (icon morphs to a check).
+    ``flip`` opens the tooltip leftward — for buttons near the table's right
+    edge, where it would otherwise be clipped."""
+    # &#10; keeps the message's line breaks intact inside the attribute;
+    # the CSS tooltip renders it via content:attr(data-q) + pre-line, so
+    # the hover preview and the copied text are the same string.
+    msg_attr = html.escape(message, quote=True).replace("\n", "&#10;")
+    cls = "copy flip" if flip else "copy"
+    aria = (
+        f' aria-label="{html.escape(label + ": " + message, quote=True)}"'
+        if label
+        else ""
+    )
+    return (
+        f'<button class="{cls}" type="button" data-q="{msg_attr}"{aria}>'
+        f"{icon.copy_svg}{icon.check_svg}"
+        f"<span>{html.escape(label) if label is not None else ui('inquiry_label', lang)}</span></button>"
+    )
+
+
+def _report_link(supplier: dict, lang: str, item: str, source: str = "") -> str:
+    """Open an editable issue draft; static links also work in downloaded guides."""
+    name = loc(supplier.get("name") or "", lang)
+    if not supplier.get("url") or not name or name == "—":
+        return ""
+    fields = {
+        "Item / part IDs": item,
+        "Supplier": name,
+        "Product / option": loc(
+            supplier.get("product") or supplier.get("spec") or "", lang
+        ),
+        "URL": clean_supplier_url(supplier["url"]),
+        "Guide version": manual_version(),
+        "Market": VENDOR_FILES[lang].stem,
+        "Source": source
+        or f"hardware/documents/sourcing/vendors/{VENDOR_FILES[lang].name}",
+    }
+    details = "\n".join(
+        f"- {label}: {value}" for label, value in fields.items() if value
+    )
+    body = f"{ui('report_prompt', lang)}\n\n\n---\n{details}"
+    title = f"Sourcing link: {name}"
+    if item:
+        title += f" — {item.split('; ', 1)[0]}"
+    query = urlencode({"title": title, "body": body})
+    href = html.escape(
+        f"https://github.com/physiclaw/PhysiClaw/issues/new?{query}", quote=True
+    )
+    label = html.escape(f"{ui('report_link', lang)}: {name}", quote=True)
+    tip = html.escape(ui("report_tip", lang), quote=True)
+    return (
+        f'<a class="report-link" href="{href}" target="_blank" '
+        f'rel="noopener noreferrer" aria-label="{label}" data-tooltip="{tip}">'
+        f"{icon.report_svg}</a>"
+    )
+
+
+def render_supplier_offer(
+    supplier: dict, lang: str, *, item: str = "", source: str = ""
+) -> str:
+    """Shared supplier name/link and product spec for required and optional items."""
+    name = html.escape(loc(supplier.get("name") or "", lang))
+    if supplier.get("url"):
+        href = html.escape(clean_supplier_url(supplier["url"]), quote=True)
+        name = f'<a href="{href}" target="_blank" rel="noopener">{name}</a>'
+    product = loc(supplier.get("product") or "", lang)
+    product_html = (
+        f'<div class="v-prod">{html.escape(product)}</div>' if product else ""
+    )
+    return (
+        f'<div class="v-vendor">{name}</div>{product_html}'
+        f"{_report_link(supplier, lang, item, source)}"
+    )
+
+
+def render_supplier_cell(
+    supplier: dict | None, lang: str, span: int, guide_id: str = "", *, item: str = ""
+) -> str:
+    """One supplier cell: the shop name (linked to its url) over its product spec."""
+    name = loc(supplier.get("name") or "", lang) if supplier else ""
+    if not name:
+        return f'<td class="offer pending"{_span_attr(span)}>{ui("pending", lang)}</td>'
+    if name == "—":
+        return f'<td class="offer na"{_span_attr(span)}>—</td>'
+    details_html = ""
+    if guide_id and supplier.get("details"):
+        label = html.escape(loc(supplier["details"]["label"], lang))
+        details_html = (
+            f'<button class="guide-open" type="button" data-guide="{guide_id}" '
+            f'aria-haspopup="dialog" aria-controls="{guide_id}">{label}</button>'
+        )
+    cell_class = "offer reportable" if supplier.get("url") else "offer"
+    return (
+        f'<td class="{cell_class}"{_span_attr(span)}>'
+        f"{render_supplier_offer(supplier, lang, item=item)}{details_html}</td>"
+    )
+
+
+def render_supplier_guide_body(details: dict, lang: str) -> str:
+    """Render structured ordering details, escaping data and preserving inline prose."""
+    body = f"<h3>{html.escape(loc(details['heading'], lang))}</h3>\n"
+    if details.get("instructions"):
+        body += f"<p>{loc(details['instructions'], lang)}</p>\n"
+    if details.get("steps"):
+        body += '<ol class="guide-steps">'
+        for step in details["steps"]:
+            body += (
+                f"<li><h4>{html.escape(loc(step['title'], lang))}</h4>"
+                f"<p>{loc(step['text'], lang)}</p>"
+            )
+            settings_rows = "".join(
+                f'<tr><th scope="row">{html.escape(loc(setting["label"], lang))}</th>'
+                f"<td>{html.escape(loc(setting['value'], lang))}</td></tr>"
+                for setting in step.get("settings", [])
+            )
+            if settings_rows:
+                body += f'<table class="guide-settings"><tbody>{settings_rows}</tbody></table>'
+            body += "</li>"
+        body += "</ol>"
+    rows = []
+    for part in details.get("parts", []):
+        number = part["part_number"]
+        description = html.escape(loc(part["description"], lang))
+        qty = html.escape(str(part["qty"]))
+        rows.append(
+            '<tr><td><div class="guide-part">'
+            f"<code>{html.escape(number)}</code>"
+            f"{_inquiry_button(number, lang, label=ui('copy', lang))}</div>"
+            f'<div class="guide-spec">{description}</div></td>'
+            f'<td><span class="guide-qty">{qty}</span></td></tr>'
+        )
+    if not rows:
+        return body
+    return body + (
+        '<table class="guide-parts"><thead><tr>'
+        f'<th scope="col">{ui("th_guide_part", lang)}</th>'
+        f'<th scope="col">{ui("th_qty", lang)}</th></tr></thead><tbody>\n'
+        + "\n".join(rows)
+        + "\n</tbody></table>"
+    )
+
+
+def render_supplier_guides(entries: list[dict], lang: str) -> str:
+    """Keep long supplier instructions outside the BOM table and its checklist."""
+    guides = []
+    for idx, entry in enumerate(entries):
+        suppliers = entry.get("suppliers")
+        if not isinstance(suppliers, list):
+            continue  # Ditto uses the anchor row's dialog.
+        for slot, supplier in enumerate(suppliers[:SUPPLIERS_PER_ROW]):
+            if not isinstance(supplier, dict) or not supplier.get("details"):
+                continue
+            name = loc(supplier.get("name") or "", lang)
+            if not name or name == "—":
+                continue  # Match the pending/empty cells, which have no dialog action.
+            details = supplier["details"]
+            guide_id = f"supplier-guide-{idx}-{slot}"
+            title = html.escape(loc(details["title"], lang))
+            body = render_supplier_guide_body(details, lang)
+            guides.append(
+                f'<dialog class="supplier-guide" id="{guide_id}" '
+                f'aria-label="{title}">'
+                '<form method="dialog" class="guide-close">'
+                f'<button aria-label="{ui("close", lang)}" title="{ui("close", lang)}" autofocus>'
+                '<span aria-hidden="true">×</span></button></form>'
+                f'<div class="guide-body">{body}</div>'
+                "</dialog>"
+            )
+    return "".join(guides)
+
+
+def render_accessories(accessories: list[dict], lang: str, *, item: str = "") -> str:
+    """Variant-specific purchases within a part's note; never checklist rows."""
+    offers = []
+    for accessory in accessories:
+        spec = loc(accessory.get("spec") or "", lang)
+        name = html.escape(loc(accessory["name"], lang))
+        href = html.escape(clean_supplier_url(accessory["url"]), quote=True)
+        spec_html = (
+            f'<div class="accessory-spec">{html.escape(spec)}</div>' if spec else ""
+        )
+        offers.append(
+            '<div class="accessory-offer reportable">'
+            f'<a href="{href}" target="_blank" rel="noopener">{name}</a>'
+            f"{spec_html}{_report_link(accessory, lang, item)}</div>"
+        )
+    return f'<div class="note-accessory">{"".join(offers)}</div>'
+
+
+def render_optional_tools(tools: list[dict], lang: str) -> str:
+    """Use the sourcing table's cells and supplier renderer, with one supplier column."""
+    if not tools:
+        return ""
+    rows = []
+    for tool in tools:
+        name = loc(tool["name"], lang)
+        spec = loc(tool.get("spec") or "", lang)
+        spec_html = f'<div class="tool-spec">{html.escape(spec)}</div>' if spec else ""
+        purpose = html.escape(loc(tool["purpose"], lang))
+        item = name
+        if tool.get("spec"):
+            item += f" ({spec})"
+        offers = "".join(
+            f'<div class="supplier-offer{" reportable" if supplier.get("url") else ""}">'
+            f"{render_supplier_offer(supplier, lang, item=item, source='hardware/documents/sourcing/optional_tools.json')}</div>"
+            for supplier in tool.get("sources", {}).get(lang, [])
+            if loc(supplier.get("name") or "", lang).strip()
+        )
+        offer_class = "offer" if offers else "offer pending"
+        rows.append(
+            f'<tr><td class="comp">{html.escape(name)}{spec_html}</td>'
+            f'<td class="desc">{purpose}</td><td class="{offer_class}">'
+            f"{offers or ui('pending', lang)}</td></tr>"
+        )
+    headings = "".join(
+        f'<th scope="col">{ui(key, lang)}</th>'
+        for key in ("th_tool", "th_desc", "supplier_n")
+    )
+    return (
+        '<section class="optional-tools" aria-labelledby="optional-tools-title">'
+        f'<h2 id="optional-tools-title">{ui("optional_tools_title", lang)}</h2>'
+        '<div class="table-wrap"><table class="sourcing optional-sourcing" aria-labelledby="optional-tools-title">'
+        f"<thead><tr>{headings}</tr></thead><tbody>{''.join(rows)}</tbody></table>"
+        "</div></section>"
+    )
+
+
+def render_table(rows: list[dict], entries: list[dict], lang: str) -> str:
+    """The grouped parts table: BOM columns rendered verbatim from the manual
+    content, then the sourcing columns (ref price / one column per supplier
+    slot / notes). ``"Ditto"`` fields merge their cell with the row above."""
+    ids = [r["part_id"] for r in rows]
+    cls_span = _rowspans(rows, lambda r: r["cls"]["en"])
+    comp_span = _rowspans(rows, lambda r: (r["cls"]["en"], r["component"]["en"]))
+
+    ref_spans, refs = ditto_walk([e.get("ref") for e in entries], "ref", ids)
+    note_spans, notes = ditto_walk([e.get("note") for e in entries], "note", ids)
+    sup_walks = [
+        ditto_walk(col, f"suppliers[{j}]", ids)
+        for j, col in enumerate(supplier_columns(entries))
+    ]
+    # The inquiry has no cell of its own — it rides as a copy control inside
+    # the part's note ({inquiry}), so only its resolved values are used.
+    _, inquiries = ditto_walk([e.get("inquiry") for e in entries], "inquiry", ids)
+
+    def report_item(index: int, span: int) -> str:
+        return "; ".join(
+            f"{loc(part['component'], lang)} ({part['part_id']})"
+            for part in rows[index : index + span]
+        )
+
+    body: list[str] = []
+    bought_label = ui("th_bought", lang)
+    for idx, row in enumerate(rows):
+        comp = loc(row["component"], lang)
+        cells = ""
+        if cls_span[idx]:
+            cells += f'<td class="cls"{_span_attr(cls_span[idx])}>{loc(row["cls"], lang)}</td>'
+        if comp_span[idx]:
+            cells += f'<td class="comp"{_span_attr(comp_span[idx])}>{comp}</td>'
+        # The bought checkbox — the only control that changes checklist
+        # state — sits between the BOM identity columns (what the part is)
+        # and the sourcing columns (where to buy it): tick as you cross over.
+        aria = html.escape(f"{bought_label}: {comp}", quote=True)
+        cells += (
+            f'<td class="spec">{loc(row["spec"], lang)}</td>'
+            f'<td class="qty">{row["qty"]}</td>'
+            f'<td class="desc">{loc(row["desc"], lang)}</td>'
+            f'<td class="get"><input type="checkbox" aria-label="{aria}"></td>'
+        )
+
+        message = loc(inquiries[idx] or "", lang)
+        for slot, (spans, col) in enumerate(sup_walks):
+            if spans[idx]:
+                cells += render_supplier_cell(
+                    col[idx],
+                    lang,
+                    spans[idx],
+                    f"supplier-guide-{idx}-{slot}",
+                    item=report_item(idx, spans[idx]),
+                )
+        if ref_spans[idx]:
+            ref = loc(refs[idx] or "", lang) or "—"
+            cells += (
+                f'<td class="ref"{_span_attr(ref_spans[idx])}>{html.escape(ref)}</td>'
+            )
+        if note_spans[idx]:
+            # Notes are prose — emitted as trusted HTML, like the manual's
+            # content strings.
+            note = loc(notes[idx] or "", lang)
+            if "{inquiry}" in note:
+                if not message:
+                    raise BuildError(
+                        f"note of entry {ids[idx]!r} uses "
+                        "{inquiry} but the part has no inquiry message"
+                    )
+                note = note.replace(
+                    "{inquiry}", _inquiry_button(message, lang, flip=True)
+                )
+            accessories = entries[idx].get("accessories")
+            if accessories:
+                note += render_accessories(
+                    accessories, lang, item=report_item(idx, note_spans[idx])
+                )
+            cells += f'<td class="note"{_span_attr(note_spans[idx])}>{note or "—"}</td>'
+
+        # Only class starts get a heavier separator; the full cell grid
+        # already delineates components, so no `sub` class here.
+        row_cls = ' class="grp"' if cls_span[idx] else ""
+        body.append(f'<tr{row_cls} data-pid="{row["part_id"]}">{cells}</tr>')
+
+    supplier_ths = "".join(
+        f"<th>{ui('supplier_n', lang)} {j + 1}</th>" for j in range(SUPPLIERS_PER_ROW)
+    )
+    head = (
+        f"<tr><th>{ui('th_cls', lang)}</th><th>{ui('th_component', lang)}</th>"
+        f"<th>{ui('th_spec', lang)}</th><th>{ui('th_qty', lang)}</th>"
+        f"<th>{ui('th_desc', lang)}</th>"
+        f'<th class="get">{ui("th_bought", lang)}</th>'
+        f"{supplier_ths}<th>{ui('th_ref', lang)}</th>"
+        f"<th>{ui('th_note', lang)}</th></tr>"
+    )
+    return (
+        f'<div class="table-wrap"><table class="sourcing">'
+        f"<thead>{head}</thead><tbody>{''.join(body)}</tbody></table></div>"
+    )
+
+
+# Page script: checklist, last opened link and inquiry-message copying.
+# Both editions share this script; localized text comes from data attributes.
+# file:// and https:// are secure contexts, so navigator.clipboard is always
+# there; localStorage may still be denied (e.g. some file:// policies) — the
+# try/catch degrades to per-visit state instead of breaking the page.
+PAGE_JS = (ASSETS_DIR / "checklist.js").read_text(encoding="utf-8")
+
+
+def render_document(rows: list[dict], entries: list[dict], css: str, lang: str) -> str:
+    entries = resolve_dimensions(entries, source=str(VENDOR_FILES[lang]))
+    optional_tools = json.loads(OPTIONAL_TOOLS_FILE.read_text(encoding="utf-8"))
+    # The checklist line sits left-aligned just above the table: the tally
+    # (JS fills it from the localized templates) and the reset / highlight
+    # buttons (hidden until something is ticked; reset's confirm text rides
+    # the button).
+    checklist = (
+        '<div class="checklist">'
+        '<span class="tally" id="tally" '
+        f'data-fmt="{html.escape(ui("tally_fmt", lang), quote=True)}" '
+        f'data-done="{html.escape(ui("tally_done", lang), quote=True)}"></span>'
+        '<button id="reset" type="button" hidden '
+        f'data-confirm="{html.escape(ui("reset_confirm", lang), quote=True)}">'
+        f"{ui('reset', lang)}</button>"
+        f'<button class="hl" id="hl" type="button" hidden>{ui("hl", lang)}</button>'
+        "</div>"
+    )
+    body = (
+        '<div class="wrap">'
+        f'<header class="mast"><h1>{ui("h1", lang)}</h1>'
+        f'<span class="url">{URL_MARK}</span></header>'
+        f"{checklist}{render_table(rows, entries, lang)}"
+        f"{render_optional_tools(optional_tools, lang)}</div>"
+        f"{render_supplier_guides(entries, lang)}"
+    )
+    body = typeset_quantities(body)
+    # A revision starts clean; both languages share the same state key.
+    # The prefix lets the script remove stale revisions.
+    store_key = f"{STORE_PREFIX}{manual_version()}"
+    return (
+        f'<!DOCTYPE html>\n<html lang="{HTML_LANG[lang]}">\n<head>\n'
+        '<meta charset="UTF-8">\n'
+        '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+        f"<title>{ui('doc_title', lang)}</title>\n"
+        f"<style>\n{css}</style>\n</head>\n"
+        f'<body data-store-key="{html.escape(store_key, quote=True)}" '
+        f'data-store-prefix="{html.escape(STORE_PREFIX, quote=True)}" '
+        f'data-opened-label="{html.escape(ui("opened_link", lang), quote=True)}">\n{body}\n'
+        f"<script>\n{PAGE_JS}</script>\n</body>\n</html>\n"
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Build
+# --------------------------------------------------------------------------- #
+def build(langs: list[str], out_dir: Path, scaffold: bool) -> list[Path]:
+    rows = load_bom_rows()
+    css = STYLES_CSS.read_text(encoding="utf-8")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    written: list[Path] = []
+    for lang in langs:
+        vendor_file = VENDOR_FILES[lang]
+        with _step(f"Load sourcing [{lang}]"):
+            entries, added, stale = sync_entries(rows, load_sourcing_data(vendor_file))
+        if scaffold or not vendor_file.exists():
+            write_sourcing_file(entries, vendor_file)
+            buildlog.event(
+                "vendors_synced",
+                vendor_file.name,
+                level="debug",
+                path=str(vendor_file),
+                added=added,
+            )
+        elif added:
+            buildlog.event(
+                "vendors_missing",
+                f"Run with --scaffold to add missing entries to {vendor_file.name}",
+                level="warning",
+                path=str(vendor_file),
+                missing=added,
+            )
+        if stale:
+            buildlog.event(
+                "vendors_stale",
+                f"Stale entries in {vendor_file.name}",
+                level="warning",
+                path=str(vendor_file),
+                stale=stale,
+            )
+
+        path = out_dir / LANG_FILENAME[lang]
+        with _step(f"Render HTML [{lang}]"):
+            path.write_text(
+                render_document(rows, entries, css, lang),
+                encoding="utf-8",
+                newline="\n",
+            )
+        written.append(path)
+    return written
+
+
+@locked_main
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument(
+        "--lang",
+        choices=("en", "zh", "all"),
+        default="all",
+        help="language(s) to render (default: all)",
+    )
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=OUTPUT_DIR,
+        help="output directory (default: hardware/output/sourcing)",
+    )
+    parser.add_argument(
+        "--scaffold",
+        action="store_true",
+        help="sync the selected language vendor files with the BOM (add bare part_id entries) before building",
+    )
+    buildlog.add_arguments(parser)
+    args = parser.parse_args()
+
+    langs = ["en", "zh"] if args.lang == "all" else [args.lang]
+    out = args.out.resolve()
+    with buildlog.command(
+        "Hardware sourcing guide", args, name="sourcing", output_dir=out
+    ) as run:
+        written = build(langs, out, scaffold=args.scaffold)
+        run.artifacts(written)
+
+
+if __name__ == "__main__":
+    main()

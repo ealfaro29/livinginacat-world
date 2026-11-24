@@ -1,0 +1,449 @@
+"""Gesture observation — the "see" half of every mutating gesture.
+
+`GestureObserver` owns the observation pipeline that brackets a gesture:
+park (clearing the arm from the lens) → grab the cropped phone-screen
+frame with a blur/blown-retry (the exposure settles after screen flips
+— and, on an unpinned lens, autofocus after the arm's move),
+escalating a persistently blown grab —
+or a stale failed-tune hold met by an in-band view — to an inline exposure
+re-tune so the agent gets a corrected view, not a warning → re-settle
+the after-grab when the before/after median jump says the screen
+flipped brightness class (mid-flip white-outs are invisible to luma
+statistics; see FLIP_MEDIAN_DELTA) → detect UI on the after-frame →
+assess camera quality → attach the screen-change verdict. Gesture
+bodies stay thin callables; a new diagnostic plugs in here without
+touching gesture code.
+
+The observer doesn't touch hardware directly — it takes `park`, `grab`,
+and `detect` callables from the orchestrator, so its logic is testable
+without an arm or camera.
+
+Careful: the verdict marker text (`physiclaw.common.verdict`) is a shared
+vocabulary with the agent engine's stuck guard — byte-stable.
+"""
+
+import logging
+import time
+from collections.abc import Callable
+from dataclasses import dataclass, replace
+from typing import Any
+
+from physiclaw.common import verdict
+from physiclaw.core.hardware.frame_reader import PublishedFrame
+from physiclaw.core.vision import quality
+from physiclaw.core.vision.change import frames_changed
+from physiclaw.core.vision.util import encode_view_jpeg
+
+log = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class ViewResult:
+    """One image/listing pair; camera notices are outside the element codec."""
+
+    jpeg: bytes
+    listing: str
+    observed_after: float | None = None
+    warning: str | None = None
+
+
+@dataclass(frozen=True)
+class GestureResult:
+    """What a screen-mutating gesture hands to the MCP tool layer: the
+    action text (screen-change verdict attached) plus the fused
+    post-gesture view — annotated JPEG + element listing detected on the
+    same parked after-frame the verdict used. `jpeg`/`listing` are None
+    when the camera or detector hiccupped; the tool layer then falls
+    back to a text-only result telling the agent to `peek`."""
+
+    text: str
+    jpeg: bytes | None = None
+    listing: str | None = None
+    observed_after: float | None = None
+    warning: str | None = None
+
+
+@dataclass(frozen=True)
+class Grab:
+    """One acquisition attempt's outcome, from ``grab_screen``.
+
+    ``frame``/``report`` are None on failure (the report always describes
+    the returned frame, so quality judgment reuses it). ``sharp`` is False
+    when the frame stayed below the blur threshold even after the retry.
+    ``retuned`` is True when an inline exposure fix was INVOKED on this
+    grab — not necessarily succeeded: a tune that crashed mid-run or whose
+    regrab failed may still have moved the exposure, and a pair diffed
+    across two exposures reads as "changed everywhere", so callers must
+    treat the grab as retuned either way.
+    """
+
+    frame: Any | None
+    report: quality.QualityReport | None
+    sharp: bool
+    retuned: bool
+    observed_after: float | None = None
+
+    def comparable_to(self, other: "Grab") -> bool:
+        """Whether this grab and ``other`` are trustworthy for a
+        screen-change diff: both frames present, sharp and neither badly
+        exposed nor retuned. A blurry side erases edges; an exposure change
+        between the pair also reads as "changed everywhere". A False here means
+        withhold the verdict (None, the fail-open direction) rather than
+        emit a false ``changed`` that would reset the agent's stuck guard."""
+        return all(
+            grab.frame is not None
+            and grab.report is not None
+            and grab.sharp
+            and not grab.retuned
+            and not grab.report.dark
+            and not grab.report.blown
+            for grab in (self, other)
+        )
+
+
+class GestureObserver:
+    """Before/after observation around a gesture body.
+
+    Stateful only through its `QualityMonitor` — shared across peeks and
+    gesture views so a persistent rig problem escalates to "tell your
+    user".
+    """
+
+    # Post-gesture settle before the fused view is captured: added to the
+    # ~1s of stylus retract + park, total ≈ 2s — enough for most page
+    # transitions (Anthropic's computer-use reference uses a 2.0s delay).
+    GESTURE_SETTLE_SECONDS = 1.0
+    # Blur-retry gates for the two acquisition paths (`_acquire_frame`
+    # runs the shared ladder; these steer it per path). Both thresholds
+    # carry the quality monitor's number in production — same measurement,
+    # same scale — but stay separate class knobs so each path can be
+    # steered independently (tests do; a rig tweak could). The retry
+    # waits genuinely differ: peek waits longer, gesture grabs ride the
+    # settle that already preceded them.
+    GRAB_BLUR_THRESHOLD = quality.BLUR_THRESHOLD
+    GRAB_RETRY_SECONDS = 1.5
+    PEEK_BLUR_THRESHOLD = quality.BLUR_THRESHOLD
+    PEEK_RETRY_SECONDS = 2.0
+
+    # A gesture that flips the screen's brightness class (lock → home,
+    # dark app → white page) can leave the settled after-grab still
+    # mid-transition, recording a white-out the phone never showed
+    # (worst when firmware AE is driving — it re-converges over seconds).
+    # Luma statistics can't flag that frame — a *readable* white page meters MORE
+    # clipped than a nuked one (measured 2026-07: good chat page 70%
+    # clip vs nuked home screen 48%) — but the median jump between the
+    # gesture's own before/after frames detects the flip itself: above
+    # this delta, settle again and regrab. 100 clears normal same-page
+    # deltas (<30) and moderate overlays, and trips on dark↔bright
+    # flips (measured ~180).
+    FLIP_MEDIAN_DELTA = 100.0
+    FLIP_SETTLE_SECONDS = 1.5
+
+    def __init__(
+        self,
+        park: Callable[[], None],
+        grab: Callable[[], PublishedFrame],
+        detect: Callable[[Any], tuple[str, Any]],
+        monitor: quality.QualityMonitor | None = None,
+        on_quality: Callable[[quality.QualityReport, int], None] | None = None,
+        fix_exposure: Callable[[], None] | None = None,
+        needs_fix: Callable[[quality.QualityReport], bool] | None = None,
+    ):
+        self._park = park
+        self._grab = grab  # cropped pixels and their host publication time
+        self._detect = detect  # frame -> (element listing, annotated frame)
+        self._quality = monitor if monitor is not None else quality.QualityMonitor()
+        self._quality_notice: tuple[bool, bool, bool] | None = None
+        # (report, streak) after every judged view — perception hangs its
+        # re-tune policy here without observation knowing about tuning.
+        self._on_quality = on_quality
+        # Synchronous exposure fix (perception.tune_now) and the
+        # predicate deciding when a grab warrants it
+        # (perception.needs_inline_fix → exposure.wants_retry: the
+        # whole fire/hold policy, one home). Fixing BEFORE the view
+        # ships beats sending the agent a mis-exposed frame with a
+        # warning attached.
+        self._fix_exposure = fix_exposure
+        self._needs_fix = needs_fix if needs_fix is not None else lambda r: r.blown
+
+    def _fix_exposure_grab(self, source: str, report: quality.QualityReport):
+        """The injected predicate says this grab warrants a tune
+        (mis-exposed with no hold, a held scene that moved, or an
+        in-band view clearing a stale hold) — run it and grab the
+        corrected sample. Returns `(sample, report, tuned)`: `sample` is
+        None when the fix or the regrab failed (the original report is
+        kept — fail-open, the view still ships). `tuned` mirrors
+        `Grab.retuned`: True when the tune was INVOKED, not when it
+        succeeded. Pixels and their publication time stay together."""
+        if self._fix_exposure is None:
+            return None, report, False
+        cause = (
+            "frame still blown after retry"
+            if report.blown
+            else "frame dark"
+            if report.dark
+            else "clearing a stale hold"
+        )
+        log.info(
+            "%s: %s (clip %.0f%%, median %.0f) — tuning exposure before the view ships",
+            source,
+            cause,
+            report.clip_pct * 100,
+            report.median_luma,
+        )
+        try:
+            self._fix_exposure()
+            sample = self._grab()
+            return sample, quality.assess(sample.frame), True
+        except Exception:
+            log.warning("inline exposure fix failed", exc_info=True)
+            return None, report, True
+
+    def observe_quality(
+        self,
+        source: str,
+        report: quality.QualityReport,
+        *,
+        retuned: bool = False,
+    ) -> str | None:
+        """Judge an already-assessed camera view for AF/AE failure; on a
+        bad one, warn in the log and return the agent-facing ⚠ line for
+        the caller to attach.
+
+        Takes the `QualityReport` the acquisition ladder
+        (`_acquire_frame`) already computed for its retry decision — the
+        frame is never re-measured here. Runs AFTER the retry grabs, so
+        a report still failing means the retry didn't recover it. Every
+        judged view is also reported to `on_quality` (with the running
+        bad-view streak) so the owner can react — e.g. re-tune exposure
+        on a washed-out view — EXCEPT when `retuned` says the inline
+        tune already ran on this very grab: scheduling the background
+        tune then would repeat the identical probe seconds later on a
+        scene the inline run just judged. Fail-open: a crash in the
+        check never costs the view."""
+        try:
+            warning = self._quality.observe(report)
+        except Exception:
+            log.exception("camera-quality check failed — skipping")
+            return None
+        if warning is not None:
+            issues = (report.dark, report.blurry, report.blown)
+            labels = [
+                label
+                for active, label in zip(
+                    issues, ("dark", "blurry", "overexposed"), strict=True
+                )
+                if active
+            ]
+            log.log(
+                logging.WARNING if issues != self._quality_notice else logging.DEBUG,
+                "%s: %s",
+                source,
+                warning,
+                extra={
+                    "console_message": "Camera view "
+                    + (", ".join(labels) or "unreliable")
+                    + " — check focus and lighting in hardware setup"
+                },
+            )
+            self._quality_notice = issues
+        elif self._quality_notice is not None:
+            self._quality_notice = None
+            log.info("Camera view clear again", extra={"console": True})
+        if self._on_quality is not None and not retuned:
+            try:
+                self._on_quality(report, self._quality.streak)
+            except Exception:
+                log.exception("quality-report callback failed — ignoring")
+        return warning
+
+    def _acquire_frame(self, source: str):
+        """The shared acquisition ladder behind `peek_frame` and
+        `grab_screen`: grab → assess → wait-and-regrab once when the
+        frame is too blurry or blown → inline exposure fix when the
+        injected predicate demands it. One ladder for both paths, so the
+        exposure regime changes in one place — the known livelock mode
+        is exactly this logic diverging between them.
+
+        Blown covers the post-flip exposure transient (the screen just
+        flipped dark→bright and the exposure hasn't settled); blur
+        covers an unpinned lens re-hunting after the arm's move. A
+        still-blurry retry frame is used as-is (better shown than
+        dropped — the callers decide what a soft frame costs); a frame
+        the `needs_fix` predicate flags escalates to the inline fix,
+        since a mis-exposed frame is correctable, not just observable.
+
+        `source` selects the path and threads one label through the
+        retry log, the fix log, and the callers' `observe_quality`.
+        "peek" picks the peek knobs and the measurement-carrying retry
+        warning (an operator watching a peek wants the numbers; the
+        literal must match the prefix baked into that warning's format
+        string); anything else is a gesture grab — gesture knobs,
+        debug-level retry (routine mid-gesture settling). Deriving the
+        knobs here, from the same predicate as the log, keeps a call
+        site from ever pairing one path's label with the other's
+        threshold.
+
+        Returns a `Grab` — its report and publication time describe
+        the returned frame, so the caller's quality judgment
+        (`observe_quality`) reuses it instead of re-measuring, and
+        `retuned` says the inline tune already ran on this grab (the
+        background safety net must not double-fire)."""
+        peek = source == "peek"
+        threshold = self.PEEK_BLUR_THRESHOLD if peek else self.GRAB_BLUR_THRESHOLD
+        retry_seconds = self.PEEK_RETRY_SECONDS if peek else self.GRAB_RETRY_SECONDS
+        sample = self._grab()
+        report = quality.assess(sample.frame)
+        blurry = report.sharpness < threshold
+        if blurry or report.blown:
+            kind = "blurry" if blurry else "blown"
+            if peek:
+                log.debug(
+                    "peek: %s frame (sharpness %.1f, clip %.0f%%) — retrying",
+                    kind,
+                    report.sharpness,
+                    report.clip_pct * 100,
+                )
+            else:
+                log.debug("gesture frame %s — waiting for AF/AE", kind)
+            time.sleep(retry_seconds)
+            sample = self._grab()
+            report = quality.assess(sample.frame)
+        retuned = False
+        if self._needs_fix(report):
+            fixed, report, retuned = self._fix_exposure_grab(source, report)
+            if fixed is not None:
+                sample = fixed
+        return Grab(
+            sample.frame,
+            report,
+            report.sharpness >= threshold,
+            retuned,
+            sample.published_at,
+        )
+
+    def peek_frame(self):
+        """Park, then run the acquisition ladder (`_acquire_frame`) —
+        peek's path. Returns the selected frame, quality and timing in a `Grab`.
+
+        Unlike `grab_screen`, failures propagate (a peek with no frame is
+        a tool error, not a withheld verdict). Caller must hold the lock."""
+        self._park()
+        return self._acquire_frame("peek")
+
+    def grab_screen(self, settle: float = 0.0):
+        """Park (clearing the arm from the lens), let the screen —
+        and, on an unpinned lens, autofocus — settle for `settle`s,
+        then run the acquisition ladder (`_acquire_frame`) for the
+        gesture diff and fused view. Parking first means the settle
+        covers any AF hunt the arm's move triggered, so the capture is
+        usually sharp.
+
+        Returns a `Grab` (frame/report/sharp/retuned) — frame is None on
+        any failure (the view is best-effort, never a reason to fail a
+        gesture). See `Grab` for what `sharp`/`retuned` mean and why the
+        caller must withhold the verdict when either is unfavorable.
+        Caller must hold the lock."""
+        try:
+            self._park()
+            if settle:
+                time.sleep(settle)
+            grab = self._acquire_frame("gesture view")
+            if not grab.sharp:
+                log.debug("gesture frame blurry — verdict withheld")
+            return grab
+        except Exception:
+            log.warning("screen frame grab failed", exc_info=True)
+            return Grab(frame=None, report=None, sharp=False, retuned=False)
+
+    def with_view(self, action) -> GestureResult:
+        """Run a gesture body bracketed by before/after frames; return
+        the action text with the screen-change verdict attached PLUS the
+        fused post-gesture view (annotated JPEG + listing) detected on
+        the same after-frame. One capture serves both:
+
+          - the verdict is the agent's only evidence for SILENT REFUSALS
+            — a toast vanishes long before the arm parks, so "the screen
+            looks exactly the same" distinguishes a refused tap from a
+            landed one;
+          - the view replaces the act-then-peek turn pair — the agent
+            reads the new screen from the gesture result itself.
+
+        Caller must hold the lock. The before-grab needs no settle (the
+        arm was already parked from the previous op, screen static); the
+        after-grab settles so the transition completes and AF recovers
+        from the gesture's arm move before capture. A brightness-class
+        flip between the pair (median jump > FLIP_MEDIAN_DELTA) marks a
+        major transition (unlock, app launch) that may still be mid-flight,
+        so the after-grab earns an extra settle + regrab — the after-frame
+        feeds the verdict, listing, and view, and any mid-transition
+        white-out it would otherwise catch is invisible to luma statistics
+        after the fact.
+        """
+        before = self.grab_screen()
+        result = action()
+        after = self.grab_screen(settle=self.GESTURE_SETTLE_SECONDS)
+        if (
+            before.report is not None
+            and after.report is not None
+            # A retune during the AFTER grab makes the median jump an
+            # exposure artifact, not a mid-transition flip: that frame was
+            # just metered inside the fix, so the regrab protects
+            # nothing. A before-grab retune is NOT a skip reason — the
+            # after frame is an ordinary grab that can still be exactly
+            # the mid-transition white-out this regrab exists to catch (and
+            # the fused view, not just the withheld verdict, ships it).
+            and not after.retuned
+            and abs(after.report.median_luma - before.report.median_luma)
+            > self.FLIP_MEDIAN_DELTA
+        ):
+            # Brightness-class flip: the after frame was likely grabbed
+            # mid-transition (see FLIP_MEDIAN_DELTA) — settle again and
+            # regrab through the full quality pipeline.
+            log.debug(
+                "gesture view: screen flipped brightness (median %.0f → %.0f) "
+                "— extra settle + regrab",
+                before.report.median_luma,
+                after.report.median_luma,
+            )
+            time.sleep(self.FLIP_SETTLE_SECONDS)
+            flip = self.grab_screen()
+            # The regrab replaces `after`; retuned OR-merges both grabs so a
+            # retune in EITHER withholds the verdict (its frame and `before`
+            # would straddle two exposures — see Grab.retuned). The gate
+            # excludes an already-retuned after-grab today, so the left term
+            # is currently always False — kept so the merge stays correct if
+            # that gate ever admits one.
+            after = replace(flip, retuned=after.retuned or flip.retuned)
+        changed = None
+        jpeg = listing = None
+        if after.frame is not None:
+            # Verdict only from a comparable pair (see Grab.comparable_to);
+            # the fused view below is best-effort either way.
+            if before.comparable_to(after):
+                try:
+                    changed = frames_changed(before.frame, after.frame)
+                except Exception:
+                    log.debug("screen-verdict diff failed", exc_info=True)
+            try:
+                listing, annotated = self._detect(after.frame)
+                jpeg = encode_view_jpeg(annotated)
+            except Exception:
+                log.warning("post-gesture view failed", exc_info=True)
+            warning = self.observe_quality(
+                "gesture view", after.report, retuned=after.retuned
+            )
+        else:
+            warning = None
+        text = verdict.attach(result, changed)
+        if warning is not None:
+            # The listing is a strict codec, also bound to the image by hash.
+            # Carry notices in the action text even when detection succeeds.
+            text = f"{text}\n{warning}"
+        return GestureResult(
+            text=text,
+            jpeg=jpeg,
+            listing=listing,
+            observed_after=after.observed_after,
+            warning=warning,
+        )

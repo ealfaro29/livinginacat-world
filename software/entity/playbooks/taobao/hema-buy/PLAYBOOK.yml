@@ -1,0 +1,69 @@
+# taobao/hema-buy — groceries from 盒马 inside Taobao, several items in
+# ONE order (~30 min): enter the storefront once, then run `add` per item
+# and `checkout`, the playbooks beside this file. Starts anywhere. Ends
+# on the paid page, the buyer told.
+kind: entry
+schema: 1
+name: hema-buy
+description: >-
+  buy groceries from 盒马 (Hema) inside 淘宝, one order in ~30 min: fresh food,
+  fruit, vegetables, meat, dairy, drinks — when the buyer says 盒马 or 买菜,
+  or wants fresh ingredients now
+enabled: false  # rehearse on YOUR device, then enable
+inputs:
+  user_said:
+    description: what the user said, verbatim — the original message the task came from
+
+route:
+  - agent: parse
+    context:
+      prompt: |
+        The buyer said: "{buyer_said}"
+        Later replies, if any: {replies}
+        The list as it stood before those replies: {earlier_list}
+        Already in the 盒马 cart from this errand: {already_in_cart}
+        Return the FULL list the buyer wants now, one product per line as
+        name + spec + quantity (e.g. 鲜牛奶 950ml ×2); leave out anything
+        they no longer want. Keep the buyer's language. Keep every line
+        of the earlier list the buyer did not change WORD FOR WORD — that
+        line is how the cart knows the item is already in it.
+        If the message names no concrete product, escalate.
+      given:
+        buyer_said: inputs.user_said
+        replies: ask.replies
+        earlier_list: parse.items
+        already_in_cart: add.line
+    returns:
+      items: the full list now, one per line
+    think: off
+
+  - tell: ack
+    message: "收到，正在盒马为你挑选：\n{parse.items}"
+
+  - start: app
+    macro: app.macros.launch      # to the feed: resumed as it is, else cold-launched
+
+  - page: app.pages.home
+
+  - do: enter                     # the feed's main search for 盒马 opens its storefront
+    with: {keyword: "盒马"}
+    macro: app.macros.search
+
+  - page: app.pages.hema-home
+
+  - run: add                      # store search, pick, 加入购物车, back to this home; one
+    each: {item: parse.items}     # round per item; a line already in the cart is not
+    miss: skip                    # re-added, an item not found is skipped
+    limit: {rounds: 4}
+
+  - page: app.pages.hema-home
+
+  - run: checkout                 # the cart, tick, settle, confirm, pay
+    with: {lines: "{add.line}"}
+    revise: parse                 # a reply the ask's words miss re-plans from `parse`
+    limit: {revisions: 2}
+
+  - page: app.pages.paid
+
+  - tell: report
+    message: "盒马已下单并完成支付：\n{add.line}"

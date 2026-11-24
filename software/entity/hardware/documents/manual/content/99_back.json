@@ -1,0 +1,22 @@
+[
+  {
+    "type": "back",
+    "page": "back",
+    "stamp": {
+      "en": "END OF MANUAL",
+      "zh": "手册结束"
+    },
+    "h2": {
+      "en": "Next, tell PhysiClaw what you'd like it to do.",
+      "zh": "接下来，告诉 PhysiClaw 你想让它做什么。"
+    },
+    "quote": {
+      "en": "&ldquo;PhysiClaw can do anything you can do on your phone. It looks at the screen and touches it, just like you.&rdquo;",
+      "zh": "&ldquo;PhysiClaw 能像你一样操作手机。它用摄像头看屏幕，用触控笔点击按钮，你能做的，它都能做。&rdquo;"
+    },
+    "brand": {
+      "en": "PhysiClaw.ai",
+      "zh": "PhysiClaw.ai"
+    }
+  }
+]

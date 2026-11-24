@@ -1,0 +1,43 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+import pytest
+
+pytest.importorskip("build123d", reason="CAD group not installed")
+
+from hardware.documents.bom.loader import load_bom_rows
+from hardware.parts import build_custom_parts as printing
+from hardware.parts.export_custom import ALL_PARTS
+
+
+def test_print_kit_matches_export_registry_and_manual_quantity():
+    actual = {cls: qty for cls, qty, _, _ in printing.CUSTOM_PARTS}
+    assert len(actual) == len(printing.CUSTOM_PARTS), "duplicate print designs"
+    assert actual == {type(part): part.qty for part in ALL_PARTS}
+    (row,) = [row for row in load_bom_rows() if row["part_id"] == "printed-parts"]
+    assert sum(actual.values()) == int(row["qty"])
+
+
+@pytest.mark.parametrize("raises", [False, True])
+def test_failed_part_export_preserves_previous_print_package(
+    tmp_path, monkeypatch, raises
+):
+    tmp_path = tmp_path / "print-output"
+    tmp_path.mkdir()
+    target = tmp_path / "parts.zip"
+    target.write_bytes(b"previous complete package")
+    monkeypatch.setattr(printing, "OUT_DIR", tmp_path)
+    monkeypatch.setattr(printing, "ZIP_PATH", target)
+
+    def fail(shape, path):
+        Path(path).write_bytes(b"partial STEP export")
+        if raises:
+            raise RuntimeError("Could not export STEP")
+        return False
+
+    monkeypatch.setattr(printing, "export_step", fail)
+    with pytest.raises(RuntimeError, match="Could not export STEP"):
+        printing.build()
+    assert target.read_bytes() == b"previous complete package"
+    assert list(tmp_path.iterdir()) == [target]

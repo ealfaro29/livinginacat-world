@@ -1,0 +1,1205 @@
+[
+  {
+    "part_id": "ext-2040-y",
+    "ref": "$25",
+    "inquiry": "EU-standard aluminum extrusion for a PhysiClaw build, T slot, cut to size, 7 pcs in 4 specs:\n1. 2040 black anodized, {Y_EXTRUSION_LENGTH} mm ×2, M6 counterbores on the 40 mm-wide face, two at each end, 10 mm from the end face\n2. 2040 black anodized, {X_EXTRUSION_LENGTH} mm ×2, both ends tapped M6\n3. 1020, {X_BEAM_LENGTH} mm ×1\n4. 1020, {PHONE_BED_BEAM_LENGTH} mm ×2, M5 through-hole 10 mm from each end\n5. SHCS M6×20 ×8\nPlease kindly quote.",
+    "suppliers": [
+      {
+        "name": "PMGN",
+        "url": "https://www.aliexpress.us/item/3256808792776211.html"
+      },
+      {
+        "name": "HighQ",
+        "url": "https://www.aliexpress.us/item/3256806710682237.html"
+      },
+      {
+        "name": "MISUMI",
+        "url": "https://us.misumi-ec.com/",
+        "details": {
+          "label": "Ordering details",
+          "title": "MISUMI USA · Extrusions",
+          "heading": "Get a quote",
+          "instructions": "Sign in to <a href=\"https://us.misumi-ec.com/\" target=\"_blank\" rel=\"noopener\">MISUMI USA</a>, open <strong>Quote / Order</strong>, and enter the part numbers and quantities below.",
+          "parts": [
+            {
+              "part_number": "HFSB5-2040-{Y_EXTRUSION_LENGTH}-Z5-YA10-YB{Y_EXTRUSION_FAR_HOLE}",
+              "qty": 2,
+              "description": "Black 2040 · {Y_EXTRUSION_LENGTH} mm · 4 × M5 counterbores"
+            },
+            {
+              "part_number": "HFSB5-2040-{X_EXTRUSION_LENGTH}-TPW",
+              "qty": 2,
+              "description": "Black 2040 · {X_EXTRUSION_LENGTH} mm · M5 taps, both ends"
+            },
+            {
+              "part_number": "HFSFIN5-1020-{X_BEAM_LENGTH}",
+              "qty": 1,
+              "description": "1020 · {X_BEAM_LENGTH} mm · Cut to length"
+            },
+            {
+              "part_number": "HFSFIN5-1020-{PHONE_BED_BEAM_LENGTH}-Z5-XA10-XB{PHONE_BED_FAR_HOLE}",
+              "qty": 2,
+              "description": "1020 · {PHONE_BED_BEAM_LENGTH} mm · 2 × M5 counterbores"
+            }
+          ]
+        }
+      }
+    ],
+    "note": "send the {inquiry} and <a href=\"https://github.com/physiclaw/PhysiClaw/releases/latest/download/physiclaw_extrusion_drawing_en.pdf\">tech drawing</a> for a quote."
+  },
+  {
+    "part_id": "ext-2040-x",
+    "ref": "Ditto",
+    "inquiry": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "ext-1020-x-beam",
+    "ref": "Ditto",
+    "inquiry": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "ext-1020-phone-support",
+    "ref": "Ditto",
+    "inquiry": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "printed-parts",
+    "ref": "$40",
+    "suppliers": [
+      {
+        "name": "JLC3DP",
+        "url": "https://jlc3dp.com/3d-printing-quote",
+        "product": "MJF · PA12-HP Nylon",
+        "details": {
+          "label": "Ordering details",
+          "heading": "Ordering from JLC3DP",
+          "steps": [
+            {
+              "title": "Specifications",
+              "text": "Select all parts and click <strong>Batch Edit</strong>.",
+              "settings": [
+                {
+                  "label": "3D Technology",
+                  "value": "MJF (Nylon)"
+                },
+                {
+                  "label": "Material",
+                  "value": "PA12-HP Nylon"
+                },
+                {
+                  "label": "Color",
+                  "value": "Natural Gray"
+                },
+                {
+                  "label": "Surface Finish",
+                  "value": "No"
+                },
+                {
+                  "label": "Thread",
+                  "value": "No"
+                },
+                {
+                  "label": "Product Desc",
+                  "value": "Connectors、Brackets、fasteners Category -> Plastic Connectors - HS Code 392690"
+                }
+              ]
+            },
+            {
+              "title": "Quantities",
+              "text": "Order 2 of each part with the filename suffix _x2 and 1 of each remaining part: 11 parts total."
+            }
+          ],
+          "title": "Ordering from JLC3DP"
+        }
+      },
+      {
+        "name": "PCBWay",
+        "url": "https://www.pcbway.com/rapid-prototyping/",
+        "product": "MJF · HP-PA-12",
+        "details": {
+          "label": "Ordering details",
+          "title": "Ordering from PCBWay",
+          "heading": "Ordering from PCBWay",
+          "steps": [
+            {
+              "title": "Specifications",
+              "text": "Apply these settings to all parts.",
+              "settings": [
+                {
+                  "label": "Design Units",
+                  "value": "mm"
+                },
+                {
+                  "label": "Material",
+                  "value": "Nylon"
+                },
+                {
+                  "label": "Type of Nylon",
+                  "value": "HP-PA-12"
+                },
+                {
+                  "label": "Material Color",
+                  "value": "Dark black (spray paint)"
+                },
+                {
+                  "label": "Process",
+                  "value": "MJF"
+                },
+                {
+                  "label": "Surface finish",
+                  "value": "Leave blank"
+                },
+                {
+                  "label": "Threads and Tapped Holes / Inserts / Parts assembly",
+                  "value": "No"
+                },
+                {
+                  "label": "Product Desc",
+                  "value": "Irregular Shape Category → Plastic Bracket (HSCode:392690)"
+                }
+              ]
+            },
+            {
+              "title": "Quantities",
+              "text": "Order 2 of each part with the filename suffix _x2 and 1 of each remaining part: 11 parts total."
+            }
+          ]
+        }
+      },
+      {
+        "name": "Xometry",
+        "url": "https://www.xometry.com/capabilities/3d-printing-service/",
+        "product": "MJF · Nylon 12",
+        "details": {
+          "label": "Ordering details",
+          "title": "Ordering from Xometry",
+          "heading": "Ordering from Xometry",
+          "steps": [
+            {
+              "title": "Specifications",
+              "text": "Open <strong>Edit Configuration</strong> for each part.",
+              "settings": [
+                {
+                  "label": "Process",
+                  "value": "Plastic 3D Printing"
+                },
+                {
+                  "label": "Technology",
+                  "value": "HP Multi Jet Fusion (MJF)"
+                },
+                {
+                  "label": "Material",
+                  "value": "Nylon 12, Gray"
+                },
+                {
+                  "label": "Color",
+                  "value": "As Printed, Grey (Natural)"
+                },
+                {
+                  "label": "Finish",
+                  "value": "Standard"
+                },
+                {
+                  "label": "Inspection",
+                  "value": "Standard Inspection"
+                },
+                {
+                  "label": "Threads and Tapped Holes / Inserts",
+                  "value": "Unchecked"
+                }
+              ]
+            },
+            {
+              "title": "Quantities",
+              "text": "Order 2 of each part with the filename suffix _x2 and 1 of each remaining part: 11 parts total."
+            }
+          ]
+        }
+      }
+    ],
+    "note": "<a href=\"https://github.com/physiclaw/PhysiClaw/releases/latest/download/physiclaw_custom_parts.zip\">Download the STEP files</a> and unzip. Upload the STEP files for an online quote. Follow the included print guide."
+  },
+  {
+    "part_id": "rail-y",
+    "ref": "$40",
+    "inquiry": "MGN9H miniature linear guide set for a PhysiClaw build, 3 rails + 3 carriages:\nRail {Y_RAIL_LENGTH} mm ×2\nRail {X_RAIL_LENGTH} mm ×1\nH-type long carriage ×3\nPlease kindly quote.",
+    "suppliers": [
+      {
+        "name": "HIWIN",
+        "url": "https://www.aliexpress.us/item/3256805159136180.html"
+      },
+      {
+        "name": "CCQ",
+        "url": "https://www.aliexpress.us/item/3256804722090559.html"
+      },
+      {
+        "name": "KGT",
+        "url": "https://www.aliexpress.us/item/3256802330641420.html"
+      }
+    ],
+    "note": "Custom order. Send the {inquiry} to the shop's customer service.<br>MGN9H rails and carriages are precision motion parts. Workmanship and accuracy grades vary noticeably between makers, and prices span a wide range. Choose according to your needs."
+  },
+  {
+    "part_id": "rail-x",
+    "ref": "Ditto",
+    "inquiry": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "carriage",
+    "ref": "Ditto",
+    "inquiry": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "pulley",
+    "ref": "$1",
+    "suppliers": [
+      {
+        "name": "POWGE",
+        "product": "Bore 5mm, For Belt Width 6mm, 2pcs",
+        "url": "https://www.aliexpress.us/item/2251832808788159.html"
+      },
+      {
+        "name": "Mellow",
+        "product": "Size: For 6mm, 2Pcs",
+        "url": "https://www.aliexpress.us/item/2251832836965041.html"
+      },
+      {
+        "name": "DFORCE",
+        "product": "Size: 2PCS 2GT 6MM P5",
+        "url": "https://www.aliexpress.us/item/2251832630591353.html"
+      }
+    ],
+    "note": "Standard part, same spec from every maker. Buy the cheapest."
+  },
+  {
+    "part_id": "idler-smooth",
+    "ref": "$5",
+    "suppliers": [
+      {
+        "name": "POWGE",
+        "product": "Bore Diameter: 5mm-No Teeth-Silver, Width: For belt width 6mm, 10pcs",
+        "url": "https://www.aliexpress.us/item/2251832539995194.html"
+      },
+      {
+        "name": "Mellow",
+        "product": "Color: H8.5mm without t",
+        "url": "https://www.aliexpress.us/item/3256804188092382.html"
+      },
+      {
+        "name": "DFORCE",
+        "product": "Size: 20T W6 B5 Without T, 10pcs",
+        "url": "https://www.aliexpress.us/item/3256804771193337.html"
+      }
+    ],
+    "note": "Ditto"
+  },
+  {
+    "part_id": "idler-toothed",
+    "ref": "$1",
+    "suppliers": [
+      {
+        "name": "POWGE",
+        "product": "Bore Diameter: 5mm-WithTeeth-Silver, Width: For belt width 6mm, 2pcs",
+        "url": "https://www.aliexpress.us/item/2251832539995194.html"
+      },
+      {
+        "name": "Mellow",
+        "product": "Color: H8.5mm with t",
+        "url": "https://www.aliexpress.us/item/3256804188092382.html"
+      },
+      {
+        "name": "DFORCE",
+        "product": "Size: 20T W6 B5 With T, 2pcs",
+        "url": "https://www.aliexpress.us/item/3256804771193337.html"
+      }
+    ],
+    "note": "Ditto"
+  },
+  {
+    "part_id": "belt",
+    "ref": "$5",
+    "suppliers": [
+      {
+        "name": "POWGE",
+        "product": "Width: 6mm-(CR-Black), Length: 5Meters",
+        "url": "https://www.aliexpress.us/item/2251832058358826.html"
+      },
+      {
+        "name": "Mellow",
+        "product": "Size: 5M-6MM-2GT",
+        "url": "https://www.aliexpress.us/item/2251832766081359.html"
+      },
+      {
+        "name": "DFORCE",
+        "product": "Size: Length 5M, Color: Width 6mm",
+        "url": "https://www.aliexpress.us/item/3256806321466333.html"
+      }
+    ],
+    "note": "Ditto"
+  },
+  {
+    "part_id": "control-board",
+    "ref": "$25",
+    "suppliers": [
+      {
+        "name": "Makerbase",
+        "product": "Suit 1: MKS DLC32 V2.1",
+        "url": "https://www.aliexpress.us/item/3256802997183501.html"
+      },
+      {
+        "name": "TwoTrees",
+        "product": "DLC32 V2.1",
+        "url": "https://www.aliexpress.us/item/3256804430815456.html"
+      },
+      {
+        "name": "Victory",
+        "product": "MKS DLC32 V2.1",
+        "url": "https://www.aliexpress.us/item/3256803342472175.html"
+      }
+    ],
+    "note": "Control board and stepper drivers: same spec from every maker."
+  },
+  {
+    "part_id": "tmc2209",
+    "ref": "$5",
+    "suppliers": [
+      {
+        "name": "BEGRINT",
+        "product": "TMC2209 V2.0",
+        "url": "https://www.aliexpress.us/item/3256808517783633.html"
+      },
+      {
+        "name": "Usongshine",
+        "product": "TMC2209",
+        "url": "https://www.aliexpress.us/item/3256806396656136.html"
+      },
+      {
+        "name": "BIG TREE",
+        "product": "TMC2209 V1.3",
+        "url": "https://www.aliexpress.us/item/2251832843273068.html"
+      }
+    ],
+    "note": "Ditto"
+  },
+  {
+    "part_id": "psu",
+    "ref": "$5",
+    "suppliers": [
+      {
+        "name": "LARZI",
+        "product": "12 V 2 A adapter, 5.5×2.5 mm barrel plug",
+        "url": "https://www.aliexpress.us/item/3256812158688430.html"
+      },
+      {
+        "name": "Adiodo",
+        "product": "12 V 2 A, 5.5×2.1 mm plug",
+        "url": "https://www.aliexpress.us/item/3256806098229742.html"
+      },
+      {
+        "name": "QvvCev",
+        "product": "12 V 2 A adapter",
+        "url": "https://www.aliexpress.us/item/3256805314867176.html"
+      }
+    ],
+    "note": "Buy a reputable brand. A 5.5×2.5 mm barrel plug fits too."
+  },
+  {
+    "part_id": "camera",
+    "ref": "$35",
+    "suppliers": [
+      {
+        "name": "UGREEN",
+        "product": "4K Webcam",
+        "url": "https://www.aliexpress.us/item/3256809048539619.html"
+      },
+      {
+        "name": "EMEET",
+        "product": "Webcam 4K",
+        "url": "https://www.aliexpress.us/item/3256806516418733.html"
+      },
+      {
+        "name": "FIFINE",
+        "product": "K438 4K UHD",
+        "url": "https://www.aliexpress.us/item/3256812496955112.html"
+      }
+    ],
+    "note": "Choose a native 8 MP sensor with autofocus."
+  },
+  {
+    "part_id": "motor-cable",
+    "ref": "$2",
+    "suppliers": [
+      {
+        "name": "Usongshine",
+        "product": "1 m, XH2.54",
+        "url": "https://www.aliexpress.us/item/3256807293333012.html"
+      },
+      {
+        "name": "JKHJ",
+        "product": "XH2.54",
+        "url": "https://www.aliexpress.us/item/2255799911123403.html"
+      },
+      {
+        "name": "DeKuSi",
+        "product": "1 m, 1 pc",
+        "url": "https://www.aliexpress.us/item/3256803466111890.html"
+      }
+    ],
+    "note": "Optional. The cable bundled with the motor is about 1 m, too long to store neatly. A 30 cm cable is plenty."
+  },
+  {
+    "part_id": "lead-wire",
+    "ref": "$3",
+    "suppliers": [
+      {
+        "name": "Kelepu",
+        "product": "Length: 5 Meters, Specification: 22AWG",
+        "url": "https://www.aliexpress.us/item/3256811936470551.html"
+      },
+      {
+        "name": "DCpowercord",
+        "product": "Length: 5m, Specification: 22AWG",
+        "url": "https://www.aliexpress.us/item/3256808056857652.html"
+      },
+      {
+        "name": "SZDelightFire",
+        "product": "Length: 5m, Specification: 22AWG",
+        "url": "https://www.aliexpress.us/item/3256806280998161.html"
+      }
+    ],
+    "note": "Buy 5 m to leave slack for the ground wire."
+  },
+  {
+    "part_id": "stepper-motor",
+    "ref": "$25",
+    "suppliers": [
+      {
+        "name": "TWO TREES",
+        "product": "4401S (black) 1pcs, XH2.54",
+        "url": "https://www.aliexpress.us/item/3256803891332263.html"
+      },
+      {
+        "name": "Usongshine",
+        "product": "With XH-2.54",
+        "url": "https://www.aliexpress.us/item/3256808273084374.html"
+      },
+      {
+        "name": "ChgImposs",
+        "product": "Color: 42HS40 2A 48N.cm",
+        "url": "https://www.aliexpress.us/item/3256809685035975.html"
+      }
+    ]
+  },
+  {
+    "part_id": "solenoid",
+    "ref": "$7",
+    "suppliers": [
+      {
+        "name": "Elecall",
+        "product": "EML-0530B 12V",
+        "url": "https://www.aliexpress.us/item/3256812075615727.html"
+      },
+      {
+        "name": "WTong",
+        "product": "0530B, 12V",
+        "url": "https://www.aliexpress.us/item/3256805246337810.html"
+      },
+      {
+        "name": "Gangbei",
+        "product": "12V DC",
+        "url": "https://www.aliexpress.us/item/2251832590918427.html"
+      }
+    ],
+    "note": "You must splice the leads longer, and careless handling breaks them easily. Buy one spare."
+  },
+  {
+    "part_id": "flat-bracket",
+    "ref": "$5",
+    "suppliers": [
+      {
+        "name": "ARUIKE",
+        "product": "2020-2 hole",
+        "url": "https://www.aliexpress.us/item/3256803768089658.html"
+      },
+      {
+        "name": "AYX Garden",
+        "product": "2 Hole-Black",
+        "url": "https://www.aliexpress.us/item/3256812043837641.html"
+      },
+      {
+        "name": "AUTOMATION",
+        "product": "2 Hole Black",
+        "url": "https://www.aliexpress.us/item/3256806570619551.html"
+      }
+    ]
+  },
+  {
+    "part_id": "motor-bracket",
+    "ref": "$2",
+    "suppliers": [
+      {
+        "name": "Tojiato",
+        "product": "2pcs",
+        "url": "https://www.aliexpress.us/item/3256806509064883.html"
+      },
+      {
+        "name": "SEEJIE",
+        "product": "black",
+        "url": "https://www.aliexpress.us/item/2251832655754814.html"
+      },
+      {
+        "name": "JINGLIN",
+        "product": "2PCS, black",
+        "url": "https://www.aliexpress.us/item/2255799870071457.html"
+      }
+    ]
+  },
+  {
+    "part_id": "corner-bracket",
+    "ref": "$7",
+    "suppliers": [
+      {
+        "name": "AYX Garden",
+        "product": "4pcs 3030-2 holes",
+        "url": "https://www.aliexpress.us/item/3256809896229811.html"
+      },
+      {
+        "name": "HighQ",
+        "product": "black, 3030 2Holes",
+        "url": "https://www.aliexpress.us/item/3256806997058315.html"
+      },
+      {
+        "name": "qingmai",
+        "product": "30s 10pcs black",
+        "url": "https://www.aliexpress.us/item/2251832774122827.html"
+      }
+    ]
+  },
+  {
+    "part_id": "bumper",
+    "ref": "$3",
+    "suppliers": [
+      {
+        "name": "Conch",
+        "product": "20x16x20mm",
+        "url": "https://www.aliexpress.us/item/2255801178473063.html"
+      },
+      {
+        "name": "ManyUse",
+        "product": "XD-20x14x17 mm",
+        "url": "https://www.aliexpress.us/item/3256805245298775.html"
+      },
+      {
+        "name": "Halojaju",
+        "product": "19X16X15 MM",
+        "url": "https://www.aliexpress.us/item/2251832794475613.html"
+      }
+    ]
+  },
+  {
+    "part_id": "stylus-tip",
+    "ref": "$6",
+    "suppliers": [
+      {
+        "name": "Foxnovo",
+        "product": "M5 7mm thread",
+        "url": "https://www.aliexpress.us/item/3256813210525735.html"
+      },
+      {
+        "name": "Techverse",
+        "product": "M5 7mm thread",
+        "url": "https://www.aliexpress.us/item/3256813044701122.html"
+      },
+      {
+        "name": "Creative Office",
+        "product": "M5 7mm thread",
+        "url": "https://www.aliexpress.com/item/1005013373947093.html"
+      }
+    ],
+    "note": "These M5 tips require an M3 female → M5 male adapter. Buy from either vendor below:",
+    "accessories": [
+      {
+        "name": "RUIRUIYANG",
+        "spec": "M3-M5 (5pcs), 5mm (L)",
+        "url": "https://www.aliexpress.us/item/3256809071948415.html"
+      },
+      {
+        "name": "Victor Hardware",
+        "spec": "M3-M5 (5pcs), length 5mm",
+        "url": "https://www.aliexpress.us/item/3256809129808580.html"
+      }
+    ]
+  },
+  {
+    "part_id": "teflon-tube",
+    "ref": "$2",
+    "suppliers": [
+      {
+        "name": "Maecoom",
+        "product": "1M, Black",
+        "url": "https://www.aliexpress.us/item/3256803004650903.html"
+      },
+      {
+        "name": "3DSWAY",
+        "product": "Grey 4M",
+        "url": "https://www.aliexpress.us/item/3256806780305316.html"
+      },
+      {
+        "name": "Creality",
+        "product": "Blue PTFE-1M",
+        "url": "https://www.aliexpress.us/item/3256807633745958.html"
+      }
+    ]
+  },
+  {
+    "part_id": "spiral-wrap",
+    "ref": "$2",
+    "suppliers": [
+      {
+        "name": "U Officer",
+        "product": "4mm x 4m",
+        "url": "https://www.aliexpress.us/item/2251832695460059.html"
+      },
+      {
+        "name": "NexusHub",
+        "product": "Black 4mm ID 5mm OD",
+        "url": "https://www.aliexpress.us/item/3256810262528489.html"
+      },
+      {
+        "name": "Double N",
+        "product": "4mm-Black",
+        "url": "https://www.aliexpress.us/item/3256808097089851.html"
+      }
+    ]
+  },
+  {
+    "part_id": "gooseneck",
+    "ref": "$4",
+    "suppliers": [
+      {
+        "name": "LMR",
+        "product": "300mm A",
+        "url": "https://www.aliexpress.us/item/3256809673340840.html"
+      },
+      {
+        "name": "Remever",
+        "product": "Model D 30cm",
+        "url": "https://www.aliexpress.us/item/3256808640494681.html"
+      },
+      {
+        "name": "Lucky Digital",
+        "product": "30cm M to F",
+        "url": "https://www.aliexpress.us/item/3256812346811541.html"
+      }
+    ]
+  },
+  {
+    "part_id": "bhcs-m3x6",
+    "ref": "$15",
+    "suppliers": [
+      {
+        "name": "NINDEJIN",
+        "product": "BHCS, M3–M5 per spec and quantity",
+        "url": "https://www.aliexpress.us/item/2255799851750939.html"
+      },
+      {
+        "name": "JUIDINTO",
+        "product": "BHCS, M3–M5 per spec and quantity",
+        "url": "https://www.aliexpress.us/item/3256804345288240.html"
+      },
+      {
+        "name": "ONLYA",
+        "product": "BHCS, M3–M5 per spec and quantity",
+        "url": "https://www.aliexpress.us/item/3256806629971774.html"
+      }
+    ],
+    "note": "Buy enough packs to get at least the quantity in the BOM."
+  },
+  {
+    "part_id": "bhcs-m3x8",
+    "ref": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "bhcs-m3x10",
+    "ref": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "bhcs-m5x10",
+    "ref": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "bhcs-m5x12",
+    "ref": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "bhcs-m5x16",
+    "ref": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "bhcs-m5x20",
+    "ref": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "fhcs-m3x8",
+    "ref": "$5",
+    "suppliers": [
+      {
+        "name": "NINDEJIN",
+        "product": "FHCS, M3–M5 per spec and quantity",
+        "url": "https://www.aliexpress.us/item/2255800052949704.html"
+      },
+      {
+        "name": "JUIDINTO",
+        "product": "FHCS, M3–M5 per spec and quantity",
+        "url": "https://www.aliexpress.us/item/3256804346937100.html"
+      },
+      {
+        "name": "ONLYA",
+        "product": "FHCS, M3–M5 per spec and quantity",
+        "url": "https://www.aliexpress.us/item/3256806551771194.html"
+      }
+    ],
+    "note": "Ditto"
+  },
+  {
+    "part_id": "fhcs-m3x10",
+    "ref": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "fhcs-m5x12",
+    "ref": "Ditto",
+    "suppliers": "Ditto",
+    "note": "Ditto"
+  },
+  {
+    "part_id": "shcs-m6x20",
+    "ref": "$2",
+    "suppliers": [
+      {
+        "name": "NINDEJIN",
+        "product": "Size: M6 10pcs, Length: 20mm",
+        "url": "https://www.aliexpress.us/item/2255800598515019.html"
+      },
+      {
+        "name": "JUIDINTO",
+        "product": "Size: M6 5pcs, Length: 20mm (buy 2 packs)",
+        "url": "https://www.aliexpress.us/item/3256804341271555.html"
+      },
+      {
+        "name": "ONLYA",
+        "product": "M6 x10pcs, Length: 20mm",
+        "url": "https://www.aliexpress.us/item/3256806576724919.html"
+      }
+    ],
+    "note": "Use M5 or M6 screws that match the tapped holes in your 2040 frame extrusions."
+  },
+  {
+    "part_id": "shcs-unc14-16",
+    "ref": "$2",
+    "suppliers": [
+      {
+        "name": "TINGGOO",
+        "product": "Size: 10Pcs 1/4-20, Length: 5/8",
+        "url": "https://www.aliexpress.us/item/3256808188506668.html"
+      },
+      {
+        "name": "Hongsen",
+        "product": "1/4-20 (5pcs), Length: 5/8",
+        "url": "https://www.aliexpress.us/item/3256810313900643.html"
+      },
+      {
+        "name": "qingmai",
+        "product": "1/4-20, Length: 5/8",
+        "url": "https://www.aliexpress.us/item/3256809722568114.html"
+      }
+    ],
+    "note": "Use with a 3/16\" imperial hex key."
+  },
+  {
+    "part_id": "shoulder-5x10",
+    "ref": "$2",
+    "suppliers": [
+      {
+        "name": "ZONSANTA",
+        "product": "Size: D5x M4 (5pcs), Length: 10mm",
+        "url": "https://www.aliexpress.us/item/3256806959412076.html"
+      },
+      {
+        "name": "Metal Master",
+        "product": "Size: D5x M4 (5pcs), Length: 10mm",
+        "url": "https://www.aliexpress.us/item/3256808128361290.html"
+      },
+      {
+        "name": "Canrich",
+        "product": "Size: D5x M4 (5pcs), Length: 10mm",
+        "url": "https://www.aliexpress.us/item/3256808128103163.html"
+      }
+    ]
+  },
+  {
+    "part_id": "shoulder-5x20",
+    "ref": "$2",
+    "suppliers": [
+      {
+        "name": "ZONSANTA",
+        "product": "Size: D5x M4 (5pcs), Length: 20mm",
+        "url": "https://www.aliexpress.us/item/3256806959412076.html"
+      },
+      {
+        "name": "Metal Master",
+        "product": "Size: D5x M4 (5pcs), Length: 20mm",
+        "url": "https://www.aliexpress.us/item/3256808128361290.html"
+      },
+      {
+        "name": "Canrich",
+        "product": "Size: D5x M4 (5pcs), Length: 20mm",
+        "url": "https://www.aliexpress.us/item/3256808128103163.html"
+      }
+    ],
+    "note": "You need 6. If the shop sells packs of 5, order 2 packs."
+  },
+  {
+    "part_id": "tnut-dropin-m3",
+    "ref": "$2",
+    "suppliers": [
+      {
+        "name": "ZONSANTA",
+        "product": "Size: M3 x 30 pieces, 2020",
+        "url": "https://www.aliexpress.us/item/3256801437020797.html"
+      },
+      {
+        "name": "HZYUEGOU",
+        "product": "20 series M3, T nut",
+        "url": "https://www.aliexpress.us/item/3256804472354178.html"
+      },
+      {
+        "name": "YMAX",
+        "product": "20 M3x 50pcs",
+        "url": "https://www.aliexpress.us/item/3256807011527907.html"
+      }
+    ]
+  },
+  {
+    "part_id": "tnut-dropin-m5",
+    "ref": "$2",
+    "suppliers": [
+      {
+        "name": "ZONSANTA",
+        "product": "Size: M5 x 20 pieces, 2020",
+        "url": "https://www.aliexpress.us/item/3256801437020797.html"
+      },
+      {
+        "name": "HZYUEGOU",
+        "product": "20 series M5, T nut",
+        "url": "https://www.aliexpress.us/item/3256804472354178.html"
+      },
+      {
+        "name": "YMAX",
+        "product": "20 M5x 50pcs",
+        "url": "https://www.aliexpress.us/item/3256807011527907.html"
+      }
+    ]
+  },
+  {
+    "part_id": "tnut-slidein-m5",
+    "ref": "$2",
+    "suppliers": [
+      {
+        "name": "ZONSANTA",
+        "product": "2020-M5-10pcs, nickel plated T nut",
+        "url": "https://www.aliexpress.us/item/3256812572736260.html"
+      },
+      {
+        "name": "HZYUEGOU",
+        "product": "20 series M5, sliding nut",
+        "url": "https://www.aliexpress.us/item/3256804472354178.html"
+      },
+      {
+        "name": "YMAX",
+        "product": "50pcs 2020 M5",
+        "url": "https://www.aliexpress.us/item/3256807696043158.html"
+      }
+    ]
+  },
+  {
+    "part_id": "sqnut-m3",
+    "ref": "$1",
+    "suppliers": [
+      {
+        "name": "ZONSANTA",
+        "product": "M3 x 50Pcs",
+        "url": "https://www.aliexpress.us/item/3256802734935705.html"
+      },
+      {
+        "name": "HZYUEGOU",
+        "product": "50pcs M3",
+        "url": "https://www.aliexpress.us/item/2251832808095646.html"
+      },
+      {
+        "name": "EDGAR GARY",
+        "product": "M3(50pcs), 304 stainless steel",
+        "url": "https://www.aliexpress.us/item/3256808604527917.html"
+      }
+    ]
+  },
+  {
+    "part_id": "sqnut-m4",
+    "ref": "$1",
+    "suppliers": [
+      {
+        "name": "ZONSANTA",
+        "product": "M4 x 40Pcs",
+        "url": "https://www.aliexpress.us/item/3256802734935705.html"
+      },
+      {
+        "name": "HZYUEGOU",
+        "product": "50pcs M4",
+        "url": "https://www.aliexpress.us/item/2251832808095646.html"
+      },
+      {
+        "name": "EDGAR GARY",
+        "product": "M4(50pcs), 304 stainless steel",
+        "url": "https://www.aliexpress.us/item/3256808604527917.html"
+      }
+    ]
+  },
+  {
+    "part_id": "sqnut-m5",
+    "ref": "$1",
+    "suppliers": [
+      {
+        "name": "ZONSANTA",
+        "product": "M5 x 30Pcs",
+        "url": "https://www.aliexpress.us/item/3256802734935705.html"
+      },
+      {
+        "name": "HZYUEGOU",
+        "product": "50pcs M5",
+        "url": "https://www.aliexpress.us/item/2251832808095646.html"
+      },
+      {
+        "name": "EDGAR GARY",
+        "product": "M5(50pcs), 304 stainless steel",
+        "url": "https://www.aliexpress.us/item/3256808604527917.html"
+      }
+    ]
+  },
+  {
+    "part_id": "hexnut-unc14",
+    "ref": "$1",
+    "suppliers": [
+      {
+        "name": "TINGGOO",
+        "product": "1/4-20 UNC, 10pcs",
+        "url": "https://www.aliexpress.us/item/3256812725991407.html"
+      },
+      {
+        "name": "HZYUEGOU",
+        "product": "UNC 1/4-20 (10 pcs)",
+        "url": "https://www.aliexpress.us/item/3256801731534935.html"
+      },
+      {
+        "name": "YMAX",
+        "product": "20pcs 1/4-20",
+        "url": "https://www.aliexpress.us/item/3256809588034255.html"
+      }
+    ],
+    "note": "Tighten with an 11 mm open-end wrench."
+  },
+  {
+    "part_id": "shim-5x8x0_5",
+    "ref": "$1",
+    "suppliers": [
+      {
+        "name": "TINGGOO",
+        "product": "100pcs M5x8, 0.5mm thick",
+        "url": "https://www.aliexpress.us/item/3256804251858880.html"
+      },
+      {
+        "name": "HZYUEGOU",
+        "product": "50pcs M5x8xThick, thick 0.5mm",
+        "url": "https://www.aliexpress.us/item/3256801859874107.html"
+      },
+      {
+        "name": "Michastu",
+        "product": "100pcs M5x8xThick, thick 0.5mm",
+        "url": "https://www.aliexpress.us/item/3256801735954243.html"
+      }
+    ]
+  },
+  {
+    "part_id": "spacer-5x10",
+    "ref": "$2",
+    "suppliers": [
+      {
+        "name": "KINGROON",
+        "product": "5x8x9mm, 10PCS",
+        "url": "https://www.aliexpress.us/item/3256801428839709.html"
+      },
+      {
+        "name": "Torupy",
+        "product": "10pcs, 5x8x9mm",
+        "url": "https://www.aliexpress.us/item/3256808890488933.html"
+      },
+      {
+        "name": "Ramps",
+        "product": "5x8x9mm, 20pcs",
+        "url": "https://www.aliexpress.us/item/3256803150543171.html"
+      }
+    ],
+    "note": "If the exact 9 mm height is unavailable, stack shorter spacers to reach 9 mm."
+  },
+  {
+    "part_id": "spacer-6x12x8",
+    "ref": "$1",
+    "suppliers": [
+      {
+        "name": "ZONSANTA",
+        "product": "OD12xM6 (5pcs), L 8mm",
+        "url": "https://www.aliexpress.us/item/3256809618948037.html"
+      },
+      {
+        "name": "Canrich",
+        "product": "OD12xM6 (5pcs), L 8mm",
+        "url": "https://www.aliexpress.us/item/3256809732112359.html"
+      },
+      {
+        "name": "LOOZI",
+        "product": "OD12xM6 (5pcs), L 8mm",
+        "url": "https://www.aliexpress.us/item/3256809625412677.html"
+      }
+    ],
+    "note": "Height must match the listed spec. The ID and OD can vary: any ID > 5 mm and OD < 20 mm works."
+  },
+  {
+    "part_id": "spacer-6x12x12",
+    "ref": "$1",
+    "suppliers": [
+      {
+        "name": "ZONSANTA",
+        "product": "OD12xM6 (5pcs), L 12mm",
+        "url": "https://www.aliexpress.us/item/3256809618948037.html"
+      },
+      {
+        "name": "Canrich",
+        "product": "OD12xM6 (5pcs), L 12mm",
+        "url": "https://www.aliexpress.us/item/3256809732112359.html"
+      },
+      {
+        "name": "LOOZI",
+        "product": "OD12xM6 (5pcs), L 12mm",
+        "url": "https://www.aliexpress.us/item/3256809625412677.html"
+      }
+    ],
+    "note": "Ditto"
+  },
+  {
+    "part_id": "hex-key",
+    "ref": "$5",
+    "suppliers": [
+      {
+        "name": "LAOA",
+        "product": "Flat head hex, 2/3/5 mm",
+        "url": "https://www.aliexpress.us/item/3256806007023572.html"
+      },
+      {
+        "name": "Ehomedreams",
+        "product": "2/3/5 mm",
+        "url": "https://www.aliexpress.us/item/3256804987807378.html"
+      },
+      {
+        "name": "BL Tools",
+        "product": "2/3/5 mm",
+        "url": "https://www.aliexpress.us/item/3256809943537745.html"
+      }
+    ],
+    "note": "You need 3 hex keys. Buy good-quality 2 mm and 3 mm keys, which you use most. A basic 5 mm key is enough."
+  },
+  {
+    "part_id": "grease",
+    "ref": "$2",
+    "suppliers": [
+      {
+        "name": "TGCF",
+        "product": "1pcs",
+        "url": "https://www.aliexpress.us/item/3256806023893182.html"
+      },
+      {
+        "name": "HongWei",
+        "product": "1pcs",
+        "url": "https://www.aliexpress.us/item/3256808928146521.html"
+      },
+      {
+        "name": "XIAOXI",
+        "product": "1pcs",
+        "url": "https://www.aliexpress.us/item/3256809074567820.html"
+      }
+    ]
+  },
+  {
+    "part_id": "threadlocker",
+    "ref": "$3",
+    "suppliers": [
+      {
+        "name": "LOOLIFL",
+        "product": "243-10ml-1pc",
+        "url": "https://www.aliexpress.us/item/3256808594980015.html"
+      },
+      {
+        "name": "TOP-H",
+        "product": "10ml 243",
+        "url": "https://www.aliexpress.us/item/3256807660387582.html"
+      },
+      {
+        "name": "Songsen",
+        "product": "Loctite 243 50ml",
+        "url": "https://www.aliexpress.us/item/3256808479460723.html"
+      }
+    ]
+  },
+  {
+    "part_id": "heat-shrink",
+    "ref": "$2",
+    "suppliers": [
+      {
+        "name": "Ammax",
+        "product": "164pcs bag",
+        "url": "https://www.aliexpress.us/item/3256801382779252.html"
+      },
+      {
+        "name": "TonKing",
+        "product": "164PCS NO BOX",
+        "url": "https://www.aliexpress.us/item/3256807310376739.html"
+      },
+      {
+        "name": "YOBO",
+        "product": "164 bagged",
+        "url": "https://www.aliexpress.us/item/3256812519493882.html"
+      }
+    ]
+  }
+]

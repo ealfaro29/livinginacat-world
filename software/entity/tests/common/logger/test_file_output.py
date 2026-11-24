@@ -1,0 +1,348 @@
+"""Portable file-sink contracts; runnable with pytest alone and --noconftest."""
+
+import datetime as dt
+import logging
+import os
+import subprocess
+import sys
+import threading
+import time
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+
+from physiclaw.common import config
+from physiclaw.common.logger import logger as logger_mod
+from physiclaw.common.logger.retention import purge_log_archives
+from physiclaw.port.locks import FileLockBusy, exclusive_file_lock
+from tests.timing_helpers import PROCESS_TIMEOUT, WAIT_TIMEOUT
+
+ROOT = Path(__file__).resolve().parents[3]
+
+
+@pytest.fixture(autouse=True)
+def fixed_retention_date(monkeypatch):
+    class FixedDateTime(dt.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return dt.datetime(2026, 8, 30, 12, tzinfo=tz)
+
+    # Only the handler sees this date; thread/process watchdogs keep real clocks.
+    monkeypatch.setattr(logger_mod, "dt", SimpleNamespace(datetime=FixedDateTime))
+
+
+@pytest.fixture
+def sink(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "CONFIG", config.Config())
+    config.CONFIG.retention.log_max_bytes = 20
+    config.CONFIG.retention.log_backup_count = 2
+    handler = logger_mod._ServiceFileHandler(tmp_path, "runtime", "runtime")
+    handler.setFormatter(logging.Formatter("%(message)s"))
+    yield handler
+    handler.close()
+
+
+def emit(sink, text):
+    sink.handle(
+        logging.LogRecord("physiclaw.test", logging.INFO, __file__, 1, text, (), None)
+    )
+
+
+def test_size_rotation_counts_utf8_bytes_and_bounds_archives(sink):
+    path = Path(sink.baseFilename)
+    # Six code points but 16 bytes per record, including its LF.
+    for i in range(4):
+        emit(sink, f"{i}中文测试啊")
+        assert sink.stream is None  # Peers can rename on Windows.
+
+    assert path.read_bytes() == "3中文测试啊\n".encode()
+    archive = path.parent / "archive"
+    assert (archive / "runtime.log.1").read_bytes() == "2中文测试啊\n".encode()
+    assert (archive / "runtime.log.2").read_bytes() == "1中文测试啊\n".encode()
+    assert len(list(archive.iterdir())) == 2
+    assert list(path.parent.glob("runtime.log*")) == [path]
+
+
+def test_large_single_record_is_preserved_then_rotated(sink):
+    path = Path(sink.baseFilename)
+    large = "long traceback\n" * 50
+    emit(sink, large)
+    emit(sink, "next event")
+
+    archive = path.parent / "archive" / "runtime.log.1"
+    assert archive.read_text(encoding="utf-8") == large + "\n"
+    assert path.read_bytes() == b"next event\n"
+
+
+def test_surrogate_and_newlines_have_stable_disk_encoding(sink):
+    emit(sink, "test\ud800\nnext")
+    assert Path(sink.baseFilename).read_bytes() == b"test\\ud800\nnext\n"
+
+
+def test_retention_expires_numbered_archives_and_leaves_other_files(tmp_path):
+    stale = [
+        "runtime.log.1",
+        "runtime.log.2",
+    ]
+    untouched = [
+        "runtime.log",
+        "runtime.log.tmp",
+        "runtime.log.backup",
+        "runtime.log.backup.1",
+        "runtime.log.tmp.2",
+        "runtime.log.1.extra",
+        "other.log.1",
+        ".runtime.log.lock",
+    ]
+    fresh = ["runtime.log.3"]
+    for name in stale + untouched + fresh:
+        path = tmp_path / name
+        path.write_text("evidence", encoding="utf-8")
+        if name not in fresh:
+            os.utime(path, (1, 1))
+
+    assert purge_log_archives(tmp_path, "runtime", days=30, backup_count=5) == 2
+
+    assert all(not (tmp_path / name).exists() for name in stale)
+    assert all((tmp_path / name).exists() for name in untouched + fresh)
+
+
+def test_restart_with_lower_backup_count_removes_excess_archives(sink):
+    root = Path(sink.baseFilename).parent
+    sink.backupCount = 5
+    for i in range(6):
+        emit(sink, f"{i}中文测试啊")
+    sink.close()
+    archive = root / "archive"
+    assert len(list(archive.iterdir())) == 5
+
+    # The fixture's configuration still requests two backups at restart.
+    restarted = logger_mod._ServiceFileHandler(root, "runtime", "runtime")
+    try:
+        assert {p.name for p in archive.iterdir()} == {
+            "runtime.log.1",
+            "runtime.log.2",
+        }
+        emit(restarted, "recorded after restart")
+    finally:
+        restarted.close()
+    assert "recorded after restart" in (root / "runtime.log").read_text(
+        encoding="utf-8"
+    )
+    assert len(list(archive.iterdir())) == 2
+
+
+def test_long_running_handler_purges_at_date_change(sink, monkeypatch):
+    path = Path(sink.baseFilename)
+    old = path.parent / "archive" / "runtime.log.1"
+    old.write_text("expired", encoding="utf-8")
+    os.utime(old, (1, 1))
+    tomorrow = logger_mod.dt.datetime.now() + dt.timedelta(days=1)
+
+    class NextDay(dt.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return tomorrow
+
+    monkeypatch.setattr(logger_mod.dt, "datetime", NextDay)
+    emit(sink, "after midnight")
+
+    assert not old.exists()
+    assert Path(sink.baseFilename) == path
+    assert Path(sink.baseFilename).read_bytes() == b"after midnight\n"
+
+
+def test_retention_uses_the_rotation_lock(sink, monkeypatch):
+    from physiclaw.common.logger import retention
+
+    checked = []
+
+    def purge(*args, **kwargs):
+        with pytest.raises(FileLockBusy), exclusive_file_lock(sink._lock_path):
+            pass
+        checked.append(True)
+        return 0
+
+    monkeypatch.setattr(retention, "purge_log_archives", purge)
+    sink._purge_archives()
+    assert checked == [True]
+
+
+def test_busy_retention_does_not_disable_logging_at_startup(tmp_path, monkeypatch):
+    def busy(path, *, timeout):
+        return exclusive_file_lock(path)
+
+    monkeypatch.setattr(logger_mod, "exclusive_file_lock", busy)
+    with exclusive_file_lock(tmp_path / ".runtime.log.lock"):
+        handler = logger_mod._ServiceFileHandler(tmp_path, "runtime", "runtime")
+    try:
+        emit(handler, "startup evidence")
+    finally:
+        handler.close()
+    assert "startup evidence" in (tmp_path / "runtime.log").read_text(encoding="utf-8")
+
+
+def test_file_count_stays_bounded_across_many_days(sink, monkeypatch):
+    day = logger_mod.dt.datetime.now()
+
+    class CurrentDay(dt.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return day
+
+    monkeypatch.setattr(logger_mod.dt, "datetime", CurrentDay)
+    for i in range(60):
+        day += dt.timedelta(days=1)
+        emit(sink, f"day {i}")
+
+    root = Path(sink.baseFilename).parent
+    assert list(root.glob("runtime.log*")) == [root / "runtime.log"]
+    assert len(list((root / "archive").iterdir())) == 2
+
+
+def test_rotation_failure_preserves_records_and_warns_once(sink, monkeypatch):
+    # Route the actual warning back through the same file handler: this must
+    # neither recurse nor deadlock, even when every rollover fails.
+    logger = logger_mod.log
+    monkeypatch.setattr(logger, "handlers", [sink])
+    monkeypatch.setattr(logger, "propagate", False)
+    monkeypatch.setattr(logger, "level", logging.DEBUG)
+
+    def deny_rotation(*args):
+        raise PermissionError("rename denied")
+
+    monkeypatch.setattr(sink, "rotate", deny_rotation)
+    emit(sink, "initial event")
+    emit(sink, "second event")
+    emit(sink, "third event")
+
+    text = Path(sink.baseFilename).read_text(encoding="utf-8")
+    assert all(
+        event in text for event in ("initial event", "second event", "third event")
+    )
+    assert text.count("Cannot rotate") == 1
+    assert "PermissionError: rename denied" in text
+    assert sink.stream is None
+
+
+def test_handler_generated_logging_runs_without_holding_its_lock(sink, monkeypatch):
+    acquired = []
+
+    def report(*args, **kwargs):
+        def try_lock():
+            locked = sink.lock.acquire(blocking=False)
+            acquired.append(locked)
+            if locked:
+                sink.lock.release()
+
+        thread = threading.Thread(target=try_lock)
+        thread.start()
+        thread.join(timeout=WAIT_TIMEOUT)
+        assert not thread.is_alive()
+
+    def deny_rotation(*args):
+        raise PermissionError("rename denied")
+
+    monkeypatch.setattr(logger_mod.log, "warning", report)
+    monkeypatch.setattr(sink, "rotate", deny_rotation)
+    emit(sink, "initial event")
+    emit(sink, "second event")
+    assert acquired == [True]
+
+
+def test_failed_rotation_notice_cannot_fail_a_completed_action(sink, monkeypatch):
+    def fail(*args, **kwargs):
+        raise OSError("sink unavailable")
+
+    errors = []
+    monkeypatch.setattr(sink, "handleError", errors.append)
+    monkeypatch.setattr(sink, "rotate", fail)
+    monkeypatch.setattr(logger_mod.log, "warning", fail)
+    emit(sink, "initial event")
+    emit(sink, "completed action")
+
+    assert len(errors) == 1
+    assert "completed action" in Path(sink.baseFilename).read_text(encoding="utf-8")
+
+
+def test_busy_sink_does_not_raise_into_the_caller(sink, monkeypatch):
+    errors = []
+    monkeypatch.setattr(sink, "handleError", errors.append)
+
+    # No waiting is necessary to exercise the handler's fail-open path.
+    def busy(path, *, timeout):
+        return exclusive_file_lock(path)
+
+    monkeypatch.setattr(logger_mod, "exclusive_file_lock", busy)
+    with exclusive_file_lock(sink._lock_path):
+        emit(sink, "completed action")
+
+    assert len(errors) == 1
+    assert errors[0].getMessage() == "completed action"
+    assert sink.stream is None
+
+
+def test_concurrent_processes_rotate_without_losing_or_duplicating_records(tmp_path):
+    program = """
+import logging, sys, time
+from pathlib import Path
+from physiclaw.common.config import CONFIG
+from physiclaw.common.logger.logger import _ServiceFileHandler
+directory, worker = Path(sys.argv[1]), sys.argv[2]
+CONFIG.retention.log_max_bytes = 128
+CONFIG.retention.log_backup_count = 128
+handler = _ServiceFileHandler(directory, 'runtime', 'runtime')
+handler.setFormatter(logging.Formatter('%(message)s'))
+(directory / ('ready-' + worker)).touch()
+deadline = time.monotonic() + 60
+while not (directory / 'start').exists():
+    if time.monotonic() > deadline:
+        raise TimeoutError('writer start barrier')
+    time.sleep(0.01)
+for i in range(60):
+    handler.handle(logging.LogRecord('physiclaw.test', logging.INFO, '', 0, f'{worker}:{i}:中文', (), None))
+handler.close()
+"""
+    env = {
+        **os.environ,
+        "PYTHONPATH": str(ROOT / "src"),
+        "PHYSICLAW_HOME": str(tmp_path / "home"),
+    }
+    processes = []
+    try:
+        for worker in range(3):
+            processes.append(
+                subprocess.Popen(
+                    [sys.executable, "-S", "-c", program, str(tmp_path), str(worker)],
+                    env=env,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
+            )
+        deadline = time.monotonic() + 60
+        while len(list(tmp_path.glob("ready-*"))) < 3:
+            assert time.monotonic() < deadline, "writers failed to reach start barrier"
+            time.sleep(0.01)
+        (tmp_path / "start").touch()
+        for process in processes:
+            stdout, stderr = process.communicate(timeout=PROCESS_TIMEOUT)
+            assert process.returncode == 0, stderr.decode(errors="replace")
+            assert not stdout and not stderr
+    finally:
+        for process in processes:
+            if process.poll() is None:
+                process.kill()
+                process.communicate(timeout=WAIT_TIMEOUT)
+
+    lines = []
+    for path in [
+        tmp_path / "runtime.log",
+        *(tmp_path / "archive").glob("runtime.log.*"),
+    ]:
+        assert path.stat().st_size <= 128
+        lines.extend(path.read_text(encoding="utf-8").splitlines())
+    assert len(lines) == 180
+    assert set(lines) == {
+        f"{worker}:{i}:中文" for worker in range(3) for i in range(60)
+    }

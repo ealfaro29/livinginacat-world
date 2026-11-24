@@ -1,0 +1,696 @@
+"""HTTP request handlers for setup calibration steps.
+
+Each handler runs the corresponding `calibrate` step in a thread
+executor, writes the result into ``rig.calibration`` (a typed
+:class:`Calibration` dataclass — the single source of truth), and
+returns a JSON response. The Starlette event loop stays responsive
+because the blocking step functions run off-thread.
+"""
+
+import asyncio
+import dataclasses
+import logging
+from collections.abc import Callable
+from typing import TYPE_CHECKING, cast
+
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+
+from physiclaw.common.logger.evidence import record_event
+from physiclaw.core.bridge import BridgeState, CalibrationState, PageState
+from physiclaw.core.bridge.handler import json_or_none
+from physiclaw.core.bridge.nonce import generate_nonce
+from physiclaw.core.calibration._common import (
+    PreconditionError,
+    require_screen_dimension,
+    require_viewport_shift,
+)
+from physiclaw.core.calibration.calibrate import (
+    TILT_ALIGNED_THRESHOLD,
+    calibrate_arm,
+    calibrate_camera_frame,
+    compute_camera_mapping,
+    measure_viewport_shift,
+    validate_calibration,
+    verify_assistive_touch,
+)
+from physiclaw.core.calibration.parking import CORNERS, parking_positions
+from physiclaw.core.calibration.state import Calibration
+from physiclaw.core.calibration.transforms import ViewportShift
+from physiclaw.core.setup.errors import ManualPositionRequired
+from physiclaw.core.setup.hardware_handlers import capture_setup_view
+from physiclaw.core.setup.run_log import record_rejection, run_setup_step
+
+if TYPE_CHECKING:
+    from physiclaw.core.orchestration import HardwareRig
+
+log = logging.getLogger(__name__)
+
+
+# ─── Helpers ────────────────────────────────────────────────
+
+
+def _ok(payload: dict) -> JSONResponse:
+    return JSONResponse({"status": "ok", **payload})
+
+
+def _flag(body: dict | None, name: str) -> bool:
+    """Read an optional boolean without coercing invalid input into motion."""
+    if body is None:
+        raise ValueError("body must be a JSON object")
+    value = body.get(name, False)
+    if type(value) is not bool:
+        raise ValueError(f"{name} must be a boolean")
+    return value
+
+
+async def _read_flag(request: Request, name: str) -> bool:
+    return _flag(await json_or_none(request, allow_empty=True), name)
+
+
+def _err(message: str, status_code: int = 500) -> JSONResponse:
+    return JSONResponse(
+        {"status": "error", "message": message}, status_code=status_code
+    )
+
+
+async def _run_locked_step(
+    rig: "HardwareRig",
+    do: Callable[[], dict],
+    *,
+    step: str,
+    parameters: dict | None = None,
+    precheck: Callable[[], None] | None = None,
+    on_failure: Callable[[], None] | None = None,
+    park_on_failure: bool = True,
+) -> JSONResponse:
+    """Run one calibration step off-thread under the hardware lock.
+
+    ``precheck`` runs BEFORE the non-blocking acquire — a raising
+    precondition (arm/camera missing, earlier step not run) must beat
+    the busy error. Checks must be read-only; they run again under the
+    lock before any step or failure cleanup may move the arm.
+    ``do`` runs with the lock held and the lock is always released,
+    even on failure; a failing step also parks (best-effort) so the
+    tip never rests mid-screen where a retry would re-pin the frame.
+    ``on_failure`` runs AFTER that park, still under the lock — for
+    step-specific cleanup that must wait until the park has used the
+    state it clears (the from_park borrow). A ``PreconditionError``
+    becomes a 409 (client state — the wizard can act on the message);
+    anything else becomes the standard 500 ``_err`` JSON (a genuine
+    fault). Page-only steps can disable failure parking.
+    """
+
+    def _step() -> dict:
+        if precheck is not None:
+            precheck()
+        with rig.locked():
+            if precheck is not None:
+                precheck()
+            try:
+                capture_setup_view(rig, "before_step")
+                result = do()
+                capture_setup_view(rig, "after_step")
+                return result
+            except BaseException:
+                # A mid-step failure must not leave the tip at the failure
+                # position — the retry's restore_park_origin would declare
+                # that spot the park frame. rig.park() is defensive: it
+                # no-ops when the arm, the affine, or the pin isn't there
+                # (each `do` owns its own success-path parking).
+                if park_on_failure:
+                    try:
+                        rig.park()
+                    except Exception:
+                        log.exception("calibration step failed — auto-park also failed")
+                if on_failure is not None:
+                    try:
+                        on_failure()
+                    except Exception:
+                        log.exception("calibration step failure cleanup failed")
+                capture_setup_view(rig, "after_failure_cleanup")
+                raise
+
+    try:
+        result = await asyncio.to_thread(
+            run_setup_step, rig, step, _step, parameters=parameters
+        )
+        return _ok(result)
+    except ManualPositionRequired as e:
+        log.info(
+            "Arm calibration waiting for stylus positioning",
+            extra={"event": "calibration.waiting_for_user"},
+        )
+        return JSONResponse(
+            {"status": "needs_input", "message": str(e)}, status_code=409
+        )
+    except PreconditionError as e:
+        log.warning("Calibration step blocked: %s", e)
+        return _err(str(e), status_code=409)
+    except Exception as e:
+        log.exception(
+            "Calibration step failed: %s",
+            e,
+            extra={"event": "calibration.failed", "step": step},
+        )
+        return _err(str(e))
+
+
+# ─── Pre-cal: measure viewport shift ────────────────────────
+
+
+async def handle_measure_viewport_shift(
+    request: Request,
+    rig: "HardwareRig",
+    calib: CalibrationState,
+    bridge: BridgeState,
+    phone: PageState,
+) -> JSONResponse:
+    """POST /api/calibrate/viewport-shift — measure viewport→screenshot offset and DPR.
+
+    Body flag ``{"fresh": true}`` bypasses the disk-cached screenshot
+    and waits for a fresh upload; interactive `physiclaw setup hardware`
+    sends this so the operator gets a real measurement, not a stale one.
+    """
+    try:
+        fresh = await _read_flag(request, "fresh")
+    except ValueError as exc:
+        await asyncio.to_thread(record_rejection, rig, "viewport", str(exc))
+        return _err(str(exc), status_code=400)
+
+    def _precheck() -> None:
+        require_screen_dimension(calib)
+
+    def _do() -> dict:
+        previous = rig.calibration.viewport_shift
+        phone.set_mode("calibrate", phase="screenshot_cal")
+        result = measure_viewport_shift(calib, bridge, fresh=fresh)
+        calib.viewport_shift = result
+        rig.calibration.viewport_shift = result
+        if result != previous:
+            # Park with the OLD affine and pin before discarding them.
+            # Parking reads the affine only, not the viewport shift.
+            try:
+                rig.park()
+            finally:
+                rig.uninstall_arm_calibration()
+                _invalidate_camera_mapping(rig)
+                rig.assistive_touch.at_screen = None
+                rig.assistive_touch.at_radius_screen = None
+        return dataclasses.asdict(result)
+
+    return await _run_locked_step(
+        rig,
+        _do,
+        step="viewport",
+        parameters={"fresh": fresh},
+        precheck=_precheck,
+        park_on_failure=False,
+    )
+
+
+# ─── Arm-side unified calibration ───────────────────────────
+
+
+def _borrow_saved_affine(rig: "HardwareRig") -> bool:
+    """Seat the saved bundle's affine into the live one when none is
+    live (plain server boot) — `rig.borrow_arm_calibration`. Returns
+    True on a borrow; raises when there is nothing to borrow. Kept
+    separate from the centering MOTION so the caller can flag the
+    borrow before any operation that can raise — a serial error
+    mid-move must be able to undo it, not just a failed probe."""
+    if rig.calibration.pct_to_grbl is not None:
+        return False
+    prior = Calibration.load()
+    if prior is None or prior.pct_to_grbl is None:
+        raise ManualPositionRequired(
+            "No saved arm calibration. Move the stylus tip above the orange "
+            "center circle, then press Start."
+        )
+    rig.borrow_arm_calibration(prior.pct_to_grbl)
+    return True
+
+
+def _center_parked_stylus(rig: "HardwareRig") -> None:
+    """Drive the parked stylus onto the screen center, so auto mode
+    needs no hand-positioning. Assumes the tip rests at ``PARK_PCT``
+    (the off-screen spot every run parks at) and that the live bundle
+    carries an affine (`_borrow_saved_affine` ran). Caller holds the
+    lock."""
+    cal = rig.calibration
+    arm = rig.arm
+    if arm is None:  # caller prechecks the arm; re-narrow here
+        raise PreconditionError("Arm not connected")
+    if not rig.restore_park_origin():
+        raise ManualPositionRequired(
+            "The last reference park was interrupted. Position the tip over the center circle."
+        )
+    center = cal.pct_to_grbl_mm(0.5, 0.5)
+    if center is None:  # unreachable: _borrow_saved_affine ensured it
+        raise RuntimeError("Arm mapping missing — calibrate manually first")
+    gx, gy = center
+    arm.rapid_to(gx, gy)
+    arm.wait_idle()
+    # No set_origin here: every affine is center-rebased (arm_cal rebases
+    # so pct (0.5, 0.5) ≡ work (0, 0)), so the tip now rests AT the frame
+    # zero already — a G92 re-zero would be an exact no-op, and issuing
+    # one would silently invalidate the pin restore_park_origin just
+    # earned. The probe runs in a pinned frame, so a mid-probe failure
+    # park still lands at the true park spot.
+
+
+async def handle_calibrate_arm(
+    request: Request,
+    rig: "HardwareRig",
+    calib: CalibrationState,
+    phone: PageState,
+) -> JSONResponse:
+    """POST /api/calibrate/arm — screen↔arm mapping.
+
+    Runs the probe triangle + 15-point grid taps (each fires the solenoid;
+    re-fires on a miss) and fits the screen↔arm affine. Writes
+    ``pct_to_grbl`` and the arm direction mapping into the in-memory bundle.
+    Bundle is only persisted to disk on full setup success (validate).
+
+    Body ``{"from_park": true}`` (sent by the wizard's auto mode) means the
+    stylus is resting at the off-screen park spot rather than hand-positioned
+    over the screen. We use the saved calibration to drive it onto the screen
+    center first, so the probe triangle lands on-screen — needs a prior bundle.
+    """
+    try:
+        body = await json_or_none(request, allow_empty=True)
+        from_park = _flag(body, "from_park")
+        same_cradle = _flag(body, "same_cradle")
+    except ValueError as exc:
+        await asyncio.to_thread(record_rejection, rig, "arm.calibrate", str(exc))
+        return _err(str(exc), status_code=400)
+
+    def _precheck() -> None:
+        if rig.arm is None:
+            raise PreconditionError("Arm not connected")
+        require_viewport_shift(calib)
+        require_screen_dimension(calib)
+
+    borrowed = False
+
+    def _do() -> dict:
+        nonlocal borrowed
+        arm = rig.arm
+        if arm is None:  # prechecked; re-narrow under the lock
+            raise PreconditionError("Arm not connected")
+        # Snapshot before the manual reset clears the live work frame and travel.
+        prior = (
+            dataclasses.replace(rig.calibration)
+            if rig.calibration.travel_limits
+            else None
+        )
+        if prior is None:
+            prior = Calibration.saved_travel() if same_cradle else Calibration.load()
+        if prior is not None and prior.travel_limits:
+            prior.remember_travel()
+        shift = None
+
+        def rebase(x, y):
+            nonlocal shift
+            shift = (x, y)
+
+        if from_park:
+            # Flag the borrow BEFORE the centering motion: any raise
+            # from here on (serial error mid-move, failed probe) must
+            # be able to undo it.
+            borrowed = _borrow_saved_affine(rig)
+        else:
+            # The operator hand-positioned the stylus. Old controller counts
+            # and the previous affine no longer describe that position.
+            rig.uninstall_arm_calibration()
+        rig.unmark_ready()
+        phone.set_mode("calibrate", phase="center")
+        if from_park:
+            _center_parked_stylus(rig)
+        else:
+            arm.set_origin()
+        # from_park: the probe runs PINNED (frame ≡ the prior affine, both
+        # center-zero), so a mid-probe failure park lands at the true park
+        # spot. Only calibrate_arm's final set_origin at the newly fitted
+        # center drifts the frame — by the fit residual, millimetres —
+        # until install_arm_calibration re-pins it to the fresh affine.
+        # Manual run: the old frame was discarded, so failure parks no-op.
+        # The center-to-center displacement is known exactly only when the
+        # probe began in the same, continuously pinned, measured frame.
+        same_frame = (
+            from_park
+            and prior is not None
+            and prior.travel_limits
+            and prior.pct_to_grbl is not None
+            and rig.calibration.pct_to_grbl is not None
+            and (prior.pct_to_grbl == rig.calibration.pct_to_grbl).all()
+        )
+        if same_frame:
+            pct_to_grbl, tilt, touches = calibrate_arm(arm, calib, on_rebase=rebase)
+        else:
+            pct_to_grbl, tilt, touches = calibrate_arm(arm, calib)
+        rig.install_arm_calibration(pct_to_grbl)
+        # The borrow is repaid — the live affine is now probe-confirmed,
+        # so a failure past this point (the park below) must NOT undo it.
+        borrowed = False
+        reused = False
+        if prior is not None and (same_cradle or shift is not None):
+            reused = rig.calibration.use_measured_travel(prior, origin_shift=shift)
+            if reused:
+                arm.travel_limits = rig.calibration.travel_limits
+                rig.calibration.remember_travel()
+        # Park off-phone before returning so the camera-aim step's
+        # preview shows an unobstructed phone (the stylus would
+        # otherwise sit at the last grid-tap position over the
+        # screen). Works because `install_arm_calibration` above PINS
+        # the frame to the fresh affine — not merely because the
+        # affine exists.
+        rig.park()
+        return {
+            "pairs": len(touches) + 3,
+            "reused_travel": reused,
+            "tilt_ratio": round(tilt, 4),
+            "aligned": tilt < TILT_ALIGNED_THRESHOLD,
+        }
+
+    def _undo_borrow() -> None:
+        # Runs after the runner's park (which needs the borrowed affine
+        # + pin to land the tip at the true park spot): a failed probe
+        # must not leave `mapping_a: OK` standing off an affine it never
+        # confirmed — a page reload would skip the arm step over it.
+        if borrowed:
+            rig.uninstall_arm_calibration()
+
+    return await _run_locked_step(
+        rig,
+        _do,
+        step="arm.calibrate",
+        parameters={"from_park": from_park, "same_cradle": same_cradle},
+        precheck=_precheck,
+        on_failure=_undo_borrow,
+    )
+
+
+# ─── Camera frame calibration — setup check + rotation ──────
+
+
+def _invalidate_camera_mapping(rig: "HardwareRig") -> None:
+    """A frame or lens change makes the previous camera fit unusable."""
+    rig.calibration.precision_verified = False
+    rig.calibration.pct_to_cam = None
+    rig.calibration.cam_size = None
+    rig.calibration.cam_focus = None
+    rig.unmark_ready()
+
+
+async def handle_calibrate_camera_frame(
+    request: Request, rig: "HardwareRig", calib: CalibrationState
+) -> JSONResponse:
+    """POST /api/calibrate/camera — one-frame camera setup + rotation.
+
+    Parks the stylus off the phone's top-left corner (screen pct
+    (-0.1, -0.05)) before reading the frame so the arm doesn't occlude
+    the screen during shape/coverage/rotation analysis. Then runs the
+    physical-setup diagnostic and picks the cv2 rotation code from
+    UP/RIGHT markers. Writes ``cam_rotation`` into the calibration
+    bundle; diagnostic ``issues`` and measurements are returned for
+    the caller to surface to the user.
+    """
+
+    def _precheck() -> None:
+        if rig.cam is None:
+            raise PreconditionError("Camera not connected")
+
+    def _do() -> dict:
+        cam = rig.cam
+        if cam is None:  # prechecked; re-narrow under the lock
+            raise PreconditionError("Camera not connected")
+        rig.park()
+        _invalidate_camera_mapping(rig)
+        result = calibrate_camera_frame(cam, calib)
+        rig.calibration.cam_rotation = result["rotation"]
+        cam.rotation = result["rotation"]
+        return result
+
+    return await _run_locked_step(rig, _do, step="camera.frame", precheck=_precheck)
+
+
+# ─── Camera mapping: screen → camera affine (Mapping B) ─────
+
+
+async def handle_compute_camera_mapping(
+    request: Request, rig: "HardwareRig", calib: CalibrationState
+) -> JSONResponse:
+    """POST /api/calibrate/camera-mapping — compute screen 0-1 → camera 0-1 affine."""
+
+    def _precheck() -> None:
+        if rig.cam is None:
+            raise PreconditionError("Camera not connected")
+        require_viewport_shift(calib)
+        require_screen_dimension(calib)
+
+    def _do() -> dict:
+        cam = rig.cam
+        if cam is None:  # prechecked; re-narrow under the lock
+            raise PreconditionError("Camera not connected")
+        rotation = rig.calibration.effective_rotation()
+        rig.park()
+        _invalidate_camera_mapping(rig)
+        pct_to_cam, cam_size, cam_focus = compute_camera_mapping(cam, calib, rotation)
+        rig.calibration.pct_to_cam = pct_to_cam
+        rig.calibration.cam_size = cam_size
+        rig.calibration.cam_focus = cam_focus
+        return {
+            "ok": True,
+            "dots": 15,
+            "cam_size": list(cam_size),
+            "cam_focus": cam_focus,
+        }
+
+    return await _run_locked_step(rig, _do, step="camera.mapping", precheck=_precheck)
+
+
+# ─── Full-chain validation ──────────────────────────────────
+
+
+async def handle_parking_clearance(
+    request: Request, rig: "HardwareRig"
+) -> JSONResponse:
+    """Record corner clearances checked on this phone placement. Does not move the arm."""
+    body = await json_or_none(request)
+    names = body.get("confirmed") if isinstance(body, dict) else None
+    if not isinstance(names, list) or any(
+        not isinstance(n, str) or n not in CORNERS for n in names
+    ):
+        return _err("Expected confirmed to list physically checked corner names", 400)
+
+    def check_and_save():
+        with rig.locked():
+            cal = rig.calibration
+            if not (rig.origin_pinned and cal.complete and cal.precision_verified):
+                raise PreconditionError("Finish precision calibration first")
+            corners = tuple(dict.fromkeys(names))
+            available = parking_positions(cal.pct_to_grbl, corners)
+            if any(n not in available for n in corners):
+                raise PreconditionError("A requested corner exceeds gantry travel")
+            updated = dataclasses.replace(cal, confirmed_park_corners=corners)
+            updated.save()
+            cal.confirmed_park_corners = corners
+            return {"positions_mm": available}
+
+    try:
+        return _ok(await asyncio.to_thread(check_and_save))
+    except (ValueError, RuntimeError) as exc:
+        return _err(str(exc), 409)
+
+
+def _require_pinned_origin(rig: "HardwareRig") -> None:
+    if not rig.origin_pinned:
+        raise PreconditionError(
+            "Arm work frame is not pinned to the calibration — "
+            "recalibrate the arm before verification"
+        )
+
+
+async def handle_validate_calibration(
+    request: Request,
+    rig: "HardwareRig",
+    calib: CalibrationState,
+    phone: PageState,
+) -> JSONResponse:
+    """POST /api/calibrate/validate — round-trip validate the calibration chain."""
+
+    def _precheck() -> None:
+        if rig.arm is None:
+            raise PreconditionError("Arm not connected")
+        if rig.cam is None:
+            raise PreconditionError("Camera not connected")
+        if not rig.calibration.transforms_ready:
+            raise PreconditionError("Run arm calibration and camera-mapping first")
+        require_viewport_shift(calib)
+        require_screen_dimension(calib)
+        _require_pinned_origin(rig)
+
+    def _do() -> dict:
+        cal_state = rig.calibration
+        # Prechecked; the re-reads narrow arm/camera/affines and
+        # re-verify the state under the lock.
+        arm, cam = rig.arm, rig.cam
+        if arm is None:
+            raise PreconditionError("Arm not connected")
+        if cam is None:
+            raise PreconditionError("Camera not connected")
+        if (
+            cal_state.pct_to_grbl is None
+            or cal_state.pct_to_cam is None
+            or cal_state.cam_size is None
+        ):
+            raise PreconditionError("Run arm calibration and camera-mapping first")
+        cal_state.precision_verified = False
+        if phone.mode == "bridge":
+            phone.set_mode("calibrate")
+        results = validate_calibration(
+            arm,
+            cam,
+            calib,
+            cal_state.effective_rotation(),
+            cal_state.pct_to_grbl,
+            cal_state.pct_to_cam,
+            cam_size=cal_state.cam_size,
+            park=rig.park,
+        )
+        passed = sum(1 for r in results if r["passed"])
+        record_event(
+            "validation.acceptance",
+            passed=passed,
+            total=len(results),
+            minimum_passed=2,
+            calibrated=passed >= 2,
+        )
+        if passed >= 2:
+            phone.set_mode("bridge")
+            # Capture the phone's current screen_dimension so warm-start
+            # doesn't have to wait for a fresh /bridge page load.
+            rig.calibration.screen_dimension = calib.screen_dimension
+            cal_state.precision_verified = True
+            rig.calibration.save()
+        # Park off-phone after the validation taps so the AssistiveTouch
+        # verification step shows an unobstructed phone.
+        rig.park()
+        return {
+            "results": results,
+            "passed": passed,
+            "total": len(results),
+            "calibrated": passed >= 2,
+        }
+
+    return await _run_locked_step(rig, _do, step="validate", precheck=_precheck)
+
+
+# ─── Edge-trace verification ────────────────────────────────
+
+
+async def handle_trace_edge(
+    request: Request, rig: "HardwareRig", phone: PageState
+) -> JSONResponse:
+    """POST /api/calibrate/trace-edge — arm traces phone screen border for visual check."""
+    from physiclaw.core.calibration.calibrate import trace_screen_edge
+
+    def _precheck() -> None:
+        if rig.transforms is None:
+            raise PreconditionError("Not calibrated — run /setup first")
+        if rig.arm is None:
+            raise PreconditionError("Arm not connected")
+        _require_pinned_origin(rig)
+
+    def _do() -> dict:
+        # rig.transforms is rebuilt per access — re-fetch and re-check the
+        # prechecked value so the locals are narrowed under the lock.
+        arm, transforms = rig.arm, rig.transforms
+        if arm is None:
+            raise PreconditionError("Arm not connected")
+        if transforms is None:
+            raise PreconditionError("Not calibrated — run /setup first")
+        trace_screen_edge(arm, transforms)
+        phone.set_mode("bridge")
+        # Park off-phone after tracing so the rig ends in a clean
+        # state — same convention as the other arm-driving steps.
+        rig.park()
+        return {"ok": True}
+
+    return await _run_locked_step(rig, _do, step="trace_edge", precheck=_precheck)
+
+
+# ─── AssistiveTouch screenshot verification ─────────────────
+
+
+async def handle_show_assistive_touch(
+    request: Request,
+    rig: "HardwareRig",
+    calib: CalibrationState,
+    phone: PageState,
+) -> JSONResponse:
+    """POST /api/calibrate/assistive-touch/show — display AT positioning circle + grey nonce grid."""
+
+    def _precheck() -> None:
+        require_viewport_shift(calib)
+
+    def _do() -> dict:
+        nonce = generate_nonce()
+        shift = cast(ViewportShift, calib.viewport_shift)
+        rig.assistive_touch.compute_at_screen_pos(shift)
+        at_screen = cast("tuple[float, float]", rig.assistive_touch.at_screen)
+        phone.set_mode("calibrate", phase="assistive_touch", nonce_bits=nonce)
+        return {
+            "at_screen": list(at_screen),
+            "nonce_count": len(nonce),
+        }
+
+    return await _run_locked_step(
+        rig,
+        _do,
+        step="assistive_touch.show",
+        precheck=_precheck,
+        park_on_failure=False,
+    )
+
+
+async def handle_verify_assistive_touch(
+    request: Request,
+    rig: "HardwareRig",
+    calib: CalibrationState,
+    bridge: BridgeState,
+    phone: PageState,
+) -> JSONResponse:
+    """POST /api/calibrate/assistive-touch/verify — tap AT, verify screenshot upload via the grey nonce grid."""
+
+    def _precheck() -> None:
+        if rig.arm is None:
+            raise PreconditionError("Arm not connected")
+        if rig.calibration.pct_to_grbl is None:
+            raise PreconditionError("Run arm calibration first")
+        if not rig.assistive_touch.at_screen:
+            raise PreconditionError("Run assistive-touch/show first")
+        require_viewport_shift(calib)
+        _require_pinned_origin(rig)
+
+    def _do() -> dict:
+        # Prechecked; the re-reads narrow and re-verify under the lock.
+        arm = rig.arm
+        if arm is None:
+            raise PreconditionError("Arm not connected")
+        pct_to_grbl = rig.calibration.pct_to_grbl
+        if pct_to_grbl is None:
+            raise PreconditionError("Run arm calibration first")
+        return verify_assistive_touch(
+            arm,
+            rig.assistive_touch,
+            bridge,
+            calib,
+            pct_to_grbl,
+            phone,
+        )
+
+    return await _run_locked_step(
+        rig, _do, step="assistive_touch.verify", precheck=_precheck
+    )

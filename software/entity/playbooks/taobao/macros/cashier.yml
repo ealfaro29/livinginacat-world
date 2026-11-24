@@ -1,0 +1,14 @@
+kind: macro
+schema: 1
+name: cashier
+description: the cashier's button after an order is submitted (立即支付 / 确认支付) — pressed only while one shows
+# Disabled until rehearsed on YOUR device: physiclaw macros run taobao/cashier
+enabled: false
+steps:
+  # NOT 免密支付: that is the order button's own label at an overlapping
+  # box, so a sheet that has not navigated yet would satisfy it and
+  # press the order button a second time.
+  - tap: ["立即支付", "确认支付"]
+    at: [0.30, 0.90, 0.70, 0.96]
+    when: ["立即支付", "确认支付"]
+  - wait: 4

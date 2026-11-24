@@ -1,0 +1,40 @@
+---
+title: Best practices
+description: How to get the most out of PhysiClaw, as a personal assistant, connected to a coding agent, and with playbooks for routine tasks.
+---
+
+PhysiClaw works three ways: as your personal assistant, as an MCP server connected to a coding agent, and with playbooks for the tasks you repeat.
+
+## As a personal assistant
+
+PhysiClaw gets to know your preferences as you use it.
+
+**Be specific about what you want.** The clearer your request, the fewer wrong turns it takes. In particular, name the app to use.
+
+:::tip[Message]
+Order a half-gallon of Horizon organic 2% milk on Instacart.
+:::
+
+**Tell it to "remember".** Anything you want it to hold onto for the long run, like your preferences, a saved address, or your rules, just tell it to remember, and it uses that in every future conversation.
+
+:::tip[Message]
+Remember: I don't like spicy food.
+:::
+
+**Schedule recurring tasks.** PhysiClaw can run tasks on a schedule, just tell it when.
+
+:::tip[Message]
+Every morning at 8:00, tell me the weather.
+:::
+
+## From Claude Code or Codex
+
+If you already work with a coding agent, you can connect PhysiClaw to it as an [MCP server](/en/custom/mcp/). The agent runs on your computer, and you drive the phone straight from the terminal.
+
+:::tip[Type in the terminal]
+Open Instacart and tell me what's in my cart.
+:::
+
+## Make routine tasks into playbooks
+
+Anything you do repeatedly, like the weekly grocery order or the morning coffee, belongs in a [playbook](/en/custom/playbooks/) rather than a skill. A skill hands every step to the model. A playbook records the fixed steps and calls the model only where judgment is needed. That cuts token usage by 50 to 100 times and runs several times faster. You can have your coding agent write the playbook for you, then run it through on your own phone and enable it once it works.

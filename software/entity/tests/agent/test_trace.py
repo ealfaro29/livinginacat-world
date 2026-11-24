@@ -1,0 +1,1486 @@
+"""Tests for `physiclaw.agent.trace` — engine session logging.
+
+Covers public formatting helpers, summarize_event dispatch, Trace
+file writes + day rollover, RawLog session-start/request/response
+emit + image scrubbing for both OpenAI (image_url) and Anthropic
+(image+source) wire shapes, and _purge_old retention.
+
+`trace.store` resolves its dirs through `common.paths` per call; the
+autouse fixture re-points the session root to a per-test directory.
+"""
+
+from __future__ import annotations
+
+import base64
+import datetime as dt
+import json
+import logging
+from pathlib import Path
+
+import pytest
+from freezegun import freeze_time
+
+from physiclaw.agent import trace
+from physiclaw.agent.trace import (
+    RawLog,
+    Trace,
+    brief,
+    brief_args,
+    brief_content,
+    format_call_args,
+    format_call_result,
+)
+from physiclaw.agent.trace.store import Images
+from physiclaw.common import paths
+from physiclaw.contract import wire
+from physiclaw.contract.dto import ImageBlock, TextBlock
+
+
+@pytest.fixture(autouse=True)
+def _trace_dirs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    log_dir = tmp_path / "log"
+    monkeypatch.setattr(paths, "sessions_dir", lambda: log_dir / "sessions")
+    return log_dir
+
+
+# ---------- brief / brief_args ----------
+
+
+def test_brief_returns_short_strings_unchanged() -> None:
+    assert brief("hello") == "hello"
+
+
+def test_brief_truncates_long_strings_with_ellipsis() -> None:
+    out = brief("x" * 100, limit=10)
+
+    assert out == "xxxxxxxxx…"
+    assert len(out) == 10
+
+
+def test_brief_uses_repr_for_non_strings() -> None:
+    assert brief({"a": 1}, limit=80) == "{'a': 1}"
+
+
+def test_brief_args_joins_kv_pairs_with_commas() -> None:
+    # `brief` returns strings as-is; non-strings via repr.
+    assert brief_args({"a": 1, "b": "x"}) == "a=1, b=x"
+
+
+def test_brief_args_truncates_individual_values_at_40() -> None:
+    out = brief_args({"k": "x" * 100})
+
+    assert "x…" in out
+
+
+# ---------- format_call_args / format_call_result ----------
+
+
+@pytest.mark.parametrize("name", ["send_to_clipboard", "sequence"])
+def test_clipboard_body_is_redacted_in_diagnostics_but_preserved_in_session(
+    _trace_dirs, name
+):
+    secret = "PIN-7391"
+    arguments = (
+        {"text": secret}
+        if name == "send_to_clipboard"
+        else {"actions": [{"tool_name": "send_to_clipboard", "arg": secret}]}
+    )
+    assert secret not in format_call_args(name, arguments)
+
+    with freeze_time("2026-04-28T10:00:00"):
+        t = Trace("clipboard", Images("clipboard"))
+        t.write(
+            {
+                "event": "tool_result",
+                "turn": 0,
+                "name": name,
+                "arguments": arguments,
+                "text": "Copied 8 chars to phone clipboard",
+            }
+        )
+        t.close()
+
+    assert secret not in (
+        _trace_dirs / "sessions" / "clipboard" / "runtime.log"
+    ).read_text(encoding="utf-8")
+    event = next(
+        e for e in _events(_trace_dirs, "clipboard") if e["event"] == "tool_result"
+    )
+    assert event["arguments"] == arguments
+    assert secret in json.dumps(arguments)
+
+
+def test_format_call_args_uses_full_args_for_update_progress() -> None:
+    long = "x" * 100
+    out = format_call_args("update_progress", {"steps": long})
+
+    # Full repr — no 40-char truncation.
+    assert long in out
+
+
+def test_format_call_args_uses_brief_args_for_other_tools() -> None:
+    out = format_call_args("tap", {"bbox": "x" * 100})
+
+    assert "…" in out
+
+
+def test_format_call_result_no_truncation_for_note() -> None:
+    long = "x" * 200
+
+    assert format_call_result("note", long) == long
+
+
+def test_format_call_result_truncates_other_tools_at_80() -> None:
+    out = format_call_result("tap", "x" * 100)
+
+    assert len(out) == 80
+
+
+# ---------- brief_content ----------
+
+
+def test_brief_content_string() -> None:
+    assert brief_content("hello") == "hello"
+
+
+def test_brief_content_text_block() -> None:
+    assert brief_content([TextBlock(text="hi")]) == "hi"
+
+
+def test_brief_content_image_block_shows_byte_count() -> None:
+    assert brief_content([ImageBlock(media_type="image/jpeg", data_b64="aGk=")]) == (
+        "<image 4b>"
+    )
+
+
+def test_brief_content_dict_text_form() -> None:
+    assert brief_content([{"type": "text", "text": "x"}]) == "x"
+
+
+def test_brief_content_dict_image_form() -> None:
+    assert brief_content([{"type": "image", "data": "aGk="}]) == "<image 4b>"
+
+
+def test_brief_content_dict_image_url_extracts_data_length() -> None:
+    out = brief_content(
+        [{"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,abcdef"}}]
+    )
+
+    # The "data" portion (after the comma) is "abcdef" = 6 chars.
+    assert out == "<image 6b>"
+
+
+def test_brief_content_unknown_block_type_uses_type_or_question() -> None:
+    out = brief_content([{"type": "future_kind"}])
+
+    assert out == "future_kind"
+
+
+def test_brief_content_unknown_object_renders_question_mark() -> None:
+    assert brief_content([object()]) == "?"
+
+
+def test_brief_content_empty_list_returns_empty_label() -> None:
+    assert brief_content([]) == "(empty)"
+
+
+def test_brief_content_non_list_non_str_uses_repr() -> None:
+    assert brief_content(42) == "42"
+
+
+def test_brief_content_multiple_blocks_joined_by_plus() -> None:
+    out = brief_content(
+        [
+            TextBlock(text="a"),
+            ImageBlock(media_type="image/jpeg", data_b64="aGk="),
+        ]
+    )
+
+    assert out == "a + <image 4b>"
+
+
+# ---------- summarize_event ----------
+
+
+@pytest.mark.parametrize(
+    "event, expected_substr",
+    [
+        (
+            {
+                "event": "wake",
+                "session": "s1",
+                "model_ref": "openai/gpt-x",
+                "triggers": [{"source": "phone"}],
+            },
+            "WAKE session=s1 model=openai/gpt-x",
+        ),
+        (
+            {"event": "tools_loaded", "mcp": [1, 2], "local": [1]},
+            "tools: 2 MCP + 1 local",
+        ),
+        (
+            {"event": "request", "turn": 3, "message_count": 7},
+            "turn 3: request (7 messages)",
+        ),
+        (
+            {
+                "event": "response",
+                "turn": 1,
+                "finish_reason": "stop",
+                "tool_calls": [{"name": "tap"}],
+            },
+            "turn 1: response finish=stop calls=['tap']",
+        ),
+        (
+            {
+                "event": "response",
+                "turn": 4,
+                "producer": {"plugin_id": "conductor-slot"},
+                "presentation": "playbook",
+                "tool_calls": [{"name": "note"}, {"name": "tap"}],
+            },
+            "turn 4: response by playbook conductor-slot calls=['note', 'tap']",
+        ),
+        (
+            {
+                "event": "usage",
+                "turn": 2,
+                "call": "turn",
+                "model": "qwen/qwen3.6-plus",
+                "elapsed_ms": 2500,
+                "input": 155,
+                "input_new": 50,
+                "cache_read": 100,
+                "cache_write": 5,
+                "output": 9,
+            },
+            "turn 2: usage[turn qwen/qwen3.6-plus] 2.5s in=155 (read 100, write 5, new 50) out=9",
+        ),
+        (
+            {
+                "event": "tool_invalid_args",
+                "turn": 4,
+                "name": "tap",
+                "error": "missing bbox",
+            },
+            "tap invalid args: missing bbox",
+        ),
+        ({"event": "tool_unknown", "turn": 4, "name": "ghost"}, "ghost unknown tool"),
+        (
+            {"event": "tool_error", "turn": 5, "name": "tap", "error": "boom"},
+            "tap failed: boom",
+        ),
+        (
+            {"event": "violations", "turn": 6, "codes": ["V1", "V2"]},
+            "violations ['V1', 'V2']",
+        ),
+        ({"event": "log_append", "turn": 1, "entry": "did stuff"}, "log: did stuff"),
+        (
+            {"event": "memory_save", "turn": 1, "text": "user likes X"},
+            "memory: user likes X",
+        ),
+        (
+            {"event": "sentinel", "turn": 9, "name": "DONE", "recap": "task complete"},
+            "SENTINEL DONE — task complete",
+        ),
+        ({"event": "done", "sentinel": "DONE", "recap": "ok"}, "OUTCOME: DONE — ok"),
+        ({"event": "crashed"}, "CRASHED"),
+        (
+            {
+                "event": "micro_call",
+                "call": "parse_task",
+                "node": "parse",
+                "out": "demo/flow",
+                "confidence": 0.9,
+                "detail": "task",
+                "attempts": 1,
+                "elapsed_ms": 1200,
+            },
+            "micro parse_task (parse) → demo/flow (0.90) — task [1 attempt(s), 1200ms]",
+        ),
+        (
+            {
+                "event": "micro_call",
+                "call": "parse_task",
+                "node": "parse",
+                "out": None,
+                "confidence": None,
+                "detail": "provider error",
+                "attempts": 2,
+                "elapsed_ms": 40,
+            },
+            "micro parse_task (parse) → escalate — provider error [2 attempt(s), 40ms]",
+        ),
+        (
+            {
+                "event": "walk",
+                "app": "demo",
+                "playbook": "flow",
+                "outcome": "handover",
+                "node": "search",
+                "idx": 2,
+                "nodes": 5,
+                "reason": "move did not land",
+            },
+            "WALK demo/flow handover at node search (2/5) — move did not land",
+        ),
+        (
+            {
+                "event": "walk",
+                "app": "demo",
+                "playbook": "flow",
+                "outcome": "completed",
+                "node": None,
+                "idx": 5,
+                "nodes": 5,
+                "reason": "",
+            },
+            "WALK demo/flow completed at node (end) (5/5)",
+        ),
+        (
+            {"event": "provider_failed", "turn": 2, "error": "rate limited"},
+            "provider failed: rate limited",
+        ),
+        (
+            {
+                "event": "prefix_drift",
+                "turn": 3,
+                "expected": "abcdefghijklmnop",
+                "actual": "zyxwvutsrqponmlk",
+            },
+            "PREFIX DRIFT",
+        ),
+    ],
+)
+def test_summarize_event_dispatch(event: dict, expected_substr: str) -> None:
+    out = trace.summarize_event(event)
+
+    assert out is not None
+    assert expected_substr in out
+
+
+def test_summarize_silent_event_returns_none() -> None:
+    assert trace.summarize_event({"event": "prefix_pinned"}) is None
+    assert trace.summarize_event({"event": "finish_length_warning"}) is None
+
+
+def test_summarize_unknown_event_falls_back_to_compact_repr() -> None:
+    out = trace.summarize_event({"event": "future_event_type", "data": 42})
+
+    assert out is not None
+    assert "future_event_type" in out
+
+
+def test_summarize_done_with_no_sentinel_uses_none_placeholder() -> None:
+    out = trace.summarize_event({"event": "done", "recap": "ok"})
+
+    assert "(none)" in out
+
+
+def test_summarize_tool_result_with_text_uses_format_call_result() -> None:
+    out = trace.summarize_event(
+        {
+            "event": "tool_result",
+            "turn": 1,
+            "name": "note",
+            "arguments": {},
+            "text": "x" * 100,
+        }
+    )
+
+    # `note` doesn't truncate at 80 — full text passes through.
+    assert "x" * 100 in out
+
+
+def test_summarize_tool_result_without_text_uses_brief_content_on_blocks() -> None:
+    out = trace.summarize_event(
+        {
+            "event": "tool_result",
+            "turn": 1,
+            "name": "tap",
+            "arguments": {},
+            "blocks": [{"type": "text", "text": "ok"}],
+        }
+    )
+
+    assert "→ ok" in out
+
+
+# ---------- Trace ----------
+
+
+def test_trace_creates_only_the_session_directory(
+    _trace_dirs: Path,
+) -> None:
+    with freeze_time("2026-04-28T10:00:00"):
+        t = Trace("session-1", Images("session-1"))
+        t.close()
+
+    assert list(_trace_dirs.iterdir()) == [_trace_dirs / "sessions"]
+    assert (_trace_dirs / "sessions" / "session-1" / "events.jsonl").is_file()
+
+
+def test_trace_write_keeps_timestamped_events_for_the_cli_narrative(
+    _trace_dirs: Path,
+) -> None:
+    with freeze_time("2026-04-28T10:00:00"):
+        t = Trace("s1", Images("s1"))
+        t.write({"event": "tools_loaded", "mcp": [], "local": []})
+        t.close()
+
+    event = next(e for e in _events(_trace_dirs, "s1") if e["event"] == "tools_loaded")
+    assert event["t"] == "2026-04-28T10:00:00.000"
+    assert trace.summarize_event(event) == "tools: 0 MCP + 0 local"
+
+
+def test_trace_write_skips_silent_events(_trace_dirs: Path) -> None:
+    with freeze_time("2026-04-28T10:00:00"):
+        t = Trace("s1", Images("s1"))
+        t.write({"event": "prefix_pinned"})
+        t.close()
+
+    assert trace.summarize_event({"event": "prefix_pinned"}) is None
+    assert any(e["event"] == "prefix_pinned" for e in _events(_trace_dirs, "s1"))
+
+
+def test_trace_close_is_idempotent(_trace_dirs: Path) -> None:
+    t = Trace("s1", Images("s1"))
+    t.close()
+    t.close()  # must not raise
+
+
+def test_trace_writes_per_turn_note_history(_trace_dirs: Path) -> None:
+    t = Trace("s1", Images("s1"))
+    t.write(
+        {
+            "event": "tool_result",
+            "turn": 3,
+            "name": "note",
+            "arguments": {"summary": "In WeChat, sending the London weather reply"},
+            "text": "noted: ...",
+        }
+    )
+    # A non-note tool_result is not narrated to notes.md.
+    t.write({"event": "tool_result", "turn": 4, "name": "tap", "text": "Tapped"})
+    t.close()
+
+    notes = (_trace_dirs / "sessions" / "s1" / "notes.md").read_text(encoding="utf-8")
+    assert "# Session s1 — note history" in notes
+    assert "- turn 3 — In WeChat, sending the London weather reply" in notes
+    assert "Tapped" not in notes
+
+
+def test_trace_mirrors_process_log_into_session_runtime_log(_trace_dirs: Path) -> None:
+    import logging
+
+    from physiclaw.common.logger import setup_logging
+
+    setup_logging("runtime", level=logging.INFO)  # permissive root, console INFO
+    t = Trace("s1", Images("s1"))
+    logging.getLogger("physiclaw.test.trace").debug("captured-debug-line")
+    t.close()
+
+    runtime_log = (_trace_dirs / "sessions" / "s1" / "runtime.log").read_text(
+        encoding="utf-8"
+    )
+    assert "captured-debug-line" in runtime_log  # our DEBUG despite console INFO
+
+
+def test_trace_publishes_and_clears_active_session_marker(_trace_dirs: Path) -> None:
+    from physiclaw.common import paths
+
+    marker = paths.active_session_marker()
+    t = Trace("s1", Images("s1"))  # SessionLogSidecars publishes the active session id
+    assert marker.read_text(encoding="utf-8").strip() == "s1"
+
+    t.close()
+    assert not marker.exists()  # cleared on close
+
+
+# ---------- RawLog ----------
+
+
+def test_rawlog_writes_session_start_line(_trace_dirs: Path) -> None:
+    log = RawLog("sess-A", Images("sess-A"))
+    log.write_session_start(
+        provider="anthropic",
+        model="claude-test",
+        prompt_hash="abc123",
+        output_schema={"type": "object"},
+    )
+    log.close()
+
+    line = (
+        (_trace_dirs / "sessions" / "sess-A" / "model.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()[0]
+    )
+    obj = json.loads(line)
+    assert obj["kind"] == "session_start"
+    assert obj["provider"] == "anthropic"
+    assert obj["output_schema"] == {"type": "object"}
+
+
+def test_rawlog_writes_request_with_turn_index(_trace_dirs: Path) -> None:
+    log = RawLog("sess-B", Images("sess-B"))
+    log.write_request(turn=3, messages=[{"role": "user", "content": "hi"}])
+    log.close()
+
+    line = (
+        (_trace_dirs / "sessions" / "sess-B" / "model.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()[0]
+    )
+    obj = json.loads(line)
+    assert obj["kind"] == "request"
+    assert obj["turn"] == 3
+    assert obj["messages"] == [{"role": "user", "content": "hi"}]
+
+
+def test_rawlog_writes_response_with_elapsed(_trace_dirs: Path) -> None:
+    log = RawLog("sess-C", Images("sess-C"))
+    log.write_response(turn=1, raw={"id": "r1"}, elapsed_ms=42)
+    log.close()
+
+    line = (
+        (_trace_dirs / "sessions" / "sess-C" / "model.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()[0]
+    )
+    obj = json.loads(line)
+    assert obj["kind"] == "response"
+    assert obj["elapsed_ms"] == 42
+
+
+def test_rawlog_close_is_idempotent(_trace_dirs: Path) -> None:
+    log = RawLog("s", Images("s"))
+    log.close()
+    log.close()
+
+
+# ---------- the wire scrub codec, through the session's frame store ----------
+
+
+def _persist(log: RawLog):
+    """What `write_request` hands the scrubber: this log's store, at the
+    turn the request is for (-1 outside a request)."""
+    return lambda mime, b64: log._images.put(-1, mime, b64)
+
+
+def test_rawlog_scrubs_openai_image_url_data_to_disk(_trace_dirs: Path) -> None:
+    log = RawLog("sess-IMG", Images("sess-IMG"))
+    raw_bytes = b"fake jpeg bytes"
+    b64 = base64.b64encode(raw_bytes).decode()
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "look"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/jpeg;base64,{b64}"},
+                },
+            ],
+        }
+    ]
+
+    out = wire.scrub_messages(messages, _persist(log))
+
+    # The image_url is replaced with a session-relative turn-tagged path
+    # (turn defaults to -1 when scrubbing outside write_request).
+    img_url = out[0]["content"][1]["image_url"]["url"]
+    assert img_url.startswith("images/") and img_url.endswith("_t-1.jpg")
+    # The actual file was written inside the session dir.
+    assert (_trace_dirs / "sessions" / "sess-IMG" / img_url).read_bytes() == raw_bytes
+
+
+def test_rawlog_files_a_micro_records_frame_like_a_turns(_trace_dirs: Path) -> None:
+    # A decision call's frame is scrubbed to the session's images/ under
+    # the latest turn's name — the same file a tool result already
+    # filed when the bytes match — so the record stays text and the
+    # viewer finds the frame where every other frame is.
+    from physiclaw.contract.dto import MicroRecord
+
+    log = RawLog("sess-MICRO", Images("sess-MICRO"))
+    raw_bytes = b"micro jpeg"
+    b64 = base64.b64encode(raw_bytes).decode()
+    log.write_response(4, {"choices": []}, elapsed_ms=1)
+    log.write_micro(
+        MicroRecord(
+            call="agent_act",
+            node="pick",
+            thinking=None,
+            allowed=("0",),
+            answer="0",
+            confidence=0.9,
+            request=[
+                {"role": "system", "content": "sys"},
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "lead"},
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": "image/jpeg",
+                                "data": b64,
+                            },
+                        },
+                        {"type": "text", "text": "listing"},
+                    ],
+                },
+            ],
+            raw={},
+        )
+    )
+    log.close()
+
+    (rec,) = [
+        json.loads(line)
+        for line in log.path.read_text(encoding="utf-8").splitlines()
+        if '"micro"' in line
+    ]
+    image = rec["request"][1]["content"][1]
+    ref = image["source"]["ref"]
+    assert image["source"]["type"] == "ref" and ref.endswith("_t4.jpg")
+    assert (_trace_dirs / "sessions" / "sess-MICRO" / ref).read_bytes() == raw_bytes
+    assert rec["request"][0]["content"] == "sys"
+
+
+def test_rawlog_scrubs_anthropic_image_block_to_ref(_trace_dirs: Path) -> None:
+    log = RawLog("sess-A", Images("sess-A"))
+    raw_bytes = b"png data"
+    b64 = base64.b64encode(raw_bytes).decode()
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "image/png",
+                        "data": b64,
+                    },
+                }
+            ],
+        }
+    ]
+
+    out = wire.scrub_messages(messages, _persist(log))
+
+    src = out[0]["content"][0]["source"]
+    assert src["type"] == "ref"
+    assert src["ref"].endswith(".png")
+    assert (_trace_dirs / "sessions" / "sess-A" / src["ref"]).read_bytes() == raw_bytes
+
+
+def test_rawlog_scrubs_anthropic_tool_result_inner_content(_trace_dirs: Path) -> None:
+    log = RawLog("sess-T", Images("sess-T"))
+    raw_bytes = b"img"
+    b64 = base64.b64encode(raw_bytes).decode()
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "tool_result",
+                    "tool_use_id": "t1",
+                    "content": [
+                        {"type": "text", "text": "caption"},
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": "image/jpeg",
+                                "data": b64,
+                            },
+                        },
+                    ],
+                }
+            ],
+        }
+    ]
+
+    out = wire.scrub_messages(messages, _persist(log))
+
+    inner = out[0]["content"][0]["content"]
+    assert inner[0] == {"type": "text", "text": "caption"}
+    assert inner[1]["source"]["type"] == "ref"
+
+
+def test_rawlog_passes_through_non_data_image_url(_trace_dirs: Path) -> None:
+    log = RawLog("s", Images("s"))
+    msg = {
+        "role": "user",
+        "content": [
+            {"type": "image_url", "image_url": {"url": "https://x/img.jpg"}},
+        ],
+    }
+
+    out = wire.scrub_messages([msg], _persist(log))
+
+    assert out[0]["content"][0]["image_url"]["url"] == "https://x/img.jpg"
+
+
+def test_rawlog_passes_through_non_base64_anthropic_image(
+    _trace_dirs: Path,
+) -> None:
+    log = RawLog("s", Images("s"))
+    msg = {
+        "role": "user",
+        "content": [
+            {"type": "image", "source": {"type": "url", "url": "https://x/img"}},
+        ],
+    }
+
+    out = wire.scrub_messages([msg], _persist(log))
+
+    assert out[0]["content"][0]["source"]["type"] == "url"
+
+
+def test_rawlog_falls_back_to_byte_count_stub_on_decode_failure(
+    _trace_dirs: Path,
+) -> None:
+    log = RawLog("s", Images("s"))
+    msg = {
+        "role": "user",
+        "content": [
+            {
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": "image/jpeg",
+                    "data": "%%not base64%%",
+                },
+            },
+        ],
+    }
+
+    out = wire.scrub_messages([msg], _persist(log))
+
+    # base64.b64decode with validate=False is permissive — won't raise
+    # on most strings. Confirm we end up with either a ref or a stub
+    # with a well-defined shape.
+    src = out[0]["content"][0]["source"]
+    assert src["type"] in ("ref", "base64")
+
+
+def test_rawlog_passes_through_messages_with_string_content(
+    _trace_dirs: Path,
+) -> None:
+    log = RawLog("s", Images("s"))
+    msg = {"role": "user", "content": "plain string"}
+
+    out = wire.scrub_messages([msg], _persist(log))
+
+    assert out == [msg]
+
+
+def test_rawlog_passes_through_unknown_block_types(
+    _trace_dirs: Path,
+) -> None:
+    log = RawLog("s", Images("s"))
+    msg = {"role": "user", "content": [{"type": "tool_use", "name": "tap"}]}
+
+    out = wire.scrub_messages([msg], _persist(log))
+
+    assert out[0]["content"][0] == {"type": "tool_use", "name": "tap"}
+
+
+def test_rawlog_empty_data_field_returns_unreadable_stub(
+    _trace_dirs: Path,
+) -> None:
+    log = RawLog("s", Images("s"))
+    msg = {
+        "role": "user",
+        "content": [
+            {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,"}},
+        ],
+    }
+
+    out = wire.scrub_messages([msg], _persist(log))
+
+    url = out[0]["content"][0]["image_url"]["url"]
+    assert "unreadable" in url
+
+
+# ---------- _purge_old ----------
+
+
+def test_purge_old_returns_silently_when_dir_missing() -> None:
+    # raw dir doesn't exist — must not raise.
+    trace.store._purge_old()
+
+
+# ---------- events.jsonl ----------
+
+
+def _events(log_dir: Path, sid: str) -> list[dict]:
+    path = log_dir / "sessions" / sid / "events.jsonl"
+    return [json.loads(x) for x in path.read_text(encoding="utf-8").splitlines()]
+
+
+def test_trace_writes_every_event_to_events_jsonl(_trace_dirs: Path) -> None:
+    t = Trace("s1", Images("s1"))
+    t.write({"event": "request", "turn": 0, "message_count": 5})
+    t.write({"event": "prefix_pinned", "hash": "abc"})  # silent in daily log
+    t.close()
+
+    events = _events(_trace_dirs, "s1")
+    # Line 0 is always the environment snapshot — see its own tests.
+    assert events[0]["event"] == "env"
+    assert events[1]["event"] == "request"
+    assert events[1]["turn"] == 0
+    assert "t" in events[1]
+    # Silent events are still data.
+    assert events[2] == {"t": events[2]["t"], "event": "prefix_pinned", "hash": "abc"}
+
+
+def test_trace_events_jsonl_degrades_on_non_serializable_values(
+    _trace_dirs: Path,
+) -> None:
+    t = Trace("s1", Images("s1"))
+    t.write({"event": "tool_error", "turn": 0, "error": ValueError("boom")})
+    t.close()
+
+    e = _events(_trace_dirs, "s1")[1]  # [0] is the env snapshot
+    assert "boom" in e["error"]  # default=repr kicked in
+
+
+# ---------- session summary ----------
+
+
+def _feed_session(t: Trace) -> None:
+    """A synthetic event stream exercising every summary field."""
+    t.write(
+        {
+            "event": "wake",
+            "session": "s1",
+            "model_ref": "moonshot/kimi-k3",
+            "triggers": [{"source": "phone", "description": "screen changed"}],
+        }
+    )
+    t.write({"event": "prefix_pinned", "hash": "deadbeef"})
+    t.write(
+        {
+            "event": "response",
+            "turn": 0,
+            "finish_reason": "tool_calls",
+            "content_len": 0,
+            "elapsed_ms": 1500,
+            "tool_calls": [],
+        }
+    )
+    t.write(
+        {
+            "event": "usage",
+            "turn": 0,
+            "call": "turn",
+            "model": "qwen/qwen3.6-plus",
+            "elapsed_ms": 1500,
+            "input": 1000,
+            "input_new": 100,
+            "cache_read": 800,
+            "cache_write": 100,
+            "output": 50,
+        }
+    )
+    t.write(
+        {
+            "event": "tool_result",
+            "turn": 0,
+            "name": "note",
+            "id": "a",
+            "arguments": {},
+            "elapsed_ms": 5,
+            "text": "noted",
+        }
+    )
+    t.write(
+        {
+            "event": "tool_result",
+            "turn": 1,
+            "name": "tap",
+            "id": "b",
+            "arguments": {},
+            "elapsed_ms": 2000,
+            "changed": True,
+            "text": "tapped",
+        }
+    )
+    t.write({"event": "tool_blocked_stuck", "turn": 1, "name": "tap", "id": "c"})
+    t.write({"event": "stuck_warning", "turn": 2, "name": "tap", "id": "d"})
+    t.write(
+        {
+            "event": "tool_invalid_args",
+            "turn": 2,
+            "name": "tap",
+            "id": "e",
+            "arguments": {},
+            "error": "bad bbox",
+        }
+    )
+    t.write({"event": "bad_turn_shape", "turn": 3, "tool_calls": []})
+    t.write({"event": "done", "sentinel": "DONE", "recap": "all good"})
+
+
+def test_summary_json_derived_from_event_stream(_trace_dirs: Path) -> None:
+    t = Trace("s1", Images("s1"))
+    _feed_session(t)
+    t.close()
+
+    s = json.loads(
+        (_trace_dirs / "sessions" / "s1" / "summary.json").read_text(encoding="utf-8")
+    )
+    assert s["schema"] == 1
+    assert s["sid"] == "s1"
+    assert s["model_ref"] == "moonshot/kimi-k3"
+    assert s["provider"] == "moonshot"
+    assert s["prompt_hash"] == "deadbeef"
+    assert s["triggers"][0]["source"] == "phone"
+    assert s["outcome"] == {"sentinel": "DONE", "recap": "all good", "crashed": False}
+    assert s["turns"] == 4  # max turn 3 → 4 turns
+    assert s["provider_calls"] == 1
+    assert s["provider_time_ms"] == 1500
+    assert s["usage"]["input_tokens"] == 1000
+    assert s["usage"]["output_tokens"] == 50
+    assert s["usage"]["cache_read_tokens"] == 800
+    assert s["usage"]["cache_creation_tokens"] == 100
+    assert s["usage"]["new_tokens"] == 100
+    assert s["usage"]["cache_hit_pct"] == 80.0
+    assert s["usage"]["by_model"] == {
+        "qwen/qwen3.6-plus": {
+            "calls": 1,
+            "input": 1000,
+            "input_new": 100,
+            "cache_read": 800,
+            "cache_write": 100,
+            "output": 50,
+            "reasoning": 0,
+        }
+    }
+    assert s["tool_calls"] == {"note": 1, "tap": 1}
+    assert s["tool_time_ms"] == 5 + 2000  # both tool_result events
+    assert s["verdicts"] == {"changed": 1}  # note carried no verdict
+    assert s["errors"]["blocked_stuck"] == 1
+    assert s["errors"]["invalid_args"] == 1
+    assert s["errors"]["correctives"] == 1
+    assert s["errors"]["blocked_plan"] == 0
+    assert s["stuck_events"] == 2  # blocked_stuck + stuck_warning
+    assert s["images"] == 0
+    assert "started_at" in s and "ended_at" in s and s["duration_s"] >= 0
+
+
+def test_summary_marks_crashed_sessions(_trace_dirs: Path) -> None:
+    t = Trace("s1", Images("s1"))
+    t.write({"event": "wake", "session": "s1", "model_ref": "m/x", "triggers": []})
+    t.write({"event": "crashed"})
+    t.close()
+
+    s = json.loads(
+        (_trace_dirs / "sessions" / "s1" / "summary.json").read_text(encoding="utf-8")
+    )
+    assert s["outcome"]["crashed"] is True
+    assert s["outcome"]["sentinel"] is None
+
+
+def test_close_records_session_metrics_in_runtime_log(
+    _trace_dirs: Path, caplog
+) -> None:
+    caplog.set_level(logging.INFO)
+    with freeze_time("2026-04-28T10:00:00"):
+        t = Trace("s1", Images("s1"))
+        _feed_session(t)
+        t.close()
+
+    text = (_trace_dirs / "sessions" / "s1" / "runtime.log").read_text(encoding="utf-8")
+    assert "END session=s1 outcome=DONE turns=4" in text
+    assert "tokens=1.0k/50 cache=80% tools=2" in text
+
+
+def test_close_counts_images_from_session_dir(_trace_dirs: Path) -> None:
+    t = Trace("s1", Images("s1"))
+    img_dir = _trace_dirs / "sessions" / "s1" / "images"
+    img_dir.mkdir(parents=True, exist_ok=True)
+    (img_dir / "120000_000_t0.jpg").write_bytes(b"x")
+    (img_dir / "120001_500_t1.jpg").write_bytes(b"y")
+    t.close()
+
+    s = json.loads(
+        (_trace_dirs / "sessions" / "s1" / "summary.json").read_text(encoding="utf-8")
+    )
+    assert s["images"] == 2
+
+
+def test_close_writes_summary_only_once(_trace_dirs: Path) -> None:
+    t = Trace("s1", Images("s1"))
+    t.close()
+    first = (_trace_dirs / "sessions" / "s1" / "summary.json").read_text(
+        encoding="utf-8"
+    )
+    t.close()  # idempotent — no rewrite, no raise
+    assert (_trace_dirs / "sessions" / "s1" / "summary.json").read_text(
+        encoding="utf-8"
+    ) == first
+
+
+def test_fmt_tokens_scales() -> None:
+    assert trace.fmt_tokens(980) == "980"
+    assert trace.fmt_tokens(9_800) == "9.8k"
+    assert trace.fmt_tokens(1_200_000) == "1.2M"
+
+
+# ---------- turn-tagged images ----------
+
+
+def test_write_request_tags_images_with_turn(_trace_dirs: Path) -> None:
+    log = RawLog("sess-T", Images("sess-T"))
+    b64 = base64.b64encode(b"img").decode()
+    log.write_request(
+        turn=7,
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{b64}"},
+                    },
+                ],
+            }
+        ],
+    )
+    log.close()
+
+    line = (
+        (_trace_dirs / "sessions" / "sess-T" / "model.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()[0]
+    )
+    url = json.loads(line)["messages"][0]["content"][0]["image_url"]["url"]
+    assert url.startswith("images/") and url.endswith("_t7.jpg")  # tagged with turn 7
+    assert (_trace_dirs / "sessions" / "sess-T" / url).read_bytes() == b"img"
+
+
+# ---------- retention: session dirs + daily logs ----------
+
+
+def _age(path: Path, days: float) -> None:
+    import os
+
+    ago = (dt.datetime.now() - dt.timedelta(days=days)).timestamp()
+    os.utime(path, (ago, ago))
+
+
+def test_close_appends_summary_line_to_durable_stats(_trace_dirs: Path) -> None:
+    # Tiered retention: session dirs purge after trace_days; the one-line
+    # summary appended at close lands at the sweep-free `log/` root — no
+    # purge target ever matches it, by placement rather than by exemption.
+    Trace("s1", Images("s1")).close()
+    Trace("s2", Images("s2")).close()
+
+    lines = (
+        (paths.LOG_DIR / "session-stats.jsonl").read_text(encoding="utf-8").splitlines()
+    )
+    assert [json.loads(ln)["sid"] for ln in lines] == ["s1", "s2"]
+
+
+def test_purge_old_removes_stale_session_dirs(_trace_dirs: Path) -> None:
+    old = _trace_dirs / "sessions" / "20260101_000000"
+    old.mkdir(parents=True)
+    f = old / "events.jsonl"
+    f.write_text("{}", encoding="utf-8")
+    _age(f, trace.store._RETENTION_DAYS + 1)
+    _age(old, trace.store._RETENTION_DAYS + 1)
+    young = _trace_dirs / "sessions" / "20990101_000000"
+    young.mkdir(parents=True)
+    (young / "events.jsonl").write_text("{}", encoding="utf-8")
+
+    trace.store._purge_old()
+
+    assert not old.exists()
+    assert young.exists()
+
+
+def test_purge_old_spares_session_dir_with_a_recent_file(_trace_dirs: Path) -> None:
+    # Dir mtime is old but a file inside is fresh (e.g. summary written
+    # late) — the newest-file rule keeps it.
+    d = _trace_dirs / "sessions" / "20260101_000000"
+    d.mkdir(parents=True)
+    old_f = d / "events.jsonl"
+    old_f.write_text("{}", encoding="utf-8")
+    _age(old_f, trace.store._RETENTION_DAYS + 1)
+    (d / "summary.json").write_text("{}", encoding="utf-8")  # fresh
+    _age(d, trace.store._RETENTION_DAYS + 1)
+
+    trace.store._purge_old()
+
+    assert d.exists()
+
+
+# ---------- new_sid ----------
+
+
+def test_new_sid_shape_and_uniqueness() -> None:
+    import re
+
+    sids = {trace.new_sid() for _ in range(50)}
+
+    # 50 mints in the same second must not collide — the random suffix
+    # is what makes instant-crash retries safe.
+    assert len(sids) == 50
+    for sid in sids:
+        assert re.fullmatch(r"\d{8}-\d{6}-[0-9a-f]{6}", sid)
+
+
+def test_new_sid_sorts_chronologically() -> None:
+    with freeze_time("2026-04-28T10:00:00"):
+        early = trace.new_sid()
+    with freeze_time("2026-04-28T10:00:01"):
+        late = trace.new_sid()
+
+    assert early < late  # lexicographic == chronological across seconds
+
+
+# ---------- env snapshot ----------
+
+
+def test_first_event_of_every_session_is_the_env_snapshot(_trace_dirs: Path) -> None:
+    Trace("s1", Images("s1")).close()
+
+    e = _events(_trace_dirs, "s1")[0]
+    assert e["event"] == "env"
+    for key in ("physiclaw", "python", "os", "platform", "host", "utc_offset"):
+        assert e[key]
+    assert "auto_exposure" in e["config"]["camera"]
+    assert "max_image_edge_px" in e["config"]["compact"]
+    assert "blur_threshold" in e["config"]["vision"]
+    assert "max_turns" in e["config"]["engine"]
+
+
+def test_env_snapshot_never_carries_secrets(_trace_dirs: Path) -> None:
+    Trace("s1", Images("s1")).close()
+
+    raw = (_trace_dirs / "sessions" / "s1" / "events.jsonl").read_text(encoding="utf-8")
+    assert "api_key" not in raw
+    assert "provider_config" not in raw
+
+
+def test_summary_includes_env(_trace_dirs: Path) -> None:
+    t = Trace("s1", Images("s1"))
+    t.write({"event": "done", "sentinel": "DONE", "recap": "ok"})
+    t.close()
+
+    s = json.loads(
+        (_trace_dirs / "sessions" / "s1" / "summary.json").read_text(encoding="utf-8")
+    )
+    assert s["env"]["os"] in ("darwin", "win32", "linux")
+    assert s["env"]["config"]["camera"]["width"] > 0
+
+
+# ---------- cross-platform bytes + sessions README ----------
+
+
+def test_log_files_use_lf_newlines_regardless_of_platform(_trace_dirs: Path) -> None:
+    # newline="\n" pinned on every writer: identical bytes on Windows and
+    # POSIX, so hashing/diffing sessions across rigs is meaningful.
+    t = Trace("s1", Images("s1"))
+    t.write({"event": "done", "sentinel": "DONE", "recap": "ok"})
+    t.close()
+    rlog = RawLog("s1", Images("s1"))
+    rlog.write_request(turn=0, messages=[{"role": "user", "content": "hi"}])
+    rlog.close()
+
+    for name in ("events.jsonl", "model.jsonl", "summary.json"):
+        raw = (_trace_dirs / "sessions" / "s1" / name).read_bytes()
+        assert b"\r" not in raw, name
+    runtime = (_trace_dirs / "sessions" / "s1" / "runtime.log").read_bytes()
+    assert b"\r" not in runtime
+
+
+def test_sessions_readme_written_once(_trace_dirs: Path) -> None:
+    Trace("s1", Images("s1")).close()
+    readme = _trace_dirs / "sessions" / "README.md"
+    assert readme.is_file()
+    text = readme.read_text(encoding="utf-8")
+    assert "events.jsonl" in text and "summary.json" in text
+
+    stamp = readme.stat().st_mtime_ns
+    Trace("s2", Images("s2")).close()  # second session must not rewrite it
+    assert readme.stat().st_mtime_ns == stamp
+
+
+def test_sessions_readme_documents_the_full_summary_schema() -> None:
+    # The README ships WITH the data as its format contract — every field
+    # summary.json actually emits must be named in it, so schema changes
+    # can't silently outrun the doc.
+    readme = trace.SESSIONS_README
+    s = trace.trace._Summary("x").finalize(images=0)
+
+    for key in s:
+        assert key in readme, f"summary key {key!r} missing from SESSIONS_README"
+    for key in s["usage"]:
+        assert key in readme, f"usage key {key!r} missing from SESSIONS_README"
+    for key in s["errors"]:
+        assert key in readme, f"errors key {key!r} missing from SESSIONS_README"
+    for key in s["outcome"]:
+        assert key in readme, f"outcome key {key!r} missing from SESSIONS_README"
+    for name in ("events.jsonl", "model.jsonl", "summary.json", "images/"):
+        assert name in readme
+
+
+def test_sessions_readme_refreshed_when_stale(_trace_dirs: Path) -> None:
+    # Existing installs carry READMEs from older builds — a changed
+    # constant (e.g. the sid separator move) must reach them, or the
+    # on-disk doc (which promises analysts can bootstrap from it alone)
+    # describes a retired format forever.
+    readme = _trace_dirs / "sessions" / "README.md"
+    readme.parent.mkdir(parents=True, exist_ok=True)
+    readme.write_text("stale doc", encoding="utf-8")
+
+    Trace("s1", Images("s1")).close()
+
+    text = readme.read_text(encoding="utf-8")
+    assert "stale doc" not in text
+    assert "events.jsonl" in text
+
+
+def test_summary_splits_conductor_turns_from_provider_calls(
+    _trace_dirs: Path,
+) -> None:
+    t = Trace("s2", Images("s2"))
+    t.write(
+        {
+            "event": "response",
+            "turn": 0,
+            "elapsed_ms": 3,
+            "producer": {"plugin_id": "conductor-slot"},
+            "presentation": "playbook",
+        }
+    )
+    t.write({"event": "response", "turn": 1, "elapsed_ms": 1500})
+    t.write(
+        {"event": "usage", "call": "turn", "model": "fake/model", "elapsed_ms": 1500}
+    )
+    t.close()
+
+    s = json.loads(
+        (_trace_dirs / "sessions" / "s2" / "summary.json").read_text(encoding="utf-8")
+    )
+    assert s["provider_calls"] == 1
+    assert s["conductor_turns"] == 1
+    # Synthesized turns sent no request — their time never inflates the
+    # provider metric.
+    assert s["provider_time_ms"] == 1500
+
+
+def test_summary_counts_micro_calls_and_folds_their_tokens(
+    _trace_dirs: Path,
+) -> None:
+    t = Trace("s3", Images("s3"))
+    t.write(
+        {
+            "event": "micro_call",
+            "call": "choose_item",
+            "out": "pick",
+            "elapsed_ms": 400,
+        }
+    )
+    # The decision's tokens ride the one `usage` event type, under the
+    # model that answered (here a cheap tier, not the session model).
+    t.write(
+        {
+            "event": "usage",
+            "turn": None,
+            "call": "micro",
+            "model": "moonshot/kimi-k2.6",
+            "input": 1500,
+            "input_new": 700,
+            "cache_read": 800,
+            "cache_write": 0,
+            "output": 30,
+        }
+    )
+    t.close()
+
+    s = json.loads(
+        (_trace_dirs / "sessions" / "s3" / "summary.json").read_text(encoding="utf-8")
+    )
+    assert s["micro_calls"] == 1
+    assert s["usage"]["input_tokens"] == 1500
+    assert s["usage"]["output_tokens"] == 30
+    assert s["usage"]["cache_read_tokens"] == 800
+    assert s["usage"]["by_model"]["moonshot/kimi-k2.6"]["calls"] == 1
+    # A micro call is not a turn-loop provider call.
+    assert s["provider_calls"] == 0
+
+
+def test_micro_decisions_are_mirrored_into_the_process_log(
+    _trace_dirs: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    # The conductor logs no line of its own for a decision: the trace
+    # renders the `micro_call` event once and mirrors that one line, so
+    # runtime.log and `physiclaw logs` can never disagree about it.
+    caplog.set_level("INFO", logger="physiclaw.agent.trace")
+    t = Trace("s1", Images("s1"))
+    t.write(
+        {
+            "event": "micro_call",
+            "call": "parse_task",
+            "node": "parse",
+            "out": "demo/flow",
+            "confidence": 0.9,
+            "detail": "task",
+            "attempts": 1,
+            "elapsed_ms": 12,
+        }
+    )
+    t.close()
+
+    assert (
+        "micro parse_task (parse) → demo/flow (0.90) — task [1 attempt(s), 12ms]"
+        in caplog.text
+    )
+
+
+def test_summary_lists_every_walk_in_order(_trace_dirs: Path) -> None:
+    t = Trace("s1", Images("s1"))
+    t.write({"event": "wake", "session": "s1", "model_ref": "x/y", "triggers": []})
+    t.write(
+        {
+            "event": "walk",
+            "app": "channel",
+            "playbook": "boot",
+            "outcome": "completed",
+            "node": "parse",
+            "idx": 1,
+            "nodes": 2,
+            "reason": "hands over to demo/flow",
+        }
+    )
+    t.write(
+        {
+            "event": "walk",
+            "app": "demo",
+            "playbook": "flow",
+            "outcome": "handover",
+            "node": "search",
+            "idx": 2,
+            "nodes": 5,
+            "reason": "move did not land",
+        }
+    )
+    t.close()
+
+    s = json.loads(
+        (_trace_dirs / "sessions" / "s1" / "summary.json").read_text(encoding="utf-8")
+    )
+    assert [(w["playbook"], w["outcome"]) for w in s["walks"]] == [
+        ("boot", "completed"),
+        ("flow", "handover"),
+    ]
+    assert "event" not in s["walks"][0] and "t" not in s["walks"][0]
+
+
+def test_summary_omits_walks_when_no_playbook_ran(_trace_dirs: Path) -> None:
+    t = Trace("s1", Images("s1"))
+    t.close()
+
+    s = json.loads(
+        (_trace_dirs / "sessions" / "s1" / "summary.json").read_text(encoding="utf-8")
+    )
+    assert "walks" not in s
+
+
+# ---------- the view a tool result carried, written when it arrives ----------
+
+
+def test_tool_result_keeps_its_text_whole_and_writes_its_frame(
+    _trace_dirs: Path,
+) -> None:
+    # A walk's turn sends no request, so the frame and the listing must
+    # land when the result arrives — not when (if) a request carries them.
+    raw_bytes = b"jpeg bytes"
+    b64 = base64.b64encode(raw_bytes).decode()
+    tr = Trace("sess-VIEW", Images("sess-VIEW"))
+    tr.write(
+        {
+            "event": "tool_result",
+            "turn": 3,
+            "name": "peek",
+            "arguments": {"bbox": [0, 0, 1, 1]},
+            "elapsed_ms": 1,
+            "blocks": [
+                TextBlock(text="Tapped | screen: changed"),
+                ImageBlock(media_type="image/jpeg", data_b64=b64),
+                TextBlock(text='0 [text] "综合" [0.1,0.1,0.2,0.2] 0.9'),
+            ],
+        }
+    )
+    tr.close()
+
+    d = _trace_dirs / "sessions" / "sess-VIEW"
+    (event,) = [
+        json.loads(line)
+        for line in (d / "events.jsonl").read_text(encoding="utf-8").splitlines()
+        if '"tool_result"' in line
+    ]
+    assert "blocks" not in event and "result_summary" not in event
+    assert (
+        event["text"]
+        == 'Tapped | screen: changed\n0 [text] "综合" [0.1,0.1,0.2,0.2] 0.9'
+    )
+    (image,) = event["images"]
+    assert image.startswith("images/") and image.endswith("_t3.jpg")
+    assert (d / image).read_bytes() == raw_bytes
+
+
+def test_a_frame_is_written_once_and_the_wire_references_it(
+    _trace_dirs: Path,
+) -> None:
+    b64 = base64.b64encode(b"one frame").decode()
+    images = Images("sess-ONCE")
+    tr = Trace("sess-ONCE", images=images)
+    rlog = RawLog("sess-ONCE", images=images)
+    tr.write(
+        {
+            "event": "tool_result",
+            "turn": 2,
+            "name": "peek",
+            "arguments": {},
+            "elapsed_ms": 1,
+            "blocks": [ImageBlock(media_type="image/jpeg", data_b64=b64)],
+        }
+    )
+    rlog.write_request(
+        3,
+        [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{b64}"},
+                    }
+                ],
+            }
+        ],
+    )
+    tr.close()
+    rlog.close()
+
+    d = _trace_dirs / "sessions" / "sess-ONCE"
+    files = sorted(p.name for p in (d / "images").iterdir())
+    assert len(files) == 1 and files[0].endswith("_t2.jpg")  # the capture turn
+    (req,) = [
+        json.loads(line)
+        for line in (d / "model.jsonl").read_text(encoding="utf-8").splitlines()
+        if '"request"' in line
+    ]
+    assert req["messages"][0]["content"][0]["image_url"]["url"] == f"images/{files[0]}"
+
+
+def test_walk_read_is_data_not_a_daily_line() -> None:
+    assert trace.summarize_event({"event": "walk_read", "verdict": "x"}) is None

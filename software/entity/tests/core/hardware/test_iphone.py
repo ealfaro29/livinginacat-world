@@ -1,0 +1,415 @@
+"""Tests for `physiclaw.core.hardware.iphone` — AssistiveTouch driver."""
+
+from __future__ import annotations
+
+import logging
+from unittest.mock import MagicMock
+
+import numpy as np
+import pytest
+from hypothesis import given
+from hypothesis import strategies as st
+
+from physiclaw.core.bridge import BridgeState
+from physiclaw.core.calibration.transforms import ViewportShift
+from physiclaw.core.hardware.iphone import AssistiveTouch
+
+# ---------- Helpers ----------
+
+
+def _shift(
+    *,
+    dpr: float = 3.0,
+    offset_x: float = 0.0,
+    offset_y: float = 0.0,
+    w: int = 1170,
+    h: int = 2532,
+) -> ViewportShift:
+    return ViewportShift(
+        offset_x=offset_x,
+        offset_y=offset_y,
+        dpr=dpr,
+        screenshot_width=w,
+        screenshot_height=h,
+    )
+
+
+def _identity_pct_to_grbl() -> np.ndarray:
+    return np.eye(3)
+
+
+# ---------- ready / construction ----------
+
+
+def test_init_ready_false_until_compute() -> None:
+    at = AssistiveTouch()
+
+    assert at.ready is False
+    assert at.at_screen is None
+    assert at.at_radius_screen is None
+
+
+def test_ready_true_after_compute() -> None:
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+
+    assert at.ready is True
+
+
+# ---------- compute_at_screen_pos ----------
+
+
+def test_compute_at_screen_pos_returns_and_stores() -> None:
+    at = AssistiveTouch()
+    s = _shift(dpr=3.0, w=1170, h=2532, offset_x=0, offset_y=0)
+
+    out = at.compute_at_screen_pos(s)
+
+    # AT_CSS_X=39, dpr=3 → 117 / 1170 = 0.1
+    # AT_CSS_Y=260, dpr=3 → 780 / 2532 ≈ 0.3081
+    assert out == at.at_screen
+    assert out[0] == pytest.approx(117 / 1170)
+    assert out[1] == pytest.approx(780 / 2532)
+
+
+def test_compute_at_screen_pos_radius_axes() -> None:
+    at = AssistiveTouch()
+    s = _shift(dpr=3.0, w=1170, h=2532)
+
+    at.compute_at_screen_pos(s)
+
+    rx, ry = at.at_radius_screen
+    assert rx == pytest.approx(28 * 3.0 / 1170)
+    assert ry == pytest.approx(28 * 3.0 / 2532)
+
+
+def test_compute_at_screen_pos_logs(caplog: pytest.LogCaptureFixture) -> None:
+    at = AssistiveTouch()
+
+    with caplog.at_level(logging.INFO, logger="physiclaw.core.hardware.iphone"):
+        at.compute_at_screen_pos(_shift())
+
+    assert any("AT screen position" in r.getMessage() for r in caplog.records)
+
+
+# ---------- overlaps_at ----------
+
+
+def test_overlaps_at_returns_false_when_unset() -> None:
+    at = AssistiveTouch()
+
+    assert at.overlaps_at(0.5, 0.5) is False
+
+
+def test_overlaps_at_center_inside_ellipse() -> None:
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+    ax, ay = at.at_screen
+
+    assert at.overlaps_at(ax, ay) is True
+
+
+def test_overlaps_at_far_point_outside() -> None:
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+
+    assert at.overlaps_at(0.9, 0.9) is False
+
+
+def test_overlaps_at_just_outside_radius() -> None:
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+    ax, ay = at.at_screen
+    rx, _ry = at.at_radius_screen
+
+    # Outside the ellipse along x.
+    assert at.overlaps_at(ax + rx * 1.01, ay) is False
+    # Inside.
+    assert at.overlaps_at(ax + rx * 0.5, ay) is True
+
+
+def test_overlaps_at_returns_false_when_radius_unset() -> None:
+    at = AssistiveTouch()
+    at.at_screen = (0.1, 0.1)  # Manually set screen but not radius.
+
+    assert at.overlaps_at(0.1, 0.1) is False
+
+
+@pytest.mark.parametrize("radius", [(0.0, 0.1), (0.1, 0.0), (-0.1, 0.1)])
+def test_regression_overlap_with_degenerate_radius_is_unset(radius) -> None:
+    at = AssistiveTouch()
+    at.at_screen = (0.1, 0.1)
+    at.at_radius_screen = radius
+
+    overlaps = at.overlaps_at(0.1, 0.1)
+
+    assert overlaps is False
+
+
+@given(
+    point=st.tuples(st.floats(0, 1), st.floats(0, 1)),
+    radius=st.tuples(
+        st.one_of(st.just(0.0), st.floats(0.0001, 1)),
+        st.one_of(st.just(0.0), st.floats(0.0001, 1)),
+    ),
+)
+def test_overlap_matches_zero_length_swipe(point, radius) -> None:
+    at = AssistiveTouch()
+    at.at_screen = (0.1, 0.3)
+    at.at_radius_screen = radius
+
+    point_hit = at.overlaps_at(*point)
+    segment_hit = at.swipe_crosses_at(*point, *point)
+
+    assert point_hit == segment_hit
+
+
+# ---------- swipe_crosses_at ----------
+
+
+def test_swipe_crosses_at_unset_returns_false() -> None:
+    at = AssistiveTouch()
+
+    assert at.swipe_crosses_at(0.5, 0.9, 0.5, 0.1) is False
+
+
+def test_swipe_crosses_at_segment_through_button() -> None:
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+    ax, ay = at.at_screen
+
+    # Vertical swipe straight through the button's column and row span.
+    assert at.swipe_crosses_at(ax, ay + 0.3, ax, ay - 0.3) is True
+    # Same column but the segment stays entirely below the button.
+    assert at.swipe_crosses_at(ax, ay + 0.4, ax, ay + 0.2) is False
+
+
+def test_swipe_crosses_at_bounded_travel_short_of_button() -> None:
+    # Same row as the button, swiping TOWARD it, but the travel stops far
+    # short — the old row-band test wrongly blocked this (regression).
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+    ax, ay = at.at_screen
+
+    assert at.swipe_crosses_at(ax + 0.6, ay, ax + 0.3, ay) is False
+
+
+def test_swipe_crosses_at_endpoint_reaching_button() -> None:
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+    ax, ay = at.at_screen
+
+    # Travel long enough that the endpoint lands inside the button.
+    assert at.swipe_crosses_at(ax + 0.4, ay, ax, ay) is True
+
+
+def test_swipe_crosses_at_moving_away_in_same_band() -> None:
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+    ax, ay = at.at_screen
+
+    # Same row, moving AWAY from the button.
+    assert at.swipe_crosses_at(ax + 0.2, ay, ax + 0.6, ay) is False
+
+
+def test_swipe_crosses_at_zero_length_segment_uses_point_test() -> None:
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+    ax, ay = at.at_screen
+
+    assert at.swipe_crosses_at(ax, ay, ax, ay) is True
+    assert at.swipe_crosses_at(ax + 0.5, ay, ax + 0.5, ay) is False
+
+
+def test_swipe_crosses_at_returns_false_when_radius_unset() -> None:
+    at = AssistiveTouch()
+    at.at_screen = (0.1, 0.1)
+
+    assert at.swipe_crosses_at(0.1, 0.5, 0.1, 0.1) is False
+
+
+# ---------- _move_to_at / tap variants ----------
+
+
+def test_move_to_at_raises_when_position_unset() -> None:
+    at = AssistiveTouch()
+    arm = MagicMock()
+
+    with pytest.raises(RuntimeError, match="AT position not set"):
+        at._move_to_at(arm, _identity_pct_to_grbl())
+
+
+def test_move_to_at_calls_rapid_to_with_grbl_coordinates() -> None:
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+    arm = MagicMock()
+    pct_to_grbl = np.array(
+        [
+            [10.0, 0.0, 1.0],
+            [0.0, 20.0, 2.0],
+            [0.0, 0.0, 1.0],
+        ]
+    )
+    sx, sy = at.at_screen
+    expected_x = 10.0 * sx + 1.0
+    expected_y = 20.0 * sy + 2.0
+
+    at._move_to_at(arm, pct_to_grbl)
+
+    arm.rapid_to.assert_called_once()
+    args = arm.rapid_to.call_args.args
+    assert args[0] == pytest.approx(expected_x)
+    assert args[1] == pytest.approx(expected_y)
+    arm.wait_idle.assert_called_once()
+
+
+def test_tap_raises_when_position_unset() -> None:
+    at = AssistiveTouch()
+    arm = MagicMock()
+
+    with pytest.raises(RuntimeError, match="AT position not set"):
+        at.tap(arm, _identity_pct_to_grbl())
+
+
+def test_tap_moves_then_taps(caplog: pytest.LogCaptureFixture) -> None:
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+    arm = MagicMock()
+
+    with caplog.at_level(logging.INFO, logger="physiclaw.core.hardware.iphone"):
+        at.tap(arm, _identity_pct_to_grbl())
+
+    arm.rapid_to.assert_called_once()
+    arm.tap.assert_called_once_with(duration=0.15)
+    assert any("single-tap" in r.getMessage() for r in caplog.records)
+
+
+def test_double_tap_raises_when_position_unset() -> None:
+    at = AssistiveTouch()
+    arm = MagicMock()
+
+    with pytest.raises(RuntimeError, match="AT position not set"):
+        at.double_tap(arm, _identity_pct_to_grbl())
+
+
+def test_double_tap_calls_arm_double_tap(caplog: pytest.LogCaptureFixture) -> None:
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+    arm = MagicMock()
+
+    with caplog.at_level(logging.INFO, logger="physiclaw.core.hardware.iphone"):
+        at.double_tap(arm, _identity_pct_to_grbl())
+
+    arm.double_tap.assert_called_once()
+    assert any("double-tap" in r.getMessage() for r in caplog.records)
+
+
+def test_long_press_raises_when_position_unset() -> None:
+    at = AssistiveTouch()
+    arm = MagicMock()
+
+    with pytest.raises(RuntimeError, match="AT position not set"):
+        at.long_press(arm, _identity_pct_to_grbl())
+
+
+def test_long_press_calls_arm_long_press(caplog: pytest.LogCaptureFixture) -> None:
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+    arm = MagicMock()
+
+    with caplog.at_level(logging.INFO, logger="physiclaw.core.hardware.iphone"):
+        at.long_press(arm, _identity_pct_to_grbl())
+
+    arm.long_press.assert_called_once()
+    assert any("long-press" in r.getMessage() for r in caplog.records)
+
+
+# ---------- take_screenshot ----------
+
+
+def test_take_screenshot_returns_bytes_on_success() -> None:
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+    arm = MagicMock()
+    bridge = MagicMock()
+    bridge.wait_screenshot.return_value = b"\x89PNG"
+
+    out = at.take_screenshot(arm, bridge, _identity_pct_to_grbl(), timeout=0.5)
+
+    assert out == b"\x89PNG"
+    bridge.clear_screenshot.assert_called_once()
+    arm.tap.assert_called_once()
+    arm.double_tap.assert_not_called()
+    bridge.wait_screenshot.assert_called_once_with(timeout=0.5)
+
+
+def test_take_screenshot_warns_and_returns_none_on_timeout(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+    arm = MagicMock()
+    bridge = MagicMock()
+    bridge.wait_screenshot.return_value = None
+    bridge.connectivity_hint.return_value = None  # phone still polling
+
+    with caplog.at_level(logging.WARNING, logger="physiclaw.core.hardware.iphone"):
+        out = at.take_screenshot(arm, bridge, _identity_pct_to_grbl())
+
+    assert out is None
+    assert any("upload timed out" in r.getMessage() for r in caplog.records)
+
+
+def test_take_screenshot_timeout_warning_carries_connectivity_hint(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+    arm = MagicMock()
+    bridge = MagicMock()
+    bridge.wait_screenshot.return_value = None
+    bridge.connectivity_hint.return_value = (
+        "the phone may be off Wi-Fi or on a different Wi-Fi network than this computer"
+    )
+
+    with caplog.at_level(logging.WARNING, logger="physiclaw.core.hardware.iphone"):
+        out = at.take_screenshot(arm, bridge, _identity_pct_to_grbl())
+
+    assert out is None
+    assert any("may be off Wi-Fi" in r.getMessage() for r in caplog.records)
+
+
+def test_take_screenshot_accepts_immediate_upload_from_one_tap(mocker) -> None:
+    sleep = mocker.patch("time.sleep")
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+    arm = MagicMock()
+    bridge = BridgeState()
+    bridge.receive_screenshot(b"stale screenshot")
+
+    def upload(*, duration):
+        token = bridge.screenshot_upload_token()
+        assert token is not None
+        assert bridge.receive_screenshot(b"current screenshot", upload_token=token)
+
+    arm.tap.side_effect = upload
+
+    assert (
+        at.take_screenshot(arm, bridge, _identity_pct_to_grbl(), timeout=0.1)
+        == b"current screenshot"
+    )
+    arm.tap.assert_called_once()
+    arm.double_tap.assert_not_called()
+    sleep.assert_not_called()
+
+
+def test_take_screenshot_default_timeout_is_5s() -> None:
+    at = AssistiveTouch()
+    at.compute_at_screen_pos(_shift())
+    arm = MagicMock()
+    bridge = MagicMock()
+    bridge.wait_screenshot.return_value = b"\x00"
+
+    at.take_screenshot(arm, bridge, _identity_pct_to_grbl())
+
+    bridge.wait_screenshot.assert_called_once_with(timeout=5.0)

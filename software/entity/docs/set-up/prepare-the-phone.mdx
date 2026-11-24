@@ -1,0 +1,129 @@
+---
+title: Prepare the phone
+description: A one-time iOS setup on a dedicated phone so PhysiClaw can see and operate it. Two Shortcuts, AssistiveTouch, and a dedicated passcode.
+---
+
+Use a **dedicated iPhone** for PhysiClaw. It doesn't need to be a flagship or the latest model. A cheap second-hand iPhone is perfectly fine.
+
+:::caution[PhysiClaw will have full control of this iPhone]
+We've done our best to make the agent protect your privacy, run reliably, and resist attacks, but please still make sure to:
+
+- **Sign out of Apple ID**, so it can't reach your iCloud photos, contacts, or Find My.
+- **Don't tie this phone's number to your important accounts.** Otherwise, controlling the phone is nearly enough to reset the passwords for those accounts.
+- **Never give the agent the password to any account.**
+- **Only install the apps you want PhysiClaw to use.**
+- **Keep sensitive apps off it**: no banking apps, no payment or wallet apps, no password managers.
+- **If you truly need payments,** enable small-amount, password-free payments and keep only a small balance in that account, so any loss stays within an acceptable range.
+:::
+
+## Set up your IM app
+
+PhysiClaw talks to you through instant messaging.
+
+### Add your contact
+
+Sign in to your messaging app (e.g. WhatsApp) on the phone and start a chat with your own account. This is the thread PhysiClaw will use to reach you. Pin the conversation to the top of the chat list so it's always in the same place.
+
+### Pin the app to the Dock
+
+Drag the app icon to the Dock. That way, no matter which screen you're on, PhysiClaw can always find and open it quickly.
+
+:::tip
+This app is PhysiClaw's only channel for reaching you. Keeping the icon and the conversation in fixed spots is what lets it check and reply to messages reliably.
+:::
+
+## Set up the Shortcuts
+
+:::tip[Alfonsito · Entity by Sentient]
+For Alfonsito, open the shortcut settings on the iPhone. The two cards give the permanent HTTPS addresses and the authorization for each shortcut. Then continue below at **Turn on AssistiveTouch**. [English](https://entity.livinginacat.world/atajos?lang=en) · [Español](https://entity.livinginacat.world/atajos?lang=es)
+:::
+
+### Local PhysiClaw installations
+
+:::tip[Same WiFi / LAN]
+Connect the iPhone and the computer running PhysiClaw to the **same WiFi**. The Shortcuts talk to the computer over the local network.
+:::
+
+Run this in your computer's terminal:
+
+```bash
+physiclaw test-assistive-touch
+```
+
+This prints your computer's hostname in the terminal and automatically opens a test page in your browser to verify screenshot uploads and clipboard transfer.
+
+### Upload a screenshot
+
+Capture the current screen and upload it directly to the computer so the agent can inspect a sharper image.
+
+<Steps>
+
+1. In the **Shortcuts** app, tap **+** to create a new one.
+
+2. Add **Take Screenshot**.
+
+3. Add **Get Contents of URL**:
+   - URL: `http://<hostname>.local:8049/api/bridge/screenshot`
+   - **Show More** → Method **POST**, Request Body **File**, File → the output of the previous **Take Screenshot** action
+
+4. Rename it to `PhysiClaw Upload Screenshot`.
+
+</Steps>
+
+### Copy to clipboard
+
+The agent sends text to the phone's clipboard and pastes it. That's faster and more reliable than tapping it out key by key with the stylus.
+
+<Steps>
+
+1. In the **Shortcuts** app, tap **+** to create a new one.
+
+2. Add **Get Contents of URL**, with URL `http://<hostname>.local:8049/api/bridge/clipboard` and Method **GET**.
+
+3. Add **Copy to Clipboard**, with its input set to the previous step's **Contents of URL**.
+
+4. Rename it to `PhysiClaw Clipboard`.
+
+</Steps>
+
+## Turn on AssistiveTouch
+
+AssistiveTouch is the floating on-screen button in iOS. The arm taps it once to capture and upload a screenshot, or long-presses it to copy text to the clipboard.
+
+<Steps>
+
+1. **Settings → Accessibility → Touch → AssistiveTouch** → turn it **on**.
+
+2. Under **Custom Actions**, set:
+   - **Single-Tap** → **PhysiClaw Upload Screenshot**
+   - **Long Press** → **PhysiClaw Clipboard**
+
+</Steps>
+
+### Verify the setup
+
+1. Tap AssistiveTouch once. Check that the computer's page shows a screenshot of your iPhone's current screen.
+2. Long-press AssistiveTouch, then paste into Notes on your iPhone. Check that the text matches the code on the test page.
+
+## Set the passcode
+
+PhysiClaw can unlock the phone itself, but it only ever uses one fixed passcode: `111111`. A dedicated passcode keeps your usual passcode from leaking through logs or config files. Set this phone's passcode to `111111`:
+
+**Settings → Face ID & Passcode → Turn Passcode On → enter `111111`**
+
+:::note[Or turn off auto-lock]
+Turn off auto-lock instead (**Settings → Display & Brightness → Auto-Lock → Never**) and keep the phone unlocked. The trade-off is faster screen wear from an always-on display.
+:::
+
+## Fix the screen brightness
+
+The camera tunes its exposure time to the screen's brightness. Auto-Brightness can leave the camera's view over- or under-exposed. Turn it off and set a fixed brightness of 50% or higher.
+
+**Settings → Accessibility → Display & Text Size → Auto-Brightness → off**
+
+## Allow pasting from other apps
+
+PhysiClaw uses Shortcuts to copy text to the clipboard and paste it into WhatsApp to talk with you, or into Amazon and Walmart to search for products.
+If a prompt asks you to confirm pasting every time, adjust this setting to skip it:
+
+**Settings → [App Name] → Paste from Other Apps → Allow**

@@ -1,0 +1,34 @@
+---
+title: Assembly
+description: Build the from-scratch CoreXY rig. The complete assembly manual online or as a printable PDF, plus the full assembly video.
+---
+
+PhysiClaw's hardware uses a [CoreXY](https://corexy.com/) motion system. Two motors working
+in tandem drive the gantry, and a solenoid drives the stylus tip on Z to tap. The whole assembly
+takes **about three hours**.
+
+The assembly manual has the complete, clear steps. Read it online or download the PDF. You can use
+[FreeCAD](https://www.freecad.org/) to view the [3D assembly model (STEP)](/downloads/physiclaw_assembly_3d.zip).
+Before you start, browse the hardware gallery to
+get a feel for the whole rig, or watch the [demo video](https://youtu.be/YJ1O6gW0KVw) to see it in action; the
+[assembly video](https://youtu.be/Acmta1kzEko) walks through the whole build.
+
+<CardGrid>
+  <LinkCard title="Open the assembly manual" description="The assembly manual, on the web." href="/en/hardware/manual/" />
+  <LinkCard title="Download the PDF" description="The assembly manual, as a printable PDF." href="/downloads/physiclaw_manual.pdf" />
+  <LinkCard title="Assembly video" description="The complete 3.5-hour assembly video." href="https://youtu.be/Acmta1kzEko" />
+  <LinkCard title="Hardware gallery" description="Photos of the finished, assembled PhysiClaw hardware." href="/en/hardware-gallery/" />
+</CardGrid>
+
+:::caution[A few things to get right during assembly]
+The manual covers these, but they're worth emphasizing:
+
+- **Earth-ground the stylus tip**: connect it to bare metal on the back of a grounded PC chassis, never a wall
+  socket, never the board GND.
+- **Position the camera**: open your system's built-in webcam preview and confirm the phone screen
+  sits flat in frame, fills as much of it as possible, with no tilt or distortion.
+- **Keep A/B belt tension equal**: mismatched tension makes the arm move inaccurately.
+- **Lock down the motor pulleys**: apply threadlocker to the set screws. The
+  motors constantly reverse, and the repeated direction changes can work the screws loose. Once a
+  pulley slips, motion starts to drift.
+:::

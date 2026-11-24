@@ -1,0 +1,245 @@
+---
+title: Playbook
+description: A whole task written as a route the agent walks step by step, calling the model only where judgment is needed.
+---
+
+The most natural way to run an agent is to have it work through a task step by step, following a skill. This is flexible, since the agent can pick whatever tools it needs along the way. For phone apps, however, the approach is slow and expensive. A single wrong tap can land the agent on an unfamiliar page, and getting back may take many steps. Today's multimodal models can already handle most app tasks. The real bottleneck is token cost.
+
+In app automation, most pages have stable icons and layouts, and navigation between them follows predictable patterns. Page anchors are enough to identify the current page and determine the next action. Sending these deterministic steps to the model wastes tokens, adds latency, and invites mistakes on unfamiliar pages.
+
+Playbooks encode high-frequency operations with relatively fixed paths as declarative templates, and call the model only when semantic understanding is needed. Each call gets the minimum context and the minimum set of tools. Fewer calls and smaller contexts cut costs sharply, and with fewer tools to choose from, the model is less likely to pick the wrong one.
+
+This brings three benefits:
+
+- **Lower cost.** Token usage drops by 50 to 100x.
+- **Faster execution.** A single model call often takes 20 to 60 seconds. With far fewer calls, tasks run 3 to 5x faster.
+- **Higher success rate.** The agent no longer explores freely, so it makes fewer wrong taps. With a narrower set of possible actions, its decisions are also more accurate.
+
+## Create a playbook
+
+Scaffold the playbook template:
+
+```bash
+physiclaw playbooks init amazon
+```
+
+<FileTree>
+- ~/.physiclaw/playbooks/amazon/
+  - APP.yml
+  - buy/
+    - PLAYBOOK.yml
+</FileTree>
+
+### APP.yml
+
+The manifest, holding what every playbook of this app shares.
+
+```yaml
+kind: manifest
+schema: 1
+app: amazon
+description: "Shop on Amazon: search, pick, confirm with the user, pay."
+
+# Where the common buttons sit on the page.
+landmarks:
+  close:
+    label: "the X below a promo popup"
+    at: [0.44, 0.68, 0.56, 0.75]
+
+# Amazon's common pages, recognized by the texts in anchors.
+pages:
+  home:
+    description: "the Amazon home page: the search bar at the top"
+    anchors:  # the placeholder changed with the 2025 redesign, so both readings
+      - {text: ["Search Amazon", "Search or ask a question"], within: top}
+    recover:
+      covered: {tap: app.landmarks.close}
+  results:
+    description: "the search results: the Filters button over the result cards"
+    anchors:
+      - {text: "Filters", within: top}
+      - {text: ["Results", "results for"], within: top}
+    scrollable: true
+    recover:
+      covered: {tap: app.landmarks.close}
+      elsewhere: go_back
+  buysheet:
+    description: "the Buy Now sheet: address, payment, the total, and Place your order"
+    anchors:
+      - {text: "Place your order", within: bottom}
+      - {text: ["Order total", "Total"], within: [0.0, 0.15, 1.0, 0.85]}
+    forbid: ["Order placed"]
+    recover:
+      covered: {tap: app.landmarks.close}
+      elsewhere: go_back
+  paid:
+    description: "the thank-you page after the order is placed"
+    anchors:
+      - ["Order placed", "Thank you"]
+```
+
+### buy/PLAYBOOK.yml
+
+The route itself. Read it top to bottom: which page the walk must be on, then what it does there.
+
+```yaml
+kind: entry
+schema: 1
+name: buy
+# The model decides from this line whether to use this playbook.
+description: buy an item on Amazon
+enabled: false
+
+# Filled in when the task starts; referenced below as {inputs.name}.
+inputs:
+  user_said:
+    description: what the user said, verbatim
+
+route:
+  # Extract the search keyword from the user's words.
+  - agent: parse
+    context:
+      prompt: |
+        Extract the Amazon search keyword from the user's message.
+        The user said: "{user_said}"
+        Rules: keep only the product name and spec, e.g. "Horizon organic whole milk 8 oz";
+        drop quantity words, verbs and pleasantries.
+        If the message names no concrete product, escalate.
+      given:
+        user_said: inputs.user_said
+    returns:
+      keyword: the search keyword
+    think: off
+
+  # Open Amazon.
+  - start: app
+    macro:
+      steps:
+        - home_screen  # back to the phone's home screen
+        - tap: "the Amazon icon"  # the icon may sit elsewhere on your phone
+          at: [0.720, 0.425, 0.909, 0.551]
+        - wait: 5
+        # A first launch asks for notification permission (an iOS dialog).
+        - tap: "Don't Allow"
+          at: [0.25, 0.55, 0.50, 0.60]
+          when: {text: "Don't Allow", within: [0.0, 0.40, 1.0, 0.70]}
+        - wait: 2
+
+  - page: app.pages.home
+
+  # Search the keyword.
+  - do: search
+    with: {keyword: "{parse.keyword}"}
+    macro:
+      inputs:
+        keyword:
+          description: what to search for
+      steps:
+        - tap: "the search bar"
+          at: [0.10, 0.092, 0.80, 0.128]
+        - send_to_clipboard: "{keyword}"
+        - long_press: "the search input field"
+          at: [0.10, 0.092, 0.60, 0.128]
+        - tap: "Paste"
+          at: [0.066, 0.050, 0.163, 0.078]
+        - tap: "search"  # the keyboard's search key
+          at: [0.811, 0.930, 0.980, 0.965]
+        - wait: 2
+
+  - page: app.pages.results
+
+  # The model picks an item, opens the Buy Now sheet, and stops before paying.
+  - agent: pick
+    context:
+      prompt: |
+        You are buying one item on Amazon for the user. Start from the search
+        results, go as far as the Buy Now sheet, and do not pay.
+        The user said: "{user_said}"
+        Search keyword: {keyword}
+        1. In the results, compare the items' title, size, price and rating.
+           Prefer a single-pack item whose size matches the keyword; a higher
+           rating and a lower price are better. Tap the chosen item's title
+           once to open its detail page.
+        2. On the detail page pick the size or style matching the keyword,
+           then tap "Buy Now". A sheet opens with the delivery address, the
+           payment method and the order total.
+        3. Stop once that sheet shows the right item and a definite order
+           total. The playbook pays from here; you do not.
+        A promo popup may cover the page: close it with its X ({close}), once.
+        If no item fits, escalate.
+      given:
+        user_said: inputs.user_said
+        keyword: parse.keyword
+        close: app.landmarks.close
+    tools: [tap, scroll, back]
+    never_tap:
+      - {label: ["Place your order", "Buy Now"], within: bottom}
+    returns:
+      summary: one line with the title, size, quantity and order total
+      message: a short message asking the user to confirm the purchase
+    limit: {calls: 12, scrolls: 4}
+    think: low
+    on_fail: stop
+
+  - page: app.pages.buysheet
+
+  # Ask the user to confirm.
+  - ask: confirm-pay
+    approve: payment
+    total_label: ["Order total", "Total"]
+    message: "{pick.message} (order total on screen: ${ask.total}) Reply yes to pay, or no to cancel."
+    yes: ["yes", "ok", "sure", "confirm"]
+    no: ["no", "cancel", "stop", "nope"]
+    denied: "OK, cancelled. Nothing was paid."
+    wait: 45
+    rounds: 3
+    think: off
+    on_fail: stop
+    # After the reply, switch back to Amazon's Buy Now sheet.
+    resume:
+      steps:
+        - home_screen
+        - tap: "the Amazon icon"
+          at: [0.720, 0.425, 0.909, 0.551]
+        - wait: 2
+
+  # Once the user agrees, tap pay. Amazon may ask for a passkey on a
+  # high-risk payment; `handover` lets the model deal with that.
+  - do: pay
+    irreversible: payment
+    on_fail: handover
+    macro:
+      steps:
+        - tap: "Place your order"
+          at: [0.06, 0.910, 0.94, 0.955]
+        - wait: 4
+
+  - page: app.pages.paid
+
+  # Tell the user the result.
+  - tell: report
+    message: "Ordered and paid: {pick.summary}."
+```
+
+## Rehearse
+
+Start the MCP server:
+
+```bash
+physiclaw mcp
+```
+
+Check the playbook, then step through it to debug:
+
+```bash
+physiclaw playbooks check
+physiclaw playbooks step amazon/buy -i user_said="buy me a case of Horizon organic milk"
+```
+
+## Best practices
+
+**Debug locally first, then enable.** The bboxes differ on every phone, so a playbook runs correctly only after you have stepped through it on your own device.
+
+**Keep anchors stable and precise.** A playbook recognizes pages by anchor texts, so pick texts that stay in place and do not shift easily when the app's layout changes.
+
+**Let an agent write it.** Connect `claude` or `codex` to your MCP server and have it write and debug the playbook for you.

@@ -1,0 +1,1249 @@
+"""Tests for `physiclaw.provider.chat.openai_compat`.
+
+The provider uses `httpx.AsyncClient` (inherited from BaseChatProvider)
+to POST to `/chat/completions`. Tests use `respx` to fake the HTTP
+layer, which is HTTPX-native and avoids monkeypatching internals.
+
+A small `_TestOpenAI(OpenAICompatibleProvider)` subclass is used
+throughout; an autouse fixture supplies the API key.
+"""
+
+from __future__ import annotations
+
+import httpx
+import pytest
+import respx
+
+from physiclaw.common.provider_errors import (
+    ProviderPermanentError,
+    ProviderTransientError,
+)
+from physiclaw.contract.dto import (
+    AssistantMessage,
+    FinishReason,
+    SystemMessage,
+    TextBlock,
+    ToolCall,
+    ToolResultMessage,
+    Usage,
+    UserMessage,
+)
+from physiclaw.contract.turn import TurnMetadata
+from physiclaw.provider.chat.history import EPHEMERAL_CACHE_CONTROL
+from physiclaw.provider.chat.openai_compat import (
+    OpenAICacheMarkers,
+    OpenAICompatibleProvider,
+    _normalize_finish,
+    _with_cache_marker,
+)
+
+# ---------- a concrete subclass for testing ----------
+
+
+class _TestOpenAI(OpenAICompatibleProvider):
+    PROVIDER_ID = "openai_test"
+    BASE_URL = "https://api.openai.test/v1"
+
+
+@pytest.fixture(autouse=True)
+def _stub_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OPENAI_TEST_API_KEY", "sk-test")
+
+
+@pytest.fixture
+def provider() -> _TestOpenAI:
+    return _TestOpenAI(model="gpt-test")
+
+
+# ---------- _with_cache_marker ----------
+
+
+def test_with_cache_marker_wraps_content_in_text_block_with_ephemeral_marker() -> None:
+    entry = {"role": "system", "content": "you are helpful"}
+
+    out = _with_cache_marker(entry)
+
+    assert out == {
+        "role": "system",
+        "content": [
+            {
+                "type": "text",
+                "text": "you are helpful",
+                "cache_control": EPHEMERAL_CACHE_CONTROL,
+            }
+        ],
+    }
+
+
+def test_with_cache_marker_does_not_mutate_original_entry() -> None:
+    entry = {"role": "system", "content": "x"}
+
+    _with_cache_marker(entry)
+
+    assert entry["content"] == "x"
+
+
+# ---------- _normalize_finish ----------
+
+
+@pytest.mark.parametrize(
+    "raw, expected",
+    [
+        ("stop", FinishReason.STOP),
+        ("length", FinishReason.LENGTH),
+        ("tool_calls", FinishReason.TOOL_CALLS),
+        ("content_filter", FinishReason.CONTENT_FILTER),
+        # function_call (legacy OpenAI) maps to TOOL_CALLS.
+        ("function_call", FinishReason.TOOL_CALLS),
+    ],
+)
+def test_normalize_finish_known_values(raw: str, expected: FinishReason) -> None:
+    assert _normalize_finish(raw) == expected
+
+
+def test_normalize_finish_unknown_value_falls_back_to_stop_with_warning(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    import logging
+
+    with caplog.at_level(logging.DEBUG, logger="physiclaw.provider.chat"):
+        out = _normalize_finish("future_unknown_reason")
+
+    assert out == FinishReason.STOP
+    assert any("unknown finish_reason" in r.getMessage() for r in caplog.records)
+
+
+# ---------- _encode_message ----------
+
+
+def test_encode_system_message(provider: _TestOpenAI) -> None:
+    out = provider._encode_message(SystemMessage(content="hi"))
+
+    assert out == {"role": "system", "content": "hi"}
+
+
+def test_encode_user_message_string_content(provider: _TestOpenAI) -> None:
+    out = provider._encode_message(UserMessage(content="ping"))
+
+    assert out == {"role": "user", "content": "ping"}
+
+
+def test_encode_user_message_with_block_list_routed_through_user_content(
+    provider: _TestOpenAI,
+) -> None:
+    out = provider._encode_message(UserMessage(content=[TextBlock(text="hi")]))
+
+    assert out["role"] == "user"
+    assert out["content"] == [{"type": "text", "text": "hi"}]
+
+
+def test_encode_assistant_message_routes_through_assistant_to_wire(
+    provider: _TestOpenAI,
+) -> None:
+    out = provider._encode_message(
+        AssistantMessage(
+            content="ack",
+            tool_calls=[],
+            finish_reason=FinishReason.STOP,
+        )
+    )
+
+    assert out == {"role": "assistant", "content": "ack"}
+
+
+def test_encode_tool_result_message_routes_through_tool_result_to_wire(
+    provider: _TestOpenAI,
+) -> None:
+    out = provider._encode_message(ToolResultMessage(tool_call_id="t1", content="ok"))
+
+    assert out == {"role": "tool", "tool_call_id": "t1", "content": "ok"}
+
+
+def test_encode_unknown_message_subtype_raises_assert_never(
+    provider: _TestOpenAI,
+) -> None:
+    class _Weird:  # not in the Message Union
+        pass
+
+    with pytest.raises(AssertionError):
+        provider._encode_message(_Weird())  # type: ignore[arg-type]
+
+
+# ---------- CACHE_MARKERS factory ----------
+
+
+def test_cache_markers_factory_is_openai_shape() -> None:
+    assert isinstance(OpenAICompatibleProvider.CACHE_MARKERS, OpenAICacheMarkers)
+
+
+def test_cache_markers_mark_system_delegates_to_with_cache_marker(
+    provider: _TestOpenAI,
+) -> None:
+    entry = {"role": "system", "content": "sys"}
+
+    out = provider.CACHE_MARKERS.mark_system(entry)
+
+    assert out["content"][0]["cache_control"] == EPHEMERAL_CACHE_CONTROL
+
+
+def test_cache_markers_mark_stub_adds_only_cache_control_to_block(
+    provider: _TestOpenAI,
+) -> None:
+    # Stubs arrive as a one-element text-block list (guaranteed by
+    # `_encode_message`); the marker must be additive so marked and
+    # unmarked stubs serialize identically apart from the key.
+    entry = {
+        "role": "tool",
+        "tool_call_id": "t1",
+        "content": [{"type": "text", "text": "(superseded peek) stale"}],
+    }
+
+    out = provider.CACHE_MARKERS.mark_stub(entry)
+
+    assert out == {
+        "role": "tool",
+        "tool_call_id": "t1",
+        "content": [
+            {
+                "type": "text",
+                "text": "(superseded peek) stale",
+                "cache_control": EPHEMERAL_CACHE_CONTROL,
+            }
+        ],
+    }
+
+
+def test_cache_markers_mark_stub_does_not_mutate_original_entry(
+    provider: _TestOpenAI,
+) -> None:
+    entry = {
+        "role": "tool",
+        "tool_call_id": "t1",
+        "content": [{"type": "text", "text": "stale"}],
+    }
+
+    provider.CACHE_MARKERS.mark_stub(entry)
+
+    assert entry["content"] == [{"type": "text", "text": "stale"}]
+
+
+def test_encode_superseded_tool_result_wraps_string_in_text_block(
+    provider: _TestOpenAI,
+) -> None:
+    out = provider._encode_message(
+        ToolResultMessage(
+            tool_call_id="t1", content="(superseded tap) gone", is_superseded=True
+        )
+    )
+
+    assert out == {
+        "role": "tool",
+        "tool_call_id": "t1",
+        "content": [{"type": "text", "text": "(superseded tap) gone"}],
+    }
+
+
+def test_superseded_stub_serializes_byte_identical_marked_vs_unmarked(
+    provider: _TestOpenAI,
+) -> None:
+    """The invariant this shape exists for: when a newer stub takes the
+    moving anchor, the previous stub's wire bytes must be unchanged
+    except for losing the `cache_control` key — the contract vendors
+    with strict anchor semantics depend on, and the same one the
+    Anthropic shape keeps by construction."""
+    sys_ = SystemMessage(content="sys")
+    s1 = ToolResultMessage(
+        tool_call_id="t1", content="(superseded peek) a", is_superseded=True
+    )
+    s2 = ToolResultMessage(
+        tool_call_id="t2", content="(superseded tap) b", is_superseded=True
+    )
+
+    as_anchor = provider.serialize_history([sys_, s1])[1]  # s1 marked
+    after_move = provider.serialize_history([sys_, s1, s2])[1]  # s1 unmarked
+
+    stripped_blocks = []
+    for block in as_anchor["content"]:
+        block = dict(block)
+        block.pop("cache_control", None)
+        stripped_blocks.append(block)
+
+    assert {**as_anchor, "content": stripped_blocks} == after_move
+
+
+# ---------- chat: success path ----------
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("turn", [None, 0, 2])
+async def test_chat_posts_to_chat_completions_with_payload(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter, turn
+) -> None:
+    route = respx_mock.post("https://api.openai.test/v1/chat/completions").respond(
+        json={
+            "choices": [{"message": {"content": "hi"}, "finish_reason": "stop"}],
+            "usage": {"prompt_tokens": 10, "completion_tokens": 5},
+        },
+    )
+
+    history = [UserMessage(content="ping")]
+    metadata = (
+        TurnMetadata("session", turn, None, 300 - turn) if turn is not None else None
+    )
+    await provider.chat(history, tools=[], metadata=metadata)
+
+    assert route.call_count == 1
+    payload = route.calls.last.request.read().decode()
+    import json
+
+    body = json.loads(payload)
+    assert body["model"] == "gpt-test"
+    assert body["messages"] == provider.serialize_history(history, metadata=metadata)
+    assert history == [UserMessage(content="ping")]
+    if metadata is None:
+        assert body["messages"] == [{"role": "user", "content": "ping"}]
+    else:
+        assert body["messages"][:-1] == [{"role": "user", "content": "ping"}]
+        tail = body["messages"][-1]
+        assert tail["role"] == "user"
+        assert json.loads(
+            tail["content"]
+            .removeprefix("<turn_metadata>")
+            .removesuffix("</turn_metadata>")
+        ) == {
+            "session_id": "session",
+            "turn": turn,
+            "deadline": None,
+            "turns_remaining": 300 - turn,
+        }
+    assert "metadata" not in body
+    assert "tools" not in body
+
+
+@pytest.mark.asyncio
+async def test_chat_payload_includes_tools_and_tool_choice_when_present(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter
+) -> None:
+    route = respx_mock.post("https://api.openai.test/v1/chat/completions").respond(
+        json={
+            "choices": [{"message": {"content": "ok"}, "finish_reason": "stop"}],
+            "usage": {},
+        },
+    )
+
+    await provider.chat(
+        [UserMessage(content="x")],
+        tools=[
+            {"name": "tap", "description": "Tap", "input_schema": {"type": "object"}}
+        ],
+    )
+
+    import json
+
+    body = json.loads(route.calls.last.request.read())
+    assert body["tools"] == [
+        {
+            "type": "function",
+            "function": {
+                "name": "tap",
+                "description": "Tap",
+                "parameters": {"type": "object"},
+            },
+        }
+    ]
+    assert body["tool_choice"] == "auto"
+
+
+@pytest.mark.asyncio
+async def test_chat_returns_assistant_message_on_success(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter
+) -> None:
+    respx_mock.post("https://api.openai.test/v1/chat/completions").respond(
+        json={
+            "choices": [
+                {
+                    "message": {"content": "hello"},
+                    "finish_reason": "stop",
+                }
+            ],
+            "usage": {"prompt_tokens": 7, "completion_tokens": 3},
+        },
+    )
+
+    out = await provider.chat([UserMessage(content="hi")], tools=[])
+
+    assert isinstance(out, AssistantMessage)
+    assert out.content == "hello"
+    assert out.finish_reason == FinishReason.STOP
+    assert out.usage.prompt_tokens == 7
+
+
+# ---------- chat: error mapping ----------
+
+
+@pytest.mark.asyncio
+async def test_chat_maps_transport_error_to_transient(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter
+) -> None:
+    respx_mock.post("https://api.openai.test/v1/chat/completions").mock(
+        side_effect=httpx.ConnectError("conn refused")
+    )
+
+    with pytest.raises(ProviderTransientError, match=r"^transport: "):
+        await provider.chat([UserMessage(content="x")], [])
+
+
+@pytest.mark.asyncio
+async def test_chat_maps_timeout_to_transient(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter
+) -> None:
+    respx_mock.post("https://api.openai.test/v1/chat/completions").mock(
+        side_effect=httpx.ReadTimeout("timeout")
+    )
+
+    with pytest.raises(ProviderTransientError, match=r"^transport: "):
+        await provider.chat([UserMessage(content="x")], [])
+
+
+@pytest.mark.asyncio
+async def test_chat_maps_429_to_transient(
+    provider: _TestOpenAI,
+    respx_mock: respx.MockRouter,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    import logging
+
+    respx_mock.post("https://api.openai.test/v1/chat/completions").respond(
+        429,
+        json={"error": "rate limited"},
+    )
+
+    with caplog.at_level(logging.DEBUG, logger="physiclaw.provider.chat"):
+        with pytest.raises(ProviderTransientError, match=r"^HTTP 429: "):
+            await provider.chat([UserMessage(content="x")], [])
+
+    assert any("HTTP 429 (transient)" in r.getMessage() for r in caplog.records)
+
+
+@pytest.mark.asyncio
+async def test_chat_maps_500_to_transient(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter
+) -> None:
+    respx_mock.post("https://api.openai.test/v1/chat/completions").respond(
+        500,
+        json={"error": "boom"},
+    )
+
+    with pytest.raises(ProviderTransientError, match=r"^HTTP 500: "):
+        await provider.chat([UserMessage(content="x")], [])
+
+
+@pytest.mark.asyncio
+async def test_chat_maps_400_to_permanent(
+    provider: _TestOpenAI,
+    respx_mock: respx.MockRouter,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    import logging
+
+    respx_mock.post("https://api.openai.test/v1/chat/completions").respond(
+        400,
+        json={"error": "bad model"},
+    )
+
+    with caplog.at_level(logging.DEBUG, logger="physiclaw.provider.chat"):
+        with pytest.raises(ProviderPermanentError, match=r"^HTTP 400: "):
+            await provider.chat([UserMessage(content="x")], [])
+
+    assert any("HTTP 400 (permanent)" in r.getMessage() for r in caplog.records)
+
+
+# ---------- list_models ----------
+
+
+@pytest.mark.asyncio
+async def test_list_models_returns_data_array(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter
+) -> None:
+    respx_mock.get("https://api.openai.test/v1/models").respond(
+        json={
+            "object": "list",
+            "data": [
+                {"id": "gpt-5", "object": "model"},
+                {"id": "gpt-4", "object": "model"},
+            ],
+        },
+    )
+
+    out = await provider.list_models()
+
+    assert out == [
+        {"id": "gpt-5", "object": "model"},
+        {"id": "gpt-4", "object": "model"},
+    ]
+
+
+@pytest.mark.asyncio
+async def test_list_models_returns_empty_when_data_missing(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter
+) -> None:
+    respx_mock.get("https://api.openai.test/v1/models").respond(json={})
+
+    assert await provider.list_models() == []
+
+
+@pytest.mark.asyncio
+async def test_list_models_maps_transport_to_transient(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter
+) -> None:
+    respx_mock.get("https://api.openai.test/v1/models").mock(
+        side_effect=httpx.ConnectError("nope")
+    )
+
+    with pytest.raises(ProviderTransientError, match=r"^transport: "):
+        await provider.list_models()
+
+
+@pytest.mark.asyncio
+async def test_list_models_maps_4xx_to_permanent(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter
+) -> None:
+    respx_mock.get("https://api.openai.test/v1/models").respond(
+        401,
+        json={"error": "unauthorized"},
+    )
+
+    with pytest.raises(ProviderPermanentError, match=r"^HTTP 401: "):
+        await provider.list_models()
+
+
+@pytest.mark.parametrize("status", [429, 500, 503])
+async def test_list_models_retryable_status_is_transient(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter, status: int
+) -> None:
+    respx_mock.get("https://api.openai.test/v1/models").respond(status)
+
+    with pytest.raises(ProviderTransientError, match=f"HTTP {status}"):
+        await provider.list_models()
+
+
+@pytest.mark.parametrize(
+    "payload", [[], {"data": "bad"}, {"data": [3]}, {"data": [{"id": []}]}]
+)
+async def test_list_models_malformed_data_is_transient(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter, payload: object
+) -> None:
+    respx_mock.get("https://api.openai.test/v1/models").respond(json=payload)
+
+    with pytest.raises(ProviderTransientError, match="model list"):
+        await provider.list_models()
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        None,
+        [],
+        {},
+        {"choices": []},
+        {"choices": [None]},
+        {"choices": [{"message": []}]},
+        {"choices": [{"message": {"tool_calls": [3]}}]},
+        {"choices": [{"message": {"tool_calls": [{"function": []}]}}]},
+        {"choices": [{"message": {"tool_calls": [{"function": {"name": []}}]}}]},
+    ],
+)
+async def test_chat_malformed_completion_is_transient(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter, payload: object
+) -> None:
+    import json
+
+    respx_mock.post("https://api.openai.test/v1/chat/completions").respond(
+        text=json.dumps(payload), headers={"content-type": "application/json"}
+    )
+
+    with pytest.raises(ProviderTransientError, match="response"):
+        await provider.chat([UserMessage(content="hi")], [])
+
+
+@pytest.mark.parametrize("count", [None, "invalid", [], {}, True, -1, 1.5])
+async def test_chat_malformed_usage_does_not_discard_answer(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter, count: object
+) -> None:
+    respx_mock.post("https://api.openai.test/v1/chat/completions").respond(
+        json={
+            "choices": [{"message": {"content": "answer"}, "finish_reason": "stop"}],
+            "usage": {
+                "prompt_tokens": count,
+                "completion_tokens": 7,
+                "prompt_tokens_details": {"cached_tokens": count},
+                "completion_tokens_details": {"reasoning_tokens": count},
+            },
+        }
+    )
+
+    result = await provider.chat([], [])
+
+    assert result.content == "answer"
+    assert result.usage == Usage(completion_tokens=7)
+
+
+@pytest.mark.parametrize(
+    "usage",
+    [
+        [],
+        "bad",
+        42,
+        {"prompt_tokens_details": [1]},
+        {"completion_tokens_details": "bad"},
+    ],
+)
+async def test_chat_invalid_usage_shape_preserves_answer(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter, usage: object
+) -> None:
+    respx_mock.post("https://api.openai.test/v1/chat/completions").respond(
+        json={
+            "choices": [{"message": {"content": "answer"}}],
+            "usage": usage,
+        }
+    )
+
+    result = await provider.chat([], [])
+
+    assert result.content == "answer"
+    assert result.usage == Usage()
+
+
+# ---------- _parse_response ----------
+
+
+def test_parse_response_text_only(provider: _TestOpenAI) -> None:
+    raw = {
+        "choices": [{"message": {"content": "hi"}, "finish_reason": "stop"}],
+    }
+
+    out = provider._parse_response(raw)
+
+    assert out.content == "hi"
+    assert out.tool_calls == []
+    assert out.finish_reason == FinishReason.STOP
+
+
+def test_parse_response_non_string_content_serialized_to_json(
+    provider: _TestOpenAI,
+) -> None:
+    raw = {
+        "choices": [
+            {
+                "message": {"content": [{"type": "text", "text": "x"}]},
+                "finish_reason": "stop",
+            }
+        ],
+    }
+
+    out = provider._parse_response(raw)
+
+    # Serialized to compact JSON; bytes preserved.
+    assert "x" in out.content
+    assert out.content.startswith("[")
+
+
+def test_parse_response_finish_reason_default_stop_when_missing(
+    provider: _TestOpenAI,
+) -> None:
+    raw = {"choices": [{"message": {"content": "x"}}]}
+
+    out = provider._parse_response(raw)
+
+    assert out.finish_reason == FinishReason.STOP
+
+
+def test_parse_response_extracts_tool_calls(provider: _TestOpenAI) -> None:
+    raw = {
+        "choices": [
+            {
+                "message": {
+                    "content": "",
+                    "tool_calls": [
+                        {
+                            "id": "call_1",
+                            "function": {"name": "tap", "arguments": '{"x": 0.5}'},
+                        }
+                    ],
+                },
+                "finish_reason": "tool_calls",
+            }
+        ],
+    }
+
+    out = provider._parse_response(raw)
+
+    assert out.tool_calls == [ToolCall(id="call_1", name="tap", arguments={"x": 0.5})]
+    assert out.finish_reason == FinishReason.TOOL_CALLS
+
+
+def test_parse_response_tool_call_arguments_dict_passthrough(
+    provider: _TestOpenAI,
+) -> None:
+    # When `arguments` is already a dict (some non-strict providers),
+    # it's passed through without JSON parsing.
+    raw = {
+        "choices": [
+            {
+                "message": {
+                    "content": "",
+                    "tool_calls": [
+                        {
+                            "id": "c1",
+                            "function": {"name": "tap", "arguments": {"x": 1}},
+                        }
+                    ],
+                },
+                "finish_reason": "tool_calls",
+            }
+        ],
+    }
+
+    out = provider._parse_response(raw)
+
+    assert out.tool_calls[0].arguments == {"x": 1}
+
+
+def test_parse_response_tool_call_with_non_dict_args_wrapped_in_raw(
+    provider: _TestOpenAI,
+) -> None:
+    # If arguments JSON parses to a list (or other non-dict), wrap so
+    # the validator still sees a dict shape.
+    raw = {
+        "choices": [
+            {
+                "message": {
+                    "content": "",
+                    "tool_calls": [
+                        {
+                            "id": "c1",
+                            "function": {"name": "x", "arguments": "[1, 2, 3]"},
+                        }
+                    ],
+                },
+                "finish_reason": "tool_calls",
+            }
+        ],
+    }
+
+    out = provider._parse_response(raw)
+
+    assert out.tool_calls[0].arguments == {"_raw": [1, 2, 3]}
+
+
+def test_parse_response_tool_call_with_malformed_json_passes_through(
+    provider: _TestOpenAI,
+) -> None:
+    # Per principle 4/5: don't drop — surface the malformed string for
+    # the validator to flag.
+    raw = {
+        "choices": [
+            {
+                "message": {
+                    "content": "",
+                    "tool_calls": [
+                        {
+                            "id": "c1",
+                            "function": {"name": "x", "arguments": "{invalid"},
+                        }
+                    ],
+                },
+                "finish_reason": "tool_calls",
+            }
+        ],
+    }
+
+    out = provider._parse_response(raw)
+
+    assert out.tool_calls[0].arguments == {"_malformed_json": "{invalid"}
+
+
+def test_parse_response_generates_id_when_tool_call_id_missing(
+    provider: _TestOpenAI, mocker
+) -> None:
+    mocker.patch(
+        "physiclaw.provider.chat.openai_compat.uuid.uuid4",
+        return_value=mocker.MagicMock(hex="abcdef1234567890"),
+    )
+    raw = {
+        "choices": [
+            {
+                "message": {
+                    "tool_calls": [
+                        {
+                            "function": {"name": "tap", "arguments": "{}"},
+                        }
+                    ],
+                },
+                "finish_reason": "tool_calls",
+            }
+        ],
+    }
+
+    out = provider._parse_response(raw)
+
+    assert out.tool_calls[0].id == "auto_abcdef12"
+
+
+async def test_chat_never_returns_a_partial_tool_list(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter
+) -> None:
+    calls = [{"id": "valid", "function": {"name": "tap", "arguments": "{}"}}, 3]
+    respx_mock.post("https://api.openai.test/v1/chat/completions").respond(
+        json={
+            "choices": [
+                {"message": {"tool_calls": calls}, "finish_reason": "tool_calls"}
+            ]
+        }
+    )
+
+    with pytest.raises(ProviderTransientError, match="malformed tool call"):
+        await provider.chat([], [])
+
+
+# ---------- _parse_usage ----------
+
+
+def test_parse_usage_with_full_openai_shape(provider: _TestOpenAI) -> None:
+    raw = {
+        "usage": {
+            "prompt_tokens": 100,
+            "completion_tokens": 50,
+            "prompt_tokens_details": {
+                "cached_tokens": 80,
+                "cache_creation_input_tokens": 10,
+            },
+        },
+    }
+
+    out = provider._parse_usage(raw)
+
+    assert out == Usage(
+        prompt_tokens=100,
+        completion_tokens=50,
+        cached_tokens=80,
+        cache_creation_tokens=10,
+    )
+
+
+def test_parse_usage_returns_zero_filled_when_usage_missing(
+    provider: _TestOpenAI,
+) -> None:
+    assert provider._parse_usage({}) == Usage()
+
+
+def test_parse_usage_handles_none_usage_block(provider: _TestOpenAI) -> None:
+    assert provider._parse_usage({"usage": None}) == Usage()
+
+
+def test_parse_usage_handles_none_token_counts(provider: _TestOpenAI) -> None:
+    raw = {"usage": {"prompt_tokens": None, "completion_tokens": None}}
+
+    assert provider._parse_usage(raw) == Usage()
+
+
+def test_parse_usage_handles_missing_prompt_tokens_details(
+    provider: _TestOpenAI,
+) -> None:
+    raw = {"usage": {"prompt_tokens": 50, "completion_tokens": 25}}
+
+    out = provider._parse_usage(raw)
+
+    assert out.cached_tokens == 0
+    assert out.cache_creation_tokens == 0
+
+
+def test_parse_usage_handles_none_when_passed_a_none_raw(
+    provider: _TestOpenAI,
+) -> None:
+    # Defensive: `(raw or {}).get("usage")` — None raw is permitted.
+    assert provider._parse_usage(None) == Usage()
+
+
+# ---------- _parse_usage: top-of-block cache-hit fallbacks ----------
+#
+# Moonshot K2 sometimes surfaces `cached_tokens` at the top of the
+# `usage` block instead of nested under `prompt_tokens_details`, and
+# DeepSeek's documented spelling is top-level `prompt_cache_hit_tokens`;
+# the base parser probes both only when the nested read came up empty,
+# so the fallbacks are no-ops for vendors that never do this.
+
+
+def test_parse_usage_falls_through_to_top_level_cached_tokens_when_nested_empty(
+    provider: _TestOpenAI,
+) -> None:
+    raw = {
+        "usage": {
+            "prompt_tokens": 200,
+            "completion_tokens": 30,
+            "cached_tokens": 150,  # top-level, no nested details
+        },
+    }
+
+    out = provider._parse_usage(raw)
+
+    assert out.cached_tokens == 150
+    assert out.prompt_tokens == 200
+
+
+def test_parse_usage_prefers_nested_cached_tokens_over_top_level_when_both_set(
+    provider: _TestOpenAI,
+) -> None:
+    """Defensive: if a response carries both, nested wins (it's the
+    standard location). The fallback only fires on empty nested."""
+    raw = {
+        "usage": {
+            "prompt_tokens": 100,
+            "completion_tokens": 10,
+            "cached_tokens": 999,  # would-be top-level
+            "prompt_tokens_details": {"cached_tokens": 80},
+        },
+    }
+
+    out = provider._parse_usage(raw)
+
+    assert out.cached_tokens == 80
+
+
+def test_parse_usage_handles_string_top_level_cached_tokens(
+    provider: _TestOpenAI,
+) -> None:
+    """Some upstream proxies stringify integers; the int() cast in the
+    fallback must accept that."""
+    raw = {
+        "usage": {
+            "prompt_tokens": 50,
+            "completion_tokens": 5,
+            "cached_tokens": "42",  # stringified
+        },
+    }
+
+    out = provider._parse_usage(raw)
+
+    assert out.cached_tokens == 42
+
+
+def test_parse_usage_falls_through_to_prompt_cache_hit_tokens(
+    provider: _TestOpenAI,
+) -> None:
+    """DeepSeek's spelling: top-level `prompt_cache_hit_tokens`
+    (`prompt_tokens` = hit + miss). Misses are ordinary-priced input
+    (auto-stored, no write premium), so they must NOT surface as
+    `cache_creation_tokens`."""
+    raw = {
+        "usage": {
+            "prompt_tokens": 1000,
+            "completion_tokens": 50,
+            "prompt_cache_hit_tokens": 800,
+            "prompt_cache_miss_tokens": 200,
+        },
+    }
+
+    out = provider._parse_usage(raw)
+
+    assert out.cached_tokens == 800
+    assert out.cache_creation_tokens == 0
+
+
+def test_parse_usage_nested_wins_over_prompt_cache_hit_tokens(
+    provider: _TestOpenAI,
+) -> None:
+    """DeepSeek live responses carry both spellings; the standard
+    nested location wins and the fallback never fires."""
+    raw = {
+        "usage": {
+            "prompt_tokens": 100,
+            "prompt_tokens_details": {"cached_tokens": 60},
+            "prompt_cache_hit_tokens": 40,
+        },
+    }
+
+    out = provider._parse_usage(raw)
+
+    assert out.cached_tokens == 60
+
+
+@pytest.mark.asyncio
+async def test_chat_non_json_200_maps_to_transient(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter
+) -> None:
+    """A gateway can 200 with an HTML body mid-restart — retryable."""
+    respx_mock.post("https://api.openai.test/v1/chat/completions").respond(
+        content=b"<html>Bad gateway page</html>", content_type="text/html"
+    )
+
+    with pytest.raises(ProviderTransientError, match=r"^non-JSON response: "):
+        await provider.chat([UserMessage(content="x")], [])
+
+
+@pytest.mark.asyncio
+async def test_chat_empty_choices_is_retryable_instead_of_a_false_stop(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter
+) -> None:
+    respx_mock.post("https://api.openai.test/v1/chat/completions").respond(
+        json={"choices": [], "usage": {}}
+    )
+
+    with pytest.raises(ProviderTransientError, match="missing completion choice"):
+        await provider.chat([UserMessage(content="x")], [])
+
+
+@pytest.mark.asyncio
+async def test_list_models_non_json_200_maps_to_transient(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter
+) -> None:
+    respx_mock.get("https://api.openai.test/v1/models").respond(
+        content=b"<html>proxy</html>", content_type="text/html"
+    )
+
+    with pytest.raises(ProviderTransientError, match=r"^non-JSON response: "):
+        await provider.list_models()
+
+
+# ---------- reasoning ask → vendor request fields ----------
+
+
+class _ThinkingOpenAI(_TestOpenAI):
+    def thinking_params(self, thinking):
+        return {"thinking": {"type": "disabled" if thinking == "off" else "enabled"}}
+
+
+@pytest.mark.asyncio
+async def test_chat_merges_the_vendors_thinking_params_into_the_payload(
+    respx_mock: respx.MockRouter,
+) -> None:
+    import json
+
+    route = respx_mock.post("https://api.openai.test/v1/chat/completions").respond(
+        json={
+            "choices": [{"message": {"content": "hi"}, "finish_reason": "stop"}],
+            "usage": {},
+        },
+    )
+    provider = _ThinkingOpenAI(model="gpt-test")
+
+    await provider.chat([UserMessage(content="x")], tools=[], thinking="off")
+    await provider.chat([UserMessage(content="x")], tools=[])
+
+    off, default = (json.loads(c.request.read()) for c in route.calls)
+    assert off["thinking"] == {"type": "disabled"}
+    assert "thinking" not in default  # None never reaches the vendor table
+
+
+@pytest.mark.asyncio
+async def test_unmeasured_vendor_sends_nothing_extra(
+    provider: _TestOpenAI, respx_mock: respx.MockRouter
+) -> None:
+    import json
+
+    route = respx_mock.post("https://api.openai.test/v1/chat/completions").respond(
+        json={
+            "choices": [{"message": {"content": "hi"}, "finish_reason": "stop"}],
+            "usage": {},
+        },
+    )
+
+    await provider.chat([UserMessage(content="x")], tools=[], thinking="high")
+
+    assert set(json.loads(route.calls.last.request.read())) == {"model", "messages"}
+
+
+@pytest.mark.parametrize(
+    "vendor,model,reasoning",
+    [
+        ("deepseek", "deepseek-flash", "opaque reasoning"),
+        ("deepseek", "deepseek-flash", ""),
+        ("deepseek", "deepseek-flash", None),
+        ("moonshot", "kimi-k2.6", "opaque reasoning"),
+    ],
+)
+async def test_structured_continuation_preserves_reasoning(
+    vendor, model, reasoning, monkeypatch, respx_mock
+):
+    from physiclaw.contract.structured import OutputSpec
+    from physiclaw.provider.services.registry import provider_class
+
+    monkeypatch.setenv(f"{vendor.upper()}_API_KEY", "test")
+    provider = provider_class(vendor)(model=model, base_url="https://fixture.test")
+    spec = OutputSpec("sample", {"type": "object"}, dict)
+    respx_mock.post("https://fixture.test/chat/completions").respond(
+        json={
+            "choices": [
+                {
+                    "finish_reason": "tool_calls",
+                    "message": {
+                        "content": "",
+                        "reasoning_content": reasoning,
+                        "tool_calls": [
+                            {
+                                "id": "envelope",
+                                "type": "function",
+                                "function": {"name": "submit_turn", "arguments": "{}"},
+                            }
+                        ],
+                    },
+                }
+            ]
+        }
+    )
+    try:
+        completed = await provider.generate_structured([], spec)
+        followup = provider.build_request(
+            [completed.reply, ToolResultMessage("envelope", "done")],
+            [],
+            output_spec=spec,
+        )
+    finally:
+        await provider.aclose()
+
+    assistant = next(m for m in followup["messages"] if m["role"] == "assistant")
+    assert assistant["reasoning_content"] == reasoning
+    assert assistant["tool_calls"][0]["id"] == "envelope"
+    assert completed.reply.content == ""
+
+
+@pytest.mark.parametrize(
+    "body,kind",
+    [
+        (
+            {"choices": [], "usage": {"prompt_tokens": 100, "completion_tokens": 20}},
+            "format",
+        ),
+        (
+            {
+                "choices": [
+                    {
+                        "finish_reason": "length",
+                        "message": {
+                            "tool_calls": [
+                                {
+                                    "id": "t",
+                                    "function": {
+                                        "name": "submit_turn",
+                                        "arguments": "{}",
+                                    },
+                                }
+                            ]
+                        },
+                    }
+                ]
+            },
+            "truncation",
+        ),
+        (
+            {"choices": [{"finish_reason": "stop", "message": {"refusal": "blocked"}}]},
+            "refusal",
+        ),
+        (
+            {
+                "choices": [
+                    {
+                        "message": {
+                            "tool_calls": [
+                                {
+                                    "id": "t",
+                                    "function": {
+                                        "name": "submit_turn",
+                                        "arguments": '{"x":1,"x":2}',
+                                    },
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "format",
+        ),
+        (
+            {
+                "choices": [
+                    {
+                        "message": {
+                            "tool_calls": [
+                                {"function": {"name": "submit_turn", "arguments": "{}"}}
+                            ]
+                        }
+                    }
+                ]
+            },
+            "format",
+        ),
+    ],
+)
+@respx.mock
+async def test_generate_structured_rejection_retains_reply_and_accounts_once(
+    provider, body, kind, mocker
+):
+    from physiclaw.contract.structured import OutputSpec
+
+    sink = mocker.Mock()
+    provider.usage_sink = sink
+    respx.post("https://api.openai.test/v1/chat/completions").mock(
+        return_value=httpx.Response(200, json=body)
+    )
+
+    result = await provider.generate_structured(
+        [], OutputSpec("sample", {"type": "object"}, dict)
+    )
+
+    assert result.failure.kind == kind
+    assert result.reply.raw == body
+    assert result.reply.usage.prompt_tokens == body.get("usage", {}).get(
+        "prompt_tokens", 0
+    )
+    assert sink.write.call_count == 1
+
+
+@respx.mock
+async def test_generate_structured_interleaved_chat_has_no_sticky_options(provider):
+    import json
+
+    from physiclaw.contract.structured import OutputSpec
+
+    body = {
+        "choices": [
+            {
+                "finish_reason": "tool_calls",
+                "message": {
+                    "tool_calls": [
+                        {
+                            "id": "envelope",
+                            "function": {
+                                "name": "submit_turn",
+                                "arguments": '{"ok":true}',
+                            },
+                        }
+                    ]
+                },
+            }
+        ]
+    }
+    route = respx.post("https://api.openai.test/v1/chat/completions").mock(
+        return_value=httpx.Response(200, json=body)
+    )
+    captured = []
+
+    completion = await provider.generate_structured(
+        [], OutputSpec("sample", {"type": "object"}, dict), on_request=captured.append
+    )
+    await provider.chat([completion.reply, ToolResultMessage("envelope", "failed")], [])
+
+    assert captured[0] == json.loads(route.calls[0].request.content)
+    assert captured[0]["tools"][0]["function"]["name"] == "submit_turn"
+    assert "tools" not in json.loads(route.calls[1].request.content)
+    assert (
+        json.loads(route.calls[1].request.content)["messages"][1]["tool_call_id"]
+        == "envelope"
+    )
+
+
+def test_output_spec_does_not_accept_transport_from_caller():
+    from physiclaw.contract.structured import OutputSpec
+
+    with pytest.raises(TypeError, match="transport"):
+        OutputSpec("sample", {}, dict, transport="native")

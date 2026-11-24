@@ -9,3 +9,7 @@ receipts/
 .wrangler/
 .dev.vars*
 vision-macos/build/
+
+# Local Python caches for CAD and Entity
+__pycache__/
+*.py[cod]

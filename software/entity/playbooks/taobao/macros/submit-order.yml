@@ -1,0 +1,11 @@
+kind: macro
+schema: 1
+name: submit-order
+description: 提交订单 on a storefront order page, then the cashier's button when one shows
+# Disabled until rehearsed on YOUR device: physiclaw macros run taobao/submit-order
+enabled: false
+steps:
+  - tap: "提交订单"
+    at: [0.72, 0.905, 0.94, 0.955]
+  - wait: 4
+  - run: cashier                             # 立即支付 / 确认支付, only while one shows

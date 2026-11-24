@@ -1,0 +1,9 @@
+extend = "../pyproject.toml"
+src = ["..", "../src"]
+extend-exclude = ["output"]
+
+[lint.extend-per-file-ignores]
+# Dynamic OS-only APIs must remain type-checkable from either platform.
+"port/backends/*.py" = ["B009"]
+# Nested build123d contexts describe the part/sketch hierarchy.
+"parts/**.py" = ["SIM117"]

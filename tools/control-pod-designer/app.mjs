@@ -402,3 +402,8 @@ init3D();$('loading').hidden=true;render();
 document.addEventListener('pointermove',dragDiagram);document.addEventListener('pointerup',endDrag);document.addEventListener('pointercancel',endDrag);
 window.ft412Editor={getState:()=>clone(state),getIssues:()=>validate(state),exportLayout:()=>exportLayout(state),load:v=>{state=sanitize(v);history=[];future=[];render();},getApertures:()=>apertures(state),getVersion:()=>VERSION,
   projectPart:id=>{const p=state.parts.find(p=>p.id===id);if(!p||!camera)return null;const v=W(point(p,[0,0,3],state.box)).project(camera),r=$('scene').getBoundingClientRect();return {x:r.left+(v.x*.5+.5)*r.width,y:r.top+(-v.y*.5+.5)*r.height};}};
+
+if (new URLSearchParams(location.search).get("home")==="en") {
+  const home=document.querySelector("[data-landing]");
+  home.href="https://livinginacat.world/";home.textContent="← Back to home";
+}
