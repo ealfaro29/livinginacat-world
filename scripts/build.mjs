@@ -68,6 +68,10 @@ for (const name of publicAssets) {
     recursive: true,
   });
 }
+await fs.copyFile(
+  path.join(rootPath, "hardware/ft412-v2/Fabricacion/02-Proyecto-completo-R01/Bambu/FT412-V2_Completa_PETG_X2D_0.4.3mf"),
+  path.join(out, "downloads/ft412-v2-completa.3mf"),
+);
 for (const [key, file] of Object.entries({ css: "style.css", js: "site.js" })) {
   const hash = createHash("sha256")
     .update(await fs.readFile(path.join(out, "assets", file)))

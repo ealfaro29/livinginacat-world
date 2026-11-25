@@ -82,6 +82,7 @@ for (const file of [
   "assets/v2/visor/index.html",
   "assets/v2/visor/consola.glb",
   "assets/v2/visor/ft412-v2-step.zip",
+  "downloads/ft412-v2-completa.3mf",
 ]) {
   if (!paths.has(file))
     errors.push(`Missing required edition resource: ${file}`);

@@ -7,10 +7,11 @@
 | Carpeta / Directory | Contenido / Contents |
 | --- | --- |
 | [Consola-tornilleria](Consola-tornilleria/) | Diseño vigente, ensamble STEP, generador paramétrico y distribución de herrajes. Current assembly, editable STEP, parametric generator and fastener layout. |
+| [**Proyecto completo · 17 piezas / Complete 17-part project**](Fabricacion/02-Proyecto-completo-R01/) | Un proyecto Bambu Studio, nueve placas PETG / One Bambu Studio project, nine PETG plates. |
 | [Fabricación · tanda 01](Fabricacion/01-Frente-y-cama-R01/) | Frente y cama con STL, STEP y dos placas PETG para boquilla de 0,4 mm. Front and phone bed with printable STL, editable STEP, and two 0.4 mm PETG plates. |
 | [Consola-compacta](Consola-compacta/) · [Consola-01](Consola-01/) | Alternativas anteriores para comparar dimensiones y arquitectura. Earlier variants for comparing dimensions and architecture. |
 
-**Para empezar a imprimir / Start printing.** [Descargar la primera tanda (ZIP) / Download print batch 01](https://livinginacat.world/downloads/ft412-v2-tanda-01.zip). Abrí el proyecto conjunto en Bambu Studio y seleccioná la placa 1 para la cama. Open the two-plate project in Bambu Studio and select plate 1 for the phone bed. [Guía ilustrada / Illustrated guide](Fabricacion/01-Frente-y-cama-R01/README.md)
+**Imprimir la V2 / Print the V2.** [Proyecto completo de Bambu Studio / Complete Bambu Studio project](https://livinginacat.world/downloads/ft412-v2-completa.3mf). La placa 1 es la cama y la placa 2 el frente. Si ya imprimiste ambas, seguí con la 3. Plate 1 is the phone bed and plate 2 is the front shell. If you already printed both, start at plate 3. [Guía de las nueve placas / Nine-plate print guide](Fabricacion/02-Proyecto-completo-R01/)
 
 La fuente externa elegida para el diseño es la MEAN WELL GST160A12-R7B (12 V, hasta 11,5 A y 138 W). La MKS recibe 12 V. El Pi 5 y el iPhone llevan convertidores dedicados. El S301T frontal conmuta corriente continua. El catálogo conserva las piezas y el presupuesto para dos máquinas independientes. [Lista V2](../../data/v2-catalog.json) · [Visor 3D](https://livinginacat.world/es/v2/#viewer)
 

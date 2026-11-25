@@ -28,7 +28,7 @@ El 24 de noviembre de 2026, desde la web autenticada de producción se programar
 
 Un cambio de posición de la cámara o del iPhone requiere revisar la calibración. En precisión se miden por separado los blancos reconocidos por la cámara y los toques que recibe el teléfono. Conservá el origen establecido y las cuatro esquinas de estacionamiento de cada máquina. Calibración, credenciales, base de datos de tareas y capturas reales se guardan en la instalación privada. Un clon nuevo dispone de código, ejemplos de servicios y herramientas de configuración. [Guía de operación y despliegue](../software/entity/guides/operaciones.md#español)
 
-La **V2** tiene un ensamble STEP editable y dos piezas de fabricación de la primera tanda, frente y cama. El diseño fija 100 mm entre el vidrio y el lente por la medida física de Alfonsito. Para la V2 se deben comprobar el montaje real, los cables, la temperatura y la libertad de los patines en todo el recorrido. [Tanda de fabricación](../hardware/ft412-v2/Fabricacion/01-Frente-y-cama-R01/)
+La **V2** tiene un [proyecto de Bambu Studio con las 17 piezas en nueve placas](../hardware/ft412-v2/Fabricacion/02-Proyecto-completo-R01/) y un STEP de referencia. El diseño fija 100 mm entre el vidrio y el lente por la medida física de Alfonsito. Quedan por verificar el montaje real, la tensión de las correas, los cables, la temperatura y la libertad de los patines con las piezas impresas.
 
 ## English
 
@@ -50,7 +50,7 @@ Open **Living in a Cat World** in Codex. This repository contains the working Al
 
 On November 24, 2026 the production operator portal successfully added, scheduled, reordered and removed tasks. The MKS read the same order. A real, text-only agent task returned **72** for 8 × 9. The registered MCP adapter also read the live state, submitted a task twice with the same ID, reordered and removed its future test tasks. The carriage stayed still. Request live state at the start of a session. After moving the phone or camera, check calibration. The phone touch count and camera target count measure different things. Calibration, the task database, credentials and phone captures belong to the private installation. [Dashboard](https://entity.livinginacat.world/?lang=en)
 
-The V2 assembly STEP and the printable front and phone bed are available. The 100 mm glass-to-lens height comes from a V1 measurement. Physical V2 fit, cable clearance, temperature and full carriage travel still need to be tested. [V2 manufacturing batch](../hardware/ft412-v2/Fabricacion/01-Frente-y-cama-R01/)
+The [complete V2 Bambu Studio project](../hardware/ft412-v2/Fabricacion/02-Proyecto-completo-R01/) contains 17 printable parts across nine plates, alongside the reference assembly STEP. The 100 mm glass-to-lens height comes from a V1 measurement. Physical V2 fit, belt tension, cable clearance, temperature and full carriage travel still need to be tested on a printed machine.
 
 ## Verificación local / Local verification
 

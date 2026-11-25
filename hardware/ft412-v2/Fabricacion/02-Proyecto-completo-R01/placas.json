@@ -1,0 +1,312 @@
+{
+  "plates": [
+    "Cama / Phone bed",
+    "Frente / Front shell",
+    "Trasera / Rear shell",
+    "Apoyo izquierdo / Left rail seat",
+    "Apoyo derecho / Right rail seat",
+    "Puente y carro / Gantry and carriage",
+    "Portico / Camera arch",
+    "Camara y electronica / Camera and electronics",
+    "Punta / Tip coupler"
+  ],
+  "objects": [
+    {
+      "plate": 1,
+      "name": "01_Cama_iPhone14",
+      "body": "Tabique_sobre_electronica",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "xy": [
+        128,
+        128
+      ],
+      "support": false,
+      "infill": 20,
+      "walls": 4,
+      "stl": "ft412-v2/Fabricacion/01-Frente-y-cama-R01/Piezas/01_Cama_iPhone14.stl",
+      "sha256": "e21ecb9e0fc7472b720bb88dde203e2389c8cec940950c467ff495b023eebe51"
+    },
+    {
+      "plate": 2,
+      "name": "02_Frente_consola",
+      "body": "Carcasa_delante",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "xy": [
+        128,
+        128
+      ],
+      "support": true,
+      "infill": 25,
+      "walls": 4,
+      "stl": "ft412-v2/Fabricacion/01-Frente-y-cama-R01/Piezas/02_Frente_consola.stl",
+      "sha256": "5c2c6fb2f8554d4201d7a41891b204d23731434624079e664836755f1081300c"
+    },
+    {
+      "plate": 3,
+      "name": "03_Trasera_consola",
+      "body": "Carcasa_detras",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "xy": [
+        128,
+        128
+      ],
+      "support": true,
+      "infill": 25,
+      "walls": 4
+    },
+    {
+      "plate": 4,
+      "name": "04_Apoyo_riel_Y_izquierdo",
+      "body": "Asiento_Y_I",
+      "rotation": [
+        0,
+        -90,
+        46
+      ],
+      "xy": [
+        128,
+        128
+      ],
+      "support": true,
+      "infill": 30,
+      "walls": 5
+    },
+    {
+      "plate": 5,
+      "name": "05_Apoyo_riel_Y_derecho",
+      "body": "Asiento_Y_D",
+      "rotation": [
+        0,
+        90,
+        44
+      ],
+      "xy": [
+        128,
+        128
+      ],
+      "support": true,
+      "infill": 30,
+      "walls": 5
+    },
+    {
+      "plate": 6,
+      "name": "06_Puente_X",
+      "body": "Puente_transversal_nuevo",
+      "rotation": [
+        180,
+        0,
+        0
+      ],
+      "xy": [
+        118,
+        70
+      ],
+      "support": true,
+      "infill": 30,
+      "walls": 5
+    },
+    {
+      "plate": 6,
+      "name": "07_Carro_solenoide_GT2",
+      "body": "Carro_portapunta",
+      "rotation": [
+        90,
+        0,
+        0
+      ],
+      "xy": [
+        100,
+        158
+      ],
+      "support": true,
+      "infill": 35,
+      "walls": 5
+    },
+    {
+      "plate": 6,
+      "name": "08_Canal_cables",
+      "body": "Canal_cables_exterior_Y",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "xy": [
+        235,
+        128
+      ],
+      "support": false,
+      "infill": 20,
+      "walls": 4
+    },
+    {
+      "plate": 7,
+      "name": "09_Portico_camara",
+      "body": "Portico_camara_una_pieza",
+      "rotation": [
+        -90,
+        0,
+        0
+      ],
+      "xy": [
+        128,
+        128
+      ],
+      "support": true,
+      "infill": 30,
+      "walls": 5
+    },
+    {
+      "plate": 8,
+      "name": "10_Capota_C922",
+      "body": "Capota_y_soporte_C922",
+      "rotation": [
+        180,
+        0,
+        0
+      ],
+      "xy": [
+        52,
+        82
+      ],
+      "support": true,
+      "infill": 25,
+      "walls": 4
+    },
+    {
+      "plate": 8,
+      "name": "11_Caja_Adafruit_base",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "xy": [
+        135,
+        58
+      ],
+      "support": false,
+      "infill": 30,
+      "walls": 4,
+      "stl": "ft412-accessories/print-prep/FT412_Caja_Adafruit_5648_32x20x10/FT412_Adafruit_5648_Base.stl",
+      "sha256": "e810c5e590cbc1b3025ce7bb7bbd13d0ff4116bce037cf6e7fbb0c55fb4ba4ea"
+    },
+    {
+      "plate": 8,
+      "name": "12_Caja_Adafruit_tapa",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "xy": [
+        211,
+        58
+      ],
+      "support": false,
+      "infill": 30,
+      "walls": 4,
+      "stl": "ft412-accessories/print-prep/FT412_Caja_Adafruit_5648_32x20x10/FT412_Adafruit_5648_Tapa.stl",
+      "sha256": "38fcf6a04cd347b9c2a53da5941b8d08a8639031dc3f9c35d5e6633341965bfc"
+    },
+    {
+      "plate": 8,
+      "name": "13_Base_Geekworm",
+      "body": "Geekworm",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "xy": [
+        55,
+        192
+      ],
+      "support": false,
+      "infill": 30,
+      "walls": 4
+    },
+    {
+      "plate": 8,
+      "name": "14_Base_DFRobot",
+      "body": "DFRobot",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "xy": [
+        140,
+        192
+      ],
+      "support": false,
+      "infill": 30,
+      "walls": 4
+    },
+    {
+      "plate": 8,
+      "name": "15_Base_portafusible",
+      "body": "Fusible",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "xy": [
+        211,
+        182
+      ],
+      "support": false,
+      "infill": 30,
+      "walls": 4
+    },
+    {
+      "plate": 9,
+      "name": "16_Acoplador_punta_delantero",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "xy": [
+        103,
+        128
+      ],
+      "support": false,
+      "infill": 80,
+      "walls": 6,
+      "stl": "ft412-coupler-rev01/FT412_Acoplador_Delantero_REV01.stl",
+      "sha256": "026c19d6332cce1737e4afd6c7fd42fde8c52d7650edc2fcc43242894b0974e0"
+    },
+    {
+      "plate": 9,
+      "name": "17_Acoplador_punta_trasero",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "xy": [
+        153,
+        128
+      ],
+      "support": false,
+      "infill": 80,
+      "walls": 6,
+      "stl": "ft412-coupler-rev01/FT412_Acoplador_Trasero_REV01.stl",
+      "sha256": "1ece6e8aeed8a88a2c3c674653007254c0a1b03fa0b682a5f7a2f7f514ad6e36"
+    }
+  ]
+}

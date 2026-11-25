@@ -1,0 +1,198 @@
+{
+  "printer": "Bambu Lab X2D",
+  "primary_nozzle_mm": 0.4,
+  "material": "Generic PETG",
+  "nominal_layer_mm": 0.2,
+  "coupler_nominal_layer_mm": 0.16,
+  "slicer": "Bambu Studio 02.09.01.70",
+  "released_project_sha256": "bca5fc05c5d68eaa703e29915de6a03f28626423d5200ae0626b215105bbc91e",
+  "objects": 17,
+  "native_slicing_return_code": 0,
+  "native_plate_warnings": [],
+  "verified_against_exported_meshes": true,
+  "total_estimated_seconds": 194158,
+  "total_estimated_petg_g": 1043.05,
+  "plates": [
+    {
+      "plate": 1,
+      "objects": [
+        "01_Cama_iPhone14"
+      ],
+      "seconds": 13818,
+      "petg_g": 79.96,
+      "layers": 43,
+      "support": false,
+      "bbox_mm": [
+        58.309290000000004,
+        10.30929,
+        197.69069000000002,
+        245.69069000000002
+      ]
+    },
+    {
+      "plate": 2,
+      "objects": [
+        "02_Frente_consola"
+      ],
+      "seconds": 36657,
+      "petg_g": 217.27,
+      "layers": 567,
+      "support": true,
+      "bbox_mm": [
+        25.3093,
+        44.80931,
+        230.69070000000002,
+        209.08945000000003
+      ]
+    },
+    {
+      "plate": 3,
+      "objects": [
+        "03_Trasera_consola"
+      ],
+      "seconds": 46706,
+      "petg_g": 267.12,
+      "layers": 859,
+      "support": true,
+      "bbox_mm": [
+        25.3093,
+        44.859300000000005,
+        230.69070000000002,
+        226.86943000000002
+      ]
+    },
+    {
+      "plate": 4,
+      "objects": [
+        "04_Apoyo_riel_Y_izquierdo"
+      ],
+      "seconds": 23170,
+      "petg_g": 114.35,
+      "layers": 287,
+      "support": true,
+      "bbox_mm": [
+        9.469140000000001,
+        11.880640000000001,
+        250.30640000000002,
+        247.39345000000003
+      ]
+    },
+    {
+      "plate": 5,
+      "objects": [
+        "05_Apoyo_riel_Y_derecho"
+      ],
+      "seconds": 24396,
+      "petg_g": 119.33,
+      "layers": 372,
+      "support": true,
+      "bbox_mm": [
+        11.66046,
+        5.697660000000001,
+        233.65963000000002,
+        243.08095000000003
+      ]
+    },
+    {
+      "plate": 6,
+      "objects": [
+        "06_Puente_X",
+        "07_Carro_solenoide_GT2",
+        "08_Canal_cables"
+      ],
+      "seconds": 14153,
+      "petg_g": 68.01,
+      "layers": 367,
+      "support": true,
+      "bbox_mm": [
+        26.28497,
+        27.809300000000004,
+        244.49070000000003,
+        228.19070000000002
+      ]
+    },
+    {
+      "plate": 7,
+      "objects": [
+        "09_Portico_camara"
+      ],
+      "seconds": 20258,
+      "petg_g": 107.18,
+      "layers": 641,
+      "support": true,
+      "bbox_mm": [
+        25.30929,
+        42.99327,
+        230.69069000000002,
+        219.03333
+      ]
+    },
+    {
+      "plate": 8,
+      "objects": [
+        "10_Capota_C922",
+        "11_Caja_Adafruit_base",
+        "12_Caja_Adafruit_tapa",
+        "13_Base_Geekworm",
+        "14_Base_DFRobot",
+        "15_Base_portafusible"
+      ],
+      "seconds": 12271,
+      "petg_g": 63.42,
+      "layers": 449,
+      "support": true,
+      "bbox_mm": [
+        21.3093,
+        26.309330000000003,
+        233.89071,
+        221.19070000000002
+      ]
+    },
+    {
+      "plate": 9,
+      "objects": [
+        "16_Acoplador_punta_delantero",
+        "17_Acoplador_punta_trasero"
+      ],
+      "seconds": 2729,
+      "petg_g": 6.41,
+      "layers": 48,
+      "support": false,
+      "bbox_mm": [
+        87.30930000000001,
+        113.90930000000002,
+        168.69070000000002,
+        142.0907
+      ]
+    }
+  ],
+  "mechanical_checks": {
+    "x_positions_mm": [
+      -55.05,
+      -53.05,
+      -46,
+      -26,
+      0,
+      26,
+      46,
+      53.05,
+      55.05
+    ],
+    "y_positions_mm": [
+      -105.05,
+      -103.05,
+      -90,
+      0,
+      90,
+      103.05,
+      105.05
+    ],
+    "tip_x_offset_mm": -3.8,
+    "moving_idler_y_offset_from_reference_mm": -9,
+    "head_positions": 63,
+    "narrow_phase_pairs": 300,
+    "collisions_at_checked_positions": 0,
+    "scope": "Rigid reference hardware and printed parts at the listed positions; physical belt wrap, cables and heat require assembly."
+  },
+  "physical_v2_assembly_verified": false
+}
