@@ -57,6 +57,7 @@ const publicAssets = [
   "downloads/" + hardware.filename,
   "downloads/ft412-cradle-rev01",
   "downloads/ft412-cradle-rev01.zip",
+  "downloads/ft412-v2-tanda-01.zip",
   "downloads/ft412-coupler-rev01",
   "downloads/ft412-coupler-rev01.zip",
   "downloads/ft412-control-module-designer.html",
