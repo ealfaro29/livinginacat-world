@@ -1,3 +1,7 @@
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["numpy>=1.26", "scipy>=1.13", "trimesh==5.2.1"]
+# ///
 """Create two independent editable X2D projects with native Bambu toolpaths."""
 import argparse
 import hashlib
@@ -169,6 +173,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--template", type=Path, default=TEMPLATE)
     args = parser.parse_args()
+    for folder in ("Bambu", "QA"):
+        (OUT / folder).mkdir(parents=True, exist_ok=True)
     results = {}
     for name, supports in PARTS.items():
         with tempfile.TemporaryDirectory(prefix="bambu-ft412-v2-") as folder:

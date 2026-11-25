@@ -162,6 +162,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("step", nargs="?", type=Path, default=DEFAULT_STEP)
     source = parser.parse_args().step
+    for folder in ("Piezas", "QA"):
+        (OUT / folder).mkdir(parents=True, exist_ok=True)
     assert hashlib.sha256(source.read_bytes()).hexdigest() == REFERENCE_SHA, "Reference STEP differs"
     assembly = import_step(source)
     parts = {obj.label: obj for group in assembly.children for obj in group.children}
