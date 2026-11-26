@@ -8,7 +8,7 @@
 "Movimiento y montaje","Riel Y de 250 mm con un patín MGN9H por riel","2",""
 "Movimiento y montaje","Riel X de 150 mm con un patín MGN9H","1",""
 "Movimiento y montaje","Kit GT2 con correas de 6 mm y poleas para ambos ejes","1","Un kit para los dos recorridos. Compará sus poleas con las que necesita el montaje antes de pedir piezas sueltas."
-"Movimiento y montaje","Juego completo de herrajes V2 con tornillos, tuercas, ejes de polea, arandelas de ajuste y separadores","1","El CAD especifica 14 M3 × 8 avellanados (#7213), 60 M3 × 8 de botón (#7219) y 54 tuercas cuadradas M3. La revisión de impresión suma seis tuercas hexagonales M5 para las poleas. Contemplá sus ejes y arandelas, los herrajes de pantalla y cámara y dos tornillos M2,5 para la toma trasera."
+"Movimiento y montaje","Juego completo de herrajes V2 con tornillos, tuercas, ejes de polea, arandelas de ajuste y separadores","1","La impresión R02 lleva 16 M3 × 8 avellanados (#7213), 58 M3 × 8 de botón (#7219) y 54 tuercas cuadradas M3. La revisión de impresión suma seis tuercas hexagonales M5 para las poleas. Contemplá sus ejes y arandelas, los herrajes de pantalla y cámara y dos tornillos M2,5 para la toma trasera."
 "Mecanismo de toque","Solenoide Adafruit #412 de 12 V","1",""
 "Mecanismo de toque","Controlador protegido Adafruit #5648 para el solenoide","1","Acciona el solenoide en el ramal de 12 V cuando la MKS da la señal. Se usa una punta de malla de repuesto."
 "Alimentación y protección","Fuente externa MEAN WELL GST160A12-R7B de 12 V y 11,5 A (138 W)","1","Una fuente externa para toda la V2. El consumo de diseño se estima en 107 W, con unos 31 W de margen nominal. El presupuesto supone que hay un cable de pared IEC C13 con tierra disponible."

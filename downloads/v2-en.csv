@@ -8,7 +8,7 @@
 "Motion and assembly","250 mm Y rail with one MGN9H carriage per rail","2",""
 "Motion and assembly","150 mm X rail with one MGN9H carriage","1",""
 "Motion and assembly","GT2 kit with 6 mm belts and pulleys for both axes","1","One kit for both belt paths. Check its pulley assortment against the build before buying individual pulleys."
-"Motion and assembly","Complete V2 fastener set, including screws, nuts, idler shafts, shims and spacers","1","The CAD specifies 14 countersunk M3 × 8 (#7213), 60 button-head M3 × 8 (#7219) and 54 square M3 nuts. The print revision also uses six M5 hex nuts at the idlers. Allow for their axles and shims, the display, the camera and the two M2.5 inlet screws."
+"Motion and assembly","Complete V2 fastener set, including screws, nuts, idler shafts, shims and spacers","1","The R02 print uses 16 countersunk M3 × 8 (#7213), 58 button-head M3 × 8 (#7219) and 54 square M3 nuts. The print revision also uses six M5 hex nuts at the idlers. Allow for their axles and shims, the display, the camera and the two M2.5 inlet screws."
 "Touch mechanism","Adafruit #412, 12 V solenoid","1",""
 "Touch mechanism","Adafruit #5648 protected solenoid driver","1","Switches the solenoid on the 12 V branch when the MKS sends a control signal. Use a spare mesh tip."
 "Power and protection","MEAN WELL GST160A12-R7B external 12 V power supply, 11.5 A (138 W)","1","One external brick for the entire V2. The design estimate is about 107 W, leaving about 31 W of nominal headroom. The budget assumes a spare grounded IEC C13 mains cord."
