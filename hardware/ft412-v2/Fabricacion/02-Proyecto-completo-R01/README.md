@@ -2,17 +2,19 @@
 
 [Abrir el proyecto de Bambu Studio / Open the Bambu Studio project](Bambu/FT412-V2_Completa_PETG_X2D_0.4.3mf) · [Descargar desde el sitio / Download from the website](https://livinginacat.world/downloads/ft412-v2-completa.3mf)
 
+**¿Se soltaron las dos plaquitas de la primera placa 3?** [Reutilizá la carcasa y la plaquita izquierda](Rescate.md#español). **Did the motor plates separate on the original rear shell?** [Repair the existing print](Rescate.md#english).
+
 ![Las nueve placas vistas en el laminador / The nine plates as rendered by the slicer](Placas.png)
 
 ## Español
 
-Las 17 piezas de la revisión R01 están a escala real en un solo archivo de nueve placas. Abrí el 3MF como **proyecto**, seleccioná la placa que querés y usá **Laminar placa** e **Imprimir placa**. Al enviar, seleccioná la bobina de PETG que tengas cargada. Si ya imprimiste la cama o el frente de la primera tanda, podés pasar directamente a la placa 3. Esas dos geometrías son idénticas a las de la primera tanda.
+Las 17 piezas, incluida la carcasa trasera R02, están a escala real en un solo archivo de nueve placas. Abrí el 3MF como **proyecto**, seleccioná la placa que querés y usá **Laminar placa** e **Imprimir placa**. Al enviar, seleccioná la bobina de PETG que tengas cargada. Si ya imprimiste la cama o el frente de la primera tanda, podés pasar directamente a la placa 3. Esas dos geometrías son idénticas a las de la primera tanda.
 
 | Placa | Piezas | Uds. | PETG | Tiempo estimado |
 | --- | --- | ---: | ---: | ---: |
 | 1 | Cama del iPhone 14 y tabique | 1 | 80 g | 3 h 50 min |
 | 2 | Carcasa delantera con bisel, interruptor y apoyos del Pi | 1 | 217 g | 10 h 11 min |
-| 3 | Carcasa trasera con las cunas de motor, la bandeja MKS y los alojamientos de poleas | 1 | 267 g | 12 h 58 min |
+| 3 | Carcasa trasera con las cunas de motor, la bandeja MKS y los alojamientos de poleas | 1 | 298 g | 14 h 47 min |
 | 4 | Asiento izquierdo del riel Y | 1 | 114 g | 6 h 26 min |
 | 5 | Asiento derecho del riel Y | 1 | 119 g | 6 h 47 min |
 | 6 | Puente X, carro del solenoide con anclajes GT2 y canal de cables | 3 | 68 g | 3 h 56 min |
@@ -20,7 +22,9 @@ Las 17 piezas de la revisión R01 están a escala real en un solo archivo de nue
 | 8 | Capota C922, base y tapa Adafruit, soportes Geekworm, DFRobot y portafusible | 6 | 63 g | 3 h 25 min |
 | 9 | Mitades delantera y trasera del acoplador de la punta | 2 | 6 g | 0 h 45 min |
 
-El laminador estima **1.043 g y 53 h 56 min** entre las nueve placas, incluidos los soportes y bordes de adhesión. Un rollo lleno de 1 kg queda corto. Se usó **Bambu Lab X2D, PETG genérico, boquilla principal de 0,4 mm y PEI texturizado**. Las capas nominales son de 0,20 mm en las primeras ocho placas y de 0,16 mm en el acoplador. Cada pieza tiene sus propios ajustes de paredes y relleno giroide. El borde exterior es de 5 mm.
+El laminador estima **1.074 g y 55 h 45 min** entre las nueve placas, incluidos los soportes y bordes de adhesión. Un rollo lleno de 1 kg queda corto. Se usó **Bambu Lab X2D, PETG genérico, boquilla principal de 0,4 mm y PEI texturizado**. Las capas nominales son de 0,20 mm en las primeras ocho placas y de 0,16 mm en el acoplador. Cada pieza tiene sus propios ajustes de paredes y relleno giroide. El borde exterior es de 5 mm.
+
+En la **placa 3 R02**, las dos cunas llevan paredes estructurales a ambos lados. En la cuna derecha alta, los dos tornillos más cercanos a la pantalla son avellanados **#7213 M3 × 8**. Los otros seis tornillos de los motores son de botón **#7219 M3 × 8**. Así el carro puede pasar por encima de la fila delantera. La carcasa reforzada y la reparación son alternativas.
 
 ### Al armar
 
@@ -35,13 +39,13 @@ Se cotejaron las 17 mallas con el proyecto que Bambu Studio volvió a exportar d
 
 ## English
 
-All 17 R01 parts are included at full scale in a single nine-plate project. Open the 3MF as a **project**, select a plate, then **Slice plate** and **Print plate**. Select your loaded PETG spool when sending. If you already printed the bed and front from batch 01, start at plate 3. The first two part geometries match that batch.
+All 17 parts, including the R02 rear shell, are included at full scale in a single nine-plate project. Open the 3MF as a **project**, select a plate, then **Slice plate** and **Print plate**. Select your loaded PETG spool when sending. If you already printed the bed and front from batch 01, start at plate 3. The first two part geometries match that batch.
 
 | Plate | Parts | Qty | PETG | Estimated time |
 | --- | --- | ---: | ---: | ---: |
 | 1 | iPhone 14 bed and service deck | 1 | 80 g | 3 h 50 min |
 | 2 | Front shell with display bezel, switch recess and Pi mounts | 1 | 217 g | 10 h 11 min |
-| 3 | Rear shell with motor beds, MKS mounts and fixed idler seats | 1 | 267 g | 12 h 58 min |
+| 3 | Rear shell with motor beds, MKS mounts and fixed idler seats | 1 | 298 g | 14 h 47 min |
 | 4 | Left Y rail seat | 1 | 114 g | 6 h 26 min |
 | 5 | Right Y rail seat | 1 | 119 g | 6 h 47 min |
 | 6 | X bridge, solenoid carriage with GT2 anchors and cable duct | 3 | 68 g | 3 h 56 min |
@@ -49,7 +53,9 @@ All 17 R01 parts are included at full scale in a single nine-plate project. Open
 | 8 | C922 pod, Adafruit base and lid, Geekworm, DFRobot and fuse-holder mounts | 6 | 63 g | 3 h 25 min |
 | 9 | Front and rear mesh-tip coupler halves | 2 | 6 g | 0 h 45 min |
 
-Bambu Studio estimates **1,043 g and 53 h 56 min** across all nine plates, including supports and brims. A full 1 kg spool falls short. The project uses a **Bambu Lab X2D, generic PETG, the primary 0.4 mm nozzle and textured PEI**. Nominal layer height is 0.20 mm on the first eight plates and 0.16 mm for the tip coupler. Walls and gyroid infill are configured per part. The outer brim is 5 mm.
+Bambu Studio estimates **1,074 g and 55 h 45 min** across all nine plates, including supports and brims. A full 1 kg spool falls short. The project uses a **Bambu Lab X2D, generic PETG, the primary 0.4 mm nozzle and textured PEI**. Nominal layer height is 0.20 mm on the first eight plates and 0.16 mm for the tip coupler. Walls and gyroid infill are configured per part. The outer brim is 5 mm.
+
+On **R02 plate 3**, both motor beds are supported on both sides. Use **#7213 M3 × 8 flat-head screws** at the two holes nearest the front display on the higher right bed. The other six motor screws are **#7219 M3 × 8 button heads**. This leaves clearance beneath the moving carriage. The integrated shell and the repair are two ways to build the same motor mounts.
 
 ### During assembly
 
@@ -78,6 +84,15 @@ mkdir -p "$work/native"
   "$src/Bambu/FT412-V2_Completa_PETG_X2D_0.4.3mf"
 uv run --python 3.12 --script "$src/Fuente/proyecto.py" "$work/meshes" \
   --native "$work/native/FT412-V2_Completa_PETG_X2D_0.4.3mf"
+```
+
+Para regenerar la reparación desde la misma raíz / To rebuild the repair from the same root:
+
+```sh
+uv run --python 3.12 --script "$src/Fuente/rescate.py" "$work/repair"
+uv run --python 3.12 --script "$src/Fuente/proyecto.py" "$work/repair" \
+  --layout "$src/rescate.json" --output "$src/Bambu/FT412-V2_Rescate_Placa03_PETG_0.4.3mf"
+uv run --python 3.12 --script "$src/Fuente/trayectorias_motor.py" "$work/native/plate_3.gcode"
 ```
 
 [Manifiesto de piezas / Part manifest](placas.json) · [CAD de referencia / Reference CAD](../../Consola-tornilleria/) · [Licencia del acoplador / Coupler license](../../../ft412-coupler-rev01/LICENSE)

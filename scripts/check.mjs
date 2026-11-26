@@ -83,6 +83,8 @@ for (const file of [
   "assets/v2/visor/consola.glb",
   "assets/v2/visor/ft412-v2-step.zip",
   "downloads/ft412-v2-completa.3mf",
+  "downloads/ft412-v2-rescate-placa-3.3mf",
+  "downloads/ft412-v2-montaje-rescate.png",
 ]) {
   if (!paths.has(file))
     errors.push(`Missing required edition resource: ${file}`);

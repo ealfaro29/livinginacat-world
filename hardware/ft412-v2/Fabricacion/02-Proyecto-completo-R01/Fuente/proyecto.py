@@ -96,7 +96,7 @@ def make(meshdir, output):
     for key, value in {
         "Application": "BambuStudio-02.09.01.70",
         "BambuStudio:3mfVersion": "1",
-        "Title": "FT412 V2 | Proyecto completo / Complete project",
+        "Title": LAYOUT["title"],
         "License": "MIT; see the bundled license notices",
     }.items():
         ET.SubElement(outer, "metadata", name=key).text = value
@@ -359,7 +359,10 @@ if __name__ == "__main__":
         help="Verify the project re-exported and sliced by Bambu Studio",
     )
     p.add_argument("--report", type=Path)
+    p.add_argument("--layout", type=Path, default=HERE / "placas.json")
     args = p.parse_args()
+    LAYOUT = json.loads(args.layout.read_text())
+    OBJECTS = LAYOUT["objects"]
     if not args.native:
         make(args.meshes, args.output)
     verify(args.meshes, args.native or args.output, bool(args.native), args.report)

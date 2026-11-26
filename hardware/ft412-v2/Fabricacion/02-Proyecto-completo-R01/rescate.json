@@ -1,0 +1,42 @@
+{
+  "title": "FT412 V2 | Rescate placa 3 / Plate 3 repair",
+  "plates": [
+    "Rescate / Motor plate carrier"
+  ],
+  "objects": [
+    {
+      "name": "Rescate_03_Soporte_doble",
+      "plate": 1,
+      "body": "Rescate",
+      "rotation": [
+        90,
+        0,
+        0
+      ],
+      "xy": [
+        99,
+        126
+      ],
+      "support": true,
+      "infill": 30,
+      "walls": 5
+    },
+    {
+      "name": "B_Alta_dos_avellanados",
+      "plate": 1,
+      "body": "B_alta",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "xy": [
+        205,
+        126
+      ],
+      "support": false,
+      "infill": 35,
+      "walls": 5
+    }
+  ]
+}

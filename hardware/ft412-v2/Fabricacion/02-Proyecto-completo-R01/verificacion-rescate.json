@@ -1,0 +1,132 @@
+{
+  "revision": "R01 rear shell repair, R02 motor B",
+  "released_project_sha256": "2f9f655bd3f0b7a44877d3599b22be75e39fa20dc31c5e8415b7a386b0a17df9",
+  "printer": "Bambu Lab X2D",
+  "material": "Generic PETG",
+  "primary_nozzle_mm": 0.4,
+  "nominal_layer_mm": 0.2,
+  "brim_mm": 5,
+  "objects": 2,
+  "sliced_plates": [
+    {
+      "plate": 1,
+      "objects": [
+        "B_Alta_dos_avellanados",
+        "Rescate_03_Soporte_doble"
+      ],
+      "seconds": 13058,
+      "petg_g": 58.51,
+      "layers": 438,
+      "support": true,
+      "bbox_mm": [
+        38.43262,
+        73.93107,
+        232.69070000000002,
+        178.60602
+      ]
+    }
+  ],
+  "native_slicing_return_code": 0,
+  "native_plate_warnings": [],
+  "mesh_matches_native_reexport": true,
+  "mechanical_checks": {
+    "carrier_volume_cm3": 36.44,
+    "plate_bottom_z_mm": [
+      84.3,
+      91.3
+    ],
+    "retention": "Two M3 x 8 cross-bolts with square nuts close the rear entrances. Two 2.5 mm cable ties secure the carrier to the existing rear idler posts below their shoulders.",
+    "collisions_mm3": {
+      "r01_shell_installed": 0.0,
+      "idler_shoulder_sweep_L": 0.0,
+      "m5_nut_entry_L": 0.0,
+      "idler_shoulder_sweep_R": 0.0,
+      "m5_nut_entry_R": 0.0,
+      "lower_carrier_2": 0.0,
+      "lower_carrier_7": 0.0,
+      "lower_carrier_15": 0.0,
+      "lower_carrier_35": 0.0,
+      "lower_carrier_56": 0.0,
+      "lower_carrier_80": 0.0,
+      "lower_carrier_99": 0.0,
+      "plate_A": 0.0,
+      "plate_rear_insertion_A": 0.0,
+      "carrier_motor_travel_A": 0.0,
+      "reinforced_shell_motor_travel_A": 0.0,
+      "strap_to_carrier_A": 0.0,
+      "strap_to_shell_A": 0.0,
+      "plate_B": 0.0,
+      "plate_rear_insertion_B": 0.0,
+      "carrier_motor_travel_B": 0.0,
+      "reinforced_shell_motor_travel_B": 0.0,
+      "strap_to_carrier_B": 0.0,
+      "strap_to_shell_B": 0.0,
+      "converter_floor": 0.0,
+      "inlet_service_corridor": 0.0,
+      "reinforcement_added_in_inlet_corridor": 0.0
+    },
+    "plate_capture_mm2": {
+      "A": [
+        54.36,
+        36.08
+      ],
+      "B": [
+        36.08,
+        54.36
+      ]
+    },
+    "roots_mm2": {
+      "A": {
+        "R01": [
+          0.0,
+          17.14
+        ],
+        "R02": [
+          231.13,
+          232.04
+        ]
+      },
+      "B": {
+        "R01": [
+          17.14,
+          0.0
+        ],
+        "R02": [
+          159.92,
+          231.13
+        ]
+      }
+    }
+  },
+  "travel": {
+    "x_positions_mm": [
+      -55.05,
+      -53.05,
+      -46,
+      -26,
+      0,
+      26,
+      46,
+      53.05,
+      55.05
+    ],
+    "y_positions_mm": [
+      -105.05,
+      -103.05,
+      -90,
+      0,
+      90,
+      103.05,
+      105.05
+    ],
+    "tip_x_offset_mm": -3.8,
+    "moving_idler_y_offset_from_reference_mm": -9,
+    "head_positions": 63,
+    "continuous_mount_and_fastener_sweep_pairs": 280,
+    "rail_and_carrier_positions_per_variant": 21,
+    "narrow_phase_pairs": 346,
+    "collisions_at_checked_positions": 0,
+    "scope": "Rigid reference hardware and printed parts at the listed positions; physical belt wrap, cables and heat require assembly."
+  },
+  "physical_repair_fit_verified": false
+}

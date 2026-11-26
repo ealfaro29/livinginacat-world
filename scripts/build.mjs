@@ -68,10 +68,14 @@ for (const name of publicAssets) {
     recursive: true,
   });
 }
-await fs.copyFile(
-  path.join(rootPath, "hardware/ft412-v2/Fabricacion/02-Proyecto-completo-R01/Bambu/FT412-V2_Completa_PETG_X2D_0.4.3mf"),
-  path.join(out, "downloads/ft412-v2-completa.3mf"),
-);
+const v2Prints = path.join(rootPath, "hardware/ft412-v2/Fabricacion/02-Proyecto-completo-R01");
+for (const [source, destination] of [
+  ["Bambu/FT412-V2_Completa_PETG_X2D_0.4.3mf", "ft412-v2-completa.3mf"],
+  ["Bambu/FT412-V2_Rescate_Placa03_PETG_0.4.3mf", "ft412-v2-rescate-placa-3.3mf"],
+  ["Montaje-rescate.png", "ft412-v2-montaje-rescate.png"],
+]) {
+  await fs.copyFile(path.join(v2Prints, source), path.join(out, "downloads", destination));
+}
 for (const [key, file] of Object.entries({ css: "style.css", js: "site.js" })) {
   const hash = createHash("sha256")
     .update(await fs.readFile(path.join(out, "assets", file)))

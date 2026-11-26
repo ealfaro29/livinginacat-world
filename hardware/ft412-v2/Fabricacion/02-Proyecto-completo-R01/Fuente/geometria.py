@@ -60,7 +60,7 @@ def moving_bridge(part):
     return part.clean()
 
 
-def rear_shell(part):
+def rear_shell_r01(part):
     # Panel mounting from the inside. 12 mm face aperture, two separate M2.5
     # screw clearances on the manufacturer's 19 mm vertical pitch.
     # Recess the exterior locally so only 1.6 mm of panel separates the plug
@@ -94,6 +94,12 @@ def rear_shell(part):
             )
             part = part.cut(*cuts)
     return part.clean()
+
+
+def rear_shell(part):
+    from motores import reinforce
+
+    return reinforce(rear_shell_r01(part))
 
 
 def tool_carriage(part):

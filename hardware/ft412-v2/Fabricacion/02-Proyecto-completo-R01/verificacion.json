@@ -5,13 +5,13 @@
   "nominal_layer_mm": 0.2,
   "coupler_nominal_layer_mm": 0.16,
   "slicer": "Bambu Studio 02.09.01.70",
-  "released_project_sha256": "bca5fc05c5d68eaa703e29915de6a03f28626423d5200ae0626b215105bbc91e",
+  "released_project_sha256": "623270acd80d69313af87ead6489d912eb98cbeefd7e318b5ff0be6f228a8f14",
   "objects": 17,
   "native_slicing_return_code": 0,
   "native_plate_warnings": [],
   "verified_against_exported_meshes": true,
-  "total_estimated_seconds": 194158,
-  "total_estimated_petg_g": 1043.05,
+  "total_estimated_seconds": 200684,
+  "total_estimated_petg_g": 1074.02,
   "plates": [
     {
       "plate": 1,
@@ -50,15 +50,15 @@
       "objects": [
         "03_Trasera_consola"
       ],
-      "seconds": 46706,
-      "petg_g": 267.12,
-      "layers": 859,
+      "seconds": 53230,
+      "petg_g": 298.09,
+      "layers": 860,
       "support": true,
       "bbox_mm": [
         25.3093,
         44.859300000000005,
         230.69070000000002,
-        226.86943000000002
+        226.86117000000002
       ]
     },
     {
@@ -82,7 +82,7 @@
       "objects": [
         "05_Apoyo_riel_Y_derecho"
       ],
-      "seconds": 24396,
+      "seconds": 24397,
       "petg_g": 119.33,
       "layers": 372,
       "support": true,
@@ -137,7 +137,7 @@
         "14_Base_DFRobot",
         "15_Base_portafusible"
       ],
-      "seconds": 12271,
+      "seconds": 12272,
       "petg_g": 63.42,
       "layers": 449,
       "support": true,
@@ -190,9 +190,98 @@
     "tip_x_offset_mm": -3.8,
     "moving_idler_y_offset_from_reference_mm": -9,
     "head_positions": 63,
-    "narrow_phase_pairs": 300,
+    "continuous_mount_and_fastener_sweep_pairs": 280,
+    "rail_and_carrier_positions_per_variant": 21,
+    "narrow_phase_pairs": 346,
     "collisions_at_checked_positions": 0,
     "scope": "Rigid reference hardware and printed parts at the listed positions; physical belt wrap, cables and heat require assembly."
   },
-  "physical_v2_assembly_verified": false
+  "physical_v2_assembly_verified": false,
+  "revision": "R02 (plate 3)",
+  "unchanged_plate_geometry_and_placement_vs_r01": [
+    1,
+    2,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "unchanged_object_meshes_vs_r01": 16,
+  "identical_native_gcode_bytes_vs_r01": [
+    1,
+    2,
+    7,
+    9
+  ],
+  "identical_native_motion_and_extrusion_commands_vs_r01": [
+    1,
+    2,
+    4,
+    5,
+    7,
+    9
+  ],
+  "motor_mount_toolpaths": {
+    "root_window_mm": [
+      3.7,
+      9.0
+    ],
+    "consecutive_model_layers_mm": [
+      84.2,
+      84.4,
+      84.6,
+      84.8,
+      91.2,
+      91.4,
+      91.6,
+      91.8
+    ],
+    "R02_model_overlap_mm2": {
+      "A left": [
+        18.22,
+        19.21,
+        19.58
+      ],
+      "A right": [
+        33.3,
+        33.3,
+        33.21
+      ],
+      "B left": [
+        33.14,
+        33.13,
+        33.21
+      ],
+      "B right": [
+        19.3,
+        19.5,
+        18.68
+      ]
+    },
+    "R01_model_overlap_mm2": {
+      "A left": [
+        0.0,
+        0.0,
+        11.7
+      ],
+      "A right": [
+        0.0,
+        0.0,
+        11.7
+      ],
+      "B left": [
+        0.0,
+        0.0,
+        11.7
+      ],
+      "B right": [
+        0.0,
+        0.0,
+        11.7
+      ]
+    }
+  },
+  "repair_project": "verificacion-rescate.json"
 }

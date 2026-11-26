@@ -13,6 +13,8 @@
 
 **Imprimir la V2 / Print the V2.** [Proyecto completo de Bambu Studio / Complete Bambu Studio project](https://livinginacat.world/downloads/ft412-v2-completa.3mf). La placa 1 es la cama y la placa 2 el frente. Si ya imprimiste ambas, seguí con la 3. Plate 1 is the phone bed and plate 2 is the front shell. If you already printed both, start at plate 3. [Guía de las nueve placas / Nine-plate print guide](Fabricacion/02-Proyecto-completo-R01/)
 
+**Placa 3 R02.** Las cunas de los motores tienen dos apoyos laterales. Quienes ya imprimieron la carcasa R01 pueden reutilizarla con el [soporte de reparación y su guía ilustrada](Fabricacion/02-Proyecto-completo-R01/Rescate.md#español). The revised plate supports both sides of each motor. Owners of the original rear shell can use the [repair plate and illustrated guide](Fabricacion/02-Proyecto-completo-R01/Rescate.md#english).
+
 La fuente externa elegida para el diseño es la MEAN WELL GST160A12-R7B (12 V, hasta 11,5 A y 138 W). La MKS recibe 12 V. El Pi 5 y el iPhone llevan convertidores dedicados. El S301T frontal conmuta corriente continua. El catálogo conserva las piezas y el presupuesto para dos máquinas independientes. [Lista V2](../../data/v2-catalog.json) · [Visor 3D](https://livinginacat.world/es/v2/#viewer)
 
 The design uses an external MEAN WELL GST160A12-R7B (12 V, up to 11.5 A and 138 W). The MKS uses 12 V directly. Separate converters feed the Pi 5 and the iPhone. The front S301T switches DC. The catalog budgets for two independent machines. [V2 parts and estimate](https://livinginacat.world/v2/#budget)
